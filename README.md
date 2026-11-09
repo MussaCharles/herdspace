@@ -9,18 +9,34 @@ You run one script on each computer. The script installs the tools, writes the c
 ## How the parts fit
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
+  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
+  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
+  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
+  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
+  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
+}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
 flowchart LR
-  subgraph client["Your Mac (client)"]
-    ghostty["Ghostty terminal"]
+  classDef cmd fill:#0d1f12,stroke:#3fb950,stroke-width:2px,color:#7ee787
+  classDef step fill:#0d1117,stroke:#58a6ff,stroke-width:1.5px,color:#c9e1ff
+  classDef ask fill:#2a2000,stroke:#e3b341,stroke-width:2px,color:#f2cc60
+  classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
+  classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
+  classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
+  subgraph client["CLIENT: macOS, Linux, or Windows with WSL"]
+    term["Terminal<br/>Ghostty"]:::step
   end
-  subgraph server["Server: Linux or macOS"]
-    herdr["Herdr server"]
-    project1["Workspace: project A"]
-    project2["Workspace: project B"]
-    herdr --> project1
-    herdr --> project2
+  subgraph server["SERVER: Linux or macOS"]
+    herdr["Herdr server"]:::host
+    a["Workspace<br/>project A"]:::data
+    b["Workspace<br/>project B"]:::data
+    herdr --> a
+    herdr --> b
   end
-  ghostty -- "SSH" --> herdr
+  term -- " ssh " --> herdr
+  style client fill:#0b0f14,stroke:#58a6ff,color:#c9e1ff
+  style server fill:#0b0f14,stroke:#bc8cff,color:#d2a8ff
 ```
 
 Your terminals run on the server. Herdr keeps them running after you close Ghostty or lose the connection.
@@ -28,11 +44,27 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 ## Choose a script
 
 ```mermaid
-flowchart TD
-  start{"Which computer<br/>do you set up?"}
-  start -- "The Mac that you use for SSH" --> client["bootstrap-client-macos.sh"]
-  start -- "A Debian or Ubuntu server" --> linux["bootstrap-server-linux.sh"]
-  start -- "A macOS server" --> mac["bootstrap-server-macos.sh"]
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
+  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
+  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
+  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
+  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
+  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
+}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
+flowchart LR
+  classDef cmd fill:#0d1f12,stroke:#3fb950,stroke-width:2px,color:#7ee787
+  classDef step fill:#0d1117,stroke:#58a6ff,stroke-width:1.5px,color:#c9e1ff
+  classDef ask fill:#2a2000,stroke:#e3b341,stroke-width:2px,color:#f2cc60
+  classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
+  classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
+  classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
+  start{"Which computer<br/>do you set up?"}:::ask
+  start -- " client: Mac " --> c1["bootstrap-client-macos.sh"]:::cmd
+  start -- " client: Debian or Ubuntu " --> c2["bootstrap-client-linux.sh"]:::cmd
+  start -- " client: Windows " --> c3["WSL, then<br/>bootstrap-client-linux.sh<br/>--no-ghostty"]:::cmd
+  start -- " server: Debian or Ubuntu " --> s1["bootstrap-server-linux.sh"]:::cmd
+  start -- " server: macOS " --> s2["bootstrap-server-macos.sh"]:::cmd
 ```
 
 Set up the server first.
@@ -49,11 +81,13 @@ git clone <repository-url> ~/herdr-bootstrap
 cd ~/herdr-bootstrap && ./bootstrap-server-linux.sh
 ```
 
-On your Mac, clone the repository and give the SSH name of each server:
+On your client, clone the repository and give the SSH name of each server. This is the command for a Mac:
 
 ```bash
 cd ~/herdr-bootstrap && ./bootstrap-client-macos.sh --server my-server
 ```
+
+On a Debian or Ubuntu client, use `bootstrap-client-linux.sh` with the same option. For Windows, see [docs/windows-wsl.md](docs/windows-wsl.md).
 
 Then connect and open Herdr:
 
@@ -71,6 +105,7 @@ herdr
 |----------|-----|
 | [docs/setup.md](docs/setup.md) | The full steps for each computer |
 | [docs/cheat-sheet.md](docs/cheat-sheet.md) | Keys and commands for daily use |
+| [docs/windows-wsl.md](docs/windows-wsl.md) | Use Windows as a client with WSL |
 | [docs/updating.md](docs/updating.md) | Update the tools, or add something new |
 | [docs/agent-setup.md](docs/agent-setup.md) | Ask a coding agent to do the setup |
 
@@ -80,7 +115,7 @@ herdr
 |------|:------:|:------:|
 | Ghostty with keys that reach Herdr | yes | |
 | Terminal description for Ghostty on each server | yes | |
-| Free `Ctrl` arrow keys in macOS | yes | |
+| Free `Ctrl` arrow keys on a Mac | yes | |
 | zsh, Oh My Zsh, and Powerlevel10k, with a different color on each side | yes | yes |
 | fzf, zoxide, eza, bat, and fd | yes | yes |
 | Herdr, with keys, colors, and sidebar | | yes |
@@ -102,17 +137,17 @@ The scripts do not install the agent programs. Install them first, or run the se
 
 ### See your changes with lazygit
 
-`Cmd+Shift+G` opens lazygit over the current pane. `q` closes it.
+`Cmd+Shift+G` opens lazygit over the current pane. On Linux, the key is `Ctrl+Shift+G`. `q` closes it.
 
 ![lazygit in a popup over Herdr](docs/media/lazygit.png)
 
 ### Go anywhere
 
-`Cmd+K` lists each workspace, tab, and agent. Type to search, and press `Enter` to go.
+`Cmd+K` lists each workspace, tab, and agent. On Linux, the key is `Ctrl+Shift+K`. Type to search, and press `Enter` to go.
 
 ![The go to list of Herdr](docs/media/go-to.png)
 
-The screens come from a test container with demo projects.
+The screens come from real Ghostty on a Linux client, connected with SSH to a test server with demo projects.
 
 ## Ask an agent to do the setup
 
@@ -131,6 +166,7 @@ The folder [skills](skills/) has instructions for coding agents. [docs/agent-set
 |------|----------------|
 | `tests/run-linux.sh` | A full server setup in throwaway Ubuntu and Debian containers |
 | `tests/run-systemd.sh` | The login service in a container with real systemd |
+| `tests/run-client-linux.sh` | A Linux client and a server in two containers, with real Ghostty key presses over SSH |
 | `tests/run-macos.sh` | The macOS scripts on a Mac, with a temporary home folder and stub commands |
 
 A container cannot run macOS. For that reason, `tests/run-macos.sh` does not change macOS shortcuts or install Homebrew packages.
