@@ -1,0 +1,9 @@
+# A throwaway Linux server that runs real systemd, to test the login service.
+FROM ubuntu:24.04
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+    systemd systemd-sysv dbus dbus-user-session libpam-systemd sudo ca-certificates procps >/dev/null \
+  && useradd -m -s /bin/bash tester \
+  && echo 'tester ALL=(ALL) NOPASSWD:ALL' >/etc/sudoers.d/tester
+COPY --chown=tester:tester . /home/tester/repo
+STOPSIGNAL SIGRTMIN+3
+CMD ["/sbin/init"]

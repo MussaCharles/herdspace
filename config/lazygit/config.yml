@@ -1,0 +1,29 @@
+# lazygit configuration from herdr-bootstrap.
+gui:
+  nerdFontsVersion: "3"
+  showFileTree: true
+  showRandomTip: false
+  showCommandLog: false
+  sidePanelWidth: 0.3
+  portraitMode: auto
+git:
+  autoFetch: true
+  autoRefresh: true
+  diffRenderers:
+    - colorArg: always
+      command: delta --dark --paging=never --line-numbers --syntax-theme=TwoDark
+customCommands:
+  - key: b
+    context: "files, status"
+    description: "Check out a branch by name"
+    prompts:
+      - type: input
+        title: "Branch:"
+        key: Branch
+        suggestions:
+          preset: branches
+    command: git checkout {{.Form.Branch | quote}}
+quitOnTopLevelReturn: true
+disableStartupPopups: true
+update:
+  method: never

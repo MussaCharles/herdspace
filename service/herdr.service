@@ -1,0 +1,14 @@
+[Unit]
+Description=Herdr terminal server
+
+[Service]
+ExecStart=@HOME@/.local/bin/herdr server
+Environment=PATH=@HOME@/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=SHELL=/usr/bin/zsh
+Restart=on-failure
+RestartSec=30
+# Exit status 1 means that a server is already running.
+RestartPreventExitStatus=1
+
+[Install]
+WantedBy=default.target
