@@ -40,28 +40,13 @@ done
 [ "$(uname -s)" = "Linux" ] || die "This script is for Linux."
 have apt-get || die "This script needs apt-get, so it works only on Debian and Ubuntu."
 
-# run_root runs a command as root, with sudo when this account is not root.
-run_root() {
-  if [ "$(id -u)" -eq 0 ]; then
-    "$@"
-  else
-    sudo "$@"
-  fi
-}
-
 step "System packages"
-run_root env DEBIAN_FRONTEND=noninteractive apt-get update -qq
-run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
-  ca-certificates curl git zsh python3 tar gzip unzip ripgrep fd-find bat \
-  build-essential nodejs npm >/dev/null
-mkdir -p "${HOME}/.local/bin"
-# Debian names these two tools batcat and fdfind.
-have batcat && ln -sfn "$(command -v batcat)" "${HOME}/.local/bin/bat"
-have fdfind && ln -sfn "$(command -v fdfind)" "${HOME}/.local/bin/fd"
-export PATH="${HOME}/.local/bin:${PATH}"
+apt_install ca-certificates curl git zsh python3 tar gzip unzip ripgrep fd-find bat \
+  build-essential nodejs npm
+link_debian_tools
 ok "System packages"
 
-install_release_tools
+install_release_tools herdr neovim lazygit git-delta eza zoxide fzf
 setup_shell server
 setup_zprofile server
 setup_server_files "${HOME}/.config/lazygit"
@@ -71,10 +56,6 @@ setup_auto_title
 setup_agents
 install_linux_service
 
-zsh_path="$(command -v zsh)"
-if [ "$(getent passwd "$(id -un)" | cut -d: -f7)" != "$zsh_path" ]; then
-  step "Login shell"
-  run_root chsh -s "$zsh_path" "$(id -un)" || warn "Could not change the login shell. Run: chsh -s ${zsh_path}"
-fi
+set_login_shell_zsh
 
 finish_server

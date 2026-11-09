@@ -1,0 +1,12 @@
+# A throwaway Linux client with a virtual display, to test real Ghostty keys.
+ARG BASE=ubuntu:26.04
+FROM ${BASE}
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+    sudo ca-certificates openssh-client xvfb openbox xdotool imagemagick \
+    libgl1-mesa-dri libegl1 fonts-dejavu-core dbus-x11 >/dev/null \
+  && useradd -m -s /bin/bash tester \
+  && echo 'tester ALL=(ALL) NOPASSWD:ALL' >/etc/sudoers.d/tester
+COPY --chown=tester:tester . /home/tester/repo
+USER tester
+WORKDIR /home/tester/repo
+ENV LANG=C.UTF-8
