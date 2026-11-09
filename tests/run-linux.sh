@@ -26,6 +26,8 @@ for base in "$@"; do
     echo RESULT login-shell-zsh
     echo \"RESULT parsers=\$(ls \$HOME/.local/share/nvim/site/parser 2>/dev/null | wc -l)\"
     if [ \"${FULL:-0}\" = 1 ]; then [ \"\$(ls \$HOME/.local/share/nvim/site/parser | wc -l)\" -gt 0 ]; fi
+    echo \"RESULT mason=\$(ls \$HOME/.local/share/nvim/mason/packages 2>/dev/null | tr '\\n' ' ')\"
+    if [ \"${FULL:-0}\" = 1 ]; then ls \$HOME/.local/share/nvim/mason/packages | grep -q pyright; fi
   " >>"$log" 2>&1
   rc=$?
   grep -E '^(FAIL|RESULT)' "$log" | cut -c1-200
