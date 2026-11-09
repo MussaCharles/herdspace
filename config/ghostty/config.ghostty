@@ -1,0 +1,20 @@
+# Ghostty configuration from herdr-bootstrap.
+
+# Tell me about a new version. Do not download it.
+auto-update = check
+
+background = #1b1313
+background-opacity = 0.905
+background-blur = true
+macos-titlebar-style = tabs
+window-width = 80
+window-height = 25
+
+# Let these Cmd keys reach Herdr and Neovim. Ghostty cannot limit a key to one
+# program, so these keys do nothing in a Ghostty window with no Herdr.
+keybind = super+t=unbind
+keybind = super+w=unbind
+keybind = super+k=unbind
+keybind = super+e=unbind
+keybind = super+shift+g=unbind
+macos-option-as-alt = true
