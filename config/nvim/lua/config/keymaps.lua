@@ -8,9 +8,11 @@ map("n", "<C-S-f>", search_project, { desc = "Search the project" })
 map({ "n", "x" }, "/", search_project, { desc = "Search the project" })
 map("n", "g/", "/", { desc = "Search inside the file" })
 
-map({ "n", "i", "x" }, "<D-e>", function()
+local function focus_tree()
   require("neo-tree.command").execute({ action = "focus", dir = LazyVim.root() })
-end, { desc = "Focus the file tree" })
+end
+map({ "n", "i", "x" }, "<D-e>", focus_tree, { desc = "Focus the file tree" })
+map({ "n", "i", "x" }, "<C-S-e>", focus_tree, { desc = "Focus the file tree" })
 
 map("n", "<leader>gc", function() Snacks.picker.git_branches() end, { desc = "Switch the git branch" })
 

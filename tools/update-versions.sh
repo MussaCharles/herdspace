@@ -23,6 +23,9 @@ TOOLS = [
     ("eza", "eza-community/eza", {"x86_64": r"^eza_x86_64-unknown-linux-gnu\.tar\.gz$", "aarch64": r"^eza_aarch64-unknown-linux-gnu\.tar\.gz$"}),
     ("zoxide", "ajeetdsouza/zoxide", {"x86_64": r"x86_64-unknown-linux-musl\.tar\.gz$", "aarch64": r"aarch64-unknown-linux-musl\.tar\.gz$"}),
     ("fzf", "junegunn/fzf", {"x86_64": r"linux_amd64\.tar\.gz$", "aarch64": r"linux_arm64\.tar\.gz$"}),
+    # Community packages of Ghostty, for Debian. Ubuntu 26.04 and later have their own.
+    ("ghostty-trixie", "mkasberg/ghostty-ubuntu", {"x86_64": r"_amd64_trixie\.deb$", "aarch64": r"_arm64_trixie\.deb$"}),
+    ("ghostty-forky", "mkasberg/ghostty-ubuntu", {"x86_64": r"_amd64_forky\.deb$", "aarch64": r"_arm64_forky\.deb$"}),
 ]
 
 lines = []

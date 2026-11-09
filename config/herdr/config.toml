@@ -43,12 +43,12 @@ rows = [
 [ui.sound]
 enabled = false
 
-# The prefix stays ctrl+b. The computer that you use for SSH must release the
-# Cmd keys. bootstrap-client-macos.sh does that for Ghostty.
+# The prefix stays ctrl+b. The client bootstrap scripts release these keys in
+# Ghostty. A Mac uses the Cmd keys. Linux uses the ctrl+shift keys.
 [keys]
-new_tab = ["prefix+c", "cmd+t"]
-close_tab = ["prefix+shift+x", "cmd+w"]
-goto = ["prefix+g", "cmd+k"]
+new_tab = ["prefix+c", "cmd+t", "ctrl+shift+t"]
+close_tab = ["prefix+shift+x", "cmd+w", "ctrl+shift+w"]
+goto = ["prefix+g", "cmd+k", "ctrl+shift+k"]
 previous_tab = ["prefix+p", "ctrl+left"]
 next_tab = ["prefix+n", "ctrl+right"]
 previous_workspace = "ctrl+up"
@@ -58,7 +58,7 @@ cycle_pane_previous = ["prefix+shift+tab", "alt+down"]
 
 # Lazygit over the focused pane. q closes it.
 [[keys.command]]
-key = ["cmd+shift+g", "prefix+d"]
+key = ["cmd+shift+g", "ctrl+shift+g", "prefix+d"]
 type = "popup"
 command = "cd \"${HERDR_ACTIVE_PANE_CWD:-.}\" && exec lazygit"
 description = "Git status"

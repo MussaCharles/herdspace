@@ -12,3 +12,7 @@ zoxide	0.10.0	x86_64	https://github.com/ajeetdsouza/zoxide/releases/download/v0.
 zoxide	0.10.0	aarch64	https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-aarch64-unknown-linux-musl.tar.gz	f1f16c5d6298d63dee467eedea1cdcd8490e43e493bea43acd416dc9033ef641
 fzf	0.75.0	x86_64	https://github.com/junegunn/fzf/releases/download/v0.75.0/fzf-0.75.0-linux_amd64.tar.gz	0d6640f83582d991cf429754baad64b07e3a4e439a6019670f4b91da1314141c
 fzf	0.75.0	aarch64	https://github.com/junegunn/fzf/releases/download/v0.75.0/fzf-0.75.0-linux_arm64.tar.gz	bd0717badb6a5620387e014bb94209aac4d9eab6ab77b5348eabb0833aeb4d59
+ghostty-trixie	1.4.0-0-ppa2	x86_64	https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.4.0-0-ppa2/ghostty_1.4.0-0.ppa2_amd64_trixie.deb	82cae2f554a6a666ac9a79095f32d1e9f100a000aa4ba5d45cfea22e1e16c2b6
+ghostty-trixie	1.4.0-0-ppa2	aarch64	https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.4.0-0-ppa2/ghostty_1.4.0-0.ppa2_arm64_trixie.deb	ceaf126fb1714427e910dddb2a5bc4062128415092da7b0a50cd7610d04e8ec3
+ghostty-forky	1.4.0-0-ppa2	x86_64	https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.4.0-0-ppa2/ghostty_1.4.0-0.ppa2_amd64_forky.deb	9c6bc8ec8e18ffe599538d08e41e9e1eb8227bc2044ea0cb1dfb238a7f375450
+ghostty-forky	1.4.0-0-ppa2	aarch64	https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.4.0-0-ppa2/ghostty_1.4.0-0.ppa2_arm64_forky.deb	d8ab1de68dd75f90d71c65758683d3f504737050979acffe5b36f058c3e726f1
