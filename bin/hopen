@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# hopen opens all the projects of a VS Code workspace file in one named Herdr
+# session, with one Herdr workspace for each folder, and then attaches to it.
+#
+# Run it again at any time. It starts a stopped session, adds only the folders
+# that have no workspace, and closes nothing. The first workspace has the name
+# of the session and opens the folder that holds the list file.
+#
+# The list is ~/<session>.code-workspace or ~/<session>/<session>.code-workspace.
+#
+# Usage: hopen <session> [--file PATH] [--no-attach]
+set -euo pipefail
+
+SESSION=""
+LIST_FILE=""
+ATTACH=1
+
+usage() { echo "Usage: hopen <session> [--file PATH] [--no-attach]"; }
+warn() { printf '  [warn] %s\n' "$*" >&2; }
+die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --file)
+      [ "$#" -ge 2 ] || { usage >&2; exit 2; }
+      LIST_FILE="$2"
+      shift 2
+      ;;
+    --no-attach) ATTACH=0; shift ;;
+    -h | --help) usage; exit 0 ;;
+    -*) usage >&2; exit 2 ;;
+    *)
+      [ -z "$SESSION" ] || { usage >&2; exit 2; }
+      SESSION="$1"
+      shift
+      ;;
+  esac
+done
+
+[ -n "$SESSION" ] || { usage >&2; exit 2; }
+
+case "$SESSION" in
+  *[!A-Za-z0-9._-]*) die "A session name can use only letters, numbers, dots, dashes, and underscores." ;;
+esac
+
+if [ "${HERDR_ENV:-}" = "1" ] && [ "$ATTACH" -eq 1 ]; then
+  die "You are in a Herdr pane. Press ctrl+b, then q, and run this command again."
+fi
+
+if [ -z "$LIST_FILE" ]; then
+  for candidate in "${HOME}/${SESSION}.code-workspace" "${HOME}/${SESSION}/${SESSION}.code-workspace"; do
+    if [ -f "$candidate" ]; then
+      LIST_FILE="$candidate"
+      break
+    fi
+  done
+fi
+
+if [ -z "$LIST_FILE" ] || [ ! -f "$LIST_FILE" ]; then
+  die "No list of projects for ${SESSION}. Create ~/${SESSION}.code-workspace."
+fi
+
+# list_folders prints one "label<TAB>path" line for the folder of the list file,
+# and then one line for each folder in the list. VS Code accepts comment lines
+# and trailing commas, so this removes them before it parses the file.
+list_folders() {
+  python3 -I - "$LIST_FILE" "$SESSION" <<'PY'
+import json, os, re, sys
+
+path, session = sys.argv[1:3]
+base = os.path.dirname(os.path.abspath(path))
+with open(path, encoding="utf-8") as handle:
+    text = handle.read()
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+text = re.sub(r",(\s*[\]}])", r"\1", text)
+print(session, base, sep="\t")
+for folder in json.loads(text).get("folders", []):
+    full = os.path.normpath(os.path.join(base, os.path.expanduser(folder["path"])))
+    print(folder.get("name") or os.path.basename(full), full, sep="\t")
+PY
+}
+
+session_answers() {
+  local output
+  output="$(HERDR_SESSION="$SESSION" herdr workspace list 2>/dev/null)" || return 1
+  [[ "$output" == *workspace_list* ]]
+}
+
+start_session() {
+  HERDR_SESSION="$SESSION" nohup herdr server >/dev/null 2>&1 &
+  disown
+  for _ in $(seq 1 40); do
+    session_answers && return 0
+    sleep 0.25
+  done
+  die "The session ${SESSION} did not start."
+}
+
+workspace_labels() {
+  HERDR_SESSION="$SESSION" herdr workspace list | python3 -I -c '
+import json, sys
+for workspace in json.load(sys.stdin)["result"]["workspaces"]:
+    print(workspace["label"])
+'
+}
+
+session_answers || start_session
+
+folders="$(list_folders)"
+existing="$(workspace_labels)"
+added=0
+
+while IFS=$'\t' read -r label folder; do
+  [ -n "$label" ] || continue
+  if grep -Fxq -- "$label" <<<"$existing"; then
+    continue
+  fi
+  if [ ! -d "$folder" ]; then
+    warn "Skipped ${label}: the folder ${folder} does not exist."
+    continue
+  fi
+  HERDR_SESSION="$SESSION" herdr workspace create --cwd "$folder" --label "$label" --no-focus >/dev/null
+  added=$((added + 1))
+done <<<"$folders"
+
+printf '  [info] Session %s: %s workspaces added.\n' "$SESSION" "$added"
+
+if [ "$ATTACH" -eq 1 ]; then
+  exec herdr session attach "$SESSION"
+fi

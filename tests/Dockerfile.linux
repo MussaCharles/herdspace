@@ -1,0 +1,15 @@
+# A throwaway Linux server for tests. The account has sudo, as a real server does.
+ARG BASE=ubuntu:24.04
+FROM ${BASE}
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends sudo ca-certificates procps >/dev/null \
+  && useradd -m -s /bin/bash tester \
+  && echo 'tester ALL=(ALL) NOPASSWD:ALL' >/etc/sudoers.d/tester \
+  && printf '#!/bin/sh\nexit 0\n' >/usr/local/bin/claude \
+  && cp /usr/local/bin/claude /usr/local/bin/pi \
+  && chmod 755 /usr/local/bin/claude /usr/local/bin/pi
+COPY --chown=tester:tester . /home/tester/repo
+USER tester
+# A real agent program creates these folders when it first runs.
+RUN mkdir -p /home/tester/.claude /home/tester/.pi/agent/extensions
+WORKDIR /home/tester/repo
+ENV LANG=C.UTF-8

@@ -1,0 +1,14 @@
+herdr	0.9.5	x86_64	https://github.com/herdrdev/herdr/releases/download/v0.9.5/herdr-linux-x86_64	14d9e8bc8b4a9e0118d77c32266f76d461f09b40342eb23752960bd89f59929d
+herdr	0.9.5	aarch64	https://github.com/herdrdev/herdr/releases/download/v0.9.5/herdr-linux-aarch64	17d7536f2da50859523680ef279dffcac8e4a235f4e46fe8da6c2ec44141897c
+neovim	0.12.6	x86_64	https://github.com/neovim/neovim/releases/download/v0.12.6/nvim-linux-x86_64.tar.gz	474430d53e6264f6d6dd18db42d6dc9df3a1b56ca9e88a325bbf860e1a811d87
+neovim	0.12.6	aarch64	https://github.com/neovim/neovim/releases/download/v0.12.6/nvim-linux-arm64.tar.gz	8f1f64a0bdb97247034038c3823c6cbad5bdf9ecd5751b85494b71c3ee04c815
+lazygit	0.66.3	x86_64	https://github.com/jesseduffield/lazygit/releases/download/v0.66.3/lazygit_0.66.3_linux_x86_64.tar.gz	0a23f429a95f0d09db298b3c291536d818de066aa5a85c255806f0490ff6656b
+lazygit	0.66.3	aarch64	https://github.com/jesseduffield/lazygit/releases/download/v0.66.3/lazygit_0.66.3_linux_arm64.tar.gz	ac0b48237f3d0283813e7154ec063237e519532feb0470c0881a1793ee78fd42
+git-delta	0.20.1	x86_64	https://github.com/dandavison/delta/releases/download/0.20.1/delta-0.20.1-x86_64-unknown-linux-gnu.tar.gz	50f08c879f84c81ceb220e476491a7f492d2c9c671e79918cc44badf961a6240
+git-delta	0.20.1	aarch64	https://github.com/dandavison/delta/releases/download/0.20.1/delta-0.20.1-aarch64-unknown-linux-gnu.tar.gz	da7f4338f593572ff426ae153e0870e2fdc72729416eff551b40cdeb67940db8
+eza	0.23.5	x86_64	https://github.com/eza-community/eza/releases/download/v0.23.5/eza_x86_64-unknown-linux-gnu.tar.gz	35c70c5c43c29108075e58b893234c67ef585f0b53a7eaf8e9e7d4eec9f339b4
+eza	0.23.5	aarch64	https://github.com/eza-community/eza/releases/download/v0.23.5/eza_aarch64-unknown-linux-gnu.tar.gz	40b87ae8628aa2ff0f0d2dc24ab52f689631366385c3da630bae745671fd71ec
+zoxide	0.10.0	x86_64	https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-x86_64-unknown-linux-musl.tar.gz	2d93385b99f3e82cf2701609a1bffcad863fbeb75aa3fe7eb6be4d29be68b1ae
+zoxide	0.10.0	aarch64	https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-aarch64-unknown-linux-musl.tar.gz	f1f16c5d6298d63dee467eedea1cdcd8490e43e493bea43acd416dc9033ef641
+fzf	0.75.0	x86_64	https://github.com/junegunn/fzf/releases/download/v0.75.0/fzf-0.75.0-linux_amd64.tar.gz	0d6640f83582d991cf429754baad64b07e3a4e439a6019670f4b91da1314141c
+fzf	0.75.0	aarch64	https://github.com/junegunn/fzf/releases/download/v0.75.0/fzf-0.75.0-linux_arm64.tar.gz	bd0717badb6a5620387e014bb94209aac4d9eab6ab77b5348eabb0833aeb4d59

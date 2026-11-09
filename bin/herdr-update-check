@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# herdr-update-check prints a line if a new Herdr version exists. It asks the
+# Homebrew API, so Herdr does not need to contact its own site. It runs at most
+# once every 5 hours. Use --now to run it at once.
+set -u
+
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/herdr-bootstrap"
+stamp="${cache_dir}/last-update-check"
+
+if [ "${1:-}" != "--now" ] && [ -n "$(find "$stamp" -mmin -300 2>/dev/null)" ]; then
+  exit 0
+fi
+mkdir -p "$cache_dir"
+touch "$stamp"
+
+command -v herdr >/dev/null 2>&1 || exit 0
+installed="$(herdr --version 2>/dev/null | awk '{print $2}')"
+latest="$(curl -fsS --connect-timeout 2 --max-time 3 https://formulae.brew.sh/api/formula/herdr.json 2>/dev/null |
+  python3 -I -c 'import json, sys; print(json.load(sys.stdin)["versions"]["stable"])' 2>/dev/null)"
+
+if [ -n "$latest" ] && [ -n "$installed" ] && [ "$latest" != "$installed" ]; then
+  printf '  [warn] Herdr %s is available. This computer has %s.\n' "$latest" "$installed"
+fi
+exit 0

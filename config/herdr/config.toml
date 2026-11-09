@@ -1,0 +1,66 @@
+# Herdr configuration from herdr-bootstrap.
+# After a change, run: herdr server reload-config
+onboarding = false
+
+[theme]
+name = "dracula"
+auto_switch = false
+
+[theme.custom]
+red = "#4e82ef"     # blocked, needs input
+teal = "#4e82ef"    # done, not seen yet
+yellow = "#a78bfa"  # working
+active_row_bg = "#45475a"
+
+[update]
+# No background contact with herdr.dev. See bin/herdr-update-check.
+version_check = false
+manifest_check = false
+
+[ui]
+status_indicators = "dots"
+agent_panel_sort = "priority"
+prompt_new_tab_name = false
+copy_on_select = false
+
+[ui.toast]
+delivery = "herdr"
+
+[ui.sidebar.agents]
+row_gap = 1
+rows = [
+  ["state_icon", "workspace"],
+  ["tab"],
+]
+
+[ui.sidebar.spaces]
+row_gap = 1
+rows = [
+  ["state_icon", "workspace"],
+  ["branch"],
+]
+
+[ui.sound]
+enabled = false
+
+# The prefix stays ctrl+b. The computer that you use for SSH must release the
+# Cmd keys. bootstrap-client-macos.sh does that for Ghostty.
+[keys]
+new_tab = ["prefix+c", "cmd+t"]
+close_tab = ["prefix+shift+x", "cmd+w"]
+goto = ["prefix+g", "cmd+k"]
+previous_tab = ["prefix+p", "ctrl+left"]
+next_tab = ["prefix+n", "ctrl+right"]
+previous_workspace = "ctrl+up"
+next_workspace = "ctrl+down"
+cycle_pane_next = ["prefix+tab", "alt+up"]
+cycle_pane_previous = ["prefix+shift+tab", "alt+down"]
+
+# Lazygit over the focused pane. q closes it.
+[[keys.command]]
+key = ["cmd+shift+g", "prefix+d"]
+type = "popup"
+command = "cd \"${HERDR_ACTIVE_PANE_CWD:-.}\" && exec lazygit"
+description = "Git status"
+width = "90%"
+height = "85%"
