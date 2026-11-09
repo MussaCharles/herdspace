@@ -6,6 +6,16 @@ Scope: the commands and keys for daily use of Herdr, with the tools around it. T
 
 A session holds workspaces, a workspace holds tabs, and a tab holds panes.
 
+```mermaid
+flowchart TD
+  session["Session: work"] --> w1["Workspace: website"]
+  session --> w2["Workspace: api"]
+  w1 --> t1["Tab 1"]
+  w1 --> t2["Tab 2"]
+  t1 --> p1["Pane: shell"]
+  t1 --> p2["Pane: agent"]
+```
+
 | Word | Meaning |
 |------|---------|
 | Session | One background server. It keeps its panes running after you leave. `herdr` opens the session named `default`. |
@@ -51,6 +61,19 @@ A VS Code workspace file is like a Herdr session, and each VS Code folder is lik
 The list for a session is `~/<session>.code-workspace` or `~/<session>/<session>.code-workspace`. `hopen` also adds a workspace with the name of the session, for the folder that holds the list file. Use it to start an agent at the parent level. `hopen` starts a stopped session, adds only the missing projects, and never closes anything. To use a new session, create a list file with the name of the session.
 
 ## Start, leave, and return
+
+```mermaid
+stateDiagram-v2
+  [*] --> Attached: herdr
+  Attached --> Detached: ctrl+b, q
+  Attached --> Detached: close the terminal
+  Detached --> Attached: herdr
+  Attached --> Stopped: herdr server stop
+  Detached --> Stopped: herdr server stop
+  Stopped --> Attached: herdr
+```
+
+In the Detached state, your programs keep running. In the Stopped state, your programs are gone, and only the layout returns.
 
 | Task | Command or key |
 |------|----------------|

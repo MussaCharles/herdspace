@@ -4,11 +4,36 @@ Scope: set up a new client or server. Use one section for each computer. Set up 
 
 You need a working SSH connection from the client to the server. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`.
 
-Do these things before you start:
+```mermaid
+flowchart TD
+  a["Install your agent programs on the server"] --> b["Start each agent one time"]
+  b --> c["Clone this repository on the server"]
+  c --> d["Run the server script"]
+  d --> e["Clone this repository on your Mac"]
+  e --> f["Run the client script with --server"]
+  f --> g["Open a new Ghostty window"]
+  g --> h["ssh my-server, then herdr"]
+```
 
-1. Install the agent programs that you want on the server.
-2. Start each agent program one time, so that it creates its configuration folder.
-3. Clone this repository on each computer.
+Each agent program creates its configuration folder at its first start. Herdr needs that folder for the integration.
+
+## What a server script does
+
+```mermaid
+flowchart TD
+  a["Install packages"] --> b["Set up zsh and the prompt"]
+  b --> c["Write the configuration files<br/>and make backups"]
+  c --> d["Install the Neovim plugins"]
+  d --> e{"Is a Herdr server<br/>running?"}
+  e -- "Yes" --> g["Use that server"]
+  e -- "No" --> f["Start one for the setup"]
+  f --> g
+  g --> h["Install the Auto Title plugin"]
+  h --> i["Add the skill and integration<br/>for each agent program found"]
+  i --> j["Install the login service"]
+```
+
+The script never stops a server that was already running.
 
 ## Debian or Ubuntu server
 
@@ -20,8 +45,10 @@ The script needs `sudo` to install system packages and to change the login shell
 
 The script takes some minutes. These options make it shorter:
 
-- `--skip-nvim-tools`: Neovim installs its language tools when it first opens.
-- `--skip-login-service`: Herdr starts when you run `herdr`.
+| Option | Effect |
+|--------|--------|
+| `--skip-nvim-tools` | Neovim installs its language tools at its first start. |
+| `--skip-login-service` | Herdr starts at your next `herdr` command. |
 
 A systemd user service starts Herdr at boot. A computer with no systemd has no service, and the script shows a warning.
 
@@ -45,12 +72,14 @@ Give the name of each server:
 ./bootstrap-client-macos.sh --server my-server --server my-other-server
 ```
 
-The script does these things:
+```mermaid
+flowchart LR
+  a["Install Ghostty<br/>and shell tools"] --> b["Write the<br/>Ghostty configuration"]
+  b --> c["Copy the terminal description<br/>to each server"]
+  c --> d["Free the Ctrl arrow keys"]
+```
 
-1. It installs Ghostty and the shell tools.
-2. It writes the Ghostty configuration.
-3. It copies the Ghostty terminal description to each server. Without this description, programs on the server can show errors.
-4. It turns off the macOS Mission Control shortcuts for the `Ctrl` arrow keys, because Herdr uses those keys. To keep the macOS shortcuts, add `--skip-mission-control`.
+Without the terminal description, programs on the server can show errors. Herdr uses the `Ctrl` arrow keys, so the script turns off those Mission Control shortcuts. To keep the macOS shortcuts, add `--skip-mission-control`.
 
 Press `Cmd+Shift+,` in Ghostty to reload the configuration. After a change to `background-opacity`, quit Ghostty and open it again.
 
@@ -73,7 +102,18 @@ If a key does nothing, Ghostty or macOS still uses that key. Run the client scri
 
 ## Open many projects at once
 
-`hopen` reads a VS Code workspace file and opens each folder as a Herdr workspace in one named session. Create `~/work.code-workspace`:
+`hopen` reads a VS Code workspace file and opens each folder as a Herdr workspace in one named session.
+
+```mermaid
+flowchart LR
+  file["work.code-workspace"] --> hopen["hopen work"]
+  hopen --> session["Herdr session: work"]
+  session --> root["Workspace: work<br/>the folder of the file"]
+  session --> w1["Workspace: website"]
+  session --> w2["Workspace: api"]
+```
+
+Create `~/work.code-workspace`:
 
 ```json
 {
@@ -90,4 +130,6 @@ Open it:
 hopen work
 ```
 
-The first workspace has the name of the session and opens the folder that holds the file. Run `hopen` again after you add a folder.
+The first workspace has the name of the session and opens the folder that holds the file. Run `hopen` again after you add a folder. It adds only the new folders.
+
+![Herdr with one workspace for each project](media/herdr-sessions.png)
