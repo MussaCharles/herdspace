@@ -2,9 +2,19 @@
 
 Scope: change the tools and the configuration in this repository, and apply a change to a computer.
 
+```mermaid
+flowchart LR
+  a["Change this repository"] --> b["Run the tests"]
+  b --> c{"Did they pass?"}
+  c -- "No" --> a
+  c -- "Yes" --> d["Merge the change"]
+  d --> e["git pull on each computer"]
+  e --> f["Run the script again"]
+```
+
 ## Apply the newest version of this repository
 
-Run these commands on each computer:
+Run this command on each computer:
 
 ```bash
 git pull
@@ -14,15 +24,18 @@ Then run the script for that computer again. The script changes only what is dif
 
 ## Update the tool versions
 
-`tools/versions.tsv` holds the Linux release files and their checksums. `tools/versions.env` holds the commits of the shell plugins and of Auto Title. To get the newest versions, run:
+| What | Where | How to update |
+|------|-------|---------------|
+| Linux release files and their checksums | `tools/versions.tsv` | `tools/update-versions.sh` |
+| Shell plugins and Auto Title commits | `tools/versions.env` | `tools/update-versions.sh` |
+| macOS tools | Homebrew | `brew upgrade`, and then run the server script |
+| Neovim plugins | `config/nvim/lazy-lock.json` | `:Lazy update`, and then copy the file from `~/.config/nvim/` |
+
+Update the versions:
 
 ```bash
 tools/update-versions.sh
 ```
-
-macOS installs the same tools with Homebrew, so `brew upgrade` updates them. Run `herdr --skill` after an upgrade by running the server script again.
-
-To update the Neovim plugins, run `:Lazy update` in Neovim. Then copy `~/.config/nvim/lazy-lock.json` to `config/nvim/lazy-lock.json`.
 
 Test a change before you use it:
 

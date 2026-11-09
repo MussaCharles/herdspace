@@ -2,6 +2,21 @@
 
 Scope: what to say to a coding agent, so that it can do the setup for you. An agent can read the skill files in [skills](../skills/) and follow them.
 
+```mermaid
+sequenceDiagram
+  actor You
+  participant Agent
+  participant Computer
+  You->>Agent: Read this skill file and follow it
+  Agent->>Computer: Check the system and the tools
+  Agent->>You: Show the plan
+  You->>Agent: Agree
+  Agent->>Computer: Run the bootstrap script
+  Computer-->>Agent: Log and warnings
+  Agent->>Computer: Run the checks
+  Agent->>You: Report the result
+```
+
 | Skill file | Use |
 |------------|-----|
 | [skills/bootstrap-herdr-server/SKILL.md](../skills/bootstrap-herdr-server/SKILL.md) | Set up a Linux or macOS server |
@@ -12,7 +27,7 @@ Scope: what to say to a coding agent, so that it can do the setup for you. An ag
 
 Start the agent on the computer that you want to set up, in the folder of this repository. A skill runs commands on that computer.
 
-Agents read a skill file when you name its path, so you do not need to install it.
+If you name the path of a skill file, the agent reads it. You do not need to install the skill.
 
 ## What to say
 
@@ -39,8 +54,8 @@ Read skills/update-herdr-bootstrap/SKILL.md in this repository and follow it. I 
 The agent must stop and ask you in these cases:
 
 - `sudo` or the Homebrew installer asks for a password.
-- A file that is not from this repository would be replaced, and you did not agree.
-- A step would stop a running Herdr server. A stop closes every pane.
+- A step replaces a file that is not from this repository, and you did not agree.
+- A step stops a running Herdr server. A stop closes every pane.
 
 ## Install a skill for regular use
 
