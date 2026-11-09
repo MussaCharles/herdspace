@@ -7,13 +7,27 @@ Scope: the commands and keys for daily use of Herdr, with the tools around it. T
 A session holds workspaces, a workspace holds tabs, and a tab holds panes.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
+  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
+  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
+  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
+  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
+  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
+}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
 flowchart TD
-  session["Session: work"] --> w1["Workspace: website"]
-  session --> w2["Workspace: api"]
-  w1 --> t1["Tab 1"]
-  w1 --> t2["Tab 2"]
-  t1 --> p1["Pane: shell"]
-  t1 --> p2["Pane: agent"]
+  classDef cmd fill:#0d1f12,stroke:#3fb950,stroke-width:2px,color:#7ee787
+  classDef step fill:#0d1117,stroke:#58a6ff,stroke-width:1.5px,color:#c9e1ff
+  classDef ask fill:#2a2000,stroke:#e3b341,stroke-width:2px,color:#f2cc60
+  classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
+  classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
+  classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
+  session["Session: work"]:::host --> w1["Workspace: website"]:::data
+  session --> w2["Workspace: api"]:::data
+  w1 --> t1["Tab 1"]:::step
+  w1 --> t2["Tab 2"]:::step
+  t1 --> p1["Pane: shell"]:::cmd
+  t1 --> p2["Pane: agent"]:::cmd
 ```
 
 | Word | Meaning |
@@ -63,14 +77,27 @@ The list for a session is `~/<session>.code-workspace` or `~/<session>/<session>
 ## Start, leave, and return
 
 ```mermaid
-stateDiagram-v2
-  [*] --> Attached: herdr
-  Attached --> Detached: ctrl+b, q
-  Attached --> Detached: close the terminal
-  Detached --> Attached: herdr
-  Attached --> Stopped: herdr server stop
-  Detached --> Stopped: herdr server stop
-  Stopped --> Attached: herdr
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
+  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
+  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
+  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
+  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
+  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
+}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
+flowchart LR
+  classDef cmd fill:#0d1f12,stroke:#3fb950,stroke-width:2px,color:#7ee787
+  classDef step fill:#0d1117,stroke:#58a6ff,stroke-width:1.5px,color:#c9e1ff
+  classDef ask fill:#2a2000,stroke:#e3b341,stroke-width:2px,color:#f2cc60
+  classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
+  classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
+  classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
+  none(("start")):::step -- " herdr " --> attached["ATTACHED<br/>You see the panes"]:::cmd
+  attached -- " ctrl+b, q<br/>or close the terminal " --> detached["DETACHED<br/>Programs keep running"]:::host
+  detached -- " herdr " --> attached
+  attached -- " herdr server stop " --> stopped["STOPPED<br/>Programs are gone"]:::stop
+  detached -- " herdr server stop " --> stopped
+  stopped -- " herdr: only the layout returns " --> attached
 ```
 
 In the Detached state, your programs keep running. In the Stopped state, your programs are gone, and only the layout returns.
@@ -102,17 +129,17 @@ After a stop, the workspaces, tabs, panes, and folders return as new shells. Run
 
 ## Direct keys
 
-These keys work only inside Herdr. In a plain Ghostty window, `Cmd+T`, `Cmd+W`, and `Cmd+K` do nothing.
+These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and the `Ctrl+Shift` keys in this table do nothing.
 
-| Action | Key |
-|--------|-----|
-| New tab | `Cmd+T` |
-| Close tab | `Cmd+W` |
-| Go to any workspace, tab, or agent | `Cmd+K` |
-| Previous or next tab | `Ctrl+Left`, `Ctrl+Right` |
-| Previous or next workspace | `Ctrl+Up`, `Ctrl+Down` |
-| Next or previous pane in the tab | `Alt+Up`, `Alt+Down` |
-| Open lazygit over the pane | `Cmd+Shift+G` |
+| Action | Mac | Linux or Windows |
+|--------|-----|------------------|
+| New tab | `Cmd+T` | `Ctrl+Shift+T` |
+| Close tab | `Cmd+W` | `Ctrl+Shift+W` |
+| Go to any workspace, tab, or agent | `Cmd+K` | `Ctrl+Shift+K` |
+| Previous or next tab | `Ctrl+Left`, `Ctrl+Right` | The same |
+| Previous or next workspace | `Ctrl+Up`, `Ctrl+Down` | The same |
+| Next or previous pane in the tab | `Alt+Up`, `Alt+Down` | The same |
+| Open lazygit over the pane | `Cmd+Shift+G` | `Ctrl+Shift+G` |
 
 ## Workspaces
 
@@ -229,7 +256,7 @@ Run `nvim .` in a project. Neovim is a viewer in this setup, because the agents 
 | Search inside the file | `g`, then `/` |
 | Go to a definition | `Ctrl`-click or `Cmd`-click |
 | Go back | `Ctrl`-right-click |
-| Focus the file tree | `Cmd+E` |
+| Focus the file tree | `Cmd+E`, or `Ctrl+Shift+E` on Linux |
 | Switch the git branch | `Space`, `g`, `c` |
 | Show the keys after the leader | `Space` |
 | Save | `:w` |

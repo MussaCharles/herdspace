@@ -3,13 +3,27 @@
 Scope: change the tools and the configuration in this repository, and apply a change to a computer.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
+  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
+  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
+  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
+  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
+  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
+}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
 flowchart LR
-  a["Change this repository"] --> b["Run the tests"]
-  b --> c{"Did they pass?"}
-  c -- "No" --> a
-  c -- "Yes" --> d["Merge the change"]
-  d --> e["git pull on each computer"]
-  e --> f["Run the script again"]
+  classDef cmd fill:#0d1f12,stroke:#3fb950,stroke-width:2px,color:#7ee787
+  classDef step fill:#0d1117,stroke:#58a6ff,stroke-width:1.5px,color:#c9e1ff
+  classDef ask fill:#2a2000,stroke:#e3b341,stroke-width:2px,color:#f2cc60
+  classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
+  classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
+  classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
+  a["Change this<br/>repository"]:::step --> b["Run the tests"]:::cmd
+  b --> c{"Did they pass?"}:::ask
+  c -- " no " --> a
+  c -- " yes " --> d["Merge the change"]:::data
+  d --> e["git pull on<br/>each computer"]:::cmd
+  e --> f["Run the script<br/>again"]:::cmd
 ```
 
 ## Apply the newest version of this repository

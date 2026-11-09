@@ -3,24 +3,35 @@
 Scope: what to say to a coding agent, so that it can do the setup for you. An agent can read the skill files in [skills](../skills/) and follow them.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
+  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
+  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
+  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
+  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
+  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
+}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
 sequenceDiagram
+  autonumber
   actor You
   participant Agent
   participant Computer
-  You->>Agent: Read this skill file and follow it
-  Agent->>Computer: Check the system and the tools
-  Agent->>You: Show the plan
-  You->>Agent: Agree
-  Agent->>Computer: Run the bootstrap script
-  Computer-->>Agent: Log and warnings
-  Agent->>Computer: Run the checks
-  Agent->>You: Report the result
+  rect rgb(13, 17, 23)
+    You->>Agent: Read this skill file and follow it
+    Agent->>Computer: Find the system and the tools
+    Agent->>You: Show the plan
+    You->>Agent: Agree
+    Agent->>Computer: Run the bootstrap script
+    Computer-->>Agent: Log and warnings
+    Agent->>Computer: Run the checks
+    Agent->>You: Report the result
+  end
 ```
 
 | Skill file | Use |
 |------------|-----|
 | [skills/bootstrap-herdr-server/SKILL.md](../skills/bootstrap-herdr-server/SKILL.md) | Set up a Linux or macOS server |
-| [skills/bootstrap-herdr-client/SKILL.md](../skills/bootstrap-herdr-client/SKILL.md) | Set up the Mac that you use for SSH |
+| [skills/bootstrap-herdr-client/SKILL.md](../skills/bootstrap-herdr-client/SKILL.md) | Set up the macOS or Linux computer that you use for SSH |
 | [skills/update-herdr-bootstrap/SKILL.md](../skills/update-herdr-bootstrap/SKILL.md) | Add a tool or a setting to this repository |
 
 ## Before you ask
@@ -40,7 +51,7 @@ Read skills/bootstrap-herdr-server/SKILL.md in this repository and follow it to 
 To set up a client, paste this prompt, and replace the server names:
 
 ```text
-Read skills/bootstrap-herdr-client/SKILL.md in this repository and follow it to set up this Mac. My servers are my-server and my-other-server. Show me the plan before you change anything.
+Read skills/bootstrap-herdr-client/SKILL.md in this repository and follow it to set up this computer. My servers are my-server and my-other-server. Show me the plan before you change anything.
 ```
 
 To add something new, paste this prompt, and replace the last sentence:
