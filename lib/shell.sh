@@ -17,6 +17,9 @@ setup_shell() {
   git_pin https://github.com/zsh-users/zsh-autosuggestions.git "${custom}/plugins/zsh-autosuggestions" "$ZSH_AUTOSUGGESTIONS_REF"
   git_pin https://github.com/zsh-users/zsh-syntax-highlighting.git "${custom}/plugins/zsh-syntax-highlighting" "$ZSH_SYNTAX_HIGHLIGHTING_REF"
 
+  # Oh My Zsh warns at each start if another account can write to its folders.
+  chmod -R go-w "$omz"
+
   if [ -f "$zshrc" ] && ! grep -q 'Managed by herdr-bootstrap' "$zshrc"; then
     info "Your old ~/.zshrc goes to a backup. Put your own lines in ~/.zshrc.local."
   fi

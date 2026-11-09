@@ -34,12 +34,14 @@ plain="$(zsh -i -c 'alias ls; whence z; print -r -- NO_TTY_OK' </dev/null 2>&1)"
 contains "$plain" NO_TTY_OK 'zsh starts with no terminal'
 lacks "$plain" 'eza' 'agents keep plain ls'
 lacks "$plain" 'monitor' 'no gitstatus error'
-tty_out="$(python3 "$ROOT/tests/pty_run.py" 25 '' zsh -i -c 'alias ls; whence -w z; whence -w p10k; print -r -- TTY_OK; exit' 2>&1)"
+tty_out="$(python3 "$ROOT/tests/pty_run.py" 25 '' zsh -i -c 'alias ls; whence -w z; whence -w p10k; print -r -- STARTUP_STATUS=$?; print -r -- TTY_OK; exit' 2>&1)"
 contains "$tty_out" TTY_OK 'zsh starts in a terminal'
+contains "$tty_out" 'STARTUP_STATUS=0' 'zsh startup ends with status 0'
 contains "$tty_out" 'ls=eza' 'ls is eza in a terminal'
 contains "$tty_out" 'z: function' 'zoxide in a terminal'
 contains "$tty_out" 'p10k: function' 'powerlevel10k loaded'
 lacks "$tty_out" 'command not found' 'no missing commands at start'
+lacks "$tty_out" 'Insecure completion' 'no insecure directory warning'
 
 # lazygit reads its configuration and quits.
 work="$(mktemp -d)"

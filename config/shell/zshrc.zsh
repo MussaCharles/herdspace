@@ -39,4 +39,6 @@ if (( bootstrap_has_tty )); then
   [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 fi
 
-[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+if [[ -f "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local"
+fi
