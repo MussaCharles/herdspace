@@ -4,8 +4,11 @@
 # display at the bottom of each video shows the keys.
 #
 # Usage: tests/capture-media.sh   The files go to tests/.work/media.
+# The GIF plays SPEED times faster than the recording (default 3). The MP4 keeps
+# the real speed.
 # Review the files, and then copy the ones that you want to docs/media.
 FULL="${FULL:-1}"
+SPEED="${SPEED:-3}"
 OPEN_CMD=/home/tester/repo/tests/open-shell.sh
 # shellcheck source=tests/lib-pair.sh
 source "$(dirname "$0")/lib-pair.sh"
@@ -64,8 +67,11 @@ record_stop() {
 import sys
 font = sys.argv[2]
 parts = []
-for line in open(sys.argv[1]):
-    start, end, text = line.rstrip("\n").split(" ", 2)
+rows = [line.rstrip("\n").split(" ", 2) for line in open(sys.argv[1])]
+for i, (start, end, text) in enumerate(rows):
+    # A label stays until the next label, so that it is readable in a fast GIF.
+    nxt = float(rows[i + 1][0]) if i + 1 < len(rows) else float(start) + 3
+    end = f"{max(float(end), min(nxt, float(start) + 4)):.2f}"
     text = text.replace("\\", "\\\\").replace("'", "").replace(":", "\\:").replace("%", "\\%")
     parts.append(
         f"drawtext=fontfile={font}:text='{text}':fontsize=30:fontcolor=0x7ee787"
@@ -76,7 +82,7 @@ print(",".join(parts) or "null")
 PY2
   docker cp "tests/.work/filter-$1.txt" "$cli:$filter" >/dev/null
   cli_user ffmpeg -y -loglevel error -i "/tmp/raw-$1.mp4" -filter_script:v "$filter" -c:v libx264 -preset veryfast -pix_fmt yuv420p "/tmp/$1.mp4"
-  cli_user ffmpeg -y -loglevel error -i "/tmp/$1.mp4" -vf "fps=10,scale=1000:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" "/tmp/$1.gif"
+  cli_user ffmpeg -y -loglevel error -i "/tmp/$1.mp4" -vf "setpts=PTS/${SPEED},fps=12,scale=1000:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" "/tmp/$1.gif"
   docker cp "$cli:/tmp/$1.mp4" "$out/$1.mp4" >/dev/null
   docker cp "$cli:/tmp/$1.gif" "$out/$1.gif" >/dev/null
 }
@@ -102,12 +108,13 @@ media_shot() { shot "$1"; mv "tests/.work/shots/$1.png" "$out/$1.png"; }
 # shellcheck disable=SC2016 # These commands run on the server.
 focus_ws() { srv_user bash -c "HERDR_SESSION=work herdr workspace focus \$(HERDR_SESSION=work herdr workspace list | python3 -c \"import json,sys; print([w['workspace_id'] for w in json.load(sys.stdin)['result']['workspaces'] if w['label']=='$1'][0])\")" >/dev/null; sleep 3; }
 
-# 1. Open every project with one command, and move between projects.
-record_start open-projects
-TYPE_DELAY=70 WAIT=3 write 'hopen --list'
-TYPE_DELAY=70 WAIT=16 write 'hopen --all work'
+# 1. Move between the projects. The video starts on a full screen, with every
+# project open, because the first frame is also the preview of the GIF.
+TYPE_DELAY=70 WAIT=16 type_text 'hopen --all work'
 clear_idle
-WAIT=3 press ctrl+Down 'Ctrl+Down: next project'
+focus_ws website
+record_start open-projects
+sleep 2
 WAIT=3 press ctrl+Down 'Ctrl+Down: next project'
 WAIT=3 press ctrl+Down 'Ctrl+Down: next project'
 WAIT=3 press ctrl+Down 'Ctrl+Down: next project'

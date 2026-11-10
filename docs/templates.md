@@ -154,8 +154,9 @@ The Auto Title plugin names the tabs. The bootstrap sets `HERDR_AUTO_TITLE_PANES
 
 ## Open every project
 
-![Open every project, and move between projects](media/open-projects.gif)
+Run `hopen --all work` to open the projects of every list. Then press `Ctrl+Down` to go to the next project, and `Ctrl+Up` to go to the previous project.
 
+![Four projects open in Herdr, and Ctrl+Down moves to the next project](media/open-projects.gif)
 
 ## Move between panes
 

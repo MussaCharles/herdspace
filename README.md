@@ -4,7 +4,7 @@ Shell scripts that set up [Herdr](https://herdr.dev) on a new computer. Herdr is
 
 You run one script on each computer. The script installs the tools, writes the configuration, and starts Herdr. If you run it again, it does only what is missing.
 
-![Open every project with one command, and move between them](docs/media/open-projects.gif)
+![Four projects open in Herdr, and Ctrl+Down moves to the next project](docs/media/open-projects.gif)
 
 ## How the parts fit
 
