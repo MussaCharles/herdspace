@@ -35,10 +35,10 @@ Install Ubuntu in WSL. Run this command in PowerShell:
 wsl --install -d Ubuntu
 ```
 
-Open Ubuntu from the Start menu, and clone this repository there. Then run the Linux client script with no Ghostty:
+Open Ubuntu from the Start menu, and run the client setup there. The script finds WSL, so it sets up the shell and does not install Ghostty:
 
 ```bash
-./bootstrap-client-linux.sh --no-ghostty
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- client --server my-server
 ```
 
 Windows Terminal does not need the terminal description, because it uses `xterm-256color`.
@@ -53,7 +53,7 @@ The prefix keys always work, for example `ctrl+b`, then `c` for a new tab. The [
 
 ## WSL as a server
 
-Run the Linux server script inside WSL. WSL needs systemd for the login service. Add these lines to `/etc/wsl.conf`:
+Run the server setup inside WSL. WSL needs systemd for the login service. Add these lines to `/etc/wsl.conf`:
 
 ```ini
 [boot]
@@ -66,10 +66,10 @@ Restart WSL. Run this command in PowerShell:
 wsl --shutdown
 ```
 
-Then run the server script:
+Then run the server setup:
 
 ```bash
-./bootstrap-server-linux.sh
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
 ```
 
 A Herdr server in WSL stops when WSL stops. Use this setup for a computer that you work on. For a server that must stay on, use Linux or macOS.

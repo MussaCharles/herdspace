@@ -9,7 +9,7 @@ Run this skill on the server, from the root folder of the herdr-bootstrap reposi
 
 ## Steps
 
-1. Find the system with `uname -s`. Use `bootstrap-server-linux.sh` on Linux and `bootstrap-server-macos.sh` on macOS. On Linux, make sure that `apt-get` exists. If it does not exist, stop and tell the person that only Debian and Ubuntu work.
+1. Use `./bootstrap.sh server`. It finds Linux, WSL, or macOS by itself. On Linux, make sure that `apt-get` exists. If it does not exist, stop and tell the person that only Debian and Ubuntu work.
 2. Run `herdr status` if `herdr` exists. Tell the person if a server is running. The script keeps it running.
 3. List the agent programs with `command -v claude codex pi opencode hermes`. Tell the person that the script adds an integration only for the programs that it finds.
 4. Run the script with `--check` and show the output. It changes nothing. Tell the person what a run changes: missing parts, and on Linux the login shell. Ask what to do with each file that the output marks as different. Wait for the person to agree.

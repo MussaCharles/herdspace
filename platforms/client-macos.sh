@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# bootstrap-client-macos.sh
+# platforms/client-macos.sh. Run it with ./bootstrap.sh client, which picks it on macOS.
 #
 # Sets up Ghostty and the shell on the Mac that you use for SSH. It also copies
 # the Ghostty terminal description to each server. It does only the parts that
 # are not done.
 #
-# Usage: ./bootstrap-client-macos.sh [options] [--server HOST]... [--skip-mission-control]
+# Usage: ./bootstrap.sh client [options] [--server HOST]... [--skip-mission-control]
 #
 # With no option, the script asks about each file that you changed.
 #   --check          Report what is done, missing, or different. Change nothing.
@@ -13,7 +13,7 @@
 #   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export REPO_ROOT
 SERVERS=()
 SKIP_MISSION_CONTROL=0

@@ -38,14 +38,14 @@ pair_setup() {
   srv_root bash -c 'apt-get update -qq >/dev/null; DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends openssh-server >/dev/null; mkdir -p /run/sshd; chmod 755 /run/sshd; /usr/sbin/sshd'
   flags="--skip-login-service"
   [ "${FULL:-0}" = "1" ] || flags="${flags} --skip-nvim-tools"
-  srv_user bash -c "./bootstrap-server-linux.sh ${flags}" >tests/.work/client-server.log 2>&1 || fail 'server bootstrap'
+  srv_user bash -c "./bootstrap.sh server ${flags}" >tests/.work/client-server.log 2>&1 || fail 'server bootstrap'
   srv_user bash tests/demo-projects.sh
   srv_user bash -c 'python3 tests/pty_run.py 14 "exit\r" zsh -i' >/dev/null 2>&1
 
   cli_user bash -c 'mkdir -p ~/.ssh && ssh-keygen -q -t ed25519 -N "" -f ~/.ssh/id_ed25519 && printf "Host my-server\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null\n  LogLevel ERROR\n" >~/.ssh/config'
   key="$(cli_user cat /home/tester/.ssh/id_ed25519.pub)"
   srv_user bash -c "mkdir -p ~/.ssh && echo '${key}' >>~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
-  if cli_user ./bootstrap-client-linux.sh --server my-server >tests/.work/client.log 2>&1; then pass 'client bootstrap'; else fail 'client bootstrap'; tail -n 8 tests/.work/client.log; fi
+  if cli_user ./bootstrap.sh client --server my-server >tests/.work/client.log 2>&1; then pass 'client bootstrap'; else fail 'client bootstrap'; tail -n 8 tests/.work/client.log; fi
 }
 
 # open_ghostty starts the display and a Ghostty window that runs OPEN_CMD.

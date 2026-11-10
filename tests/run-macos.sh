@@ -83,26 +83,26 @@ status=0
 for target in "$@"; do
   case "$target" in
     server)
-      run "$ROOT/bootstrap-server-macos.sh" --skip-nvim-tools || status=1
+      run "$ROOT/bootstrap.sh" server --skip-nvim-tools || status=1
       run "$ROOT/tests/verify-server.sh" macos || status=1
       "$ROOT/tests/test-install.sh" || status=1
       grep -q 'brew install herdr' "$CALLS" && echo 'PASS brew installs herdr' || { echo 'FAIL brew installs herdr'; status=1; }
       grep -q 'launchctl bootstrap' "$CALLS" && echo 'PASS launch agent loads' || { echo 'FAIL launch agent loads'; status=1; }
       plutil -lint "${TEST_HOME}/home/Library/LaunchAgents/local.herdr.server.plist" >/dev/null && echo 'PASS plist is valid' || { echo 'FAIL plist is valid'; status=1; }
-      run "$ROOT/tests/test-idempotent.sh" bootstrap-server-macos.sh "${TEST_HOME}/home/.config/herdr/config.toml" --skip-nvim-tools || status=1
+      run "$ROOT/tests/test-idempotent.sh" bootstrap.sh "${TEST_HOME}/home/.config/herdr/config.toml" server --skip-nvim-tools || status=1
       backups="$(find "${TEST_HOME}/home" -name '*.bak-*' -not -path '*/.cache/*' -not -path '*/.oh-my-zsh/*' -not -path '*/.local/*' | wc -l | tr -d ' ')"
       echo "RESULT server backups=${backups}"
       [ "$backups" = 0 ] || status=1
       ;;
     client)
       rm -f "${TEST_HOME}/home/.zshrc"
-      run "$ROOT/bootstrap-client-macos.sh" --server example-server || status=1
+      run "$ROOT/bootstrap.sh" client --server example-server || status=1
       cmp -s "$ROOT/config/ghostty/config.ghostty" "${TEST_HOME}/home/.config/ghostty/config.ghostty" && echo 'PASS ghostty configuration' || { echo 'FAIL ghostty configuration'; status=1; }
       grep -q 'BOOTSTRAP_PROMPT_COLOR=166' "${TEST_HOME}/home/.config/herdr-bootstrap/env.zsh" && echo 'PASS client prompt color' || { echo 'FAIL client prompt color'; status=1; }
       grep -q 'ssh -- example-server tic -x -' "$CALLS" && echo 'PASS terminal description sent' || { echo 'FAIL terminal description sent'; status=1; }
       [ "$(grep -c 'defaults write com.apple.symbolichotkeys' "$CALLS")" = 4 ] && echo 'PASS four shortcuts released' || { echo 'FAIL four shortcuts released'; status=1; }
       grep -q 'activate-stub -u' "$CALLS" && echo 'PASS shortcuts applied' || { echo 'FAIL shortcuts applied'; status=1; }
-      run "$ROOT/tests/test-idempotent.sh" bootstrap-client-macos.sh "${TEST_HOME}/home/.config/ghostty/config.ghostty" --server example-server || status=1
+      run "$ROOT/tests/test-idempotent.sh" bootstrap.sh "${TEST_HOME}/home/.config/ghostty/config.ghostty" client --server example-server || status=1
       out="$(run zsh -i -c 'print -r -- CLIENT_OK' </dev/null 2>&1)"
       case "$out" in *CLIENT_OK*) echo 'PASS client shell starts' ;; *) echo "FAIL client shell starts: ${out:0:200}"; status=1 ;; esac
       ;;

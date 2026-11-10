@@ -21,8 +21,8 @@ flowchart LR
   classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
   classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
   a["Install agent programs<br/>on the server"]:::step --> b["Start each agent<br/>one time"]:::step
-  b --> c["Run the<br/>server script"]:::cmd
-  c --> d["Run the client script<br/>with --server"]:::cmd
+  b --> c["bootstrap.sh server"]:::cmd
+  c --> d["bootstrap.sh client<br/>--server my-server"]:::cmd
   d --> e["Open a new<br/>terminal window"]:::step
   e --> f["ssh my-server<br/>herdr"]:::host
 ```
@@ -61,6 +61,54 @@ flowchart TD
 
 The script never stops a server that was already running.
 
+## Get the script
+
+You can run the script in two ways.
+
+To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdr-bootstrap/<tag>`, compares its checksum, and runs it from there:
+
+```bash
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
+```
+
+To read or change the files first, clone this repository, and run the script from the clone:
+
+```bash
+git clone <repository-url> ~/herdr-bootstrap
+```
+
+```bash
+cd ~/herdr-bootstrap && ./bootstrap.sh server
+```
+
+If the repository is private, `curl` cannot download the release. Log in with `gh auth login`, and then download the script with the GitHub CLI:
+
+```bash
+gh release download v0.1.0-alpha.3 --repo <owner>/herdr-bootstrap --pattern bootstrap.sh --dir /tmp/hb && bash /tmp/hb/bootstrap.sh server
+```
+
+The script also uses the GitHub CLI for the rest of the release.
+
+## Options
+
+The first word is `server` or `client`. The script finds the system. Each option below works with `curl` too, after `bash -s --`.
+
+| Option | Use |
+|--------|-----|
+| `--os macos`, `--os linux`, `--os wsl` | Name the system, if the script finds the wrong one. |
+| `--check` | Report what is done, missing, or different. Change nothing. |
+| `--keep-existing` | Add what is missing, and change no existing file. |
+| `--replace-all` | Use the repository version of every file, with backups. |
+| `--version <tag>` | With `curl`: download another release. |
+| `--skip-nvim-tools` | Server: do not install the Neovim language tools. |
+| `--skip-login-service` | Server: do not start Herdr at login. |
+| `--server <name>` | Client: the SSH name of a server. Repeat it for each server. |
+| `--no-ghostty` | Linux client: use another terminal. WSL always uses this. |
+| `--skip-mission-control` | macOS client: keep the Mission Control shortcuts. |
+| `-h`, `--help` | Show every option. |
+
+`bootstrap.sh` runs one script from the folder `platforms/`, one for each role and system.
+
 ## Run a script again
 
 You can run a script at any time. It finds what is done, and it does only the rest. On a finished computer, it prints `Everything is already set up` in a few seconds.
@@ -97,12 +145,12 @@ flowchart TD
 
 | Command | Effect |
 |---------|--------|
-| `./bootstrap-server-linux.sh` | Do what is missing, and ask about each file that you changed. |
-| `./bootstrap-server-linux.sh --check` | Report what is done, missing, or different. Change nothing. |
-| `./bootstrap-server-linux.sh --keep-existing` | Add what is missing, and change no existing file. |
-| `./bootstrap-server-linux.sh --replace-all` | Use the repository version of every file. Each replaced file gets a backup. |
+| `./bootstrap.sh server` | Do what is missing, and ask about each file that you changed. |
+| `./bootstrap.sh server --check` | Report what is done, missing, or different. Change nothing. |
+| `./bootstrap.sh server --keep-existing` | Add what is missing, and change no existing file. |
+| `./bootstrap.sh server --replace-all` | Use the repository version of every file. Each replaced file gets a backup. |
 
-These options work with all four scripts. For each changed file, the question offers keep, replace, show the difference, keep all, and replace all. With no terminal, for example when an agent runs the script, the script keeps your files and lists them.
+These options work for a server and for a client. For each changed file, the question offers keep, replace, show the difference, keep all, and replace all. With no terminal, for example when an agent runs the script, the script keeps your files and lists them.
 
 `--check` exits with status 0 if nothing is missing, and with status 1 if something needs work. A file that you changed does not change the status.
 
@@ -113,7 +161,7 @@ A script records the hash of each file that it installs, in `~/.local/share/herd
 The script needs `sudo` to install system packages and to change the login shell. If `sudo` asks for a password, type it. Run the script as the account that will use Herdr:
 
 ```bash
-./bootstrap-server-linux.sh
+./bootstrap.sh server
 ```
 
 The script takes some minutes. These options make it shorter:
@@ -130,7 +178,7 @@ A systemd user service starts Herdr at boot. A computer with no systemd has no s
 Homebrew must be able to write to its folder from this account. If Homebrew is not installed, the script installs it. Then the script asks for your password, so a person must be at the keyboard. Run the script:
 
 ```bash
-./bootstrap-server-macos.sh
+./bootstrap.sh server
 ```
 
 A LaunchAgent starts Herdr at login. If a Herdr server is already running, the LaunchAgent starts at the next login.
@@ -142,7 +190,7 @@ To start Herdr after a reboot with no person present, turn on automatic login fo
 Give the name of each server:
 
 ```bash
-./bootstrap-client-macos.sh --server my-server --server my-other-server
+./bootstrap.sh client --server my-server --server my-other-server
 ```
 
 ```mermaid
@@ -175,7 +223,7 @@ Press `Cmd+Shift+,` in Ghostty to reload the configuration. After a change to `b
 The script needs `sudo`. Give the name of each server:
 
 ```bash
-./bootstrap-client-linux.sh --server my-server
+./bootstrap.sh client --server my-server
 ```
 
 Ubuntu 26.04 and later have a Ghostty package. Debian 13 uses a community package with a pinned checksum. For another system, install Ghostty from the [Ghostty install page](https://ghostty.org/docs/install/binary) first. Add `--no-ghostty` to set up only the shell.
