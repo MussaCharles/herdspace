@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# bootstrap-server-linux.sh
+# platforms/server-linux.sh. Run it with ./bootstrap.sh server, which picks it on Linux.
 #
 # Sets up Herdr and its tools on a Debian or Ubuntu server. Run it as the
 # account that will use Herdr. It does only the parts that are not done.
 #
-# Usage: ./bootstrap-server-linux.sh [options] [--skip-nvim-tools] [--skip-login-service]
+# Usage: ./bootstrap.sh server [options] [--skip-nvim-tools] [--skip-login-service]
 #
 # With no option, the script asks about each file that you changed.
 #   --check          Report what is done, missing, or different. Change nothing.
@@ -12,7 +12,7 @@
 #   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export REPO_ROOT
 SKIP_NVIM_TOOLS=0
 SKIP_LOGIN_SERVICE=0

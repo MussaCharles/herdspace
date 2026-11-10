@@ -15,11 +15,11 @@ for base in "$@"; do
   docker build -q --build-arg "BASE=${base}" -f tests/Dockerfile.linux -t "$tag" . >"$log" 2>&1 || { echo "FAIL build ${base}"; tail -n 20 "$log"; status=1; continue; }
   docker run --rm --name "${tag}-$$" "$tag" bash -c "
     set -e
-    ./bootstrap-server-linux.sh ${flags}
+    ./bootstrap.sh server ${flags}
     tests/verify-server.sh linux
     tests/test-install.sh
     echo '== idempotent'
-    tests/test-idempotent.sh bootstrap-server-linux.sh \$HOME/.config/herdr/config.toml ${flags}
+    tests/test-idempotent.sh bootstrap.sh \$HOME/.config/herdr/config.toml server ${flags}
     backups=\$(find \$HOME -name '*.bak-*' -not -path '*/.cache/*' -not -path '*/.oh-my-zsh/*' -not -path '*/.local/*' | wc -l)
     echo \"RESULT backups=\$backups\"
     [ \"\$backups\" -eq 0 ]

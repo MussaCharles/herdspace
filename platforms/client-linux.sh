@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# bootstrap-client-linux.sh
+# platforms/client-linux.sh. Run it with ./bootstrap.sh client, which picks it on Linux.
 #
 # Sets up the shell and Ghostty on a Debian or Ubuntu computer that you use for
 # SSH. It also copies the Ghostty terminal description to each server. It does
 # only the parts that are not done. Use --no-ghostty with another terminal.
 #
-# Usage: ./bootstrap-client-linux.sh [options] [--server HOST]... [--no-ghostty]
+# Usage: ./bootstrap.sh client [options] [--server HOST]... [--no-ghostty]
 #
 # With no option, the script asks about each file that you changed.
 #   --check          Report what is done, missing, or different. Change nothing.
@@ -13,7 +13,7 @@
 #   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export REPO_ROOT
 SERVERS=()
 USE_GHOSTTY=1

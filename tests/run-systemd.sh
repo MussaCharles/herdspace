@@ -31,14 +31,14 @@ status=0
 pass() { echo "PASS $1"; }
 fail() { echo "FAIL $1"; status=1; }
 
-as_tester ./bootstrap-server-linux.sh --skip-nvim-tools >tests/.work/systemd.log 2>&1 || fail 'bootstrap'
+as_tester ./bootstrap.sh server --skip-nvim-tools >tests/.work/systemd.log 2>&1 || fail 'bootstrap'
 grep -E '\[(warn|err)\]' tests/.work/systemd.log | cut -c1-160
 if [ "$(as_tester systemctl --user is-active herdr.service)" = active ]; then pass 'service is active'; else fail 'service is active'; fi
 if [ "$(as_tester systemctl --user is-enabled herdr.service)" = enabled ]; then pass 'service is enabled'; else fail 'service is enabled'; fi
 case "$(as_tester herdr workspace list 2>&1)" in *workspace_list*) pass 'herdr answers' ;; *) fail 'herdr answers' ;; esac
 if docker exec "$name" loginctl show-user tester --property=Linger | grep -q yes; then pass 'linger is on'; else fail 'linger is on'; fi
 before="$(as_tester systemctl --user show -p MainPID --value herdr.service)"
-as_tester ./bootstrap-server-linux.sh --skip-nvim-tools >>tests/.work/systemd.log 2>&1 || fail 'second run'
+as_tester ./bootstrap.sh server --skip-nvim-tools >>tests/.work/systemd.log 2>&1 || fail 'second run'
 after="$(as_tester systemctl --user show -p MainPID --value herdr.service)"
 if [ -n "$before" ] && [ "$before" = "$after" ] && [ "$before" != 0 ]; then pass 'second run keeps the server'; else fail "second run keeps the server: ${before} ${after}"; fi
 as_tester kill -9 "$before" >/dev/null 2>&1
