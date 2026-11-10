@@ -102,7 +102,7 @@ You can run the script in two ways.
 To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdspace/<tag>`, compares its checksum, and runs it from there:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/bootstrap.sh | bash -s -- server
 ```
 
 To read or change the files first, clone this repository, and run the script from the clone:
@@ -346,7 +346,7 @@ If a key does nothing, Ghostty or the desktop still uses that key. Run the clien
 On a computer that has Herdr already, you can install `hopen` and its templates without the rest of the setup. You need Python 3 and curl:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/install.sh | bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/install.sh | bash
 ```
 
 `install.sh` copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`, after a checksum check. `hopen --version` shows the installed release.
@@ -356,7 +356,7 @@ To update `hopen`, run the install command of the new release. Each release page
 To remove `hopen`, run the same command with `--uninstall`. It keeps your templates:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/install.sh | bash -s -- --uninstall
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/install.sh | bash -s -- --uninstall
 ```
 
 ### Write a list

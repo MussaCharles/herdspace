@@ -20,7 +20,7 @@ herdspace has two parts. `hopen` opens your projects. `bootstrap.sh` sets up a c
 You need Herdr, Python 3, and curl. Install `hopen` and its templates:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/install.sh | bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/install.sh | bash
 ```
 
 ### Set up a new computer
@@ -28,13 +28,13 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-al
 Set up the server first. Run this command on the server:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/bootstrap.sh | bash -s -- server
 ```
 
 Run this command on the computer that you use to connect. Give the SSH name of the server. If you connect with an IP address, read [Connect with an IP address](docs/setup.md#connect-with-an-ip-address) first.
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/bootstrap.sh | bash -s -- client --server my-server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/bootstrap.sh | bash -s -- client --server my-server
 ```
 
 The script finds the system, downloads the release, and compares its checksum. Then it runs the setup for that system. Run it again at any time. It does only what is missing, and it asks before it replaces a file that you changed.
