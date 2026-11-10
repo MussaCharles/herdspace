@@ -24,13 +24,22 @@ link_debian_tools() {
   export PATH="${HOME}/.local/bin:${PATH}"
 }
 
+login_shell_ready() {
+  have zsh && [ "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)" ]
+}
+
 set_login_shell_zsh() {
   local zsh_path
   zsh_path="$(command -v zsh)"
-  if [ "$(getent passwd "$(id -un)" | cut -d: -f7)" != "$zsh_path" ]; then
-    step "Login shell"
-    run_root chsh -s "$zsh_path" "$(id -un)" || warn "Could not change the login shell. Run: chsh -s ${zsh_path}"
-  fi
+  run_root chsh -s "$zsh_path" "$(id -un)" || warn "Could not change the login shell. Run: chsh -s ${zsh_path}"
+}
+
+# apt_ready NAME... exits 0 if each package is installed.
+apt_ready() {
+  local name
+  for name in "$@"; do
+    dpkg-query -W -f '${Status}' "$name" 2>/dev/null | grep -q 'install ok installed' || return 1
+  done
 }
 
 linux_arch() {
@@ -41,20 +50,35 @@ linux_arch() {
   esac
 }
 
+release_tool_line() {
+  awk -F '\t' -v n="$1" -v a="$(linux_arch)" '$1 == n && $3 == a' "${REPO_ROOT}/tools/versions.tsv"
+}
+
+release_tool_binary() {
+  case "$1" in
+    git-delta) echo delta ;;
+    neovim) echo nvim ;;
+    ghostty-*) echo ghostty ;;
+    *) echo "$1" ;;
+  esac
+}
+
+release_tool_ready() {
+  local name="$1" sha marker
+  sha="$(release_tool_line "$name" | cut -f5)"
+  marker="${STATE_DIR}/installed/${name}"
+  [ -n "$sha" ] && [ -f "$marker" ] && [ "$(cat "$marker")" = "$sha" ] && have "$(release_tool_binary "$name")"
+}
+
 # install_release_tool NAME installs one tool for this processor type.
 install_release_tool() {
-  local name="$1" arch line version url sha marker tmp file
-  arch="$(linux_arch)"
-  line="$(awk -F '\t' -v n="$name" -v a="$arch" '$1 == n && $3 == a' "${REPO_ROOT}/tools/versions.tsv")"
-  [ -n "$line" ] || die "tools/versions.tsv has no entry for ${name} on ${arch}."
+  local name="$1" line version url sha marker tmp file
+  line="$(release_tool_line "$name")"
+  [ -n "$line" ] || die "tools/versions.tsv has no entry for ${name} on $(linux_arch)."
   version="$(printf '%s' "$line" | cut -f2)"
   url="$(printf '%s' "$line" | cut -f4)"
   sha="$(printf '%s' "$line" | cut -f5)"
   marker="${STATE_DIR}/installed/${name}"
-  if [ -f "$marker" ] && [ "$(cat "$marker")" = "$sha" ]; then
-    ok "${name} ${version}"
-    return 0
-  fi
   tmp="$(mktemp -d)"
   file="${tmp}/$(basename "$url")"
   curl -fsSL --retry 2 --connect-timeout 15 -o "$file" "$url"
@@ -87,33 +111,38 @@ install_release_tool() {
   ok "${name} ${version}"
 }
 
-# install_release_tools NAME... installs each tool in the list.
-install_release_tools() {
-  step "Tools from release pages"
+# setup_release_tools NAME... installs each tool that is missing or out of date.
+setup_release_tools() {
   local name
   for name in "$@"; do
-    install_release_tool "$name"
+    run_part "$name" release_tool_ready install_release_tool "$name"
   done
 }
 
+ghostty_codename() { (. /etc/os-release && printf '%s' "${VERSION_CODENAME:-}"); }
+
+ghostty_candidate() { apt-cache policy ghostty 2>/dev/null | awk '/Candidate:/ {print $2}'; }
+
+ghostty_has_community_package() {
+  awk -F '\t' -v n="ghostty-$(ghostty_codename)" '$1 == n {found = 1} END {exit !found}' "${REPO_ROOT}/tools/versions.tsv"
+}
+
+# ghostty_available exits 0 if this system has a Ghostty package.
+ghostty_available() {
+  have ghostty && return 0
+  local candidate
+  candidate="$(ghostty_candidate)"
+  { [ -n "$candidate" ] && [ "$candidate" != "(none)" ]; } || ghostty_has_community_package
+}
+
 # install_ghostty uses the package of the system if it has one. Otherwise it
-# uses a community package with a pinned checksum. It returns 1 with no package.
+# uses a community package with a pinned checksum.
 install_ghostty() {
-  if have ghostty; then
-    ok "Ghostty is already installed"
-    return 0
-  fi
-  local candidate codename
-  candidate="$(apt-cache policy ghostty 2>/dev/null | awk '/Candidate:/ {print $2}')"
+  local candidate
+  candidate="$(ghostty_candidate)"
   if [ -n "$candidate" ] && [ "$candidate" != "(none)" ]; then
     apt_install ghostty
-    ok "Ghostty from the system packages"
-    return 0
+  else
+    install_release_tool "ghostty-$(ghostty_codename)"
   fi
-  codename="$(. /etc/os-release && printf '%s' "${VERSION_CODENAME:-}")"
-  if awk -F '\t' -v n="ghostty-${codename}" '$1 == n {found = 1} END {exit !found}' "${REPO_ROOT}/tools/versions.tsv"; then
-    install_release_tool "ghostty-${codename}"
-    return 0
-  fi
-  return 1
 }

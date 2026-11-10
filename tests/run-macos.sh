@@ -18,21 +18,43 @@ STUBS="${TEST_HOME}/stubs"
 CALLS="${TEST_HOME}/calls.log"
 mkdir -p "$STUBS" "${TEST_HOME}/home/.claude" "${TEST_HOME}/home/.pi/agent/extensions"
 
-for name in launchctl defaults ssh chsh activate-stub; do
+for name in defaults chsh activate-stub; do
   cat >"${STUBS}/${name}" <<STUB
 #!/bin/sh
 echo "${name} \$*" >>"${CALLS}"
-[ "${name}" = launchctl ] && [ "\$1" = print ] && exit 1
-[ "${name}" = ssh ] && cat >"${TEST_HOME}/terminfo.sent"
 exit 0
 STUB
 done
+cat >"${STUBS}/launchctl" <<STUB
+#!/bin/sh
+echo "launchctl \$*" >>"${CALLS}"
+[ "\$1" = bootstrap ] && touch "${TEST_HOME}/loaded"
+if [ "\$1" = print ]; then [ -f "${TEST_HOME}/loaded" ]; exit \$?; fi
+exit 0
+STUB
+cat >"${STUBS}/ssh" <<STUB
+#!/bin/sh
+echo "ssh \$*" >>"${CALLS}"
+case "\$*" in
+  *" true") exit 0 ;;
+  *infocmp*) [ -s "${TEST_HOME}/terminfo.sent" ]; exit \$? ;;
+  *tic*) cat >"${TEST_HOME}/terminfo.sent"; exit 0 ;;
+esac
+exit 0
+STUB
 cat >"${STUBS}/brew" <<STUB
 #!/bin/sh
 echo "brew \$*" >>"${CALLS}"
 case "\$1" in
   shellenv) exit 0 ;;
-  list) exit 0 ;;
+  list)
+    if [ "\$2" = --formula ]; then cat "${TEST_HOME}/brew-installed" 2>/dev/null; fi
+    exit 0
+    ;;
+  install)
+    shift
+    for f in "\$@"; do echo "\$f" >>"${TEST_HOME}/brew-installed"; done
+    ;;
 esac
 exit 0
 STUB
@@ -66,7 +88,7 @@ for target in "$@"; do
       grep -q 'brew install herdr' "$CALLS" && echo 'PASS brew installs herdr' || { echo 'FAIL brew installs herdr'; status=1; }
       grep -q 'launchctl bootstrap' "$CALLS" && echo 'PASS launch agent loads' || { echo 'FAIL launch agent loads'; status=1; }
       plutil -lint "${TEST_HOME}/home/Library/LaunchAgents/local.herdr.server.plist" >/dev/null && echo 'PASS plist is valid' || { echo 'FAIL plist is valid'; status=1; }
-      run "$ROOT/bootstrap-server-macos.sh" --skip-nvim-tools >/dev/null || status=1
+      run "$ROOT/tests/test-idempotent.sh" bootstrap-server-macos.sh "${TEST_HOME}/home/.config/herdr/config.toml" --skip-nvim-tools || status=1
       backups="$(find "${TEST_HOME}/home" -name '*.bak-*' -not -path '*/.cache/*' -not -path '*/.oh-my-zsh/*' -not -path '*/.local/*' | wc -l | tr -d ' ')"
       echo "RESULT server backups=${backups}"
       [ "$backups" = 0 ] || status=1
@@ -79,6 +101,7 @@ for target in "$@"; do
       grep -q 'ssh -- example-server tic -x -' "$CALLS" && echo 'PASS terminal description sent' || { echo 'FAIL terminal description sent'; status=1; }
       [ "$(grep -c 'defaults write com.apple.symbolichotkeys' "$CALLS")" = 4 ] && echo 'PASS four shortcuts released' || { echo 'FAIL four shortcuts released'; status=1; }
       grep -q 'activate-stub -u' "$CALLS" && echo 'PASS shortcuts applied' || { echo 'FAIL shortcuts applied'; status=1; }
+      run "$ROOT/tests/test-idempotent.sh" bootstrap-client-macos.sh "${TEST_HOME}/home/.config/ghostty/config.ghostty" --server example-server || status=1
       out="$(run zsh -i -c 'print -r -- CLIENT_OK' </dev/null 2>&1)"
       case "$out" in *CLIENT_OK*) echo 'PASS client shell starts' ;; *) echo "FAIL client shell starts: ${out:0:200}"; status=1 ;; esac
       ;;
