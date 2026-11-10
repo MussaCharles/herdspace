@@ -1,14 +1,35 @@
 # herdspace
 
-Shell scripts that set up [Herdr](https://herdr.dev) on a new computer. Herdr is a terminal multiplexer for coding agents. A terminal multiplexer keeps your terminals running on a server after you disconnect.
+Workspace and session manager for [Herdr](https://herdr.dev). Herdr is a terminal multiplexer for coding agents: your terminals and agents keep running on a server after you disconnect.
 
-herdspace was called herdr-bootstrap before.
-
-You run one script on each computer. The script installs the tools, writes the configuration, and starts Herdr. If you run it again, it does only what is missing.
+herdspace opens the folders of a VS Code workspace file as Herdr workspaces in one session. A template splits each workspace into named panes, for example an editor, an agent, and lazygit. herdspace can also set up the whole stack on a new computer with one command.
 
 ![Four projects open in Herdr, and Ctrl+Down moves to the next project](docs/media/open-projects.gif)
 
+| Part | What it does |
+|------|--------------|
+| `hopen` | Opens your projects as Herdr workspaces, with pane templates. |
+| `bootstrap.sh` | Sets up Herdr, the shell, Neovim, lazygit, and Ghostty on a server and on the computer that you connect from. |
+
+herdspace was called herdr-bootstrap before.
+
 ## Quick start
+
+### Use hopen on a computer that has Herdr
+
+You need Herdr, Python 3, and curl. Install `hopen` and its templates, and replace `<owner>` with the owner of this repository:
+
+```bash
+curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/install.sh | bash
+```
+
+Then open the projects of a VS Code workspace file, for example `~/work.code-workspace`:
+
+```bash
+hopen work
+```
+
+### Set up a new computer
 
 Set up the server first. Run this command on the server:
 
@@ -22,17 +43,73 @@ Then run this command on the computer that you use to connect, and give the SSH 
 curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- client --server my-server
 ```
 
-Connect, and open Herdr:
+Connect, and open your projects:
 
 ```bash
 ssh my-server
 ```
 
 ```bash
-herdr
+hopen work
 ```
 
-The script finds the system: macOS, Linux, or Windows with WSL. It downloads the release, compares its checksum, and runs the setup for that system. [docs/setup.md](docs/setup.md) has every option, the steps for each system, and how to use a clone of this repository.
+The script finds the system: macOS, Linux, or Windows with WSL. It downloads the release, compares its checksum, and runs the setup for that system. The server setup includes `hopen`. [docs/setup.md](docs/setup.md) has every option, the steps for each system, and how to use a clone of this repository.
+
+## Open all your projects
+
+`hopen` reads your VS Code workspace files, and it opens each folder as a Herdr workspace. Each file becomes one session.
+
+| Command | Effect |
+|---------|--------|
+| `hopen work` | Open the projects of one list, and attach to that session. |
+| `hopen --all` | Open every list. |
+| `hopen --all work` | Open every list, and attach to one session. |
+| `hopen --list` | Show every list and its state. |
+| `hopen work --template code` | Split each new workspace with a template. |
+| `hopen --templates` | Show every template. |
+| `hopen --apply grid` | Split the current tab with a template. |
+
+[docs/setup.md](docs/setup.md#open-many-projects-at-once) shows how to write a list.
+
+### Update or remove hopen
+
+To update `hopen`, run the install command of the new release. Each release page shows its own command. After the first normal release, `releases/latest/download/install.sh` installs the newest one. That address skips pre-releases, such as the alpha versions.
+
+`install.sh` copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`. It compares each download with its checksum. You can run it again to update. It keeps a template that you changed, and it writes the new version next to it as `<name>.layout.new`.
+
+To remove `hopen`, run the same script with `--uninstall`. It keeps your templates.
+
+```bash
+curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/install.sh | bash -s -- --uninstall
+```
+
+`hopen --version` shows the installed release.
+
+## Templates
+
+A template opens each project with named panes, and it starts a program in each pane. This is the `code` template, with Neovim, an agent pane, and lazygit:
+
+![The code template](docs/media/template-code.png)
+
+The other templates are `agent`, `grid`, and `review`, and you can add your own. [docs/templates.md](docs/templates.md) shows each template and has short videos for moving between panes.
+
+## See it work
+
+The videos come from real Ghostty on a Linux client, connected with SSH to a test server with demo projects. The keys that the video presses show at the bottom.
+
+### Move between panes
+
+`Alt+Up` and `Alt+Down` go to the previous or next pane. `ctrl+b`, `z` zooms one pane.
+
+![Move between panes, and zoom one pane](docs/media/move-panes.gif)
+
+### Use a template
+
+`hopen --apply review` splits the current tab into named panes and starts a program in each pane.
+
+![Use a template in a new tab](docs/media/apply-template.gif)
+
+[docs/templates.md](docs/templates.md#open-every-project) has more videos: split and close panes, and go to a project by name. [docs/cheat-sheet.md](docs/cheat-sheet.md#neovim) shows Neovim and lazygit.
 
 ## How the parts fit
 
@@ -69,7 +146,7 @@ flowchart LR
 
 Your terminals run on the server. Herdr keeps them running after you close Ghostty or lose the connection.
 
-## One script for each computer
+## Set up a computer
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -107,18 +184,7 @@ flowchart LR
 
 For Windows, see [docs/windows-wsl.md](docs/windows-wsl.md).
 
-## Documents
-
-| Document | Use |
-|----------|-----|
-| [docs/setup.md](docs/setup.md) | The full steps for each computer |
-| [docs/cheat-sheet.md](docs/cheat-sheet.md) | Keys and commands for daily use |
-| [docs/templates.md](docs/templates.md) | Templates, and videos that show how to move between panes |
-| [docs/windows-wsl.md](docs/windows-wsl.md) | Use Windows as a client with WSL |
-| [docs/updating.md](docs/updating.md) | Update the tools, or add something new |
-| [docs/agent-setup.md](docs/agent-setup.md) | Ask a coding agent to do the setup |
-
-## What you get
+### What the setup installs
 
 | Part | Client | Server |
 |------|:------:|:------:|
@@ -136,73 +202,22 @@ For Windows, see [docs/windows-wsl.md](docs/windows-wsl.md).
 
 The scripts do not install the agent programs. Install them first, or run the server script again after you install one.
 
-## See it work
+## Documents
 
-The videos come from real Ghostty on a Linux client, connected with SSH to a test server with demo projects. The keys that the video presses show at the bottom.
-
-### Move between panes
-
-`Alt+Up` and `Alt+Down` go to the previous or next pane. `ctrl+b`, `z` zooms one pane.
-
-![Move between panes, and zoom one pane](docs/media/move-panes.gif)
-
-### Use a template
-
-`hopen --apply review` splits the current tab into named panes and starts a program in each pane.
-
-![Use a template in a new tab](docs/media/apply-template.gif)
-
-[docs/templates.md](docs/templates.md#open-every-project) has more videos: split and close panes, and go to a project by name. [docs/cheat-sheet.md](docs/cheat-sheet.md#neovim) shows Neovim and lazygit.
-
-## Open all your projects
-
-`hopen` reads your VS Code workspace files, and it opens each folder as a Herdr workspace. Each file becomes one session.
-
-| Command | Effect |
-|---------|--------|
-| `hopen work` | Open the projects of one list, and attach to that session. |
-| `hopen --all` | Open every list. |
-| `hopen --all work` | Open every list, and attach to one session. |
-| `hopen --list` | Show every list and its state. |
-| `hopen work --template code` | Split each new workspace with a template. |
-| `hopen --templates` | Show every template. |
-| `hopen --apply grid` | Split the current tab with a template. |
-
-[docs/setup.md](docs/setup.md#open-many-projects-at-once) shows how to write a list.
-
-### Install hopen alone
-
-You can use `hopen` without the rest of this repository. You need Herdr, Python 3, and curl. Run this command, and replace `<owner>` with the owner of this repository:
-
-```bash
-curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/install.sh | bash
-```
-
-The command installs the release in the address. Each release page shows its own command. After the first normal release, `releases/latest/download/install.sh` installs the newest one. That address skips pre-releases, such as the alpha versions.
-
-The script copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`. It compares each download with its checksum. You can run it again to update. It keeps a template that you changed, and it writes the new version next to it as `<name>.layout.new`.
-
-To remove `hopen`, run the same script with `--uninstall`. It keeps your templates.
-
-```bash
-curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/install.sh | bash -s -- --uninstall
-```
-
-`hopen --version` shows the installed release.
-
-## Templates
-
-A template opens each project with named panes, and it starts a program in each pane. This is the `code` template, with Neovim, an agent pane, and lazygit:
-
-![The code template](docs/media/template-code.png)
-
-The other templates are `agent`, `grid`, and `review`, and you can add your own. [docs/templates.md](docs/templates.md) shows each template and has short videos for moving between panes.
+| Document | Use |
+|----------|-----|
+| [docs/setup.md](docs/setup.md) | The full steps for each computer |
+| [docs/cheat-sheet.md](docs/cheat-sheet.md) | Keys and commands for daily use |
+| [docs/templates.md](docs/templates.md) | Templates, and videos that show how to move between panes |
+| [docs/windows-wsl.md](docs/windows-wsl.md) | Use Windows as a client with WSL |
+| [docs/updating.md](docs/updating.md) | Update the tools, or add something new |
+| [docs/agent-setup.md](docs/agent-setup.md) | Ask a coding agent to do the setup |
 
 ## Ask an agent to do the setup
 
 The folder [skills](skills/) has instructions for coding agents. [docs/agent-setup.md](docs/agent-setup.md) shows what to say to an agent.
 
-## Rules that the scripts follow
+## Rules that the setup follows
 
 - A script does only the parts that are not done. [Run a script again](docs/setup.md#run-a-script-again) lists the options.
 - A script asks before it replaces a file that you changed, and it makes a backup first.

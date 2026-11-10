@@ -235,7 +235,7 @@ To make one agent start another agent, mention Herdr in the prompt. Add the last
 Use Herdr to start an opencode agent named coder in a split next to you. Give it the plan in docs/plan.md and wait until it finishes. If the other agent is blocked on a permission or approval prompt, do not answer it. Stop and tell me.
 ```
 
-The skill works for each agent program that the bootstrap found. Every program in a pane can read and type into other panes. Do not let one agent answer the approval prompt of another agent.
+The skill works for each agent program that the server setup found. Every program in a pane can read and type into other panes. Do not let one agent answer the approval prompt of another agent.
 
 ## Jump to folders
 

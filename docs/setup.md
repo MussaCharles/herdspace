@@ -1,6 +1,6 @@
 # Setup
 
-Scope: set up a new client or server. Use one section for each computer. Set up the server first.
+Scope: set up a new client or server with `bootstrap.sh`, or install only `hopen`. Use one section for each computer. Set up the server first.
 
 You need a working SSH connection from the client to the server. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`.
 
@@ -253,7 +253,19 @@ If a key does nothing, Ghostty or the desktop still uses that key. Run the clien
 
 ## Open many projects at once
 
-`hopen` reads a VS Code workspace file and opens each folder as a Herdr workspace in one named session.
+`hopen` reads a VS Code workspace file and opens each folder as a Herdr workspace in one named session. The server setup installs it.
+
+### Install only hopen
+
+On a computer that has Herdr already, you can install `hopen` and its templates without the rest of the setup. You need Python 3 and curl:
+
+```bash
+curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/install.sh | bash
+```
+
+`install.sh` copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`, after a checksum check. Add `--uninstall` after `bash -s --` to remove `hopen`.
+
+### Write a list
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {

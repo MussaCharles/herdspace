@@ -21,7 +21,7 @@ sequenceDiagram
     Agent->>Computer: Find the system and the tools
     Agent->>You: Show the plan
     You->>Agent: Agree
-    Agent->>Computer: Run the bootstrap script
+    Agent->>Computer: Run bootstrap.sh
     Computer-->>Agent: Log and warnings
     Agent->>Computer: Run the checks
     Agent->>You: Report the result
