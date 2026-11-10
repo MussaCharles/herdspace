@@ -2,15 +2,21 @@
 # bootstrap-server-macos.sh
 #
 # Sets up Herdr and its tools on a macOS server. Run it as the account that will
-# use Herdr. You can run it again at any time.
+# use Herdr. It does only the parts that are not done.
 #
-# Usage: ./bootstrap-server-macos.sh [--skip-nvim-tools] [--skip-login-service]
+# Usage: ./bootstrap-server-macos.sh [options] [--skip-nvim-tools] [--skip-login-service]
+#
+# With no option, the script asks about each file that you changed.
+#   --check          Report what is done, missing, or different. Change nothing.
+#   --keep-existing  Add what is missing, and change no existing file.
+#   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 export REPO_ROOT
 SKIP_NVIM_TOOLS=0
 SKIP_LOGIN_SERVICE=0
+FORMULAS="herdr neovim lazygit git-delta eza zoxide fzf bat fd ripgrep node"
 
 # shellcheck source=lib/common.sh
 source "${REPO_ROOT}/lib/common.sh"
@@ -24,31 +30,31 @@ source "${REPO_ROOT}/lib/service-macos.sh"
 source "${REPO_ROOT}/tools/versions.env"
 
 for arg in "$@"; do
+  apply_mode_flag "$arg" && continue
   case "$arg" in
     --skip-nvim-tools) SKIP_NVIM_TOOLS=1 ;;
     --skip-login-service) SKIP_LOGIN_SERVICE=1 ;;
-    -h | --help)
-      sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'
-      exit 0
-      ;;
+    -h | --help) print_usage "$0"; exit 0 ;;
     *) die "Unknown option: ${arg}" ;;
   esac
 done
 
 [ "$(uname -s)" = "Darwin" ] || die "This script is for macOS."
 
-step "Homebrew packages"
-ensure_homebrew
-brew install herdr neovim lazygit git-delta eza zoxide fzf bat fd ripgrep node
 export PATH="${HOME}/.local/bin:${PATH}"
-ok "Homebrew packages"
+load_homebrew
 
+# shellcheck disable=SC2086 # The list must split into words.
+formulas_ready() { brew_formulas_ready $FORMULAS; }
+# shellcheck disable=SC2086
+install_formulas() { brew_install $FORMULAS; }
+
+step "Checking this computer"
+run_part "Homebrew" homebrew_ready install_homebrew
+run_part "Homebrew packages" formulas_ready install_formulas
 setup_shell server
 setup_zprofile server
 setup_server_files "${HOME}/Library/Application Support/lazygit"
-setup_neovim
-ensure_server
-setup_auto_title
-setup_agents
-install_macos_service
-finish_server
+setup_server_common
+run_part "Herdr LaunchAgent" macos_service_ready install_macos_service
+finish_run "Connect with SSH and run: herdr"

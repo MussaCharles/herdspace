@@ -2,15 +2,21 @@
 # bootstrap-server-linux.sh
 #
 # Sets up Herdr and its tools on a Debian or Ubuntu server. Run it as the
-# account that will use Herdr. You can run it again at any time.
+# account that will use Herdr. It does only the parts that are not done.
 #
-# Usage: ./bootstrap-server-linux.sh [--skip-nvim-tools] [--skip-login-service]
+# Usage: ./bootstrap-server-linux.sh [options] [--skip-nvim-tools] [--skip-login-service]
+#
+# With no option, the script asks about each file that you changed.
+#   --check          Report what is done, missing, or different. Change nothing.
+#   --keep-existing  Add what is missing, and change no existing file.
+#   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 export REPO_ROOT
 SKIP_NVIM_TOOLS=0
 SKIP_LOGIN_SERVICE=0
+PACKAGES="ca-certificates curl git zsh python3 tar gzip unzip ripgrep fd-find bat build-essential nodejs npm"
 
 # shellcheck source=lib/common.sh
 source "${REPO_ROOT}/lib/common.sh"
@@ -26,13 +32,11 @@ source "${REPO_ROOT}/lib/service-linux.sh"
 source "${REPO_ROOT}/tools/versions.env"
 
 for arg in "$@"; do
+  apply_mode_flag "$arg" && continue
   case "$arg" in
     --skip-nvim-tools) SKIP_NVIM_TOOLS=1 ;;
     --skip-login-service) SKIP_LOGIN_SERVICE=1 ;;
-    -h | --help)
-      sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'
-      exit 0
-      ;;
+    -h | --help) print_usage "$0"; exit 0 ;;
     *) die "Unknown option: ${arg}" ;;
   esac
 done
@@ -40,22 +44,26 @@ done
 [ "$(uname -s)" = "Linux" ] || die "This script is for Linux."
 have apt-get || die "This script needs apt-get, so it works only on Debian and Ubuntu."
 
-step "System packages"
-apt_install ca-certificates curl git zsh python3 tar gzip unzip ripgrep fd-find bat \
-  build-essential nodejs npm
-link_debian_tools
-ok "System packages"
+export PATH="${HOME}/.local/bin:${PATH}"
 
-install_release_tools herdr neovim lazygit git-delta eza zoxide fzf
+packages_ready() {
+  # shellcheck disable=SC2086 # The list must split into words.
+  apt_ready $PACKAGES && have bat && have fd
+}
+
+install_packages() {
+  # shellcheck disable=SC2086
+  apt_install $PACKAGES
+  link_debian_tools
+}
+
+step "Checking this computer"
+run_part "System packages" packages_ready install_packages
+setup_release_tools herdr neovim lazygit git-delta eza zoxide fzf
 setup_shell server
 setup_zprofile server
 setup_server_files "${HOME}/.config/lazygit"
-setup_neovim
-ensure_server
-setup_auto_title
-setup_agents
-install_linux_service
-
-set_login_shell_zsh
-
-finish_server
+setup_server_common
+run_part "Herdr service at boot" linux_service_ready install_linux_service
+run_part "Login shell" login_shell_ready set_login_shell_zsh
+finish_run "Connect with SSH and run: herdr"

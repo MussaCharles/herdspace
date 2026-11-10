@@ -1,37 +1,43 @@
 #!/usr/bin/env bash
 # Sets up zsh, Oh My Zsh, Powerlevel10k, and the prompt color.
 
+OMZ_DIR="${HOME}/.oh-my-zsh"
+OMZ_CUSTOM="${OMZ_DIR}/custom"
+
+pin_ready() { [ -d "$1/.git" ] && [ "$(git -C "$1" rev-parse HEAD 2>/dev/null)" = "$2" ]; }
+
+shell_pins_ready() {
+  have git || return 1
+  pin_ready "$OMZ_DIR" "$OHMYZSH_REF" &&
+    pin_ready "${OMZ_CUSTOM}/themes/powerlevel10k" "$POWERLEVEL10K_REF" &&
+    pin_ready "${OMZ_CUSTOM}/plugins/zsh-autosuggestions" "$ZSH_AUTOSUGGESTIONS_REF" &&
+    pin_ready "${OMZ_CUSTOM}/plugins/zsh-syntax-highlighting" "$ZSH_SYNTAX_HIGHLIGHTING_REF"
+}
+
+install_shell_pins() {
+  git_pin https://github.com/ohmyzsh/ohmyzsh.git "$OMZ_DIR" "$OHMYZSH_REF"
+  git_pin https://github.com/romkatv/powerlevel10k.git "${OMZ_CUSTOM}/themes/powerlevel10k" "$POWERLEVEL10K_REF"
+  git_pin https://github.com/zsh-users/zsh-autosuggestions.git "${OMZ_CUSTOM}/plugins/zsh-autosuggestions" "$ZSH_AUTOSUGGESTIONS_REF"
+  git_pin https://github.com/zsh-users/zsh-syntax-highlighting.git "${OMZ_CUSTOM}/plugins/zsh-syntax-highlighting" "$ZSH_SYNTAX_HIGHLIGHTING_REF"
+  # Oh My Zsh warns at each start if another account can write to its folders.
+  chmod -R go-w "$OMZ_DIR"
+}
+
 # setup_shell ROLE. ROLE is "client" or "server". The folder segment of the
 # prompt has a different color on each, so a shell shows where it runs.
 setup_shell() {
-  local role="$1" color omz="${HOME}/.oh-my-zsh" custom zshrc="${HOME}/.zshrc"
+  local role="$1" color tmp
   case "$role" in
     client) color="${PROMPT_COLOR_CLIENT:-166}" ;;
     *) color="${PROMPT_COLOR_SERVER:-30}" ;;
   esac
-  custom="${omz}/custom"
-
-  step "Shell"
-  git_pin https://github.com/ohmyzsh/ohmyzsh.git "$omz" "$OHMYZSH_REF"
-  git_pin https://github.com/romkatv/powerlevel10k.git "${custom}/themes/powerlevel10k" "$POWERLEVEL10K_REF"
-  git_pin https://github.com/zsh-users/zsh-autosuggestions.git "${custom}/plugins/zsh-autosuggestions" "$ZSH_AUTOSUGGESTIONS_REF"
-  git_pin https://github.com/zsh-users/zsh-syntax-highlighting.git "${custom}/plugins/zsh-syntax-highlighting" "$ZSH_SYNTAX_HIGHLIGHTING_REF"
-
-  # Oh My Zsh warns at each start if another account can write to its folders.
-  chmod -R go-w "$omz"
-
-  if [ -f "$zshrc" ] && ! grep -q 'Managed by herdr-bootstrap' "$zshrc"; then
-    info "Your old ~/.zshrc goes to a backup. Put your own lines in ~/.zshrc.local."
-  fi
-  install_file "${REPO_ROOT}/config/shell/zshrc.zsh" "$zshrc"
+  run_part "Oh My Zsh and Powerlevel10k" shell_pins_ready install_shell_pins
+  install_file "${REPO_ROOT}/config/shell/zshrc.zsh" "${HOME}/.zshrc"
   install_file "${REPO_ROOT}/config/shell/p10k.zsh" "${HOME}/.p10k.zsh"
-
-  local env_file="${HOME}/.config/herdr-bootstrap/env.zsh" tmp
   tmp="$(mktemp)"
   printf 'export BOOTSTRAP_ROLE=%s\nexport BOOTSTRAP_PROMPT_COLOR=%s\n' "$role" "$color" >"$tmp"
-  install_file "$tmp" "$env_file"
+  install_file "$tmp" "${HOME}/.config/herdr-bootstrap/env.zsh"
   rm -f "$tmp"
-  ok "zsh, Oh My Zsh, and Powerlevel10k"
 }
 
 # setup_zprofile writes the login block. A server also checks for a new Herdr.
