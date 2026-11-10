@@ -2,7 +2,7 @@
 
 Shell scripts that set up [Herdr](https://herdr.dev) on a new computer. Herdr is a terminal multiplexer for coding agents. A terminal multiplexer keeps your terminals running on a server after you disconnect.
 
-You run one script on each computer. The script installs the tools, writes the configuration, and starts Herdr. You can run a script again at any time.
+You run one script on each computer. The script installs the tools, writes the configuration, and starts Herdr. If you run it again, it does only what is missing.
 
 ![Herdr with four projects in the sidebar and two panes](docs/media/herdr-panes.png)
 
@@ -155,7 +155,8 @@ The folder [skills](skills/) has instructions for coding agents. [docs/agent-set
 
 ## Rules that the scripts follow
 
-- A script makes a backup before it replaces a file.
+- A script does only the parts that are not done. [Run a script again](docs/setup.md#run-a-script-again) lists the options.
+- A script asks before it replaces a file that you changed, and it makes a backup first.
 - A script never stops a Herdr server that was already running, because a stop closes every pane.
 - Tools from release pages have a pinned version and a checksum.
 - Herdr and Neovim do not contact their sites in the background. The update check asks the Homebrew API.

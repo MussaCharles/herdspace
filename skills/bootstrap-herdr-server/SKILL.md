@@ -12,8 +12,8 @@ Run this skill on the server, from the root folder of the herdr-bootstrap reposi
 1. Find the system with `uname -s`. Use `bootstrap-server-linux.sh` on Linux and `bootstrap-server-macos.sh` on macOS. On Linux, make sure that `apt-get` exists. If it does not exist, stop and tell the person that only Debian and Ubuntu work.
 2. Run `herdr status` if `herdr` exists. Tell the person if a server is running. The script keeps it running.
 3. List the agent programs with `command -v claude codex pi opencode hermes`. Tell the person that the script adds an integration only for the programs that it finds.
-4. Tell the person what the script changes: system packages, `~/.zshrc` (with a backup), and the login shell on Linux. Wait for the person to agree.
-5. Run the script. It can take more than ten minutes, so run it in the background with its output in a log file, and read the log.
+4. Run the script with `--check` and show the output. It changes nothing. Tell the person what a run changes: missing parts, and on Linux the login shell. Ask what to do with each file that the output marks as different. Wait for the person to agree.
+5. Run the script. If the person wants the repository version of every file, add `--replace-all`. Otherwise add `--keep-existing`. It can take more than ten minutes, so run it in the background with its output in a log file, and read the log.
 6. If the script asks for a password, stop and ask the person to run it in their own terminal.
 7. Run `tests/verify-server.sh linux` or `tests/verify-server.sh macos`. Report each line that starts with `FAIL`.
 8. Report any `[warn]` lines from the script, and tell the person how to open a session: `herdr`.

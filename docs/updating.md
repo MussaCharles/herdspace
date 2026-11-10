@@ -34,7 +34,7 @@ Run this command on each computer:
 git pull
 ```
 
-Then run the script for that computer again. The script changes only what is different, and it keeps a backup of each changed file.
+Then run the script for that computer again. The script changes only what is different. It updates a file that you did not change, and it asks about a file that you changed. It keeps a backup of each replaced file.
 
 ## Update the tool versions
 
@@ -64,7 +64,7 @@ tests/run-macos.sh
 ## Add something new
 
 1. Put a configuration file in `config/`.
-2. Add an install step to `lib/server.sh` for all servers, or to one bootstrap script for one system.
+2. Add an install step to `lib/server.sh` for all servers, or to one bootstrap script for one system. Use `run_part` with a check function, so that a new run skips the step when it is done.
 3. Add a line to `tests/verify-server.sh` that proves the step works.
 4. Add the step to [setup.md](setup.md) and to the cheat sheet.
 5. Run the tests.
