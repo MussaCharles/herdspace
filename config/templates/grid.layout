@@ -1,0 +1,5 @@
+# grid: Four panes in a square, for two agents, tests, and a shell.
+agent-1  -        -      -    -
+agent-2  agent-1  right  0.5  -
+tests    agent-1  down   0.5  -
+shell    agent-2  down   0.5  -

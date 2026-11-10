@@ -6,36 +6,51 @@
 # that have no workspace, and closes nothing. The first workspace has the name
 # of the session and opens the folder that holds the list file.
 #
-# The list is ~/<session>.code-workspace or ~/<session>/<session>.code-workspace.
+# A template splits a new workspace into named panes and starts a program in
+# each. After a stopped session starts again, hopen starts those programs again.
 #
-# Usage: hopen <session> [--file PATH] [--no-attach]
-#        hopen --all [session]   Open every list. Attach to the session, if named.
+# Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach]
+#        hopen --all [session] [--template NAME]
 #        hopen --list            Show every list and its state.
+#        hopen --templates       Show every template.
+#        hopen --apply NAME      Split the current tab with a template.
 set -euo pipefail
 
 SESSION=""
 LIST_FILE=""
 ATTACH=1
 ACTION="one"
+TEMPLATE_FLAG=""
+APPLY_NAME=""
+TEMPLATE_DIR="${HOPEN_TEMPLATES:-${XDG_CONFIG_HOME:-$HOME/.config}/hopen/templates}"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hopen"
+STARTED=0
 
 usage() {
-  echo "Usage: hopen <session> [--file PATH] [--no-attach]"
-  echo "       hopen --all [session]"
+  echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach]"
+  echo "       hopen --all [session] [--template NAME]"
   echo "       hopen --list"
+  echo "       hopen --templates"
+  echo "       hopen --apply NAME"
 }
 warn() { printf '  [warn] %s\n' "$*" >&2; }
 die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --file)
+    --file | --template | --apply)
       [ "$#" -ge 2 ] || { usage >&2; exit 2; }
-      LIST_FILE="$2"
+      case "$1" in
+        --file) LIST_FILE="$2" ;;
+        --template) TEMPLATE_FLAG="$2" ;;
+        --apply) ACTION="apply"; APPLY_NAME="$2" ;;
+      esac
       shift 2
       ;;
     --no-attach) ATTACH=0; shift ;;
     --all) ACTION="all"; shift ;;
     --list) ACTION="list"; shift ;;
+    --templates) ACTION="templates"; shift ;;
     -h | --help) usage; exit 0 ;;
     -*) usage >&2; exit 2 ;;
     *)
@@ -52,6 +67,55 @@ valid_name() {
     *) return 0 ;;
   esac
 }
+
+# ---------- templates
+
+template_file() { printf '%s/%s.layout' "$TEMPLATE_DIR" "$1"; }
+
+# template_exists exits 0 for a template file, and for "plain", which means no panes.
+template_exists() { [ "$1" = plain ] || [ -f "$(template_file "$1")" ]; }
+
+template_lines() { grep -vE '^[[:space:]]*(#|$)' "$(template_file "$1")"; }
+
+show_templates() {
+  local file name text
+  printf '%-12s %s\n' TEMPLATE DESCRIPTION
+  printf '%-12s %s\n' plain "One pane with a shell. This is the default."
+  for file in "$TEMPLATE_DIR"/*.layout; do
+    [ -f "$file" ] || continue
+    name="$(basename "$file" .layout)"
+    text="$(sed -n "1s/^# *${name}: *//p" "$file")"
+    printf '%-12s %s\n' "$name" "${text:-}"
+  done
+}
+
+json_get() { python3 -I -c "import json,sys; d=json.load(sys.stdin); print(eval(sys.argv[1], {'d': d}))" "$1"; }
+
+# apply_template NAME ROOT_PANE splits from ROOT_PANE and starts each program.
+apply_template() {
+  local name="$1" root="$2" made pane from direction size command id source
+  made="$(printf '%s\t%s' "" "")"
+  while read -r pane from direction size command; do
+    if [ "$from" = "-" ]; then
+      id="$root"
+    else
+      source="$(awk -F '\t' -v n="$from" '$1 == n {print $2}' <<<"$made")"
+      if [ -z "$source" ]; then
+        warn "Template ${name}: the pane ${from} comes later or does not exist."
+        continue
+      fi
+      id="$(herdr pane split "$source" --direction "$direction" --ratio "$size" --no-focus | json_get "d['result']['pane']['pane_id']")"
+    fi
+    herdr pane rename "$id" "$pane" >/dev/null
+    made="${made}
+$(printf '%s\t%s' "$pane" "$id")"
+    if [ -n "$command" ] && [ "$command" != "-" ]; then
+      herdr pane run "$id" "$command" >/dev/null
+    fi
+  done < <(template_lines "$name")
+}
+
+# ---------- project lists
 
 # find_lists prints one "session<TAB>file" line for each project list.
 find_lists() {
@@ -72,25 +136,36 @@ find_list_for() {
   find_lists | awk -F '\t' -v n="$1" '$1 == n {print $2}'
 }
 
-# list_folders prints one "label<TAB>path" line for the folder of the list file,
-# and then one line for each folder in the list. VS Code accepts comment lines
-# and trailing commas, so this removes them before it parses the file.
+# list_folders prints one "label<TAB>path<TAB>template" line for the folder of
+# the list file, and then one line for each folder in the list. VS Code accepts
+# comment lines and trailing commas, so this removes them before it parses.
 list_folders() {
-  python3 -I - "$LIST_FILE" "$SESSION" <<'PY2'
+  python3 -I - "$LIST_FILE" "$SESSION" "$TEMPLATE_FLAG" <<'PY'
 import json, os, re, sys
 
-path, session = sys.argv[1:3]
+path, session, forced = sys.argv[1:4]
 base = os.path.dirname(os.path.abspath(path))
 with open(path, encoding="utf-8") as handle:
     text = handle.read()
 text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
 text = re.sub(r",(\s*[\]}])", r"\1", text)
-print(session, base, sep="\t")
-for folder in json.loads(text).get("folders", []):
+data = json.loads(text)
+settings = data.get("settings", {}) or {}
+default = settings.get("hopen.template", "plain")
+per_folder = settings.get("hopen.templates", {}) or {}
+
+def template(label):
+    return forced or per_folder.get(label) or default
+
+print(session, base, template(session), sep="\t")
+for folder in data.get("folders", []):
     full = os.path.normpath(os.path.join(base, os.path.expanduser(folder["path"])))
-    print(folder.get("name") or os.path.basename(full), full, sep="\t")
-PY2
+    label = folder.get("name") or os.path.basename(full)
+    print(label, full, template(label), sep="\t")
+PY
 }
+
+# ---------- sessions
 
 session_answers() {
   local output
@@ -101,6 +176,7 @@ session_answers() {
 start_session() {
   HERDR_SESSION="$SESSION" nohup herdr server >/dev/null 2>&1 &
   disown
+  STARTED=1
   for _ in $(seq 1 40); do
     session_answers && return 0
     sleep 0.25
@@ -108,21 +184,92 @@ start_session() {
   die "The session ${SESSION} did not start."
 }
 
-workspace_labels() {
+# workspaces prints one "label<TAB>workspace id" line for each workspace.
+workspaces() {
   HERDR_SESSION="$SESSION" herdr workspace list | python3 -I -c '
 import json, sys
-for workspace in json.load(sys.stdin)["result"]["workspaces"]:
-    print(workspace["label"])
+for w in json.load(sys.stdin)["result"]["workspaces"]:
+    print(w["label"], w["workspace_id"], sep="\t")
 '
+}
+
+# panes_of WORKSPACE prints one "label<TAB>pane id" line for each pane.
+panes_of() {
+  HERDR_SESSION="$SESSION" herdr pane list | python3 -I -c '
+import json, sys
+for p in json.load(sys.stdin)["result"]["panes"]:
+    if p["workspace_id"] == sys.argv[1]:
+        print(p.get("label") or "", p["pane_id"], sep="\t")
+' "$1"
+}
+
+# pane_is_idle exits 0 if the pane shows its shell prompt, with no program.
+pane_is_idle() {
+  local info
+  for _ in $(seq 1 20); do
+    info="$(HERDR_SESSION="$SESSION" herdr pane process-info --pane "$1" 2>/dev/null)" || info=""
+    case "$info" in
+      *shell_pid*)
+        python3 -I -c '
+import json, sys
+p = json.load(sys.stdin)["result"]["process_info"]
+sys.exit(0 if p.get("shell_pid") and p.get("foreground_process_group_id") == p.get("shell_pid") else 1)
+' <<<"$info"
+        return
+        ;;
+    esac
+    sleep 0.25
+  done
+  return 1
+}
+
+state_file() { printf '%s/%s.tsv' "$STATE_DIR" "$SESSION"; }
+
+remember_template() {
+  local file
+  file="$(state_file)"
+  mkdir -p "$STATE_DIR"
+  touch "$file"
+  awk -F '\t' -v l="$1" '$1 != l' "$file" >"${file}.tmp"
+  printf '%s\t%s\n' "$1" "$2" >>"${file}.tmp"
+  mv "${file}.tmp" "$file"
+}
+
+# restart_programs starts each template program again in a pane that shows only
+# its shell. Herdr restores the panes after a stop, but not their programs.
+restart_programs() {
+  local file label template id panes pane from direction size command pane_id restarted=0
+  file="$(state_file)"
+  [ -f "$file" ] || return 0
+  local all
+  all="$(workspaces)"
+  while IFS=$'\t' read -r label template; do
+    template_exists "$template" && [ "$template" != plain ] || continue
+    id="$(awk -F '\t' -v l="$label" '$1 == l {print $2}' <<<"$all")"
+    [ -n "$id" ] || continue
+    panes="$(panes_of "$id")"
+    while read -r pane from direction size command; do
+      [ -n "$command" ] && [ "$command" != "-" ] || continue
+      pane_id="$(awk -F '\t' -v l="$pane" '$1 == l {print $2; exit}' <<<"$panes")"
+      [ -n "$pane_id" ] || continue
+      if pane_is_idle "$pane_id"; then
+        HERDR_SESSION="$SESSION" herdr pane run "$pane_id" "$command" >/dev/null
+        restarted=$((restarted + 1))
+      fi
+    done < <(template_lines "$template")
+  done <"$file"
+  [ "$restarted" -eq 0 ] || printf '  [info] Session %s: %s programs started again.\n' "$SESSION" "$restarted"
 }
 
 # prepare_session starts SESSION and adds each folder that has no workspace.
 prepare_session() {
-  local folders existing added=0 label folder
+  local folders existing added=0 label folder template output root
+  STARTED=0
   session_answers || start_session
+  [ "$STARTED" -eq 0 ] || restart_programs
   folders="$(list_folders)"
-  existing="$(workspace_labels)"
-  while IFS=$'\t' read -r label folder; do
+  existing="$(workspaces | cut -f1)"
+  while IFS=$'\t' read -r label folder template; do
     [ -n "$label" ] || continue
     if grep -Fxq -- "$label" <<<"$existing"; then
       continue
@@ -131,7 +278,16 @@ prepare_session() {
       warn "Skipped ${label}: the folder ${folder} does not exist."
       continue
     fi
-    HERDR_SESSION="$SESSION" herdr workspace create --cwd "$folder" --label "$label" --no-focus >/dev/null
+    if ! template_exists "$template"; then
+      warn "${label}: no template named ${template}. It opens with one pane."
+      template="plain"
+    fi
+    output="$(HERDR_SESSION="$SESSION" herdr workspace create --cwd "$folder" --label "$label" --no-focus)"
+    if [ "$template" != plain ]; then
+      root="$(json_get "d['result']['root_pane']['pane_id']" <<<"$output")"
+      HERDR_SESSION="$SESSION" apply_template "$template" "$root"
+      remember_template "$label" "$template"
+    fi
     added=$((added + 1))
   done <<<"$folders"
   printf '  [info] Session %s: %s workspaces added.\n' "$SESSION" "$added"
@@ -145,7 +301,7 @@ attach_session() {
 }
 
 show_lists() {
-  local lists name state workspaces
+  local lists name state count
   lists="$(find_lists)"
   [ -n "$lists" ] || die "No project lists. Create ~/work.code-workspace."
   printf '%-22s %-9s %-11s %s\n' SESSION STATE WORKSPACES LIST
@@ -153,12 +309,12 @@ show_lists() {
     SESSION="$name"
     if session_answers; then
       state="running"
-      workspaces="$(workspace_labels | wc -l | tr -d ' ')"
+      count="$(workspaces | wc -l | tr -d ' ')"
     else
       state="stopped"
-      workspaces="-"
+      count="-"
     fi
-    printf '%-22s %-9s %-11s %s\n' "$name" "$state" "$workspaces" "${LIST_FILE/#$HOME/~}"
+    printf '%-22s %-9s %-11s %s\n' "$name" "$state" "$count" "${LIST_FILE/#$HOME/~}"
   done <<<"$lists"
 }
 
@@ -180,14 +336,39 @@ open_all() {
   printf '  [info] Run hopen with a session name to attach, for example: hopen %s\n' "$(printf '%s' "$lists" | head -n 1 | cut -f1)"
 }
 
+# apply_here splits the current tab of a Herdr pane with a template.
+apply_here() {
+  [ "${HERDR_ENV:-}" = "1" ] && [ -n "${HERDR_PANE_ID:-}" ] || die "Run --apply inside a Herdr pane."
+  template_exists "$APPLY_NAME" || die "No template named ${APPLY_NAME}. Run hopen --templates."
+  [ "$APPLY_NAME" != plain ] || return 0
+  local tab count
+  tab="$(herdr pane list | python3 -I -c '
+import json, sys
+print([p["tab_id"] for p in json.load(sys.stdin)["result"]["panes"] if p["pane_id"] == sys.argv[1]][0])
+' "$HERDR_PANE_ID")"
+  count="$(herdr pane list | python3 -I -c '
+import json, sys
+print(len([p for p in json.load(sys.stdin)["result"]["panes"] if p["tab_id"] == sys.argv[1]]))
+' "$tab")"
+  [ "$count" = 1 ] || die "The current tab has ${count} panes. Open a new tab, and run --apply there."
+  apply_template "$APPLY_NAME" "$HERDR_PANE_ID"
+}
+
 case "$ACTION" in
   list) show_lists; exit 0 ;;
-  all)
-    [ -z "$SESSION" ] || valid_name "$SESSION" || die "A session name can use only letters, numbers, dots, dashes, and underscores."
-    open_all
-    exit 0
-    ;;
+  templates) show_templates; exit 0 ;;
+  apply) apply_here; exit 0 ;;
 esac
+
+if [ -n "$TEMPLATE_FLAG" ] && ! template_exists "$TEMPLATE_FLAG"; then
+  die "No template named ${TEMPLATE_FLAG}. Run hopen --templates."
+fi
+
+if [ "$ACTION" = all ]; then
+  [ -z "$SESSION" ] || valid_name "$SESSION" || die "A session name can use only letters, numbers, dots, dashes, and underscores."
+  open_all
+  exit 0
+fi
 
 [ -n "$SESSION" ] || { usage >&2; exit 2; }
 valid_name "$SESSION" || die "A session name can use only letters, numbers, dots, dashes, and underscores."

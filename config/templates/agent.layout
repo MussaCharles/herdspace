@@ -1,0 +1,3 @@
+# agent: An agent on the left, and a shell on the right.
+agent  -      -      -    -
+shell  agent  right  0.6  -
