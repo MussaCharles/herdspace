@@ -162,6 +162,26 @@ The videos come from real Ghostty on a Linux client, connected with SSH to a tes
 
 [docs/setup.md](docs/setup.md#open-many-projects-at-once) shows how to write a list.
 
+### Install hopen alone
+
+You can use `hopen` without the rest of this repository. You need Herdr, Python 3, and curl. Run this command, and replace `<owner>` with the owner of this repository:
+
+```bash
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.2/install.sh | bash
+```
+
+The command installs the release in the address. Each release page shows its own command. After the first normal release, `releases/latest/download/install.sh` installs the newest one. That address skips pre-releases, such as the alpha versions.
+
+The script copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`. It compares each download with its checksum. You can run it again to update. It keeps a template that you changed, and it writes the new version next to it as `<name>.layout.new`.
+
+To remove `hopen`, run the same script with `--uninstall`. It keeps your templates.
+
+```bash
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.2/install.sh | bash -s -- --uninstall
+```
+
+`hopen --version` shows the installed release.
+
 ## Templates
 
 A template opens each project with named panes, and it starts a program in each pane. This is the `code` template, with Neovim, an agent pane, and lazygit:
@@ -190,6 +210,7 @@ The folder [skills](skills/) has instructions for coding agents. [docs/agent-set
 | `tests/run-systemd.sh` | The login service in a container with real systemd |
 | `tests/run-client-linux.sh` | A Linux client and a server in two containers, with real Ghostty key presses over SSH |
 | `tests/run-macos.sh` | The macOS scripts on a Mac, with a temporary home folder and stub commands |
+| `tests/test-install.sh` | A release build and `install.sh`, in a temporary home folder |
 
 A container cannot run macOS. For that reason, `tests/run-macos.sh` does not change macOS shortcuts or install Homebrew packages.
 
