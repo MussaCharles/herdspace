@@ -72,6 +72,9 @@ A VS Code workspace file is like a Herdr session, and each VS Code folder is lik
 | Open every list | `hopen --all` |
 | Open every list, and attach to one session | `hopen --all work` |
 | Show every list and its state | `hopen --list` |
+| Split each new workspace with a template | `hopen work --template code` |
+| Show every template | `hopen --templates` |
+| Split the current tab with a template | `hopen --apply grid` |
 | Add a project | Add the folder to the list file, then run `hopen` again. |
 | Remove a project | Remove the folder from the list file, then close its workspace with `ctrl+b`, `shift+d`. |
 
@@ -172,6 +175,8 @@ In the `ctrl+b`, `g` list, type `/` to search and press `Enter` to go. Press `b`
 The Auto Title plugin names each tab. A name that you set by hand stays.
 
 ## Panes
+
+The [templates guide](templates.md) has short videos of these keys.
 
 An ordinary pane closes with no question, and its program stops.
 

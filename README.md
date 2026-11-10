@@ -105,6 +105,7 @@ herdr
 |----------|-----|
 | [docs/setup.md](docs/setup.md) | The full steps for each computer |
 | [docs/cheat-sheet.md](docs/cheat-sheet.md) | Keys and commands for daily use |
+| [docs/templates.md](docs/templates.md) | Templates, and videos that show how to move between panes |
 | [docs/windows-wsl.md](docs/windows-wsl.md) | Use Windows as a client with WSL |
 | [docs/updating.md](docs/updating.md) | Update the tools, or add something new |
 | [docs/agent-setup.md](docs/agent-setup.md) | Ask a coding agent to do the setup |
@@ -122,7 +123,7 @@ herdr
 | Auto Title plugin | | yes |
 | Agent skill and integration for each agent program that it finds | | yes |
 | Neovim with a file tree, and lazygit with delta | | yes |
-| `hopen`, which opens the projects of one list or of every list | | yes |
+| `hopen`, which opens the projects of one list or of every list, with templates | | yes |
 | A login service that starts Herdr, and a check for new versions | | yes |
 
 The scripts do not install the agent programs. Install them first, or run the server script again after you install one.
@@ -159,8 +160,19 @@ The screens come from real Ghostty on a Linux client, connected with SSH to a te
 | `hopen --all` | Open every list. |
 | `hopen --all work` | Open every list, and attach to one session. |
 | `hopen --list` | Show every list and its state. |
+| `hopen work --template code` | Split each new workspace with a template. |
+| `hopen --templates` | Show every template. |
+| `hopen --apply grid` | Split the current tab with a template. |
 
 [docs/setup.md](docs/setup.md#open-many-projects-at-once) shows how to write a list.
+
+## Templates
+
+A template opens each project with named panes, and it starts a program in each pane. This is the `code` template, with Neovim, an agent pane, and lazygit:
+
+![The code template](docs/media/template-code.png)
+
+The other templates are `agent`, `grid`, and `review`, and you can add your own. [docs/templates.md](docs/templates.md) shows each template and has short videos for moving between panes.
 
 ## Ask an agent to do the setup
 
