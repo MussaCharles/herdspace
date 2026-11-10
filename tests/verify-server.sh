@@ -145,7 +145,7 @@ done
 rm -rf "$HOME/hb-all-two" "$HOME/hb-all-one-dir" "$HOME/hb-all-one.code-workspace"
 
 # Templates split each new workspace into named panes.
-contains "$(cat "$HOME/.config/herdr-auto-title/config.env")" 'HERDR_AUTO_TITLE_PANES=false' 'auto title keeps pane names'
+if [ ! -f "$HOME/.config/herdr-auto-title/config.env" ]; then pass 'auto title has its default settings'; else fail 'auto title has its default settings'; fi
 tlist="$(hopen --templates 2>&1)"
 for t in plain code agent grid review; do contains "$tlist" "$t" "template ${t} is listed"; done
 mkdir -p "$HOME/hb-tpl/one" "$HOME/hb-tpl/two" "$HOME/hb-tpl/three"
@@ -163,7 +163,8 @@ print(",".join(sorted(p.get("label") or "-" for p in json.load(sys.stdin)["resul
 ' "$1" <(HERDR_SESSION=hb-tpl herdr workspace list)
 }
 hopen hb-tpl --no-attach >/dev/null 2>&1
-sleep 3
+# Auto Title starts with the session and renames panes it thinks are its own.
+sleep 15
 contains "$(pane_labels one)" 'agent,editor,git' 'template code makes three named panes'
 contains "$(pane_labels two)" 'agent,shell' 'the default template applies to the other folders'
 if [ "$(pane_labels three)" = '-' ] || [ "$(pane_labels three | tr ',' '\n' | wc -l | tr -d ' ')" = 1 ]; then pass 'plain keeps one pane'; else fail "plain keeps one pane: $(pane_labels three)"; fi
@@ -177,22 +178,37 @@ sleep 2
 contains "$(fg_of "$(git_pane)")" 'lazygit' 'template starts lazygit'
 hopen hb-tpl --no-attach >/dev/null 2>&1
 contains "$(pane_labels one)" 'agent,editor,git' 'a second run adds no panes'
+contains "$(cat "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-tpl.tsv")" '=editor' 'hopen saves the pane IDs'
+# A second session writes the same pane IDs to the shared Auto Title file. That
+# made Auto Title forget the names of the first session after a restart.
+mkdir -p "$HOME/hb-other/one"
+cat >"$HOME/hb-other/hb-other.code-workspace" <<'JSON'
+{ "folders": [ { "name": "one", "path": "./one" } ], "settings": { "hopen.templates": { "one": "review" } } }
+JSON
+hopen hb-other --no-attach >/dev/null 2>&1
+sleep 8
 herdr session stop hb-tpl >/dev/null 2>&1
 sleep 1
 restart_out="$(hopen hb-tpl --no-attach 2>&1)"
 contains "$restart_out" 'programs started again' 'hopen reports the restarted programs'
 sleep 3
 contains "$(fg_of "$(git_pane)")" 'lazygit' 'lazygit runs again after a stop'
+sleep 12
 contains "$(pane_labels one)" 'agent,editor,git' 'pane names stay after a stop'
 contains "$(hopen hb-tpl --template nope --no-attach 2>&1)" 'No template named nope' 'unknown template is refused'
 # --apply runs inside a pane. A new workspace with one pane stands in for it.
 newroot="$(HERDR_SESSION=hb-tpl herdr workspace create --cwd "$HOME/hb-tpl" --label applied --no-focus | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
 HERDR_SESSION=hb-tpl HERDR_ENV=1 HERDR_PANE_ID="$newroot" hopen --apply grid >/dev/null 2>&1
+sleep 8
 contains "$(pane_labels applied)" 'agent-1,agent-2,shell,tests' 'apply splits the current tab'
 contains "$(HERDR_SESSION=hb-tpl HERDR_ENV=1 HERDR_PANE_ID="$newroot" hopen --apply code 2>&1)" 'has 4 panes' 'apply refuses a tab with many panes'
 herdr session stop hb-tpl >/dev/null 2>&1
 sleep 1
 herdr session delete hb-tpl >/dev/null 2>&1
+herdr session stop hb-other >/dev/null 2>&1
+sleep 1
+herdr session delete hb-other >/dev/null 2>&1
+rm -rf "$HOME/hb-other" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-other.tsv"
 rm -rf "$HOME/hb-tpl" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-tpl.tsv"
 rm -rf "$work"
 

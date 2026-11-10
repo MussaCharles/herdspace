@@ -13,22 +13,6 @@ setup_server_files() {
   install_file "${REPO_ROOT}/bin/hopen" "${HOME}/.local/bin/hopen" 755
   install_file "${REPO_ROOT}/bin/herdr-update-check" "${HOME}/.local/bin/herdr-update-check" 755
   install_tree "${REPO_ROOT}/config/templates" "${HOME}/.config/hopen/templates"
-  install_file "${REPO_ROOT}/config/herdr-auto-title/config.env" "${HOME}/.config/herdr-auto-title/config.env"
-}
-
-auto_title_config_sha() { file_sha "${HOME}/.config/herdr-auto-title/config.env" 2>/dev/null || true; }
-
-auto_title_config_ready() {
-  [ -f "${HOME}/.config/herdr-auto-title/config.env" ] || return 0
-  done_ready auto-title-config "$(auto_title_config_sha)"
-}
-
-# restart_auto_title makes a running Auto Title read its configuration again.
-restart_auto_title() {
-  if server_answers && auto_title_ready; then
-    herdr plugin action invoke restart --plugin herdr.auto-title >/dev/null 2>&1 || warn "Auto Title did not restart."
-  fi
-  done_mark auto-title-config "$(auto_title_config_sha)"
 }
 
 # done_ready and done_mark use small files to record finished long steps.
@@ -185,7 +169,6 @@ setup_server_common() {
   run_part "Neovim plugins" nvim_plugins_ready install_nvim_plugins
   run_part "Neovim language tools" nvim_tools_ready install_nvim_tools
   run_part "Auto Title plugin" auto_title_ready install_auto_title
-  run_part "Auto Title settings" auto_title_config_ready restart_auto_title
   run_part "Agent integrations and skill" agents_ready install_agents
   stop_setup_server
 }
