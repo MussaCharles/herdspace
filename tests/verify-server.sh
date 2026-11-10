@@ -115,6 +115,34 @@ contains "$attach" 'status=0' 'hopen attaches and detach exits'
 herdr session stop hb-test >/dev/null 2>&1
 sleep 1
 herdr session delete hb-test >/dev/null 2>&1
+
+# hopen --all and --list find each list in the home folder.
+mkdir -p "$HOME/hb-all-two/app" "$HOME/hb-all-one-dir"
+printf '{ "folders": [ { "name": "x", "path": "./hb-all-one-dir" } ] }\n' >"$HOME/hb-all-one.code-workspace"
+printf '{ "folders": [ { "name": "app", "path": "./app" } ] }\n' >"$HOME/hb-all-two/hb-all-two.code-workspace"
+listed="$(hopen --list 2>&1)"
+contains "$listed" 'hb-all-one' 'hopen --list finds a list in the home folder'
+contains "$listed" 'hb-all-two' 'hopen --list finds a list in a project folder'
+contains "$listed" 'stopped' 'hopen --list shows a stopped session'
+hopen --all >/dev/null 2>&1
+labels_of() { HERDR_SESSION="$1" herdr workspace list | python3 -c 'import json,sys; print(",".join(w["label"] for w in json.load(sys.stdin)["result"]["workspaces"]))'; }
+contains "$(labels_of hb-all-one)" 'hb-all-one,x' 'hopen --all opens the first list'
+contains "$(labels_of hb-all-two)" 'hb-all-two,app' 'hopen --all opens the second list'
+first="$(labels_of hb-all-one)"
+hopen --all >/dev/null 2>&1
+if [ "$(labels_of hb-all-one)" = "$first" ]; then pass 'hopen --all adds nothing on a second run'; else fail 'hopen --all adds nothing on a second run'; fi
+contains "$(hopen --list 2>&1)" 'running' 'hopen --list shows a running session'
+attach_all="$(python3 "$ROOT/tests/pty_run.py" 8 '\x02q' hopen --all hb-all-two 2>&1; echo "status=$?")"
+contains "$attach_all" 'status=0' 'hopen --all attaches to the named session'
+contains "$(hopen --all no-such-list 2>&1)" 'No project list' 'hopen --all rejects an unknown name'
+for name in hb-all-one hb-all-two; do
+  herdr session stop "$name" >/dev/null 2>&1
+done
+sleep 1
+for name in hb-all-one hb-all-two; do
+  herdr session delete "$name" >/dev/null 2>&1
+done
+rm -rf "$HOME/hb-all-two" "$HOME/hb-all-one-dir" "$HOME/hb-all-one.code-workspace"
 rm -rf "$work"
 
 printf 'RESULT failures=%s\n' "$failures"

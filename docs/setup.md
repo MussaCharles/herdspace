@@ -249,4 +249,18 @@ hopen work
 
 The first workspace has the name of the session and opens the folder that holds the file. Run `hopen` again after you add a folder. It adds only the new folders.
 
+To open every list at once, run this command:
+
+```bash
+hopen --all
+```
+
+`hopen --all` starts one session for each list, and it adds the missing workspaces. A terminal can attach to one session at a time, so add a name to attach to that session:
+
+```bash
+hopen --all work
+```
+
+To see every list and its state, run `hopen --list`. `hopen` finds a list at `~/<name>.code-workspace` or at `~/<name>/<name>.code-workspace`.
+
 ![Herdr with one workspace for each project](media/herdr-sessions.png)

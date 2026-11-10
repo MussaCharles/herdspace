@@ -69,6 +69,9 @@ A VS Code workspace file is like a Herdr session, and each VS Code folder is lik
 | Task | Command |
 |------|---------|
 | Open all the projects of a list | `hopen work` |
+| Open every list | `hopen --all` |
+| Open every list, and attach to one session | `hopen --all work` |
+| Show every list and its state | `hopen --list` |
 | Add a project | Add the folder to the list file, then run `hopen` again. |
 | Remove a project | Remove the folder from the list file, then close its workspace with `ctrl+b`, `shift+d`. |
 

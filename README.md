@@ -122,7 +122,7 @@ herdr
 | Auto Title plugin | | yes |
 | Agent skill and integration for each agent program that it finds | | yes |
 | Neovim with a file tree, and lazygit with delta | | yes |
-| `hopen`, which opens all the projects of a list | | yes |
+| `hopen`, which opens the projects of one list or of every list | | yes |
 | A login service that starts Herdr, and a check for new versions | | yes |
 
 The scripts do not install the agent programs. Install them first, or run the server script again after you install one.
@@ -148,6 +148,19 @@ The scripts do not install the agent programs. Install them first, or run the se
 ![The go to list of Herdr](docs/media/go-to.png)
 
 The screens come from real Ghostty on a Linux client, connected with SSH to a test server with demo projects.
+
+## Open all your projects
+
+`hopen` reads your VS Code workspace files, and it opens each folder as a Herdr workspace. Each file becomes one session.
+
+| Command | Effect |
+|---------|--------|
+| `hopen work` | Open the projects of one list, and attach to that session. |
+| `hopen --all` | Open every list. |
+| `hopen --all work` | Open every list, and attach to one session. |
+| `hopen --list` | Show every list and its state. |
+
+[docs/setup.md](docs/setup.md#open-many-projects-at-once) shows how to write a list.
 
 ## Ask an agent to do the setup
 
