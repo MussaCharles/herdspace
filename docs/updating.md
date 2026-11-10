@@ -53,7 +53,7 @@ Update the versions:
 tools/update-versions.sh
 ```
 
-Test a change before you use it:
+Test a change before you use it. [testing.md](testing.md) lists every test:
 
 ```bash
 tests/run-linux.sh
@@ -65,22 +65,22 @@ tests/run-macos.sh
 
 ## Make a release
 
-A release holds `hopen`, its templates, `install.sh`, and `SHA256SUMS`. A tag with a dash, for example `v0.1.0-alpha.2`, becomes a pre-release.
+A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag with a dash, for example `v0.1.0-alpha.5`, becomes a pre-release.
 
-1. Merge the change, and run the tests.
+1. Change the tag in the commands of `README.md` and `docs/` to the new tag. Merge the change, and run the tests.
 2. Build the files and look at them:
 
    ```bash
-   tools/release.sh v0.1.0-alpha.2
+   tools/release.sh v0.1.0-alpha.5
    ```
 
 3. Publish the release:
 
    ```bash
-   tools/release.sh v0.1.0-alpha.2 --publish
+   tools/release.sh v0.1.0-alpha.5 --publish
    ```
 
-The script reads the repository name from `gh`. No file in git holds the name.
+The script reads the repository name from `gh`, and it writes the name into `bootstrap.sh` and `install.sh`.
 
 `--publish` stops if `git status` shows a change or an untracked file, so that a release holds only committed files.
 

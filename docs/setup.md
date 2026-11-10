@@ -68,26 +68,26 @@ You can run the script in two ways.
 To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdspace/<tag>`, compares its checksum, and runs it from there:
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/bootstrap.sh | bash -s -- server
 ```
 
 To read or change the files first, clone this repository, and run the script from the clone:
 
 ```bash
-git clone <repository-url> ~/herdspace
+git clone https://github.com/MussaCharles/herdspace.git ~/herdspace
 ```
+
+If you use SSH keys with GitHub, clone with the SSH address instead:
+
+```bash
+git clone git@github.com:MussaCharles/herdspace.git ~/herdspace
+```
+
+Then run the script from the clone:
 
 ```bash
 cd ~/herdspace && ./bootstrap.sh server
 ```
-
-If the repository is private, `curl` cannot download the release. Log in with `gh auth login`, and then download the script with the GitHub CLI:
-
-```bash
-gh release download v0.1.0-alpha.3 --repo <owner>/herdspace --pattern bootstrap.sh --dir /tmp/hb && bash /tmp/hb/bootstrap.sh server
-```
-
-The script also uses the GitHub CLI for the rest of the release.
 
 ## Options
 
@@ -108,6 +108,58 @@ The first word is `server` or `client`. The script finds the system. Each option
 | `-h`, `--help` | Show every option. |
 
 `bootstrap.sh` runs one script from the folder `bootstrap/platforms/`, one for each role and system.
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
+  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
+  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
+  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
+  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
+  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
+}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
+flowchart LR
+  classDef cmd fill:#0d1f12,stroke:#3fb950,stroke-width:2px,color:#7ee787
+  classDef step fill:#0d1117,stroke:#58a6ff,stroke-width:1.5px,color:#c9e1ff
+  classDef ask fill:#2a2000,stroke:#e3b341,stroke-width:2px,color:#f2cc60
+  classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
+  classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
+  classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
+  run["bootstrap.sh"]:::cmd --> role{"server or client?"}:::ask
+  role -- " server " --> sos{"System?"}:::ask
+  role -- " client " --> cos{"System?"}:::ask
+  sos -- " Linux or WSL " --> s1["bootstrap/platforms/<br/>server-linux.sh"]:::data
+  sos -- " macOS " --> s2["bootstrap/platforms/<br/>server-macos.sh"]:::data
+  cos -- " macOS " --> c1["bootstrap/platforms/<br/>client-macos.sh"]:::data
+  cos -- " Linux " --> c2["bootstrap/platforms/<br/>client-linux.sh"]:::data
+  cos -- " WSL " --> c3["bootstrap/platforms/<br/>client-linux.sh<br/>--no-ghostty"]:::data
+```
+
+## What the setup installs
+
+| Part | Client | Server |
+|------|:------:|:------:|
+| Ghostty with keys that reach Herdr | yes | |
+| Terminal description for Ghostty on each server | yes | |
+| Free `Ctrl` arrow keys on a Mac | yes | |
+| zsh, Oh My Zsh, and Powerlevel10k, with a different color on each side | yes | yes |
+| fzf, zoxide, eza, bat, and fd | yes | yes |
+| Herdr, with keys, colors, and sidebar | | yes |
+| Auto Title plugin | | yes |
+| Agent skill and integration for each agent program that it finds | | yes |
+| Neovim with a file tree, and lazygit with delta | | yes |
+| `hopen`, which opens the projects of one list or of every list, with templates | | yes |
+| A login service that starts Herdr, and a check for new versions | | yes |
+
+The scripts do not install the agent programs. Install them first, or run the server script again after you install one.
+
+## Rules that the setup follows
+
+- A script does only the parts that are not done. [Run a script again](#run-a-script-again) lists the options.
+- A script asks before it replaces a file that you changed, and it makes a backup first.
+- A script never stops a Herdr server that was already running, because a stop closes every pane.
+- Tools from release pages have a pinned version and a checksum.
+- Herdr and Neovim do not contact their sites in the background. The update check asks the Homebrew API.
 
 ## Run a script again
 
@@ -260,10 +312,18 @@ If a key does nothing, Ghostty or the desktop still uses that key. Run the clien
 On a computer that has Herdr already, you can install `hopen` and its templates without the rest of the setup. You need Python 3 and curl:
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/install.sh | bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/install.sh | bash
 ```
 
-`install.sh` copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`, after a checksum check. Add `--uninstall` after `bash -s --` to remove `hopen`.
+`install.sh` copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`, after a checksum check. `hopen --version` shows the installed release.
+
+To update `hopen`, run the install command of the new release. Each release page shows its own command. `install.sh` keeps a template that you changed, and it writes the new version next to it as `<name>.layout.new`. After the first normal release, `releases/latest/download/install.sh` installs the newest release. That address skips pre-releases, such as the alpha versions.
+
+To remove `hopen`, run the same command with `--uninstall`. It keeps your templates:
+
+```bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.4/install.sh | bash -s -- --uninstall
+```
 
 ### Write a list
 
