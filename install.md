@@ -2,7 +2,7 @@
 
 These instructions are for a coding agent that installs herdspace for a person. Follow the steps in order. Do not clone the repository. Every command downloads a release.
 
-herdspace is a workspace and session manager for Herdr. It uses two machines. The server machine runs Herdr, the projects, and the agents. The client machine connects to the server machine with SSH.
+herdspace is a workspace and session manager for Herdr. It uses two machines. The server machine runs Herdr, the projects, and the agents. The client machine is the machine that the person uses, and it connects to the server machine with SSH.
 
 The release in these instructions is `v0.1.0`. All commands use this address:
 

@@ -2,6 +2,8 @@
 
 Scope: what to say to a coding agent, so that it can do the setup for you. To install, the agent follows [install.md](../install.md). To change herdspace, an agent in a clone follows the skill files in [skills](../skills/).
 
+herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH.
+
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
   'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',

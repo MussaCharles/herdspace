@@ -1,8 +1,10 @@
 # Setup
 
-Scope: set up a new client or server with `bootstrap.sh`, or install only `hopen`. Use one section for each machine. Set up the server first.
+Scope: set up a new server machine or client machine with `bootstrap.sh`, or install only `hopen`.
 
-You need an SSH connection from the client to the server that works with no password. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`. If you connect with an IP address, follow [Connect with an IP address](#connect-with-an-ip-address) first.
+herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. Set up the server machine first. Use one section for each machine.
+
+You need an SSH connection from the client machine to the server machine that works with no password. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`. If you connect with an IP address, follow [Connect with an IP address](#connect-with-an-ip-address) first.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
