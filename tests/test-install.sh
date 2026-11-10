@@ -19,6 +19,9 @@ for f in "hopen-${tag}.tar.gz" install.sh SHA256SUMS; do
   if [ -f "${dist}/${f}" ]; then pass "release has ${f}"; else fail "release has ${f}"; fi
 done
 contains "$(grep -c '@VERSION@\|@REPO@' "${dist}/install.sh")" '0' 'install.sh has the tag and the repository'
+full_hopen="$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/bin/hopen")"
+contains "$full_hopen" "HOPEN_VERSION=\"${tag}\"" 'the full archive has hopen with the tag'
+if [ "$full_hopen" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/hopen")" ]; then pass 'both archives have the same hopen'; else fail 'both archives have the same hopen'; fi
 
 home="${tmp}/home"
 mkdir -p "${home}/.local/bin" "${tmp}/old"
