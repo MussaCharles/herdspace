@@ -1,11 +1,11 @@
 ---
 name: bootstrap-herdr-client
-description: Set up Ghostty, the shell, and Herdr keys on the macOS or Linux computer that a person uses for SSH, with the herdr-bootstrap scripts. Use when a person asks to set up the client side of this Herdr environment.
+description: Set up Ghostty, the shell, and Herdr keys on the macOS or Linux computer that a person uses for SSH, with the herdspace scripts. Use when a person asks to set up the client side of this Herdr environment.
 ---
 
 # Bootstrap a Herdr client
 
-Run this skill on the computer that the person uses for SSH, from the root folder of the herdr-bootstrap repository.
+Run this skill on the computer that the person uses for SSH, from the root folder of the herdspace repository.
 
 ## Steps
 
