@@ -61,5 +61,21 @@ out="$(run_install --uninstall)"
 contains "$out" 'Removed' 'uninstall removes hopen'
 if [ ! -e "${home}/.local/bin/hopen" ] && [ -d "${home}/.config/hopen/templates" ]; then pass 'uninstall keeps the templates'; else fail 'uninstall keeps the templates'; fi
 
+# bootstrap.sh from curl downloads the full release, and runs the right script.
+for f in bootstrap.sh "herdr-bootstrap-${tag}.tar.gz"; do
+  if [ -f "${dist}/${f}" ]; then pass "release has ${f}"; else fail "release has ${f}"; fi
+done
+piped() { HOME="$home" XDG_DATA_HOME="" HB_BASE_URL="file://$1" HB_NO_TTY=1 HB_DRY_RUN=1 bash -s -- "${@:2}" <"$1/bootstrap.sh" 2>&1; }
+out="$(piped "$dist" client --os wsl --server example)"
+contains "$out" 'platforms/client-linux.sh --server example --no-ghostty' 'piped bootstrap.sh picks the WSL client'
+if [ -x "${home}/.local/share/herdr-bootstrap/${tag}/platforms/server-linux.sh" ]; then pass 'piped bootstrap.sh keeps the release files'; else fail 'piped bootstrap.sh keeps the release files'; fi
+if [ ! -d "${home}/.local/share/herdr-bootstrap/${tag}/tests" ]; then pass 'the release has no tests folder'; else fail 'the release has no tests folder'; fi
+out="$(piped "$dist" --check server --os linux)"
+contains "$out" 'platforms/server-linux.sh --check' 'piped bootstrap.sh passes the options'
+printf 'x' >>"${bad}/herdr-bootstrap-${tag}.tar.gz"
+out="$(piped "$bad" server)"
+contains "$out" 'checksum' 'piped bootstrap.sh stops on a wrong checksum'
+contains "$(HB_DRY_RUN=1 ./bootstrap.sh client --os mac 2>&1)" '--os must be' 'bootstrap.sh refuses an unknown system'
+
 printf 'RESULT failures=%s\n' "$failures"
 [ "$failures" -eq 0 ]
