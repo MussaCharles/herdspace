@@ -82,6 +82,8 @@ A release holds `hopen`, its templates, `install.sh`, and `SHA256SUMS`. A tag wi
 
 The script reads the repository name from `gh`. No file in git holds the name.
 
+`--publish` stops if `git status` shows a change or an untracked file, so that a release holds only committed files.
+
 ## Add something new
 
 1. Put a configuration file in `config/`.

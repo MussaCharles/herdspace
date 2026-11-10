@@ -61,6 +61,12 @@ out="$(run_install --uninstall)"
 contains "$out" 'Removed' 'uninstall removes hopen'
 if [ ! -e "${home}/.local/bin/hopen" ] && [ -d "${home}/.config/hopen/templates" ]; then pass 'uninstall keeps the templates'; else fail 'uninstall keeps the templates'; fi
 
+touch release-guard-test.txt
+out="$(tools/release.sh v9.9.9-guard --repo example/hopen-test --publish 2>&1)"; rc=$?
+rm -f release-guard-test.txt
+contains "$out" 'release-guard-test.txt' 'publish lists an untracked file'
+if [ "$rc" -ne 0 ]; then pass 'publish refuses a folder with changes'; else fail 'publish refuses a folder with changes'; fi
+
 # bootstrap.sh from curl downloads the full release, and runs the right script.
 for f in bootstrap.sh "herdr-bootstrap-${tag}.tar.gz"; do
   if [ -f "${dist}/${f}" ]; then pass "release has ${f}"; else fail "release has ${f}"; fi
