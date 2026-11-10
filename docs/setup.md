@@ -2,7 +2,7 @@
 
 Scope: set up a new client or server with `bootstrap.sh`, or install only `hopen`. Use one section for each computer. Set up the server first.
 
-You need a working SSH connection from the client to the server. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`.
+You need an SSH connection from the client to the server that works with no password. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`. If you connect with an IP address, follow [Connect with an IP address](#connect-with-an-ip-address) first.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -61,6 +61,40 @@ flowchart TD
 
 The script never stops a server that was already running.
 
+## Connect with an IP address
+
+The client setup connects to the server with SSH and an SSH key. A password does not work for this step. If you connect with an IP address and a password, do these steps on the client first. In the examples, the user on the server is `me`, and the address of the server is `203.0.113.10`.
+
+1. If you do not have an SSH key, make one. Press Enter at each question.
+
+   ```bash
+   ssh-keygen -t ed25519
+   ```
+
+2. Copy the key to the server. Type the password of the server one more time.
+
+   ```bash
+   ssh-copy-id me@203.0.113.10
+   ```
+
+3. Give the server a short name. Add these lines to `~/.ssh/config` on the client:
+
+   ```text
+   Host my-server
+     HostName 203.0.113.10
+     User me
+   ```
+
+4. Make sure that the connection works with no password. The command prints `ok`.
+
+   ```bash
+   ssh -o BatchMode=yes my-server true && echo ok
+   ```
+
+Then use `--server my-server`, and connect each day with `ssh my-server`. If the address of the server changes, change only the `HostName` line.
+
+You can also give the address to the setup with no name: `--server me@203.0.113.10`. Steps 1 and 2 are still necessary.
+
 ## Get the script
 
 You can run the script in two ways.
@@ -102,7 +136,7 @@ The first word is `server` or `client`. The script finds the system. Each option
 | `--version <tag>` | With `curl`: download another release. |
 | `--skip-nvim-tools` | Server: do not install the Neovim language tools. |
 | `--skip-login-service` | Server: do not start Herdr at login. |
-| `--server <name>` | Client: the SSH name of a server. Repeat it for each server. |
+| `--server <name>` | Client: the SSH name of a server, or `user@address`. Repeat it for each server. |
 | `--no-ghostty` | Linux client: use another terminal. WSL always uses this. |
 | `--skip-mission-control` | macOS client: keep the Mission Control shortcuts. |
 | `-h`, `--help` | Show every option. |

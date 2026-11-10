@@ -38,6 +38,8 @@ sequenceDiagram
 
 Start the agent on the computer that you want to set up, in the folder of this repository. A skill runs commands on that computer.
 
+If the computer does not have this repository, add this to the start of the prompt: `Clone https://github.com/MussaCharles/herdspace and work in that folder.`
+
 If you name the path of a skill file, the agent reads it. You do not need to install the skill.
 
 ## What to say

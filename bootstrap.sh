@@ -21,7 +21,8 @@
 #   --skip-login-service  Do not start Herdr at login.
 #
 # Options for a client:
-#   --server HOST         An SSH host name of a server. Repeat it for each server.
+#   --server HOST         An SSH host name of a server, or user@address. Repeat it
+#                         for each server.
 #   --no-ghostty          Linux: use another terminal. WSL always uses this.
 #   --skip-mission-control  macOS: keep the Mission Control shortcuts.
 #
