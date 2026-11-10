@@ -50,22 +50,27 @@ cp config/templates/*.layout "${stage}/templates/"
 sed -e "s|@VERSION@|${TAG}|" -e "s|@REPO@|${REPO}|" install.sh >"${out}/install.sh"
 chmod 755 "${out}/install.sh"
 COPYFILE_DISABLE=1 tar -czf "${out}/hopen-${TAG}.tar.gz" -C "$out" "hopen-${TAG}"
+# The full archive gets the same hopen, with the tag in it.
+mv "${stage}/hopen" "${out}/hopen.tagged"
 rm -rf "$stage"
 sed -e "s|@VERSION@|${TAG}|" -e "s|@REPO@|${REPO}|" bootstrap.sh >"${out}/bootstrap.sh"
 chmod 755 "${out}/bootstrap.sh"
 # The full archive holds each file that git tracks or would track, so a test can
-# build it before a commit. The release copy of bootstrap.sh replaces the one in git.
+# build it before a commit. The release copies of bootstrap.sh and bin/hopen
+# replace the ones in git.
 git ls-files -co --exclude-standard | python3 -I -c '
 import os, sys, tarfile
 tag, out = sys.argv[1], sys.argv[2]
 skip = ("tests/", "docs/media/", "dist/")
 with tarfile.open(os.path.join(out, f"herdspace-{tag}.tar.gz"), "w:gz") as tar:
     for name in sorted(sys.stdin.read().splitlines()):
-        if name.startswith(skip) or not os.path.isfile(name) or name == "bootstrap.sh":
+        if name.startswith(skip) or not os.path.isfile(name) or name in ("bootstrap.sh", "bin/hopen"):
             continue
         tar.add(name, arcname=f"herdspace-{tag}/{name}")
     tar.add(os.path.join(out, "bootstrap.sh"), arcname=f"herdspace-{tag}/bootstrap.sh")
+    tar.add(os.path.join(out, "hopen.tagged"), arcname=f"herdspace-{tag}/bin/hopen")
 ' "$TAG" "$out"
+rm -f "${out}/hopen.tagged"
 (
   cd "$out"
   if command -v sha256sum >/dev/null 2>&1; then
