@@ -1,6 +1,6 @@
 # Windows with WSL
 
-Scope: use a Windows machine as a client, or run a Herdr server inside WSL. WSL (Windows Subsystem for Linux) runs Linux inside Windows. Ghostty has no Windows build, so Windows Terminal is the terminal in this setup.
+Scope: use a Windows machine as a client machine, or as a server machine with Herdr inside WSL. The server machine runs Herdr and your projects. The client machine connects to it with SSH. WSL (Windows Subsystem for Linux) runs Linux inside Windows. Ghostty has no Windows build, so Windows Terminal is the terminal in this setup.
 
 The tests in this repository do not run on Windows. The Linux scripts have tests in containers, but the Windows Terminal steps have no test.
 

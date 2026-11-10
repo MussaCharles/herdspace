@@ -1,6 +1,8 @@
 # herdspace
 
-herdspace is a workspace and session manager for [Herdr](https://herdr.dev). Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running on a server after you disconnect.
+herdspace is a workspace and session manager for [Herdr](https://herdr.dev). Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running after you disconnect.
+
+herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH.
 
 ![Four projects open in Herdr, and Ctrl+Down moves to the next project](docs/media/open-projects.gif)
 
@@ -9,13 +11,13 @@ With herdspace, you can:
 - Open every project of a VS Code workspace file in one Herdr session, with one command.
 - Split each project into named panes from a template, for example an editor, an agent, and lazygit.
 - Start the template programs again after a restart.
-- Set up Herdr and its tools on a new server and client with one command, on macOS, Linux, or Windows with WSL.
+- Set up Herdr and its tools on a new server machine and client machine with one command, on macOS, Linux, or Windows with WSL.
 
 herdspace has two parts. `hopen` opens your projects. `bootstrap.sh` sets up a machine, and the server setup includes `hopen`.
 
 ## Quick start
 
-herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the one that you sit at. It connects to the server machine with SSH. Set up the server machine first.
+Set up the server machine first.
 
 ### Server machine
 
