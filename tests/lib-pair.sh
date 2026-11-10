@@ -62,7 +62,13 @@ open_ghostty() {
     sleep 2
   done
   sleep 12
-  [ -n "$win" ] || fail 'ghostty window'
+  if [ -z "$win" ]; then
+    fail 'ghostty window'
+    cli_user tail -n 5 /tmp/ghostty.log
+    # Stop here. The key and screenshot steps wait forever without a window.
+    echo "RESULT exit=1"
+    exit 1
+  fi
   cli_user xdotool windowactivate --sync "$win" >/dev/null 2>&1
 }
 
