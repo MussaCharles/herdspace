@@ -1,5 +1,5 @@
 ---
-name: bootstrap-herdr-client
+name: herdspace-client
 description: Set up Ghostty, the shell, and Herdr keys on the macOS or Linux computer that a person uses for SSH, with the herdspace scripts. Use when a person asks to set up the client side of this Herdr environment.
 ---
 

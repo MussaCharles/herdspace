@@ -75,8 +75,8 @@ clear_backups
 
 # A file from an older version that no person changed.
 echo '# an older version' >"$SAMPLE"
-# shellcheck source=lib/common.sh
-( source "${ROOT}/lib/common.sh"; manifest_set "$SAMPLE" "$(file_sha "$SAMPLE")" )
+# shellcheck source=bootstrap/lib/common.sh
+( source "${ROOT}/bootstrap/lib/common.sh"; manifest_set "$SAMPLE" "$(file_sha "$SAMPLE")" )
 out="$(run_script "$@")"
 if cmp -s "$SAMPLE" "${SAMPLE}.saved"; then pass 'outdated: updates with no question'; else fail 'outdated: updates with no question'; fi
 lacks "$out" 'Kept' 'outdated: is not kept'

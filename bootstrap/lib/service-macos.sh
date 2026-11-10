@@ -7,7 +7,7 @@ HERDR_PLIST="${HOME}/Library/LaunchAgents/${HERDR_LABEL}.plist"
 
 render_plist() {
   sed -e "s|@HOME@|${HOME}|g" -e "s|@HERDR@|$(command -v herdr)|g" -e "s|@LABEL@|${HERDR_LABEL}|g" \
-    "${REPO_ROOT}/service/herdr.plist" >"$1"
+    "${REPO_ROOT}/bootstrap/service/herdr.plist" >"$1"
 }
 
 macos_service_ready() {

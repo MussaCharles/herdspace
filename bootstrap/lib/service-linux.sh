@@ -3,7 +3,7 @@
 
 HERDR_UNIT="${HOME}/.config/systemd/user/herdr.service"
 
-render_unit() { sed "s|@HOME@|${HOME}|g" "${REPO_ROOT}/service/herdr.service" >"$1"; }
+render_unit() { sed "s|@HOME@|${HOME}|g" "${REPO_ROOT}/bootstrap/service/herdr.service" >"$1"; }
 
 linux_service_ready() {
   [ "${SKIP_LOGIN_SERVICE:-0}" = "1" ] && return 0

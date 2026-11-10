@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# platforms/client-linux.sh. Run it with ./bootstrap.sh client, which picks it on Linux.
+# bootstrap/platforms/client-linux.sh. Run it with ./bootstrap.sh client, which picks it on Linux.
 #
 # Sets up the shell and Ghostty on a Debian or Ubuntu computer that you use for
 # SSH. It also copies the Ghostty terminal description to each server. It does
@@ -13,20 +13,20 @@
 #   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export REPO_ROOT
 SERVERS=()
 USE_GHOSTTY=1
 PACKAGES="ca-certificates curl git zsh python3 tar gzip openssh-client ncurses-bin fd-find bat"
 
-# shellcheck source=lib/common.sh
-source "${REPO_ROOT}/lib/common.sh"
-# shellcheck source=lib/shell.sh
-source "${REPO_ROOT}/lib/shell.sh"
-# shellcheck source=lib/linux-tools.sh
-source "${REPO_ROOT}/lib/linux-tools.sh"
-# shellcheck source=lib/client.sh
-source "${REPO_ROOT}/lib/client.sh"
+# shellcheck source=bootstrap/lib/common.sh
+source "${REPO_ROOT}/bootstrap/lib/common.sh"
+# shellcheck source=bootstrap/lib/shell.sh
+source "${REPO_ROOT}/bootstrap/lib/shell.sh"
+# shellcheck source=bootstrap/lib/linux-tools.sh
+source "${REPO_ROOT}/bootstrap/lib/linux-tools.sh"
+# shellcheck source=bootstrap/lib/client.sh
+source "${REPO_ROOT}/bootstrap/lib/client.sh"
 # shellcheck source=tools/versions.env
 source "${REPO_ROOT}/tools/versions.env"
 

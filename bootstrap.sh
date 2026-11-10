@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bootstrap.sh sets up a Herdr server, or a computer that you use to connect to
 # one. It finds the system, and it runs the script for that system from the
-# folder platforms/. It is safe to run again.
+# folder bootstrap/platforms/. It is safe to run again.
 #
 # Usage: ./bootstrap.sh server [options]
 #        ./bootstrap.sh client --server HOST [--server HOST]... [options]
@@ -26,11 +26,11 @@
 #   --skip-mission-control  macOS: keep the Mission Control shortcuts.
 #
 # With curl, the script downloads the release into
-# ~/.local/share/herdr-bootstrap/<tag>, compares its checksum, and runs it.
+# ~/.local/share/herdspace/<tag>, compares its checksum, and runs it.
 set -euo pipefail
 
 RELEASE="@VERSION@"
-REPO="${HB_REPO:-@REPO@}"
+REPO="${HS_REPO:-@REPO@}"
 ROLE=""
 OS=""
 TAG=""
@@ -79,20 +79,20 @@ if [ -n "$SELF" ] && [ -f "$SELF" ]; then
   HERE="$(cd "$(dirname "$SELF")" && pwd)"
 fi
 
-if [ -z "$HERE" ] || [ ! -d "${HERE}/platforms" ]; then
+if [ -z "$HERE" ] || [ ! -d "${HERE}/bootstrap/platforms" ]; then
   # This copy came from curl. Download the full release and run it.
   [ -n "$ROLE" ] || { usage >&2; exit 2; }
-  TAG="${TAG:-${HB_VERSION:-$RELEASE}}"
+  TAG="${TAG:-${HS_VERSION:-$RELEASE}}"
   case "$TAG" in "" | @*@) die "No release is set. Give one with --version <tag>." ;; esac
-  case "$REPO" in "" | @*@) [ -n "${HB_BASE_URL:-}" ] || die "No repository is set. Set HB_REPO to owner/name." ;; esac
+  case "$REPO" in "" | @*@) [ -n "${HS_BASE_URL:-}" ] || die "No repository is set. Set HS_REPO to owner/name." ;; esac
   for tool in curl tar; do command -v "$tool" >/dev/null 2>&1 || die "This script needs ${tool}."; done
-  base="${HB_BASE_URL:-https://github.com/${REPO}/releases/download/${TAG}}"
-  archive="herdr-bootstrap-${TAG}.tar.gz"
+  base="${HS_BASE_URL:-https://github.com/${REPO}/releases/download/${TAG}}"
+  archive="herdspace-${TAG}.tar.gz"
   work="$(mktemp -d)"
   trap 'rm -rf "$work"' EXIT
   fetch() {
     if curl -fsSL "${base}/$1" -o "${work}/$1" 2>/dev/null; then return 0; fi
-    if [ -z "${HB_BASE_URL:-}" ] && command -v gh >/dev/null 2>&1; then
+    if [ -z "${HS_BASE_URL:-}" ] && command -v gh >/dev/null 2>&1; then
       gh release download "$TAG" --repo "$REPO" --pattern "$1" --dir "$work" --clobber >/dev/null 2>&1 && return 0
     fi
     die "Could not download $1 from ${base}."
@@ -103,14 +103,14 @@ if [ -z "$HERE" ] || [ ! -d "${HERE}/platforms" ]; then
   fetch SHA256SUMS
   want="$(awk -v f="$archive" '$2 == f || $2 == "*" f {print $1}' "${work}/SHA256SUMS")"
   [ -n "$want" ] && [ "$(sha_of "${work}/${archive}")" = "$want" ] || die "The checksum of ${archive} is wrong. Nothing was changed."
-  dest_root="${HB_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/herdr-bootstrap}"
+  dest_root="${HS_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/herdspace}"
   mkdir -p "$dest_root"
   tar -xzf "${work}/${archive}" -C "$work"
   rm -rf "${dest_root:?}/${TAG}"
-  mv "${work}/herdr-bootstrap-${TAG}" "${dest_root}/${TAG}"
+  mv "${work}/herdspace-${TAG}" "${dest_root}/${TAG}"
   info "The files are in ${dest_root}/${TAG}."
   # A script from curl reads its questions from the terminal, not from the pipe.
-  if [ -z "${HB_NO_TTY:-}" ] && { : </dev/tty; } 2>/dev/null; then
+  if [ -z "${HS_NO_TTY:-}" ] && { : </dev/tty; } 2>/dev/null; then
     exec bash "${dest_root}/${TAG}/bootstrap.sh" "$@" </dev/tty
   fi
   exec bash "${dest_root}/${TAG}/bootstrap.sh" "$@"
@@ -145,8 +145,8 @@ case "${ROLE}-${OS}" in
 esac
 
 info "Setting up a ${ROLE} on ${OS}."
-if [ -n "${HB_DRY_RUN:-}" ]; then
-  echo "platforms/${script} ${PASS[*]:-}"
+if [ -n "${HS_DRY_RUN:-}" ]; then
+  echo "bootstrap/platforms/${script} ${PASS[*]:-}"
   exit 0
 fi
-exec "${HERE}/platforms/${script}" ${PASS[@]+"${PASS[@]}"}
+exec "${HERE}/bootstrap/platforms/${script}" ${PASS[@]+"${PASS[@]}"}

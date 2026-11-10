@@ -1,4 +1,4 @@
-# lazygit configuration from herdr-bootstrap.
+# lazygit configuration from herdspace.
 gui:
   nerdFontsVersion: "3"
   showFileTree: true

@@ -30,9 +30,9 @@ sequenceDiagram
 
 | Skill file | Use |
 |------------|-----|
-| [skills/bootstrap-herdr-server/SKILL.md](../skills/bootstrap-herdr-server/SKILL.md) | Set up a Linux or macOS server |
-| [skills/bootstrap-herdr-client/SKILL.md](../skills/bootstrap-herdr-client/SKILL.md) | Set up the macOS or Linux computer that you use for SSH |
-| [skills/update-herdr-bootstrap/SKILL.md](../skills/update-herdr-bootstrap/SKILL.md) | Add a tool or a setting to this repository |
+| [skills/herdspace-server/SKILL.md](../skills/herdspace-server/SKILL.md) | Set up a Linux or macOS server |
+| [skills/herdspace-client/SKILL.md](../skills/herdspace-client/SKILL.md) | Set up the macOS or Linux computer that you use for SSH |
+| [skills/herdspace-update/SKILL.md](../skills/herdspace-update/SKILL.md) | Add a tool or a setting to this repository |
 
 ## Before you ask
 
@@ -45,19 +45,19 @@ If you name the path of a skill file, the agent reads it. You do not need to ins
 To set up a server, paste this prompt:
 
 ```text
-Read skills/bootstrap-herdr-server/SKILL.md in this repository and follow it to set up this computer. Show me the plan before you change anything.
+Read skills/herdspace-server/SKILL.md in this repository and follow it to set up this computer. Show me the plan before you change anything.
 ```
 
 To set up a client, paste this prompt, and replace the server names:
 
 ```text
-Read skills/bootstrap-herdr-client/SKILL.md in this repository and follow it to set up this computer. My servers are my-server and my-other-server. Show me the plan before you change anything.
+Read skills/herdspace-client/SKILL.md in this repository and follow it to set up this computer. My servers are my-server and my-other-server. Show me the plan before you change anything.
 ```
 
 To add something new, paste this prompt, and replace the last sentence:
 
 ```text
-Read skills/update-herdr-bootstrap/SKILL.md in this repository and follow it. I want to add this tool: <name of the tool and why you want it>.
+Read skills/herdspace-update/SKILL.md in this repository and follow it. I want to add this tool: <name of the tool and why you want it>.
 ```
 
 ## What stays with you
@@ -73,5 +73,5 @@ The agent must stop and ask you in these cases:
 To make a skill available in every session of Claude Code, copy its folder:
 
 ```bash
-cp -R skills/bootstrap-herdr-server ~/.claude/skills/
+cp -R skills/herdspace-server ~/.claude/skills/
 ```

@@ -2,7 +2,7 @@
 # Shared helpers. This file works with the bash 3.2 that macOS ships.
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
-export STATE_DIR="${HOME}/.local/share/herdr-bootstrap"
+export STATE_DIR="${HOME}/.local/share/herdspace"
 
 info() { printf '  [info] %s\n' "$*"; }
 ok() { printf '  [ok]   %s\n' "$*"; }

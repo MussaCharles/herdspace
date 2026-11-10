@@ -1,5 +1,5 @@
 ---
-name: update-herdr-bootstrap
+name: herdspace-update
 description: Add a tool or a setting to the herdspace repository, or update its pinned versions. Use when a person wants a new discovery to become part of this Herdr setup.
 ---
 
@@ -9,7 +9,7 @@ Run this skill in the herdspace repository. Read `docs/updating.md` first.
 
 ## Steps
 
-1. Decide where the change belongs: `lib/server.sh` for all servers, one script in `platforms/` for one system, `config/` for a configuration file, or `config/templates/` for a pane template.
+1. Decide where the change belongs: `bootstrap/lib/server.sh` for all servers, one script in `bootstrap/platforms/` for one system, `config/` for a configuration file, or `config/templates/` for a pane template.
 2. Add the step with `run_part` and a check function, so that a new run skips it when it is done. Use `install_file` for a file and `ensure_block` for lines in a file that a person owns.
 3. On Linux, pin a release file with `tools/update-versions.sh`. Never run `curl | sh` from a new source without the agreement of the person.
 4. Add a check to `tests/verify-server.sh`.

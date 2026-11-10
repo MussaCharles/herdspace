@@ -65,7 +65,7 @@ The script never stops a server that was already running.
 
 You can run the script in two ways.
 
-To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdr-bootstrap/<tag>`, compares its checksum, and runs it from there:
+To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdspace/<tag>`, compares its checksum, and runs it from there:
 
 ```bash
 curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
@@ -107,7 +107,7 @@ The first word is `server` or `client`. The script finds the system. Each option
 | `--skip-mission-control` | macOS client: keep the Mission Control shortcuts. |
 | `-h`, `--help` | Show every option. |
 
-`bootstrap.sh` runs one script from the folder `platforms/`, one for each role and system.
+`bootstrap.sh` runs one script from the folder `bootstrap/platforms/`, one for each role and system.
 
 ## Run a script again
 
@@ -154,7 +154,7 @@ These options work for a server and for a client. For each changed file, the que
 
 `--check` exits with status 0 if nothing is missing, and with status 1 if something needs work. A file that you changed does not change the status.
 
-A script records the hash of each file that it installs, in `~/.local/share/herdr-bootstrap/manifest.tsv`. A file with the same hash is a file that you did not change.
+A script records the hash of each file that it installs, in `~/.local/share/herdspace/manifest.tsv`. A file with the same hash is a file that you did not change.
 
 ## Debian or Ubuntu server
 

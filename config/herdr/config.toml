@@ -1,4 +1,4 @@
-# Herdr configuration from herdr-bootstrap.
+# Herdr configuration from herdspace.
 # After a change, run: herdr server reload-config
 onboarding = false
 
