@@ -75,29 +75,17 @@ Run `hopen` again at any time. It starts a stopped session and adds only the new
 
 ## Templates
 
-A template splits a project into named panes, and it starts a program in each pane. This is the `code` template, with Neovim, an agent pane, and lazygit:
+A template splits a project into named panes, and it starts a program in each pane.
 
-![The code template](docs/media/template-code.png)
+| `code` | `agent` |
+|:------:|:-------:|
+| ![The code template: Neovim, an agent, and lazygit](docs/media/template-code.png) | ![The agent template: an agent and a shell](docs/media/template-agent.png) |
+| Neovim, an agent, and lazygit | An agent and a shell |
+| **`grid`** | **`review`** |
+| ![The grid template: four panes](docs/media/template-grid.png) | ![The review template: lazygit and Neovim](docs/media/template-review.png) |
+| Two agents, tests, and a shell | lazygit and Neovim, to read what an agent changed |
 
-The other templates are `agent`, `grid`, and `review`. You can add your own template as a small text file. The [templates guide](docs/templates.md) shows each template.
-
-## See it work
-
-The videos come from real Ghostty on a Linux client. The client connects with SSH to a test server. The keys show at the bottom of each video.
-
-### Move between panes
-
-`Alt+Up` and `Alt+Down` go to the previous or next pane. `ctrl+b`, `z` makes one pane fill the tab.
-
-![Move between panes, and zoom one pane](docs/media/move-panes.gif)
-
-### Use a template
-
-`hopen --apply review` splits the current tab into named panes, and it starts a program in each pane.
-
-![Use a template in a new tab](docs/media/apply-template.gif)
-
-The [templates guide](docs/templates.md#open-every-project) has more videos.
+The default is `plain`, one pane with a shell. You can add your own template as a small text file. The [templates guide](docs/templates.md) shows how, and it has videos of the keys that move between panes.
 
 ## How the parts fit
 
