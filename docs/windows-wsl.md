@@ -1,6 +1,6 @@
 # Windows with WSL
 
-Scope: use a Windows computer as a client, or run a Herdr server inside WSL. WSL (Windows Subsystem for Linux) runs Linux inside Windows. Ghostty has no Windows build, so Windows Terminal is the terminal in this setup.
+Scope: use a Windows machine as a client, or run a Herdr server inside WSL. WSL (Windows Subsystem for Linux) runs Linux inside Windows. Ghostty has no Windows build, so Windows Terminal is the terminal in this setup.
 
 The tests in this repository do not run on Windows. The Linux scripts have tests in containers, but the Windows Terminal steps have no test.
 
@@ -38,7 +38,7 @@ wsl --install -d Ubuntu
 Open Ubuntu from the Start menu, and run the client setup there. The script finds WSL, so it sets up the shell and does not install Ghostty:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/bootstrap.sh | bash -s -- client --server my-server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bootstrap.sh | bash -s -- client --server my-server
 ```
 
 Windows Terminal does not need the terminal description, because it uses `xterm-256color`.
@@ -69,10 +69,10 @@ wsl --shutdown
 Then run the server setup:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bootstrap.sh | bash -s -- server
 ```
 
-A Herdr server in WSL stops when WSL stops. Use this setup for a computer that you work on. For a server that must stay on, use Linux or macOS.
+A Herdr server in WSL stops when WSL stops. Use this setup for a machine that you work on. For a server that must stay on, use Linux or macOS.
 
 ## References
 

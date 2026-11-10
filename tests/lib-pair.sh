@@ -33,7 +33,7 @@ srv_user() { docker exec -u tester -e LANG=C.UTF-8 -e PATH=/home/tester/.local/b
 cli_user() { docker exec -e LANG=C.UTF-8 -e DISPLAY=:9 -e LIBGL_ALWAYS_SOFTWARE=1 -e PATH=/home/tester/.local/bin:/usr/local/bin:/usr/bin:/bin -w /home/tester/repo "$cli" "${in_mask[@]}" "$@"; }
 
 
-# pair_setup bootstraps both computers and connects them with an SSH key.
+# pair_setup bootstraps both machines and connects them with an SSH key.
 pair_setup() {
   srv_root bash -c 'apt-get update -qq >/dev/null; DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends openssh-server >/dev/null; mkdir -p /run/sshd; chmod 755 /run/sshd; /usr/sbin/sshd'
   flags="--skip-login-service"

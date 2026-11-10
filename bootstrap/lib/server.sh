@@ -112,7 +112,7 @@ agent_folder() {
 }
 
 # agent_skill_path prints where a program reads the skill. OpenCode reads the
-# Claude Code folder if Claude Code is on this computer.
+# Claude Code folder if Claude Code is on this machine.
 agent_skill_path() {
   case "$1" in
     claude) echo "${HOME}/.claude/skills/herdr/SKILL.md" ;;
@@ -146,7 +146,7 @@ agents_ready() {
 }
 
 # install_agents adds an integration and the skill for each agent program on
-# this computer. It does not install the agent programs.
+# this machine. It does not install the agent programs.
 install_agents() {
   local agent skill path
   skill="$(mktemp)"

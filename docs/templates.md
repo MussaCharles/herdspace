@@ -143,7 +143,7 @@ flowchart LR
   classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
   classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
   classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
-  stop["Server stops<br/>or the computer restarts"]:::stop --> back["Herdr restores the panes<br/>as plain shells"]:::host
+  stop["Server stops<br/>or the machine restarts"]:::stop --> back["Herdr restores the panes<br/>as plain shells"]:::host
   back --> hopen["hopen work"]:::cmd
   hopen --> again["hopen starts the template<br/>programs in idle panes"]:::data
 ```

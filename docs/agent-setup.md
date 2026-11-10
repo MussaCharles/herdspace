@@ -1,6 +1,6 @@
 # Ask an agent to do the setup
 
-Scope: what to say to a coding agent, so that it can do the setup for you. An agent can read the skill files in [skills](../skills/) and follow them.
+Scope: what to say to a coding agent, so that it can do the setup for you. To install, the agent follows [install.md](../install.md). To change herdspace, an agent in a clone follows the skill files in [skills](../skills/).
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -15,15 +15,15 @@ sequenceDiagram
   autonumber
   actor You
   participant Agent
-  participant Computer
+  participant Machine
   rect rgb(13, 17, 23)
-    You->>Agent: Read this skill file and follow it
-    Agent->>Computer: Find the system and the tools
+    You->>Agent: Follow install.md
+    Agent->>Machine: Find the system and the tools
     Agent->>You: Show the plan
     You->>Agent: Agree
-    Agent->>Computer: Run bootstrap.sh
-    Computer-->>Agent: Log and warnings
-    Agent->>Computer: Run the checks
+    Agent->>Machine: Run bootstrap.sh
+    Machine-->>Agent: Log and warnings
+    Agent->>Machine: Run the checks
     Agent->>You: Report the result
   end
 ```
@@ -31,32 +31,42 @@ sequenceDiagram
 | Skill file | Use |
 |------------|-----|
 | [skills/herdspace-server/SKILL.md](../skills/herdspace-server/SKILL.md) | Set up a Linux or macOS server |
-| [skills/herdspace-client/SKILL.md](../skills/herdspace-client/SKILL.md) | Set up the macOS or Linux computer that you use for SSH |
+| [skills/herdspace-client/SKILL.md](../skills/herdspace-client/SKILL.md) | Set up the macOS or Linux machine that you use for SSH |
 | [skills/herdspace-update/SKILL.md](../skills/herdspace-update/SKILL.md) | Add a tool or a setting to this repository |
 
-## Before you ask
+## Install with an agent
 
-Start the agent on the computer that you want to set up, in the folder of this repository. A skill runs commands on that computer.
+Start the agent on the machine that you want to set up. Paste one of these prompts. The agent reads [install.md](../install.md), which uses the `curl` commands of the release. It does not clone the repository.
 
-If the computer does not have this repository, add this to the start of the prompt: `Clone https://github.com/MussaCharles/herdspace and work in that folder.`
-
-If you name the path of a skill file, the agent reads it. You do not need to install the skill.
-
-## What to say
-
-To set up a server, paste this prompt:
+On the server machine:
 
 ```text
-Read skills/herdspace-server/SKILL.md in this repository and follow it to set up this computer. Show me the plan before you change anything.
+Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
 ```
 
-To set up a client, paste this prompt, and replace the server names:
+On the client machine. Replace the server names:
 
 ```text
-Read skills/herdspace-client/SKILL.md in this repository and follow it to set up this computer. My servers are my-server and my-other-server. Show me the plan before you change anything.
+Set up herdspace on this machine as the client for my-server and my-other-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
 ```
 
-To add something new, paste this prompt, and replace the last sentence:
+On a machine that has Herdr already, to install only `hopen`:
+
+```text
+Install only hopen from herdspace on this machine. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
+```
+
+## Work in a clone of this repository
+
+The skill files are for a person who changes herdspace. Start the agent in the folder of a clone. If you name the path of a skill file, the agent reads it. You do not need to install the skill.
+
+To set up this machine from the files in the clone:
+
+```text
+Read skills/herdspace-server/SKILL.md in this repository and follow it to set up this machine. Show me the plan before you change anything.
+```
+
+To add something new, replace the last sentence:
 
 ```text
 Read skills/herdspace-update/SKILL.md in this repository and follow it. I want to add this tool: <name of the tool and why you want it>.

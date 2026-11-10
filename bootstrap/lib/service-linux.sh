@@ -7,7 +7,7 @@ render_unit() { sed "s|@HOME@|${HOME}|g" "${REPO_ROOT}/bootstrap/service/herdr.s
 
 linux_service_ready() {
   [ "${SKIP_LOGIN_SERVICE:-0}" = "1" ] && return 0
-  # A computer with no systemd user session has nothing to set up.
+  # A machine with no systemd user session has nothing to set up.
   systemctl --user list-units >/dev/null 2>&1 || return 0
   local tmp status=0
   tmp="$(mktemp)"

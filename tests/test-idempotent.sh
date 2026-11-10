@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# test-idempotent.sh proves how a script behaves on a computer that it already
+# test-idempotent.sh proves how a script behaves on a machine that it already
 # set up: a complete run, a partial run, and each way to handle a changed file.
 #
 # Usage: tests/test-idempotent.sh SCRIPT SAMPLE_FILE [script options...]
@@ -18,7 +18,7 @@ run_script() { "$SCRIPT" "$@" 2>&1 </dev/null; }
 backups() { find "$(dirname "$SAMPLE")" -maxdepth 1 -name '*.bak-*' | wc -l | tr -d ' '; }
 clear_backups() { find "$(dirname "$SAMPLE")" -maxdepth 1 -name '*.bak-*' -delete; }
 
-# A complete computer.
+# A complete machine.
 start="$(date +%s)"
 out="$(run_script "$@")"
 took=$(($(date +%s) - start))
@@ -29,7 +29,7 @@ out="$(run_script --check "$@")"; rc=$?
 contains "$out" 'Everything is already set up' 'check: says that it is done'
 if [ "$rc" -eq 0 ]; then pass 'check: exit 0'; else fail "check: exit ${rc}"; fi
 
-# A computer with one part missing.
+# A machine with one part missing.
 cp "${HOME}/.p10k.zsh" "${HOME}/.p10k.saved"
 rm -f "${HOME}/.p10k.zsh"
 before="$(ls -l "$SAMPLE")"
