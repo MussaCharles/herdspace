@@ -261,6 +261,6 @@ hopen --all
 hopen --all work
 ```
 
-To see every list and its state, run `hopen --list`. `hopen` finds a list at `~/<name>.code-workspace` or at `~/<name>/<name>.code-workspace`.
+To open each project with several named panes, use a template. See [templates.md](templates.md). To see every list and its state, run `hopen --list`. `hopen` finds a list at `~/<name>.code-workspace` or at `~/<name>/<name>.code-workspace`.
 
 ![Herdr with one workspace for each project](media/herdr-sessions.png)
