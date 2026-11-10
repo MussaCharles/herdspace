@@ -65,19 +65,19 @@ tests/run-macos.sh
 
 ## Make a release
 
-A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag with a dash, for example `v0.1.0-alpha.5`, becomes a pre-release.
+A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag with a dash, for example `v0.1.0-alpha.6`, becomes a pre-release.
 
 1. Change the tag in the commands of `README.md` and `docs/` to the new tag. Merge the change, and run the tests.
 2. Build the files and look at them:
 
    ```bash
-   tools/release.sh v0.1.0-alpha.5
+   tools/release.sh v0.1.0-alpha.6
    ```
 
 3. Publish the release:
 
    ```bash
-   tools/release.sh v0.1.0-alpha.5 --publish
+   tools/release.sh v0.1.0-alpha.6 --publish
    ```
 
 The script reads the repository name from `gh`, and it writes the name into `bootstrap.sh` and `install.sh`.
