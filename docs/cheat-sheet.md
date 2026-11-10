@@ -297,7 +297,7 @@ herdr server reload-config
 | Start the Auto Title plugin | `herdr plugin action invoke restart --plugin herdr.auto-title` |
 | Show the state of the integrations | `herdr integration status` |
 
-To update the tools, follow [updating.md](updating.md).
+To update the tools, follow [updating.md](updating.md). To see what a computer still needs, run its script with `--check`.
 
 ## Problems
 

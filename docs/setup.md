@@ -61,6 +61,53 @@ flowchart TD
 
 The script never stops a server that was already running.
 
+## Run a script again
+
+You can run a script at any time. It finds what is done, and it does only the rest. On a finished computer, it prints `Everything is already set up` in a few seconds.
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
+  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
+  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
+  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
+  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
+  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
+}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
+flowchart TD
+  classDef cmd fill:#0d1f12,stroke:#3fb950,stroke-width:2px,color:#7ee787
+  classDef step fill:#0d1117,stroke:#58a6ff,stroke-width:1.5px,color:#c9e1ff
+  classDef ask fill:#2a2000,stroke:#e3b341,stroke-width:2px,color:#f2cc60
+  classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
+  classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
+  classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
+  start["Run the script"]:::cmd --> part{"Is this part<br/>already done?"}:::ask
+  part -- " yes " --> skip["Skip it"]:::step
+  part -- " no " --> run["Do only this part"]:::cmd
+  run --> file{"File state?"}:::ask
+  skip --> file
+  file -- " the same " --> same["No change"]:::step
+  file -- " missing " --> add["Add it"]:::cmd
+  file -- " older, not changed by you " --> update["Update it, with a backup"]:::cmd
+  file -- " changed by you " --> ask{"Option?"}:::ask
+  ask -- " none " --> q["Ask you"]:::host
+  ask -- " --keep-existing " --> keep["Keep your file"]:::data
+  ask -- " --replace-all " --> rep["Replace, with a backup"]:::stop
+```
+
+| Command | Effect |
+|---------|--------|
+| `./bootstrap-server-linux.sh` | Do what is missing, and ask about each file that you changed. |
+| `./bootstrap-server-linux.sh --check` | Report what is done, missing, or different. Change nothing. |
+| `./bootstrap-server-linux.sh --keep-existing` | Add what is missing, and change no existing file. |
+| `./bootstrap-server-linux.sh --replace-all` | Use the repository version of every file. Each replaced file gets a backup. |
+
+These options work with all four scripts. For each changed file, the question offers keep, replace, show the difference, keep all, and replace all. With no terminal, for example when an agent runs the script, the script keeps your files and lists them.
+
+`--check` exits with status 0 if nothing is missing, and with status 1 if something needs work. A file that you changed does not change the status.
+
+A script records the hash of each file that it installs, in `~/.local/share/herdr-bootstrap/manifest.tsv`. A file with the same hash is a file that you did not change.
+
 ## Debian or Ubuntu server
 
 The script needs `sudo` to install system packages and to change the login shell. If `sudo` asks for a password, type it. Run the script as the account that will use Herdr:
@@ -143,7 +190,7 @@ Follow [windows-wsl.md](windows-wsl.md).
 
 - Ghostty cannot limit a key to one program. The keys that Herdr uses do nothing in a Ghostty window that has no Herdr.
 - On a Mac, the Option key sends Alt in Ghostty, so it does not type special characters there.
-- The script replaces `~/.zshrc` and keeps a backup. Put your own lines in `~/.zshrc.local`.
+- The script manages `~/.zshrc`. Put your own lines in `~/.zshrc.local`, so that they stay when `~/.zshrc` changes.
 - In a shell with no terminal, `ls` and `cat` stay plain, so agents and scripts get the output that they expect.
 
 ## Make sure that it works
