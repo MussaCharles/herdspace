@@ -1,0 +1,10 @@
+# code: Neovim on the left, an agent on the top right, and lazygit on the bottom right.
+#
+# Each line is one pane: NAME FROM DIRECTION SIZE COMMAND
+#   FROM       the pane to split. The first line has "-", because it is the first pane.
+#   DIRECTION  right or down.
+#   SIZE       the part of the FROM pane that stays with FROM, from 0.1 to 0.9.
+#   COMMAND    the program to start, or "-" for a plain shell.
+editor  -       -      -     nvim .
+agent   editor  right  0.55  -
+git     agent   down   0.45  lazygit

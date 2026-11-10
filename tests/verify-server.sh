@@ -143,6 +143,57 @@ for name in hb-all-one hb-all-two; do
   herdr session delete "$name" >/dev/null 2>&1
 done
 rm -rf "$HOME/hb-all-two" "$HOME/hb-all-one-dir" "$HOME/hb-all-one.code-workspace"
+
+# Templates split each new workspace into named panes.
+contains "$(cat "$HOME/.config/herdr-auto-title/config.env")" 'HERDR_AUTO_TITLE_PANES=false' 'auto title keeps pane names'
+tlist="$(hopen --templates 2>&1)"
+for t in plain code agent grid review; do contains "$tlist" "$t" "template ${t} is listed"; done
+mkdir -p "$HOME/hb-tpl/one" "$HOME/hb-tpl/two" "$HOME/hb-tpl/three"
+cat >"$HOME/hb-tpl/hb-tpl.code-workspace" <<'JSON'
+{
+  "folders": [ { "name": "one", "path": "./one" }, { "name": "two", "path": "./two" }, { "name": "three", "path": "./three" } ],
+  "settings": { "hopen.template": "agent", "hopen.templates": { "one": "code", "three": "plain", "hb-tpl": "plain" } }
+}
+JSON
+pane_labels() {
+  HERDR_SESSION=hb-tpl herdr pane list | python3 -c '
+import json, sys
+ws = {w["label"]: w["workspace_id"] for w in json.load(open(sys.argv[2]))["result"]["workspaces"]}
+print(",".join(sorted(p.get("label") or "-" for p in json.load(sys.stdin)["result"]["panes"] if p["workspace_id"] == ws[sys.argv[1]])))
+' "$1" <(HERDR_SESSION=hb-tpl herdr workspace list)
+}
+hopen hb-tpl --no-attach >/dev/null 2>&1
+sleep 3
+contains "$(pane_labels one)" 'agent,editor,git' 'template code makes three named panes'
+contains "$(pane_labels two)" 'agent,shell' 'the default template applies to the other folders'
+if [ "$(pane_labels three)" = '-' ] || [ "$(pane_labels three | tr ',' '\n' | wc -l | tr -d ' ')" = 1 ]; then pass 'plain keeps one pane'; else fail "plain keeps one pane: $(pane_labels three)"; fi
+git_pane() { HERDR_SESSION=hb-tpl herdr pane list | python3 -c '
+import json, sys
+ws = {w["label"]: w["workspace_id"] for w in json.load(open(sys.argv[1]))["result"]["workspaces"]}
+print([p["pane_id"] for p in json.load(sys.stdin)["result"]["panes"] if p["workspace_id"] == ws["one"] and p.get("label") == "git"][0])
+' <(HERDR_SESSION=hb-tpl herdr workspace list); }
+fg_of() { HERDR_SESSION=hb-tpl herdr pane process-info --pane "$1" | python3 -c 'import json,sys; print(" ".join(p["name"] for p in json.load(sys.stdin)["result"]["process_info"]["foreground_processes"]))'; }
+sleep 2
+contains "$(fg_of "$(git_pane)")" 'lazygit' 'template starts lazygit'
+hopen hb-tpl --no-attach >/dev/null 2>&1
+contains "$(pane_labels one)" 'agent,editor,git' 'a second run adds no panes'
+herdr session stop hb-tpl >/dev/null 2>&1
+sleep 1
+restart_out="$(hopen hb-tpl --no-attach 2>&1)"
+contains "$restart_out" 'programs started again' 'hopen reports the restarted programs'
+sleep 3
+contains "$(fg_of "$(git_pane)")" 'lazygit' 'lazygit runs again after a stop'
+contains "$(pane_labels one)" 'agent,editor,git' 'pane names stay after a stop'
+contains "$(hopen hb-tpl --template nope --no-attach 2>&1)" 'No template named nope' 'unknown template is refused'
+# --apply runs inside a pane. A new workspace with one pane stands in for it.
+newroot="$(HERDR_SESSION=hb-tpl herdr workspace create --cwd "$HOME/hb-tpl" --label applied --no-focus | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
+HERDR_SESSION=hb-tpl HERDR_ENV=1 HERDR_PANE_ID="$newroot" hopen --apply grid >/dev/null 2>&1
+contains "$(pane_labels applied)" 'agent-1,agent-2,shell,tests' 'apply splits the current tab'
+contains "$(HERDR_SESSION=hb-tpl HERDR_ENV=1 HERDR_PANE_ID="$newroot" hopen --apply code 2>&1)" 'has 4 panes' 'apply refuses a tab with many panes'
+herdr session stop hb-tpl >/dev/null 2>&1
+sleep 1
+herdr session delete hb-tpl >/dev/null 2>&1
+rm -rf "$HOME/hb-tpl" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-tpl.tsv"
 rm -rf "$work"
 
 printf 'RESULT failures=%s\n' "$failures"

@@ -169,11 +169,29 @@ install_file() {
 }
 
 # install_tree copies every file below SRC_DIR to the same place below DEST_DIR.
+# Files named in SEED_ONLY are copied only if they are missing, because a
+# program changes them after the first start.
 install_tree() {
   local src_dir="$1" dest_dir="$2" file
   while IFS= read -r file; do
-    install_file "${src_dir}/${file}" "${dest_dir}/${file}"
+    if [ -n "${SEED_ONLY:-}" ] && grep -Fxq -- "$file" <<<"$SEED_ONLY"; then
+      seed_file "${src_dir}/${file}" "${dest_dir}/${file}"
+    else
+      install_file "${src_dir}/${file}" "${dest_dir}/${file}"
+    fi
   done < <(cd "$src_dir" && find . -type f | sed 's|^\./||')
+}
+
+# seed_file copies SRC to DEST only if DEST is missing.
+seed_file() {
+  [ -e "$2" ] && return 0
+  if [ "$MODE" = "check" ]; then
+    note_todo "${2} is missing"
+  else
+    mkdir -p "$(dirname "$2")"
+    cp "$1" "$2"
+    CHANGED=$((CHANGED + 1))
+  fi
 }
 
 # ensure_block puts TEXT between two marker lines in FILE. It replaces the old

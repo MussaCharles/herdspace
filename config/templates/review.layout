@@ -1,0 +1,3 @@
+# review: lazygit on the left, and Neovim on the right, to read what an agent changed.
+git     -    -      -    lazygit
+editor  git  right  0.5  nvim .
