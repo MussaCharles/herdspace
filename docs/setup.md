@@ -68,23 +68,23 @@ You can run the script in two ways.
 To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdr-bootstrap/<tag>`, compares its checksum, and runs it from there:
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
 ```
 
 To read or change the files first, clone this repository, and run the script from the clone:
 
 ```bash
-git clone <repository-url> ~/herdr-bootstrap
+git clone <repository-url> ~/herdspace
 ```
 
 ```bash
-cd ~/herdr-bootstrap && ./bootstrap.sh server
+cd ~/herdspace && ./bootstrap.sh server
 ```
 
 If the repository is private, `curl` cannot download the release. Log in with `gh auth login`, and then download the script with the GitHub CLI:
 
 ```bash
-gh release download v0.1.0-alpha.3 --repo <owner>/herdr-bootstrap --pattern bootstrap.sh --dir /tmp/hb && bash /tmp/hb/bootstrap.sh server
+gh release download v0.1.0-alpha.3 --repo <owner>/herdspace --pattern bootstrap.sh --dir /tmp/hb && bash /tmp/hb/bootstrap.sh server
 ```
 
 The script also uses the GitHub CLI for the rest of the release.

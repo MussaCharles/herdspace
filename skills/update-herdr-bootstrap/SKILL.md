@@ -1,11 +1,11 @@
 ---
 name: update-herdr-bootstrap
-description: Add a tool or a setting to the herdr-bootstrap repository, or update its pinned versions. Use when a person wants a new discovery to become part of this Herdr setup.
+description: Add a tool or a setting to the herdspace repository, or update its pinned versions. Use when a person wants a new discovery to become part of this Herdr setup.
 ---
 
-# Update herdr-bootstrap
+# Update herdspace
 
-Run this skill in the herdr-bootstrap repository. Read `docs/updating.md` first.
+Run this skill in the herdspace repository. Read `docs/updating.md` first.
 
 ## Steps
 
