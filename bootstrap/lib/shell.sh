@@ -36,7 +36,7 @@ setup_shell() {
   install_file "${REPO_ROOT}/config/shell/p10k.zsh" "${HOME}/.p10k.zsh"
   tmp="$(mktemp)"
   printf 'export BOOTSTRAP_ROLE=%s\nexport BOOTSTRAP_PROMPT_COLOR=%s\n' "$role" "$color" >"$tmp"
-  install_file "$tmp" "${HOME}/.config/herdr-bootstrap/env.zsh"
+  install_file "$tmp" "${HOME}/.config/herdspace/env.zsh"
   rm -f "$tmp"
 }
 
@@ -53,5 +53,5 @@ if [[ -n "$SSH_CONNECTION" && -t 1 && -x "$HOME/.local/bin/herdr-update-check" ]
   "$HOME/.local/bin/herdr-update-check"
 fi'
   fi
-  ensure_block "${HOME}/.zprofile" "herdr-bootstrap" "$text"
+  ensure_block "${HOME}/.zprofile" "herdspace" "$text"
 }

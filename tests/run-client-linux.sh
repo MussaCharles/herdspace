@@ -12,7 +12,7 @@ pair_setup
 grep -E '\[(warn|err)\]' tests/.work/client.log | cut -c1-160
 if cli_user cmp -s config/ghostty/config-linux.ghostty /home/tester/.config/ghostty/config.ghostty; then pass 'ghostty configuration'; else fail 'ghostty configuration'; fi
 if srv_user infocmp -x xterm-ghostty >/dev/null 2>&1; then pass 'terminal description on the server'; else fail 'terminal description on the server'; fi
-if cli_user grep -q 'BOOTSTRAP_PROMPT_COLOR=166' /home/tester/.config/herdr-bootstrap/env.zsh; then pass 'client prompt color'; else fail 'client prompt color'; fi
+if cli_user grep -q 'BOOTSTRAP_PROMPT_COLOR=166' /home/tester/.config/herdspace/env.zsh; then pass 'client prompt color'; else fail 'client prompt color'; fi
 if cli_user tests/test-idempotent.sh bootstrap.sh /home/tester/.config/ghostty/config.ghostty client --server my-server >tests/.work/client-idem.log 2>&1; then pass 'idempotent client'; else fail 'idempotent client'; fi
 grep -E '^(FAIL|RESULT)' tests/.work/client-idem.log | cut -c1-170
 

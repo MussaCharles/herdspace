@@ -1,4 +1,4 @@
-# Managed by herdr-bootstrap. A new run replaces this file.
+# Managed by herdspace. A new run replaces this file.
 # Put your own lines in ~/.zshrc.local.
 
 # This line must stay above the instant prompt, which redirects the terminal.
@@ -8,7 +8,7 @@ if (( bootstrap_has_tty )) && [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instan
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-[[ -r "$HOME/.config/herdr-bootstrap/env.zsh" ]] && source "$HOME/.config/herdr-bootstrap/env.zsh"
+[[ -r "$HOME/.config/herdspace/env.zsh" ]] && source "$HOME/.config/herdspace/env.zsh"
 
 export ZSH="$HOME/.oh-my-zsh"
 export DISABLE_AUTO_UPDATE=true

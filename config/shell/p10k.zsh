@@ -1,4 +1,4 @@
-# Powerlevel10k configuration from herdr-bootstrap.
+# Powerlevel10k configuration from herdspace.
 # BOOTSTRAP_PROMPT_COLOR sets the folder color. It differs on client and server.
 
 typeset -g POWERLEVEL9K_MODE=nerdfont-v3

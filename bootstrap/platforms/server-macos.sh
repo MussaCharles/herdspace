@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# platforms/server-macos.sh. Run it with ./bootstrap.sh server, which picks it on macOS.
+# bootstrap/platforms/server-macos.sh. Run it with ./bootstrap.sh server, which picks it on macOS.
 #
 # Sets up Herdr and its tools on a macOS server. Run it as the account that will
 # use Herdr. It does only the parts that are not done.
@@ -12,20 +12,20 @@
 #   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export REPO_ROOT
 SKIP_NVIM_TOOLS=0
 SKIP_LOGIN_SERVICE=0
 FORMULAS="herdr neovim lazygit git-delta eza zoxide fzf bat fd ripgrep node"
 
-# shellcheck source=lib/common.sh
-source "${REPO_ROOT}/lib/common.sh"
-# shellcheck source=lib/shell.sh
-source "${REPO_ROOT}/lib/shell.sh"
-# shellcheck source=lib/server.sh
-source "${REPO_ROOT}/lib/server.sh"
-# shellcheck source=lib/service-macos.sh
-source "${REPO_ROOT}/lib/service-macos.sh"
+# shellcheck source=bootstrap/lib/common.sh
+source "${REPO_ROOT}/bootstrap/lib/common.sh"
+# shellcheck source=bootstrap/lib/shell.sh
+source "${REPO_ROOT}/bootstrap/lib/shell.sh"
+# shellcheck source=bootstrap/lib/server.sh
+source "${REPO_ROOT}/bootstrap/lib/server.sh"
+# shellcheck source=bootstrap/lib/service-macos.sh
+source "${REPO_ROOT}/bootstrap/lib/service-macos.sh"
 # shellcheck source=tools/versions.env
 source "${REPO_ROOT}/tools/versions.env"
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# platforms/client-macos.sh. Run it with ./bootstrap.sh client, which picks it on macOS.
+# bootstrap/platforms/client-macos.sh. Run it with ./bootstrap.sh client, which picks it on macOS.
 #
 # Sets up Ghostty and the shell on the Mac that you use for SSH. It also copies
 # the Ghostty terminal description to each server. It does only the parts that
@@ -13,7 +13,7 @@
 #   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export REPO_ROOT
 SERVERS=()
 SKIP_MISSION_CONTROL=0
@@ -21,12 +21,12 @@ FORMULAS="eza zoxide fzf bat fd"
 ACTIVATE_SETTINGS="${ACTIVATE_SETTINGS:-/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings}"
 export TERMINFO="${GHOSTTY_TERMINFO:-/Applications/Ghostty.app/Contents/Resources/terminfo}"
 
-# shellcheck source=lib/common.sh
-source "${REPO_ROOT}/lib/common.sh"
-# shellcheck source=lib/shell.sh
-source "${REPO_ROOT}/lib/shell.sh"
-# shellcheck source=lib/client.sh
-source "${REPO_ROOT}/lib/client.sh"
+# shellcheck source=bootstrap/lib/common.sh
+source "${REPO_ROOT}/bootstrap/lib/common.sh"
+# shellcheck source=bootstrap/lib/shell.sh
+source "${REPO_ROOT}/bootstrap/lib/shell.sh"
+# shellcheck source=bootstrap/lib/client.sh
+source "${REPO_ROOT}/bootstrap/lib/client.sh"
 # shellcheck source=tools/versions.env
 source "${REPO_ROOT}/tools/versions.env"
 

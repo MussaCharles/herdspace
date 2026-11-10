@@ -4,7 +4,7 @@
 # once every 5 hours. Use --now to run it at once.
 set -u
 
-cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/herdr-bootstrap"
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/herdspace"
 stamp="${cache_dir}/last-update-check"
 
 if [ "${1:-}" != "--now" ] && [ -n "$(find "$stamp" -mmin -300 2>/dev/null)" ]; then

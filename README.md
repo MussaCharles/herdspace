@@ -2,7 +2,7 @@
 
 Shell scripts that set up [Herdr](https://herdr.dev) on a new computer. Herdr is a terminal multiplexer for coding agents. A terminal multiplexer keeps your terminals running on a server after you disconnect.
 
-herdspace was called herdr-bootstrap before. Some folders on a set-up computer still use the old name, for example `~/.config/herdr-bootstrap`.
+herdspace was called herdr-bootstrap before.
 
 You run one script on each computer. The script installs the tools, writes the configuration, and starts Herdr. If you run it again, it does only what is missing.
 
@@ -90,11 +90,11 @@ flowchart LR
   run["bootstrap.sh"]:::cmd --> role{"server or client?"}:::ask
   role -- " server " --> sos{"System?"}:::ask
   role -- " client " --> cos{"System?"}:::ask
-  sos -- " Linux or WSL " --> s1["platforms/<br/>server-linux.sh"]:::data
-  sos -- " macOS " --> s2["platforms/<br/>server-macos.sh"]:::data
-  cos -- " macOS " --> c1["platforms/<br/>client-macos.sh"]:::data
-  cos -- " Linux " --> c2["platforms/<br/>client-linux.sh"]:::data
-  cos -- " WSL " --> c3["platforms/<br/>client-linux.sh<br/>--no-ghostty"]:::data
+  sos -- " Linux or WSL " --> s1["bootstrap/platforms/<br/>server-linux.sh"]:::data
+  sos -- " macOS " --> s2["bootstrap/platforms/<br/>server-macos.sh"]:::data
+  cos -- " macOS " --> c1["bootstrap/platforms/<br/>client-macos.sh"]:::data
+  cos -- " Linux " --> c2["bootstrap/platforms/<br/>client-linux.sh"]:::data
+  cos -- " WSL " --> c3["bootstrap/platforms/<br/>client-linux.sh<br/>--no-ghostty"]:::data
 ```
 
 | Command | Effect |

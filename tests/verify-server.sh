@@ -26,7 +26,7 @@ same 'lazygit configuration' "$ROOT/config/lazygit/config.yml" "$lg/config.yml"
 same 'neovim keys' "$ROOT/config/nvim/lua/config/keymaps.lua" "$HOME/.config/nvim/lua/config/keymaps.lua"
 same 'zshrc' "$ROOT/config/shell/zshrc.zsh" "$HOME/.zshrc"
 same 'p10k' "$ROOT/config/shell/p10k.zsh" "$HOME/.p10k.zsh"
-contains "$(cat "$HOME/.config/herdr-bootstrap/env.zsh")" 'BOOTSTRAP_PROMPT_COLOR=30' 'server prompt color'
+contains "$(cat "$HOME/.config/herdspace/env.zsh")" 'BOOTSTRAP_PROMPT_COLOR=30' 'server prompt color'
 contains "$(cat "$HOME/.zprofile")" 'herdr-update-check' 'zprofile block'
 
 # Shell behavior with and without a real terminal.

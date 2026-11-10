@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# platforms/server-linux.sh. Run it with ./bootstrap.sh server, which picks it on Linux.
+# bootstrap/platforms/server-linux.sh. Run it with ./bootstrap.sh server, which picks it on Linux.
 #
 # Sets up Herdr and its tools on a Debian or Ubuntu server. Run it as the
 # account that will use Herdr. It does only the parts that are not done.
@@ -12,22 +12,22 @@
 #   --replace-all    Use the repository version of every file, with backups.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export REPO_ROOT
 SKIP_NVIM_TOOLS=0
 SKIP_LOGIN_SERVICE=0
 PACKAGES="ca-certificates curl git zsh python3 tar gzip unzip ripgrep fd-find bat build-essential nodejs npm"
 
-# shellcheck source=lib/common.sh
-source "${REPO_ROOT}/lib/common.sh"
-# shellcheck source=lib/shell.sh
-source "${REPO_ROOT}/lib/shell.sh"
-# shellcheck source=lib/server.sh
-source "${REPO_ROOT}/lib/server.sh"
-# shellcheck source=lib/linux-tools.sh
-source "${REPO_ROOT}/lib/linux-tools.sh"
-# shellcheck source=lib/service-linux.sh
-source "${REPO_ROOT}/lib/service-linux.sh"
+# shellcheck source=bootstrap/lib/common.sh
+source "${REPO_ROOT}/bootstrap/lib/common.sh"
+# shellcheck source=bootstrap/lib/shell.sh
+source "${REPO_ROOT}/bootstrap/lib/shell.sh"
+# shellcheck source=bootstrap/lib/server.sh
+source "${REPO_ROOT}/bootstrap/lib/server.sh"
+# shellcheck source=bootstrap/lib/linux-tools.sh
+source "${REPO_ROOT}/bootstrap/lib/linux-tools.sh"
+# shellcheck source=bootstrap/lib/service-linux.sh
+source "${REPO_ROOT}/bootstrap/lib/service-linux.sh"
 # shellcheck source=tools/versions.env
 source "${REPO_ROOT}/tools/versions.env"
 

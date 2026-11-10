@@ -87,7 +87,7 @@ The script reads the repository name from `gh`. No file in git holds the name.
 ## Add something new
 
 1. Put a configuration file in `config/`.
-2. Add an install step to `lib/server.sh` for all servers, or to one script in `platforms/` for one system. Use `run_part` with a check function, so that a new run skips the step when it is done.
+2. Add an install step to `bootstrap/lib/server.sh` for all servers, or to one script in `bootstrap/platforms/` for one system. Use `run_part` with a check function, so that a new run skips the step when it is done.
 3. Add a line to `tests/verify-server.sh` that proves the step works.
 4. Add the step to [setup.md](setup.md) and to the cheat sheet.
 5. Run the tests.
