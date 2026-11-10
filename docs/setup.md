@@ -1,6 +1,6 @@
 # Setup
 
-Scope: set up a new client or server with `bootstrap.sh`, or install only `hopen`. Use one section for each computer. Set up the server first.
+Scope: set up a new client or server with `bootstrap.sh`, or install only `hopen`. Use one section for each machine. Set up the server first.
 
 You need an SSH connection from the client to the server that works with no password. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`. If you connect with an IP address, follow [Connect with an IP address](#connect-with-an-ip-address) first.
 
@@ -102,7 +102,7 @@ You can run the script in two ways.
 To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdspace/<tag>`, compares its checksum, and runs it from there:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bootstrap.sh | bash -s -- server
 ```
 
 To read or change the files first, clone this repository, and run the script from the clone:
@@ -197,7 +197,7 @@ The scripts do not install the agent programs. Install them first, or run the se
 
 ## Run a script again
 
-You can run a script at any time. It finds what is done, and it does only the rest. On a finished computer, it prints `Everything is already set up` in a few seconds.
+You can run a script at any time. It finds what is done, and it does only the rest. On a finished machine, it prints `Everything is already set up` in a few seconds.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -257,7 +257,7 @@ The script takes some minutes. These options make it shorter:
 | `--skip-nvim-tools` | Neovim installs its language tools at its first start. |
 | `--skip-login-service` | Herdr starts at your next `herdr` command. |
 
-A systemd user service starts Herdr at boot. A computer with no systemd has no service, and the script shows a warning.
+A systemd user service starts Herdr at boot. A machine with no systemd has no service, and the script shows a warning.
 
 ## macOS server
 
@@ -343,20 +343,20 @@ If a key does nothing, Ghostty or the desktop still uses that key. Run the clien
 
 ### Install only hopen
 
-On a computer that has Herdr already, you can install `hopen` and its templates without the rest of the setup. You need Python 3 and curl:
+On a machine that has Herdr already, you can install `hopen` and its templates without the rest of the setup. You need Python 3 and curl:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/install.sh | bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/install.sh | bash
 ```
 
 `install.sh` copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`, after a checksum check. `hopen --version` shows the installed release.
 
-To update `hopen`, run the install command of the new release. Each release page shows its own command. `install.sh` keeps a template that you changed, and it writes the new version next to it as `<name>.layout.new`. After the first normal release, `releases/latest/download/install.sh` installs the newest release. That address skips pre-releases, such as the alpha versions.
+To update `hopen`, run the install command of the new release. Each release page shows its own command. `install.sh` keeps a template that you changed, and it writes the new version next to it as `<name>.layout.new`. The address `https://github.com/MussaCharles/herdspace/releases/latest/download/install.sh` installs the newest normal release. It skips pre-releases, such as the alpha versions.
 
 To remove `hopen`, run the same command with `--uninstall`. It keeps your templates:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/install.sh | bash -s -- --uninstall
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/install.sh | bash -s -- --uninstall
 ```
 
 ### Write a list

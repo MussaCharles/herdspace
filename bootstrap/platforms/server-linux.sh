@@ -57,7 +57,7 @@ install_packages() {
   link_debian_tools
 }
 
-step "Checking this computer"
+step "Checking this machine"
 run_part "System packages" packages_ready install_packages
 setup_release_tools herdr neovim lazygit git-delta eza zoxide fzf
 setup_shell server

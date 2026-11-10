@@ -1,6 +1,6 @@
 # Updating
 
-Scope: change the tools and the configuration in this repository, and apply a change to a computer.
+Scope: change the tools and the configuration in this repository, and apply a change to a machine.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -23,7 +23,7 @@ flowchart LR
   c -- " no " --> a
   c -- " yes " --> d["Merge the change"]:::data
   d --> e["Make a release"]:::cmd
-  e --> f["Run bootstrap.sh<br/>again on each computer"]:::cmd
+  e --> f["Run bootstrap.sh<br/>again on each machine"]:::cmd
 ```
 
 ## Apply the newest version of this repository
@@ -65,19 +65,19 @@ tests/run-macos.sh
 
 ## Make a release
 
-A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag with a dash, for example `v0.1.0-alpha.6`, becomes a pre-release.
+A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag with a dash, for example `v0.2.0-alpha.1`, becomes a pre-release.
 
-1. Change the tag in the commands of `README.md` and `docs/` to the new tag. Merge the change, and run the tests.
+1. Change the tag in the commands of `README.md`, `install.md`, and `docs/` to the new tag. Merge the change, and run the tests.
 2. Build the files and look at them:
 
    ```bash
-   tools/release.sh v0.1.0-alpha.6
+   tools/release.sh v0.1.1
    ```
 
 3. Publish the release:
 
    ```bash
-   tools/release.sh v0.1.0-alpha.6 --publish
+   tools/release.sh v0.1.1 --publish
    ```
 
 The script reads the repository name from `gh`, and it writes the name into `bootstrap.sh` and `install.sh`.

@@ -21,6 +21,6 @@ Run this skill on the server, from the root folder of the herdspace repository.
 ## Rules
 
 - Do not run `herdr server stop`. A stop closes every pane.
-- Do not edit the configuration files on the computer. Change them in this repository and run the script again.
+- Do not edit the configuration files on the machine. Change them in this repository and run the script again.
 - Do not print the contents of a secret file.
 - If an integration fails, ask the person to start that agent program one time. Then run the script again.

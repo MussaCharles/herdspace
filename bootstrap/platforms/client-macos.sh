@@ -84,7 +84,7 @@ release_mission_control() {
   info "If a Ctrl arrow key still moves a space, log out and log in."
 }
 
-step "Checking this computer"
+step "Checking this machine"
 run_part "Homebrew" homebrew_ready install_homebrew
 run_part "Homebrew packages" formulas_ready install_formulas
 run_part "Ghostty" ghostty_ready install_ghostty

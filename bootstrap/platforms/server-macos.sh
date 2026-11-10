@@ -49,7 +49,7 @@ formulas_ready() { brew_formulas_ready $FORMULAS; }
 # shellcheck disable=SC2086
 install_formulas() { brew_install $FORMULAS; }
 
-step "Checking this computer"
+step "Checking this machine"
 run_part "Homebrew" homebrew_ready install_homebrew
 run_part "Homebrew packages" formulas_ready install_formulas
 setup_shell server

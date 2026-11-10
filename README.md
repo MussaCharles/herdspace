@@ -11,53 +11,59 @@ With herdspace, you can:
 - Start the template programs again after a restart.
 - Set up Herdr and its tools on a new server and client with one command, on macOS, Linux, or Windows with WSL.
 
-herdspace has two parts. `hopen` opens your projects. `bootstrap.sh` sets up a computer, and the server setup includes `hopen`.
+herdspace has two parts. `hopen` opens your projects. `bootstrap.sh` sets up a machine, and the server setup includes `hopen`.
 
 ## Quick start
 
-### Use hopen on a computer that has Herdr
+herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the one that you sit at. It connects to the server machine with SSH. Set up the server machine first.
 
-You need Herdr, Python 3, and curl. Install `hopen` and its templates:
+### Server machine
 
-```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/install.sh | bash
-```
-
-### Set up a new computer
-
-Set up the server first. Run this command on the server:
+Run this command on the server machine. It installs Herdr, its tools, and `hopen`:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bootstrap.sh | bash -s -- server
 ```
 
-Run this command on the computer that you use to connect. Give the SSH name of the server. If you connect with an IP address, read [Connect with an IP address](docs/setup.md#connect-with-an-ip-address) first.
+### Client machine
+
+Run this command on the client machine. It sets up Ghostty, the shell, and the Herdr keys. Give the SSH name of the server:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-alpha.5/bootstrap.sh | bash -s -- client --server my-server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bootstrap.sh | bash -s -- client --server my-server
 ```
 
-The script finds the system, downloads the release, and compares its checksum. Then it runs the setup for that system. Run it again at any time. It does only what is missing, and it asks before it replaces a file that you changed.
+If you connect with an IP address, read [Connect with an IP address](docs/setup.md#connect-with-an-ip-address) first.
 
-The [setup guide](docs/setup.md) has every option and the steps for each system.
+### Only hopen, on a machine that has Herdr
+
+If a machine has Herdr already, you can install only `hopen` and its templates. You need Python 3 and curl:
+
+```bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/install.sh | bash
+```
+
+### How the commands work
+
+`bootstrap.sh` finds the system, downloads the release, and compares its checksum. Then it runs the setup for that system. Run it again at any time. It does only what is missing, and it asks before it replaces a file that you changed. The [setup guide](docs/setup.md) has every option and the steps for each system.
 
 ### Ask an agent to do the setup
 
-You can also give the setup to a coding agent, for example Claude Code or Codex. Start the agent on the computer that you want to set up, and paste one of these prompts.
+You can also give the setup to a coding agent, for example Claude Code or Codex. Start the agent on the machine that you want to set up, and paste one of these prompts. The agent reads [install.md](install.md) and runs the same commands as above.
 
-On the server:
-
-```text
-Clone https://github.com/MussaCharles/herdspace and read skills/herdspace-server/SKILL.md in it. Follow it to set up this computer. Show me the plan before you change anything.
-```
-
-On the computer that you use to connect. Replace the server, for example with `my-server` or `me@203.0.113.10`:
+On the server machine:
 
 ```text
-Clone https://github.com/MussaCharles/herdspace and read skills/herdspace-client/SKILL.md in it. Follow it to set up this computer. My server is my-server. Show me the plan before you change anything.
+Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
 ```
 
-The agent asks you before it changes a file, and it tells you when a command needs your password. [Ask an agent to do the setup](docs/agent-setup.md) has more prompts.
+On the client machine. Replace `my-server` with the SSH name or the address of your server:
+
+```text
+Set up herdspace on this machine as the client for my-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
+```
+
+The agent shows you what will change before it changes anything, and it gives you each command that needs your password.
 
 ## Open your projects
 
@@ -145,7 +151,7 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 - [Setup guide](docs/setup.md): set up a server and a client, every option, and what the setup installs.
 - [Templates and panes](docs/templates.md): each template, how to add your own, and videos of the pane keys.
 - [Cheat sheet](docs/cheat-sheet.md): keys and commands for daily use.
-- [Windows with WSL](docs/windows-wsl.md): use a Windows computer as a client.
+- [Windows with WSL](docs/windows-wsl.md): use a Windows machine as a client.
 - [Ask an agent to do the setup](docs/agent-setup.md): what to say to a coding agent.
 - [Updating](docs/updating.md): update the tools, add something new, and make a release.
 - [Testing](docs/testing.md): the tests, and how to run them.

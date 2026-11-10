@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bootstrap/platforms/client-linux.sh. Run it with ./bootstrap.sh client, which picks it on Linux.
 #
-# Sets up the shell and Ghostty on a Debian or Ubuntu computer that you use for
+# Sets up the shell and Ghostty on a Debian or Ubuntu machine that you use for
 # SSH. It also copies the Ghostty terminal description to each server. It does
 # only the parts that are not done. Use --no-ghostty with another terminal.
 #
@@ -63,7 +63,7 @@ install_packages() {
   link_debian_tools
 }
 
-step "Checking this computer"
+step "Checking this machine"
 run_part "System packages" packages_ready install_packages
 setup_release_tools eza zoxide fzf
 setup_shell client

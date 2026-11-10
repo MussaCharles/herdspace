@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bootstrap.sh sets up a Herdr server, or a computer that you use to connect to
+# bootstrap.sh sets up a Herdr server, or a machine that you use to connect to
 # one. It finds the system, and it runs the script for that system from the
 # folder bootstrap/platforms/. It is safe to run again.
 #
@@ -7,7 +7,7 @@
 #        ./bootstrap.sh client --server HOST [--server HOST]... [options]
 #        curl -fsSL <release-url>/bootstrap.sh | bash -s -- server
 #
-# Options for every computer:
+# Options for every machine:
 #   --os macos|linux|wsl  The system. The default is the system that it finds.
 #   --check               Report what is done, missing, or different. Change nothing.
 #   --keep-existing       Add what is missing, and change no existing file.
@@ -117,7 +117,7 @@ if [ -z "$HERE" ] || [ ! -d "${HERE}/bootstrap/platforms" ]; then
   exec bash "${dest_root}/${TAG}/bootstrap.sh" "$@"
 fi
 
-# ---------- pick the script for this computer
+# ---------- pick the script for this machine
 
 [ -n "$ROLE" ] || { usage >&2; exit 2; }
 if [ -z "$OS" ]; then
