@@ -32,6 +32,13 @@ if [ -z "$REPO" ]; then
   REPO="$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)" || true
 fi
 [ -n "$REPO" ] || { echo "Give the repository with --repo owner/name." >&2; exit 2; }
+# A build for the tests can use files that are not committed yet. A published
+# release must hold only committed files, so --publish needs a clean folder.
+if [ "$PUBLISH" -eq 1 ] && [ -n "$(git status --porcelain)" ]; then
+  echo "The folder has changes or untracked files. Commit or remove them before --publish:" >&2
+  git status --short >&2
+  exit 1
+fi
 
 out="dist/${TAG}"
 stage="${out}/hopen-${TAG}"
