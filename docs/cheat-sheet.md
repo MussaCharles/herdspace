@@ -255,6 +255,8 @@ zoxide knows only the folders that you visited. Use `cd` with the full path the 
 
 Run `nvim .` in a project. Neovim is a viewer in this setup, because the agents write the code.
 
+![Neovim with a file tree and a file preview](media/neovim.png)
+
 | Action | Keys |
 |--------|------|
 | Preview a file | Click it, or move over it with `j` and `k` |
@@ -273,7 +275,9 @@ Run `nvim .` in a project. Neovim is a viewer in this setup, because the agents 
 
 ## lazygit
 
-Press `Cmd+Shift+G` in a Herdr pane, or run `lazygit` in a project.
+Press `Cmd+Shift+G` in a Herdr pane, or `Ctrl+Shift+G` on Linux. You can also run `lazygit` in a project.
+
+![lazygit in a popup over Herdr](media/lazygit.png)
 
 | Action | Key |
 |--------|-----|

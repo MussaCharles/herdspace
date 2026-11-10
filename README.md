@@ -4,7 +4,7 @@ Shell scripts that set up [Herdr](https://herdr.dev) on a new computer. Herdr is
 
 You run one script on each computer. The script installs the tools, writes the configuration, and starts Herdr. If you run it again, it does only what is missing.
 
-![Herdr with four projects in the sidebar and two panes](docs/media/herdr-panes.png)
+![Open every project with one command, and move between them](docs/media/open-projects.gif)
 
 ## How the parts fit
 
@@ -128,27 +128,23 @@ herdr
 
 The scripts do not install the agent programs. Install them first, or run the server script again after you install one.
 
-## Screens
+## See it work
 
-### Open a file tree with Neovim
+The videos come from real Ghostty on a Linux client, connected with SSH to a test server with demo projects. The keys that the video presses show at the bottom.
 
-`nvim .` shows a file tree. A click shows a preview of the file. A double-click keeps the file open.
+### Move between panes
 
-![Neovim with a file tree and a file preview](docs/media/neovim.png)
+`Alt+Up` and `Alt+Down` go to the previous or next pane. `ctrl+b`, `z` zooms one pane.
 
-### See your changes with lazygit
+![Move between panes, and zoom one pane](docs/media/move-panes.gif)
 
-`Cmd+Shift+G` opens lazygit over the current pane. On Linux, the key is `Ctrl+Shift+G`. `q` closes it.
+### Use a template
 
-![lazygit in a popup over Herdr](docs/media/lazygit.png)
+`hopen --apply review` splits the current tab into named panes and starts a program in each pane.
 
-### Go anywhere
+![Use a template in a new tab](docs/media/apply-template.gif)
 
-`Cmd+K` lists each workspace, tab, and agent. On Linux, the key is `Ctrl+Shift+K`. Type to search, and press `Enter` to go.
-
-![The go to list of Herdr](docs/media/go-to.png)
-
-The screens come from real Ghostty on a Linux client, connected with SSH to a test server with demo projects.
+[docs/templates.md](docs/templates.md#open-every-project) has more videos: split and close panes, and go to a project by name. [docs/cheat-sheet.md](docs/cheat-sheet.md#neovim) shows Neovim and lazygit.
 
 ## Open all your projects
 
