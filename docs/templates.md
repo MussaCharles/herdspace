@@ -4,7 +4,7 @@ Scope: open projects with several panes at once, and move between panes with the
 
 ## Templates
 
-A template splits a new workspace into named panes, and it starts a program in each pane. The bootstrap installs these templates in `~/.config/hopen/templates`:
+A template splits a new workspace into named panes, and it starts a program in each pane. `install.sh` and the server setup install these templates in `~/.config/hopen/templates`:
 
 | Template | Panes |
 |----------|-------|
@@ -123,7 +123,7 @@ editor  -       -     -    nvim .
 tests   editor  down  0.7  npm test -- --watch
 ```
 
-The bootstrap does not change a template that you added. If you change one of its own templates, the bootstrap asks before it replaces it.
+No install changes a template that you added. If you change a template that came with herdspace, the server setup asks before it replaces it, and `install.sh` writes the new version next to it as `<name>.layout.new`.
 
 ## After a restart
 

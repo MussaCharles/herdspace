@@ -3,7 +3,7 @@ name: herdspace-server
 description: Set up Herdr and its tools on a Debian, Ubuntu, or macOS server with the herdspace scripts. Use when a person asks to set up, install, or repeat this Herdr environment on a server.
 ---
 
-# Bootstrap a Herdr server
+# Set up a herdspace server
 
 Run this skill on the server, from the root folder of the herdspace repository.
 
