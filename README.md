@@ -1,6 +1,8 @@
-# herdr-bootstrap
+# herdspace
 
 Shell scripts that set up [Herdr](https://herdr.dev) on a new computer. Herdr is a terminal multiplexer for coding agents. A terminal multiplexer keeps your terminals running on a server after you disconnect.
+
+herdspace was called herdr-bootstrap before. Some folders on a set-up computer still use the old name, for example `~/.config/herdr-bootstrap`.
 
 You run one script on each computer. The script installs the tools, writes the configuration, and starts Herdr. If you run it again, it does only what is missing.
 
@@ -11,13 +13,13 @@ You run one script on each computer. The script installs the tools, writes the c
 Set up the server first. Run this command on the server:
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
 ```
 
 Then run this command on the computer that you use to connect, and give the SSH name of the server:
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- client --server my-server
+curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- client --server my-server
 ```
 
 Connect, and open Herdr:
@@ -173,7 +175,7 @@ The videos come from real Ghostty on a Linux client, connected with SSH to a tes
 You can use `hopen` without the rest of this repository. You need Herdr, Python 3, and curl. Run this command, and replace `<owner>` with the owner of this repository:
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/install.sh | bash
+curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/install.sh | bash
 ```
 
 The command installs the release in the address. Each release page shows its own command. After the first normal release, `releases/latest/download/install.sh` installs the newest one. That address skips pre-releases, such as the alpha versions.
@@ -183,7 +185,7 @@ The script copies `hopen` to `~/.local/bin` and the templates to `~/.config/hope
 To remove `hopen`, run the same script with `--uninstall`. It keeps your templates.
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/install.sh | bash -s -- --uninstall
+curl -fsSL https://github.com/<owner>/herdspace/releases/download/v0.1.0-alpha.3/install.sh | bash -s -- --uninstall
 ```
 
 `hopen --version` shows the installed release.
@@ -225,3 +227,7 @@ A container cannot run macOS. For that reason, `tests/run-macos.sh` does not cha
 The idea for these keys, colors, and tools comes from the guide [Herdr setup](https://learn.datalumina.com/docs/herdr) by Dave Ebbelaar. The configuration files in this repository are new files. They are not copies of the files in that guide.
 
 The Auto Title plugin is [kryptamine/herdr-auto-title](https://github.com/kryptamine/herdr-auto-title).
+
+## License
+
+MIT. See [LICENSE](LICENSE).
