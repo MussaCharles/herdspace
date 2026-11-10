@@ -6,6 +6,32 @@ You run one script on each computer. The script installs the tools, writes the c
 
 ![Four projects open in Herdr, and Ctrl+Down moves to the next project](docs/media/open-projects.gif)
 
+## Quick start
+
+Set up the server first. Run this command on the server:
+
+```bash
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- server
+```
+
+Then run this command on the computer that you use to connect, and give the SSH name of the server:
+
+```bash
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/bootstrap.sh | bash -s -- client --server my-server
+```
+
+Connect, and open Herdr:
+
+```bash
+ssh my-server
+```
+
+```bash
+herdr
+```
+
+The script finds the system: macOS, Linux, or Windows with WSL. It downloads the release, compares its checksum, and runs the setup for that system. [docs/setup.md](docs/setup.md) has every option, the steps for each system, and how to use a clone of this repository.
+
 ## How the parts fit
 
 ```mermaid
@@ -41,7 +67,7 @@ flowchart LR
 
 Your terminals run on the server. Herdr keeps them running after you close Ghostty or lose the connection.
 
-## Choose a script
+## One script for each computer
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -59,45 +85,25 @@ flowchart LR
   classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
   classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
   classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
-  start{"Which computer<br/>do you set up?"}:::ask
-  start -- " client: Mac " --> c1["bootstrap-client-macos.sh"]:::cmd
-  start -- " client: Debian or Ubuntu " --> c2["bootstrap-client-linux.sh"]:::cmd
-  start -- " client: Windows " --> c3["WSL, then<br/>bootstrap-client-linux.sh<br/>--no-ghostty"]:::cmd
-  start -- " server: Debian or Ubuntu " --> s1["bootstrap-server-linux.sh"]:::cmd
-  start -- " server: macOS " --> s2["bootstrap-server-macos.sh"]:::cmd
+  run["bootstrap.sh"]:::cmd --> role{"server or client?"}:::ask
+  role -- " server " --> sos{"System?"}:::ask
+  role -- " client " --> cos{"System?"}:::ask
+  sos -- " Linux or WSL " --> s1["platforms/<br/>server-linux.sh"]:::data
+  sos -- " macOS " --> s2["platforms/<br/>server-macos.sh"]:::data
+  cos -- " macOS " --> c1["platforms/<br/>client-macos.sh"]:::data
+  cos -- " Linux " --> c2["platforms/<br/>client-linux.sh"]:::data
+  cos -- " WSL " --> c3["platforms/<br/>client-linux.sh<br/>--no-ghostty"]:::data
 ```
 
-Set up the server first.
+| Command | Effect |
+|---------|--------|
+| `./bootstrap.sh server` | Set up a server. |
+| `./bootstrap.sh client --server my-server` | Set up a client for one or more servers. |
+| `./bootstrap.sh server --check` | Show what a run would change. Change nothing. |
+| `./bootstrap.sh client --os wsl --server my-server` | Name the system, if the script finds the wrong one. |
+| `./bootstrap.sh --help` | Show every option. |
 
-## Quick start
-
-On the server, clone this repository and run the script for its system:
-
-```bash
-git clone <repository-url> ~/herdr-bootstrap
-```
-
-```bash
-cd ~/herdr-bootstrap && ./bootstrap-server-linux.sh
-```
-
-On your client, clone the repository and give the SSH name of each server. This is the command for a Mac:
-
-```bash
-cd ~/herdr-bootstrap && ./bootstrap-client-macos.sh --server my-server
-```
-
-On a Debian or Ubuntu client, use `bootstrap-client-linux.sh` with the same option. For Windows, see [docs/windows-wsl.md](docs/windows-wsl.md).
-
-Then connect and open Herdr:
-
-```bash
-ssh my-server
-```
-
-```bash
-herdr
-```
+For Windows, see [docs/windows-wsl.md](docs/windows-wsl.md).
 
 ## Documents
 
@@ -167,7 +173,7 @@ The videos come from real Ghostty on a Linux client, connected with SSH to a tes
 You can use `hopen` without the rest of this repository. You need Herdr, Python 3, and curl. Run this command, and replace `<owner>` with the owner of this repository:
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.2/install.sh | bash
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/install.sh | bash
 ```
 
 The command installs the release in the address. Each release page shows its own command. After the first normal release, `releases/latest/download/install.sh` installs the newest one. That address skips pre-releases, such as the alpha versions.
@@ -177,7 +183,7 @@ The script copies `hopen` to `~/.local/bin` and the templates to `~/.config/hope
 To remove `hopen`, run the same script with `--uninstall`. It keeps your templates.
 
 ```bash
-curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.2/install.sh | bash -s -- --uninstall
+curl -fsSL https://github.com/<owner>/herdr-bootstrap/releases/download/v0.1.0-alpha.3/install.sh | bash -s -- --uninstall
 ```
 
 `hopen --version` shows the installed release.

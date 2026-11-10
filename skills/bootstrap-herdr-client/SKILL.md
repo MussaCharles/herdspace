@@ -9,7 +9,7 @@ Run this skill on the computer that the person uses for SSH, from the root folde
 
 ## Steps
 
-1. Run `uname -s`. Use `bootstrap-client-macos.sh` for `Darwin` and `bootstrap-client-linux.sh` for `Linux`. On Windows, follow `docs/windows-wsl.md` instead.
+1. Use `./bootstrap.sh client`. It finds macOS, Linux, or WSL by itself. On Windows, work inside WSL, and follow `docs/windows-wsl.md` for the Windows Terminal steps.
 2. Ask the person for the SSH name of each server, if you do not have them. For each server, run `ssh -o BatchMode=yes <name> true`. If a server fails, tell the person and leave it out.
 3. Run the script with `--check` and show the output. It changes nothing. Tell the person what a run changes: Ghostty and shell tools, `~/.zshrc` and `~/.config/ghostty/config.ghostty` (with backups). On macOS, the script also changes four Mission Control shortcuts. Ask if they want to keep those shortcuts. If they do, add `--skip-mission-control`. Wait for the person to agree.
 4. Tell the person about this effect: the keys that Herdr uses do nothing in a Ghostty window that has no Herdr.

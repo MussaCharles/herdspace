@@ -315,7 +315,7 @@ To update the tools, follow [updating.md](updating.md). To see what a computer s
 
 | Problem | Action |
 |---------|--------|
-| `Cmd+T`, `Cmd+W`, or `Cmd+K` does nothing | Herdr is not open. Run `herdr`. If Herdr is open, run `bootstrap-client-macos.sh` again. |
+| `Cmd+T`, `Cmd+W`, or `Cmd+K` does nothing | Herdr is not open. Run `herdr`. If Herdr is open, run `./bootstrap.sh client` again. |
 | The `Ctrl` arrow keys change the macOS space | Log out and log in. Then look in System Settings, Keyboard, Keyboard Shortcuts, Mission Control. |
 | `Ctrl+Shift+F` or `Cmd+E` does nothing in Neovim | Press `/` to search, or click the file tree. |
 | A new tab shows only a number | Start the Auto Title plugin. |
