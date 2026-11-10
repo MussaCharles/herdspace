@@ -39,7 +39,7 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0-al
 
 The script finds the system, downloads the release, and compares its checksum. Then it runs the setup for that system. Run it again at any time. It does only what is missing, and it asks before it replaces a file that you changed.
 
-[docs/setup.md](docs/setup.md) has every option and the steps for each system.
+The [setup guide](docs/setup.md) has every option and the steps for each system.
 
 ## Open your projects
 
@@ -71,7 +71,7 @@ hopen work
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
 
-Run `hopen` again at any time. It starts a stopped session and adds only the new folders. It never closes anything. [docs/setup.md](docs/setup.md#open-many-projects-at-once) has more about the list file.
+Run `hopen` again at any time. It starts a stopped session and adds only the new folders. It never closes anything. The [setup guide](docs/setup.md#open-many-projects-at-once) has more about the list file.
 
 ## Templates
 
@@ -79,7 +79,7 @@ A template splits a project into named panes, and it starts a program in each pa
 
 ![The code template](docs/media/template-code.png)
 
-The other templates are `agent`, `grid`, and `review`. You can add your own template as a small text file. [docs/templates.md](docs/templates.md) shows each template.
+The other templates are `agent`, `grid`, and `review`. You can add your own template as a small text file. The [templates guide](docs/templates.md) shows each template.
 
 ## See it work
 
@@ -97,7 +97,7 @@ The videos come from real Ghostty on a Linux client. The client connects with SS
 
 ![Use a template in a new tab](docs/media/apply-template.gif)
 
-[docs/templates.md](docs/templates.md#open-every-project) has more videos.
+The [templates guide](docs/templates.md#open-every-project) has more videos.
 
 ## How the parts fit
 
@@ -134,17 +134,15 @@ flowchart LR
 
 Your terminals run on the server. Herdr keeps them running after you close Ghostty or lose the connection.
 
-## Documents
+## Documentation
 
-| Document | Use |
-|----------|-----|
-| [docs/setup.md](docs/setup.md) | Set up each computer, every option, and what the setup installs |
-| [docs/templates.md](docs/templates.md) | Templates, and videos that show how to move between panes |
-| [docs/cheat-sheet.md](docs/cheat-sheet.md) | Keys and commands for daily use |
-| [docs/windows-wsl.md](docs/windows-wsl.md) | Use Windows as a client with WSL |
-| [docs/agent-setup.md](docs/agent-setup.md) | Ask a coding agent to do the setup |
-| [docs/updating.md](docs/updating.md) | Update the tools, add something new, and make a release |
-| [docs/testing.md](docs/testing.md) | The tests, and how to run them |
+- [Setup guide](docs/setup.md): set up a server and a client, every option, and what the setup installs.
+- [Templates and panes](docs/templates.md): each template, how to add your own, and videos of the pane keys.
+- [Cheat sheet](docs/cheat-sheet.md): keys and commands for daily use.
+- [Windows with WSL](docs/windows-wsl.md): use a Windows computer as a client.
+- [Ask an agent to do the setup](docs/agent-setup.md): what to say to a coding agent.
+- [Updating](docs/updating.md): update the tools, add something new, and make a release.
+- [Testing](docs/testing.md): the tests, and how to run them.
 
 ## Credits
 
