@@ -61,6 +61,25 @@ tests/run-linux.sh
 tests/run-macos.sh
 ```
 
+## Make a release
+
+A release holds `hopen`, its templates, `install.sh`, and `SHA256SUMS`. A tag with a dash, for example `v0.1.0-alpha.2`, becomes a pre-release.
+
+1. Merge the change, and run the tests.
+2. Build the files and look at them:
+
+   ```bash
+   tools/release.sh v0.1.0-alpha.2
+   ```
+
+3. Publish the release:
+
+   ```bash
+   tools/release.sh v0.1.0-alpha.2 --publish
+   ```
+
+The script reads the repository name from `gh`. No file in git holds the name.
+
 ## Add something new
 
 1. Put a configuration file in `config/`.

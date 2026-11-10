@@ -16,6 +16,8 @@
 #        hopen --apply NAME      Split the current tab with a template.
 set -euo pipefail
 
+# The release script writes the release tag here.
+HOPEN_VERSION="dev"
 SESSION=""
 LIST_FILE=""
 ATTACH=1
@@ -25,6 +27,8 @@ APPLY_NAME=""
 TEMPLATE_DIR="${HOPEN_TEMPLATES:-${XDG_CONFIG_HOME:-$HOME/.config}/hopen/templates}"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hopen"
 STARTED=0
+# GUARD_PAIRS holds one "pane id<TAB>name" line for each pane that a template named.
+GUARD_PAIRS=""
 
 usage() {
   echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach]"
@@ -32,6 +36,7 @@ usage() {
   echo "       hopen --list"
   echo "       hopen --templates"
   echo "       hopen --apply NAME"
+  echo "       hopen --version"
 }
 warn() { printf '  [warn] %s\n' "$*" >&2; }
 die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
@@ -51,6 +56,7 @@ while [ "$#" -gt 0 ]; do
     --all) ACTION="all"; shift ;;
     --list) ACTION="list"; shift ;;
     --templates) ACTION="templates"; shift ;;
+    --version) echo "hopen ${HOPEN_VERSION}"; exit 0 ;;
     -h | --help) usage; exit 0 ;;
     -*) usage >&2; exit 2 ;;
     *)
@@ -107,12 +113,43 @@ apply_template() {
       id="$(herdr pane split "$source" --direction "$direction" --ratio "$size" --no-focus | json_get "d['result']['pane']['pane_id']")"
     fi
     herdr pane rename "$id" "$pane" >/dev/null
+    GUARD_PAIRS="${GUARD_PAIRS}${id}"$'\t'"${pane}"$'\n'
     made="${made}
 $(printf '%s\t%s' "$pane" "$id")"
     if [ -n "$command" ] && [ "$command" != "-" ]; then
       herdr pane run "$id" "$command" >/dev/null
     fi
   done < <(template_lines "$name")
+}
+
+# guard_names keeps the template pane names for a short time. A plugin such as
+# Auto Title names panes too. It keeps a name that you chose, but after a
+# restart it can forget that choice, because every session writes its choices
+# to one shared file, with pane IDs that repeat across sessions. So for
+# HOPEN_GUARD_SECONDS (default 30), a background job puts back each template
+# name that changed. The plugin then counts the name as one that you chose
+# again. HOPEN_GUARD_SECONDS=0 turns the guard off.
+guard_names() {
+  local seconds="${HOPEN_GUARD_SECONDS:-30}"
+  [ -n "$GUARD_PAIRS" ] && [ "$seconds" != 0 ] || return 0
+  printf '%s' "$GUARD_PAIRS" | nohup python3 -I -c '
+import json, subprocess, sys, time
+pairs = [line.split("\t", 1) for line in sys.stdin.read().splitlines() if "\t" in line]
+end = time.time() + float(sys.argv[1])
+while pairs and time.time() < end:
+    time.sleep(0.5)
+    try:
+        out = subprocess.run(["herdr", "pane", "list"], capture_output=True, text=True, timeout=5).stdout
+        labels = {p["pane_id"]: p.get("label") or "" for p in json.loads(out)["result"]["panes"]}
+    except Exception:
+        continue
+    pairs = [(pane, name) for pane, name in pairs if pane in labels]
+    for pane, name in pairs:
+        if labels[pane] != name:
+            subprocess.run(["herdr", "pane", "rename", pane, name], capture_output=True, timeout=5)
+' "$seconds" >/dev/null 2>&1 &
+  disown
+  GUARD_PAIRS=""
 }
 
 # ---------- project lists
@@ -225,13 +262,16 @@ sys.exit(0 if p.get("shell_pid") and p.get("foreground_process_group_id") == p.g
 
 state_file() { printf '%s/%s.tsv' "$STATE_DIR" "$SESSION"; }
 
+# remember_template LABEL TEMPLATE PANES writes one state line for a workspace.
+# PANES is "id=name id=name". Herdr keeps the pane IDs after a restart, so
+# hopen finds each template pane by its ID, even if a plugin renamed it.
 remember_template() {
   local file
   file="$(state_file)"
   mkdir -p "$STATE_DIR"
   touch "$file"
   awk -F '\t' -v l="$1" '$1 != l' "$file" >"${file}.tmp"
-  printf '%s\t%s\n' "$1" "$2" >>"${file}.tmp"
+  printf '%s\t%s\t%s\n' "$1" "$2" "${3:-}" >>"${file}.tmp"
   mv "${file}.tmp" "$file"
 }
 
@@ -243,15 +283,20 @@ restart_programs() {
   [ -f "$file" ] || return 0
   local all
   all="$(workspaces)"
-  while IFS=$'\t' read -r label template; do
+  while IFS=$'\t' read -r label template saved; do
     template_exists "$template" && [ "$template" != plain ] || continue
     id="$(awk -F '\t' -v l="$label" '$1 == l {print $2}' <<<"$all")"
     [ -n "$id" ] || continue
     panes="$(panes_of "$id")"
     while read -r pane from direction size command; do
-      [ -n "$command" ] && [ "$command" != "-" ] || continue
-      pane_id="$(awk -F '\t' -v l="$pane" '$1 == l {print $2; exit}' <<<"$panes")"
+      # The saved ID comes first. The name is for state from older versions.
+      pane_id="$(tr ' ' '\n' <<<"${saved:-}" | awk -F '=' -v n="$pane" '$2 == n {print $1; exit}')"
+      if [ -z "$pane_id" ] || ! cut -f2 <<<"$panes" | grep -Fxq -- "$pane_id"; then
+        pane_id="$(awk -F '\t' -v l="$pane" '$1 == l {print $2; exit}' <<<"$panes")"
+      fi
       [ -n "$pane_id" ] || continue
+      GUARD_PAIRS="${GUARD_PAIRS}${pane_id}"$'\t'"${pane}"$'\n'
+      [ -n "$command" ] && [ "$command" != "-" ] || continue
       if pane_is_idle "$pane_id"; then
         HERDR_SESSION="$SESSION" herdr pane run "$pane_id" "$command" >/dev/null
         restarted=$((restarted + 1))
@@ -263,7 +308,7 @@ restart_programs() {
 
 # prepare_session starts SESSION and adds each folder that has no workspace.
 prepare_session() {
-  local folders existing added=0 label folder template output root
+  local folders existing added=0 label folder template output root before
   STARTED=0
   session_answers || start_session
   [ "$STARTED" -eq 0 ] || restart_programs
@@ -285,12 +330,14 @@ prepare_session() {
     output="$(HERDR_SESSION="$SESSION" herdr workspace create --cwd "$folder" --label "$label" --no-focus)"
     if [ "$template" != plain ]; then
       root="$(json_get "d['result']['root_pane']['pane_id']" <<<"$output")"
+      before="$GUARD_PAIRS"
       HERDR_SESSION="$SESSION" apply_template "$template" "$root"
-      remember_template "$label" "$template"
+      remember_template "$label" "$template" "$(printf '%s' "${GUARD_PAIRS#"$before"}" | tr '\t' '=' | tr '\n' ' ' | sed 's/ $//')"
     fi
     added=$((added + 1))
   done <<<"$folders"
   printf '  [info] Session %s: %s workspaces added.\n' "$SESSION" "$added"
+  HERDR_SESSION="$SESSION" guard_names
 }
 
 attach_session() {
@@ -352,6 +399,7 @@ print(len([p for p in json.load(sys.stdin)["result"]["panes"] if p["tab_id"] == 
 ' "$tab")"
   [ "$count" = 1 ] || die "The current tab has ${count} panes. Open a new tab, and run --apply there."
   apply_template "$APPLY_NAME" "$HERDR_PANE_ID"
+  guard_names
 }
 
 case "$ACTION" in

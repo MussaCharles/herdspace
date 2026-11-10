@@ -17,6 +17,7 @@ for base in "$@"; do
     set -e
     ./bootstrap-server-linux.sh ${flags}
     tests/verify-server.sh linux
+    tests/test-install.sh
     echo '== idempotent'
     tests/test-idempotent.sh bootstrap-server-linux.sh \$HOME/.config/herdr/config.toml ${flags}
     backups=\$(find \$HOME -name '*.bak-*' -not -path '*/.cache/*' -not -path '*/.oh-my-zsh/*' -not -path '*/.local/*' | wc -l)

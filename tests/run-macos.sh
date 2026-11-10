@@ -85,6 +85,7 @@ for target in "$@"; do
     server)
       run "$ROOT/bootstrap-server-macos.sh" --skip-nvim-tools || status=1
       run "$ROOT/tests/verify-server.sh" macos || status=1
+      "$ROOT/tests/test-install.sh" || status=1
       grep -q 'brew install herdr' "$CALLS" && echo 'PASS brew installs herdr' || { echo 'FAIL brew installs herdr'; status=1; }
       grep -q 'launchctl bootstrap' "$CALLS" && echo 'PASS launch agent loads' || { echo 'FAIL launch agent loads'; status=1; }
       plutil -lint "${TEST_HOME}/home/Library/LaunchAgents/local.herdr.server.plist" >/dev/null && echo 'PASS plist is valid' || { echo 'FAIL plist is valid'; status=1; }
