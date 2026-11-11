@@ -25,7 +25,7 @@ Follow the `simple-english` skill for every doc. These rules matter most here:
 | client machine | The machine that the person uses. It connects to the server machine with SSH. |
 | one machine as both | One machine that is the server machine and the client machine. |
 | SSH name | A short name for a server in `~/.ssh/config`, for example `my-server`. |
-| list | A VS Code workspace file that `hopen` reads. |
+| list | The file of projects that `hopen` reads: `herdspace.toml` first, and a VS Code workspace file for people who come from VS Code. |
 
 Define each of these at its first use in a doc, before you use it.
 

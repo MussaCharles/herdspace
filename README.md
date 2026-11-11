@@ -8,7 +8,7 @@ herdspace uses two machines. The server machine runs Herdr, your projects, and y
 
 With herdspace, you can:
 
-- Open every project of a VS Code workspace file in one Herdr session, with one command.
+- Open every project of a list in one Herdr session, with one command. The list is a `herdspace.toml` file, or a VS Code workspace file.
 - Split each project into named panes from a template, for example an editor, an agent, and lazygit.
 - Start the template programs again after a restart.
 - Set up Herdr and its tools on a new server machine and client machine with one command, on macOS, Linux, or Windows with WSL.
@@ -54,7 +54,7 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 ### Only hopen
 
-If a machine has Herdr already, you can install only `hopen` and its templates. You need Python 3 and curl:
+If a machine has Herdr already, you can install only `hopen` and its templates. You need curl and Python 3.11 or later:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/install.sh | bash
@@ -92,17 +92,17 @@ To teach your agent to use herdspace every day, install the herdspace skill. See
 
 ## Open your projects
 
-A VS Code workspace file lists project folders. `hopen` opens each folder as a Herdr workspace. Each file becomes one Herdr session with the name of the file.
+A list holds the projects of one Herdr session. `hopen` opens each project as a Herdr workspace. The list of the session `work` is `~/work/herdspace.toml`:
 
-Create `~/work.code-workspace`:
+```toml
+[[project]]
+name = "website"
+path = "~/code/website"
+template = "code"
 
-```json
-{
-  "folders": [
-    { "name": "website", "path": "./code/website" },
-    { "name": "api", "path": "./code/api" }
-  ]
-}
+[[project]]
+name = "api"
+path = "~/code/api"
 ```
 
 Open it:
@@ -120,7 +120,9 @@ hopen work
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
 
-Run `hopen` again at any time. It starts a stopped session and adds only the new folders. It never closes anything. A list can also be a `herdspace.toml` file, and a list can set a start command, environment values, and extra tabs for each project. The [hopen guide](docs/hopen.md) has every command and more about the list file.
+Run `hopen` again at any time. It starts a stopped session and adds only the new projects. It never closes anything. A list can also set a start command, environment values, and extra tabs for each project. The [hopen guide](docs/hopen.md) has every command and setting.
+
+If you come from VS Code, `hopen` also reads a VS Code workspace file, so that VS Code and Herdr share one list. See [Use a VS Code workspace file](docs/hopen.md#use-a-vs-code-workspace-file).
 
 ## Templates
 
@@ -173,7 +175,7 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 
 ## Documentation
 
-- [hopen guide](docs/hopen.md): open your projects, install, update, or remove `hopen`, and write a list.
+- [hopen guide](docs/hopen.md): write a list, its settings, the commands, and how to install, update, or remove `hopen`.
 - [Setup guide](docs/setup.md): set up a server and a client, every option, and what the setup installs.
 - [Templates and panes](docs/templates.md): each template, how to add your own, and videos of the pane keys.
 - [Keyboard shortcuts](docs/keyboard-shortcuts.md): the keys that the setup changes, and how to keep the keys of your terminal.

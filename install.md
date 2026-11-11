@@ -29,7 +29,7 @@ For `client`, ask for the SSH name of each server, for example `my-server`. An a
 
 Run `uname -s`. herdspace supports macOS, Debian, Ubuntu, and Windows with WSL. On Windows, work inside WSL. On another system, stop and tell the person.
 
-For `hopen`, make sure that `herdr`, `python3`, and `curl` are installed. If one is missing, tell the person and stop.
+For `hopen`, make sure that `herdr`, `curl`, and Python 3.11 or later are installed. Run `python3 --version`. If one is missing, tell the person and stop.
 
 ## 3. Install only hopen
 

@@ -64,7 +64,7 @@ The prefix key is `ctrl+b`. A row such as `ctrl+b`, `c` means: press `ctrl+b`, r
 
 ## Open all projects at once
 
-A VS Code workspace file is like a Herdr session, and each VS Code folder is like a Herdr workspace.
+A list is like a Herdr session, and each project in the list is like a Herdr workspace. The list of the session `work` is `~/work/herdspace.toml`.
 
 | Task | Command |
 |------|---------|
@@ -75,10 +75,10 @@ A VS Code workspace file is like a Herdr session, and each VS Code folder is lik
 | Split each new workspace with a template | `hopen work --template code` |
 | Show every template | `hopen --templates` |
 | Split the current tab with a template | `hopen --apply grid` |
-| Add a project | Add the folder to the list file, then run `hopen` again. |
-| Remove a project | Remove the folder from the list file, then close its workspace with `ctrl+b`, `shift+d`. |
+| Add a project | Add a `[[project]]` to the list file, then run `hopen` again. |
+| Remove a project | Remove the project from the list file, then close its workspace with `ctrl+b`, `shift+d`. |
 
-The list for a session is `~/<session>.code-workspace` or `~/<session>/<session>.code-workspace`. `hopen` also adds a workspace with the name of the session, for the folder that holds the list file. Use it to start an agent at the parent level. `hopen` starts a stopped session, adds only the missing projects, and never closes anything. To use a new session, create a list file with the name of the session.
+The list for a session is `~/<session>/herdspace.toml`. A VS Code workspace file, `~/<session>.code-workspace`, also works. `hopen` also adds a workspace with the name of the session, for the folder that holds the list file. Use it to start an agent at the parent level. `hopen` starts a stopped session, adds only the missing projects, and never closes anything. To use a new session, create a list file with the name of the session.
 
 ## Start, leave, and return
 

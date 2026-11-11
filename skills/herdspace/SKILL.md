@@ -8,7 +8,7 @@ metadata:
 
 # Use herdspace
 
-herdspace has two parts. `hopen` opens the projects of a list in one Herdr session. `bootstrap.sh` sets up a machine. A list is a VS Code workspace file. Each list becomes one Herdr session with the name of the file.
+herdspace has two parts. `hopen` opens the projects of a list in one Herdr session. `bootstrap.sh` sets up a machine. A list is a `herdspace.toml` file in a folder, or a VS Code workspace file. Each list becomes one Herdr session, with the name of the folder or the file.
 
 If `hopen --version` fails, herdspace is not installed. Follow the agent install steps at `https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md`.
 
@@ -32,9 +32,9 @@ hopen work
 
 ## Add a project to a list
 
-1. Find the list file with `hopen --list`. A list is at `~/<name>.code-workspace`, `~/<name>/<name>.code-workspace`, or `~/<name>/herdspace.toml`.
+1. Find the list file with `hopen --list`. A list is at `~/<name>/herdspace.toml`, or, as a VS Code workspace file, at `~/<name>.code-workspace` or `~/<name>/<name>.code-workspace`.
 2. Before you change the file, ask the person.
-3. In a VS Code list, add one entry to `folders`, for example `{ "name": "api", "path": "./code/api" }`. In a `herdspace.toml` list, add a `[[project]]` table with `name` and `path`. A path is relative to the folder of the list file. Keep the comments and the other entries. The settings for a start command, environment values, and extra tabs are in the hopen guide: `https://github.com/MussaCharles/herdspace/blob/main/docs/hopen.md`.
+3. In a `herdspace.toml` list, add a `[[project]]` table with `name` and `path`. In a VS Code workspace file, add one entry to `folders`, for example `{ "name": "api", "path": "./code/api" }`. A path is relative to the folder of the list file. Keep the comments and the other entries. The settings for a start command, environment values, and extra tabs are in the hopen guide: `https://github.com/MussaCharles/herdspace/blob/main/docs/hopen.md`.
 4. Run `hopen <name> --no-attach`. It adds a workspace only for the new folder.
 
 ## Split a tab with a template

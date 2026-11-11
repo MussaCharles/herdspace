@@ -17,6 +17,11 @@ TEST_HOME="$(mktemp -d /tmp/hbt.XXXXXX)"
 STUBS="${TEST_HOME}/stubs"
 CALLS="${TEST_HOME}/calls.log"
 mkdir -p "$STUBS" "${TEST_HOME}/home/.claude" "${TEST_HOME}/home/.pi/agent/extensions"
+# hopen needs Python 3.11 or later. The test uses the newest Homebrew Python.
+for py in /opt/homebrew/bin/python3.1[1-9]; do
+  [ -x "$py" ] && ln -sf "$py" "${STUBS}/python3"
+done
+[ -e "${STUBS}/python3" ] || { echo "FAIL this test needs Python 3.11 or later from Homebrew: brew install python"; exit 1; }
 # The Homebrew folder of the stub, so that the prerequisites step finds it writable.
 mkdir -p "${TEST_HOME}/brew/Cellar" "${TEST_HOME}/brew/bin"
 

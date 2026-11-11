@@ -6,7 +6,7 @@ A CLI workspace and session manager for Herdr, the terminal multiplexer for codi
 
 | Path | What it is |
 |------|------------|
-| `bin/hopen` | The command that opens the projects of a VS Code workspace file in one Herdr session. Bash, with small Python parts. |
+| `bin/hopen` | The command that opens the projects of a list (`herdspace.toml`, or a VS Code workspace file) in one Herdr session. Bash, with small Python parts. |
 | `config/templates/` | The pane templates of `hopen`. |
 | `bootstrap.sh` | The entry point of the setup. It picks a script in `bootstrap/platforms/` from the role and the system. |
 | `bootstrap/lib/` | The shared steps of the setup scripts. |

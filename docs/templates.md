@@ -40,22 +40,22 @@ hopen --templates
 
 ## Choose a template
 
-Add the template names to the `settings` of your list file. `hopen.template` is the template for every folder. `hopen.templates` sets a template for one folder. The [hopen guide](hopen.md#settings-in-a-vs-code-list) has every setting, and the same keys for a `herdspace.toml` list.
+Add the template names to your list. `template` at the top of the file is the template for each project. `template` in a project sets the template of that project:
 
-```json
-{
-  "folders": [
-    { "name": "website", "path": "./code/website" },
-    { "name": "api", "path": "./code/api" }
-  ],
-  "settings": {
-    "hopen.template": "agent",
-    "hopen.templates": { "website": "code" }
-  }
-}
+```toml
+template = "agent"
+
+[[project]]
+name = "website"
+path = "~/code/website"
+template = "code"
+
+[[project]]
+name = "api"
+path = "~/code/api"
 ```
 
-VS Code can show a warning for these settings, because it does not know them. The warning does no harm.
+In a VS Code workspace file, the same settings are `hopen.template` and `hopen.templates`. VS Code can show a warning for them, because it does not know them. The warning does no harm. The [hopen guide](hopen.md#settings) has every setting.
 
 To use one template for each new workspace of one run, use `--template`:
 

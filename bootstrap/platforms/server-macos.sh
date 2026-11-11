@@ -54,7 +54,7 @@ install_formulas() { brew_install $FORMULAS; }
 
 prereq_add "Homebrew" necessary homebrew_ready install_homebrew yes "Install Homebrew from https://brew.sh, and run the setup again."
 prereq_add "Homebrew can write to its folder" necessary brew_writable - no "Run the setup from the account that owns Homebrew, or give this account write access to $(brew --prefix 2>/dev/null || echo /opt/homebrew)."
-prereq_add "Python 3 for hopen" necessary python_ready install_python no "Run: xcode-select --install"
+prereq_add "Python 3.11 or later for hopen" necessary python_ready install_python no "Run: brew install python"
 run_prereqs
 
 step "Checking this machine"
