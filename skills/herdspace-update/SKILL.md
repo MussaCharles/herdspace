@@ -23,10 +23,9 @@ Run this skill in the herdspace repository. Read `docs/updating.md` first.
 Do this only when the person asks for a release. Follow "Make a release" in `docs/updating.md`:
 
 1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, add a new empty `## [Unreleased]`, and change the links at the end of the file.
-2. Change the tag in `README.md`, `install.md`, and `docs/`. A tag has no v in front, for example `0.1.2`.
-3. Run all tests, and merge.
-4. Run `tools/release.sh <tag>`, and show `dist/<tag>.notes.md` to the person.
-5. Run `tools/release.sh <tag> --publish` only after the person agrees.
+2. Run all tests, and merge. A tag has no v in front, for example `0.1.2`. The docs use the `latest` address, so they do not change.
+3. Run `tools/release.sh <tag>`, and show `dist/<tag>.notes.md` to the person.
+4. Run `tools/release.sh <tag> --publish` only after the person agrees.
 
 ## Rules
 

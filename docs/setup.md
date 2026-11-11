@@ -74,7 +74,7 @@ You can run the script in two ways.
 To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdspace/<tag>`, compares its checksum, and runs it from there:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
 ```
 
 To read or change the files first, clone this repository, and run the script from the clone:
@@ -290,7 +290,7 @@ On Linux, the direct keys use `Ctrl+Shift` in place of `Cmd`. The script release
 
 ## Windows client
 
-Follow [windows-wsl.md](windows-wsl.md).
+Follow the [Windows with WSL guide](windows-wsl.md).
 
 ## One machine as server and client
 
@@ -303,7 +303,7 @@ If Herdr runs on the machine that you use, and you do not connect to another mac
 With `curl`:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/bootstrap.sh | bash -s -- both
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- both
 ```
 
 Do not run `server` and `client` one after the other on the same machine. Each one writes its own role into `~/.config/herdspace/env.zsh` and `~/.zprofile`. Then each check reports the file of the other one as not done. `both` writes one role for the two setups.
@@ -329,82 +329,4 @@ If a key does nothing, Ghostty or the desktop still uses that key. Run the clien
 
 ## Open many projects at once
 
-`hopen` reads a VS Code workspace file and opens each folder as a Herdr workspace in one named session. The server setup installs it.
-
-### Install only hopen
-
-On a machine that has Herdr already, you can install `hopen` and its templates without the rest of the setup. You need Python 3 and curl:
-
-```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/install.sh | bash
-```
-
-`install.sh` copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`, after a checksum check. `hopen --version` shows the installed release.
-
-To update `hopen`, run the install command of the new release. Each release page shows its own command. `install.sh` keeps a template that you changed, and it writes the new version next to it as `<name>.layout.new`. The address `https://github.com/MussaCharles/herdspace/releases/latest/download/install.sh` installs the newest normal release. It skips pre-releases, such as the alpha versions.
-
-To remove `hopen`, run the same command with `--uninstall`. It keeps your templates:
-
-```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/install.sh | bash -s -- --uninstall
-```
-
-### Write a list
-
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {
-  'fontFamily': 'Menlo, Consolas, Courier New, monospace', 'fontSize': '14px',
-  'primaryColor': '#0d1117', 'primaryTextColor': '#e6edf3', 'primaryBorderColor': '#3fb950',
-  'textColor': '#e6edf3', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117',
-  'edgeLabelBackground': '#0b0f14', 'clusterBkg': '#0b0f14', 'clusterBorder': '#30363d', 'titleColor': '#d2a8ff',
-  'actorBkg': '#0d1f12', 'actorBorder': '#3fb950', 'actorTextColor': '#7ee787', 'actorLineColor': '#30363d',
-  'signalColor': '#58a6ff', 'signalTextColor': '#e6edf3', 'sequenceNumberColor': '#0b0f14'
-}, 'flowchart': {'curve': 'basis', 'nodeSpacing': 34, 'rankSpacing': 42, 'wrappingWidth': 340}}}%%
-flowchart LR
-  classDef cmd fill:#0d1f12,stroke:#3fb950,stroke-width:2px,color:#7ee787
-  classDef step fill:#0d1117,stroke:#58a6ff,stroke-width:1.5px,color:#c9e1ff
-  classDef ask fill:#2a2000,stroke:#e3b341,stroke-width:2px,color:#f2cc60
-  classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
-  classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
-  classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
-  file["work.code-workspace"]:::data --> hopen["hopen work"]:::cmd
-  hopen --> session["Herdr session<br/>work"]:::host
-  session --> root["Workspace: work<br/>the folder of the file"]:::data
-  session --> w1["Workspace: website"]:::data
-  session --> w2["Workspace: api"]:::data
-```
-
-Create `~/work.code-workspace`:
-
-```json
-{
-  "folders": [
-    { "name": "website", "path": "./code/website" },
-    { "name": "api", "path": "./code/api" }
-  ]
-}
-```
-
-Open it:
-
-```bash
-hopen work
-```
-
-The first workspace has the name of the session and opens the folder that holds the file. Run `hopen` again after you add a folder. It adds only the new folders.
-
-To open every list at once, run this command:
-
-```bash
-hopen --all
-```
-
-`hopen --all` starts one session for each list, and it adds the missing workspaces. A terminal can attach to one session at a time, so add a name to attach to that session:
-
-```bash
-hopen --all work
-```
-
-To open each project with several named panes, use a template. See [templates.md](templates.md). To see every list and its state, run `hopen --list`. `hopen` finds a list at `~/<name>.code-workspace` or at `~/<name>/<name>.code-workspace`.
-
-![Herdr with one workspace for each project](media/herdr-sessions.png)
+Follow the [hopen guide](hopen.md).

@@ -10,7 +10,7 @@ All people in this project follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 2. Open a new issue with the bug template.
 3. Give the system, the release tag, the command, and the full error text.
 
-Do not report a security problem in an issue. Follow [SECURITY.md](SECURITY.md).
+Do not report a security problem in an issue. Follow the [security policy](SECURITY.md).
 
 ## Suggest a change
 
