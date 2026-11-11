@@ -18,6 +18,7 @@
 #        hopen --templates       Show every template.
 #        hopen --apply NAME      Split the current tab with a template.
 #        hopen --convert NAME    Write ~/NAME/herdspace.toml from the VS Code list NAME.
+#        hopen --completion zsh|bash   Print a shell completion script.
 #
 # A list can run commands (on-open and tab commands) and set environment
 # values. hopen asks before it uses them the first time, and again after the
@@ -32,6 +33,8 @@ ATTACH=1
 ACTION="one"
 TEMPLATE_FLAG=""
 APPLY_NAME=""
+SHELL_NAME=""
+COMPLETE_WHAT=""
 TEMPLATE_DIR="${HOPEN_TEMPLATES:-${XDG_CONFIG_HOME:-$HOME/.config}/hopen/templates}"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hopen"
 STARTED=0
@@ -52,6 +55,7 @@ usage() {
   echo "       hopen --templates"
   echo "       hopen --apply NAME"
   echo "       hopen --convert NAME"
+  echo "       hopen --completion zsh|bash"
   echo "       hopen --version"
 }
 warn() { printf '  [warn] %s\n' "$*" >&2; }
@@ -59,13 +63,15 @@ die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --file | --template | --apply | --convert)
+    --file | --template | --apply | --convert | --completion | --complete)
       [ "$#" -ge 2 ] || { usage >&2; exit 2; }
       case "$1" in
         --file) LIST_FILE="$2" ;;
         --template) TEMPLATE_FLAG="$2" ;;
         --apply) ACTION="apply"; APPLY_NAME="$2" ;;
         --convert) ACTION="convert"; SESSION="$2" ;;
+        --completion) ACTION="completion"; SHELL_NAME="$2" ;;
+        --complete) ACTION="complete"; COMPLETE_WHAT="$2" ;;
       esac
       shift 2
       ;;
@@ -89,6 +95,60 @@ valid_name() {
   case "$1" in
     "" | *[!A-Za-z0-9._-]*) return 1 ;;
     *) return 0 ;;
+  esac
+}
+
+# ---------- shell completion
+
+# completion_script SHELL prints a completion script for zsh or bash. It asks
+# "hopen --complete lists|templates" for the names, so that they stay current.
+completion_script() {
+  case "$1" in
+    zsh)
+      cat <<'ZSH'
+#compdef hopen
+_hopen() {
+  local -a options
+  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --completion --version --help)
+  case "${words[CURRENT-1]}" in
+    --template | --apply) compadd -- ${(f)"$(hopen --complete templates 2>/dev/null)"}; return ;;
+    --convert) compadd -- ${(f)"$(hopen --complete lists 2>/dev/null)"}; return ;;
+    --file) _files; return ;;
+    --completion) compadd zsh bash; return ;;
+  esac
+  case "$PREFIX" in
+    -*) compadd -- $options ;;
+    */* | .*) _files -/ ;;
+    *) compadd -- ${(f)"$(hopen --complete lists 2>/dev/null)"} ;;
+  esac
+}
+compdef _hopen hopen
+ZSH
+      ;;
+    bash)
+      cat <<'BASH'
+# This works with bash 3.2, the bash of macOS, which has no mapfile.
+_hopen() {
+  local cur="${COMP_WORDS[COMP_CWORD]}" prev="${COMP_WORDS[COMP_CWORD-1]}" words="" IFS=$'\n'
+  case "$prev" in
+    --template | --apply) words="$(hopen --complete templates 2>/dev/null)" ;;
+    --convert) words="$(hopen --complete lists 2>/dev/null)" ;;
+    --completion) words=$'zsh\nbash' ;;
+    --file) COMPREPLY=($(compgen -f -- "$cur")); return ;;
+    *)
+      case "$cur" in
+        -*) words=$'--all\n--list\n--templates\n--apply\n--convert\n--file\n--template\n--no-attach\n--trust\n--completion\n--version\n--help' ;;
+        */* | .*) COMPREPLY=($(compgen -d -- "$cur")); return ;;
+        *) words="$(hopen --complete lists 2>/dev/null)" ;;
+      esac
+      ;;
+  esac
+  COMPREPLY=($(compgen -W "$words" -- "$cur"))
+}
+complete -o filenames -F _hopen hopen
+BASH
+      ;;
+    *) die "hopen --completion needs zsh or bash." ;;
   esac
 }
 
@@ -806,6 +866,15 @@ PY
 }
 
 case "$ACTION" in
+  completion) completion_script "$SHELL_NAME"; exit 0 ;;
+  complete)
+    # The completion scripts call this. It prints one name on each line.
+    case "$COMPLETE_WHAT" in
+      lists) find_lists 2>/dev/null | cut -f1 ;;
+      templates) show_templates | tail -n +2 | cut -d ' ' -f1 ;;
+    esac
+    exit 0
+    ;;
   list) show_lists; exit 0 ;;
   convert) convert_list; exit 0 ;;
   templates) show_templates; exit 0 ;;

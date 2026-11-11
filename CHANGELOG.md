@@ -7,6 +7,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 ### Added
 
 - `hopen .` opens the current folder as one workspace, with no list, as `code .` does in VS Code. `hopen <path>` opens another folder. A list in the folder wins.
+- Shell completion for `hopen` in zsh and bash. Tab completes list names, options, and template names. The server setup turns it on for zsh, and `hopen --completion zsh|bash` prints the script.
 
 ## [0.3.0] - 2026-11-11
 

@@ -90,6 +90,7 @@ hopen .
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
 | `hopen --convert work` | Write `~/work/herdspace.toml` from the VS Code workspace file `work`. It never replaces a file. |
+| `hopen --completion zsh` | Print the shell completion script for zsh or bash. See [Shell completion](#shell-completion). |
 | `hopen --version` | Show the installed release. |
 
 ## Settings
@@ -179,6 +180,22 @@ With no answer, `hopen` still opens the workspaces, but it runs no command and s
 ## Session names
 
 The name of the session comes from the file name, or the folder name for `herdspace.toml`. `hopen.session` and `session` can set another name. A list that only claims a name never takes over a list whose own file or folder has that name. `hopen` skips the claiming list, and it prints a warning. If two lists claim one name and no list has it as its own, `hopen` skips both, and it names them.
+
+## Shell completion
+
+Press Tab after `hopen` to complete a list name, an option, or a template name after `--template` and `--apply`. The server setup turns it on for zsh. After an install of only `hopen`, add one of these lines to your shell startup file.
+
+For zsh, in `~/.zshrc`, after `compinit` or Oh My Zsh:
+
+```bash
+source <(hopen --completion zsh)
+```
+
+For bash, in `~/.bashrc`:
+
+```bash
+source <(hopen --completion bash)
+```
 
 ## Install only hopen
 

@@ -120,5 +120,18 @@ else
   pass 'herdspace.toml checks skipped: Python is older than 3.11'
 fi
 
+# Shell completion.
+complete_bash() {
+  HOME="$home" HOPEN_TEMPLATES=config/templates PATH="$PWD/bin:$PATH" bash -c 'eval "$(hopen --completion bash)"; COMP_WORDS=("$@"); COMP_CWORD=$(($# - 1)); _hopen; echo "${COMPREPLY[*]}"' _ "$@"
+}
+contains "$(complete_bash hopen --template c)" 'code' 'bash completion offers template names'
+contains "$(complete_bash hopen --no)" '--no-attach' 'bash completion offers options'
+contains "$(complete_bash hopen re)" 'renamed' 'bash completion offers list names'
+contains "$(complete_bash hopen ./bi)" './bin' 'bash completion offers folders for a path'
+if command -v zsh >/dev/null; then
+  if bin/hopen --completion zsh | zsh -n; then pass 'the zsh completion script has no syntax error'; else fail 'the zsh completion script has no syntax error'; fi
+fi
+contains "$(bin/hopen --completion fish 2>&1)" 'needs zsh or bash' 'hopen --completion refuses another shell'
+
 printf 'RESULT failures=%s\n' "$failures"
 [ "$failures" -eq 0 ]
