@@ -82,7 +82,15 @@ RESULT bench code first=<seconds>s second=<seconds>s projects=20
 
 Compare a new run with this reference run. If a time is much longer, find the cause before a release.
 
-REFERENCE_TABLE
+| Measure | Time |
+|---------|------|
+| `setup`, with the download cache | 42 s |
+| `plain`, first run | 0.5 s |
+| `plain`, second run | 0.0 s |
+| `code`, first run | 1.3 s |
+| `code`, second run | 0.0 s |
+
+The reference run used `ubuntu:24.04` in Docker, on an Apple M4 Pro, on 2026-11-11.
 
 ## Test in a sandbox
 
