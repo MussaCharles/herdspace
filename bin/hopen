@@ -21,6 +21,8 @@
 #        hopen --convert NAME    Write ~/NAME/herdspace.toml from the VS Code list NAME.
 #        hopen --completion zsh|bash   Print a shell completion script.
 #        hopen --task [NAME]     Run a task of the project of the current folder.
+#        hopen --find            Choose a file with fzf, and open it in the editor.
+#        hopen --grep TEXT       Search the files, and open a result at its line.
 #
 # A list can run commands (on-open and tab commands) and set environment
 # values. hopen asks before it uses them the first time, and again after the
@@ -49,6 +51,7 @@ GUARD_TABS=""
 ENV_ARGS=()
 TRUST_FLAG=0
 TASK_NAME=""
+GREP_TEXT=""
 # FOLDER is set for "hopen <folder>" when the folder has no list of its own.
 FOLDER=""
 
@@ -63,6 +66,8 @@ usage() {
   echo "       hopen --convert NAME"
   echo "       hopen --completion zsh|bash"
   echo "       hopen --task [NAME]"
+  echo "       hopen --find"
+  echo "       hopen --grep TEXT"
   echo "       hopen --version"
 }
 # short_path PATH shows a path in the home folder as ~/... The ~ is in a
@@ -92,6 +97,11 @@ while [ "$#" -gt 0 ]; do
         TASK_NAME="$1"
         shift
       fi
+      ;;
+    --find) ACTION="find"; shift ;;
+    --grep)
+      [ "$#" -ge 2 ] || { usage >&2; exit 2; }
+      ACTION="grep"; GREP_TEXT="$2"; shift 2
       ;;
     --no-attach) ATTACH=0; shift ;;
     --trust) TRUST_FLAG=1; shift ;;
@@ -127,7 +137,7 @@ completion_script() {
 #compdef hopen
 _hopen() {
   local -a options
-  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --task --completion --version --help)
+  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --task --find --grep --completion --version --help)
   case "${words[CURRENT-1]}" in
     --template | --apply) compadd -- ${(f)"$(hopen --complete templates 2>/dev/null)"}; return ;;
     --convert) compadd -- ${(f)"$(hopen --complete lists 2>/dev/null)"}; return ;;
@@ -157,7 +167,7 @@ _hopen() {
     --file) COMPREPLY=($(compgen -f -- "$cur")); return ;;
     *)
       case "$cur" in
-        -*) words=$'--all\n--list\n--templates\n--apply\n--convert\n--file\n--template\n--no-attach\n--trust\n--task\n--completion\n--version\n--help' ;;
+        -*) words=$'--all\n--list\n--templates\n--apply\n--convert\n--file\n--template\n--no-attach\n--trust\n--task\n--find\n--grep\n--completion\n--version\n--help' ;;
         */* | .*) COMPREPLY=($(compgen -d -- "$cur")); return ;;
         *) words="$(hopen --complete lists 2>/dev/null)" ;;
       esac
@@ -1153,9 +1163,57 @@ run_task() {
   fi
 }
 
+# ---------- quick open and search, like Ctrl+P and Ctrl+Shift+F in VS Code
+
+# open_in_editor FILE [LINE] opens FILE in $VISUAL or $EDITOR, or else Neovim.
+open_in_editor() {
+  local editor="${VISUAL:-${EDITOR:-nvim}}"
+  case "$(basename "${editor%% *}")" in
+    code | code-insiders | cursor) exec ${editor} --goto "$1${2:+:$2}" ;;
+    *) if [ -n "${2:-}" ]; then exec ${editor} "+$2" "$1"; else exec ${editor} "$1"; fi ;;
+  esac
+}
+
+need() { command -v "$1" >/dev/null 2>&1 || die "$2 needs $1. The server setup installs it."; }
+
+list_files() {
+  if command -v fd >/dev/null 2>&1; then fd --type f --hidden --exclude .git
+  elif command -v fdfind >/dev/null 2>&1; then fdfind --type f --hidden --exclude .git
+  else find . -type f ! -path '*/.git/*'
+  fi
+}
+
+# find_file lets the person choose a file in the current folder with fzf, and
+# opens it. It uses fd, or fdfind on Debian, or find.
+find_file() {
+  local file preview="cat {}"
+  need fzf "hopen --find"
+  [ -t 0 ] && [ -t 1 ] || die "hopen --find needs a terminal."
+  command -v bat >/dev/null 2>&1 && preview="bat --color=always --style=numbers {}"
+  file="$(cd "$DIR" && list_files | sed 's|^\./||' | fzf --prompt 'Open file > ' --preview "$preview" --height 80% --reverse)" || true
+  [ -n "$file" ] || exit 0
+  cd "$DIR" && open_in_editor "$file"
+}
+
+# grep_files searches the files of the current folder with ripgrep, lets the
+# person choose a result with fzf, and opens the file at that line.
+grep_files() {
+  local hit preview="sed -n '{2},+20p' {1}"
+  need rg "hopen --grep"
+  need fzf "hopen --grep"
+  [ -t 0 ] && [ -t 1 ] || die "hopen --grep needs a terminal."
+  command -v bat >/dev/null 2>&1 && preview="bat --color=always --style=numbers --highlight-line {2} {1}"
+  hit="$(cd "$DIR" && rg --line-number --no-heading --color=always --smart-case --fixed-strings -- "$GREP_TEXT" |
+    fzf --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --preview "$preview" --preview-window '+{2}-5' --height 80% --reverse)" || true
+  [ -n "$hit" ] || exit 0
+  cd "$DIR" && open_in_editor "$(cut -d: -f1 <<<"$hit")" "$(cut -d: -f2 <<<"$hit")"
+}
+
 case "$ACTION" in
   completion) completion_script "$SHELL_NAME"; exit 0 ;;
   task) run_task; exit 0 ;;
+  find) DIR="${HERDR_ACTIVE_PANE_CWD:-$PWD}"; find_file ;;
+  grep) DIR="${HERDR_ACTIVE_PANE_CWD:-$PWD}"; grep_files ;;
   complete)
     # The completion scripts call this. It prints one name on each line.
     case "$COMPLETE_WHAT" in

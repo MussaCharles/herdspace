@@ -184,6 +184,9 @@ HOME="$thome" bin_hopen --convert tw >/dev/null 2>&1
 contains "$(cat "$thome/tw/herdspace.toml" 2>/dev/null)" 'tasks = { "test" = "echo ran-test-$HB_T" }' 'hopen --convert keeps the tasks'
 contains "$(cat "$thome/tw/herdspace.toml" 2>/dev/null)" 'tasks = { "all" = "echo parent" }' 'hopen --convert keeps the tasks of the parent workspace'
 
+# --find and --grep need a terminal.
+contains "$(bin_hopen --grep x </dev/null 2>&1)" 'needs a terminal' 'hopen --grep with no terminal stops with a message'
+
 # Shell completion.
 complete_bash() {
   HOME="$home" HOPEN_TEMPLATES=config/templates PATH="$PWD/bin:$PATH" bash -c 'eval "$(hopen --completion bash)"; COMP_WORDS=("$@"); COMP_CWORD=$(($# - 1)); _hopen; echo "${COMPREPLY[*]}"' _ "$@"

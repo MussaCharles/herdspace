@@ -30,7 +30,12 @@ if (( bootstrap_has_tty )); then
   export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --cycle'
   command -v fzf >/dev/null && source <(fzf --zsh)
   command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
-  command -v hopen >/dev/null && source <(hopen --completion zsh)
+  if command -v hopen >/dev/null; then
+    source <(hopen --completion zsh)
+    # Like Ctrl+P and Ctrl+Shift+F in VS Code: open a file, or a search result.
+    alias ff='hopen --find'
+    fif() { hopen --grep "$*"; }
+  fi
   if command -v eza >/dev/null; then
     alias ls="eza"
     alias ll="eza -la"
