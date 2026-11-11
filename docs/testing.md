@@ -15,6 +15,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-install.sh` | A release builds, `install.sh` installs `hopen`, and `bootstrap.sh` from `curl` picks the right script. |
 | `tests/run-prereqs.sh` | The prerequisites step finds and installs a missing locale, stops with a fix when `sudo` is missing, works as root, and reports a server with no SSH. |
 | `tests/test-hopen-list.sh` | `hopen` reads each list setting, refuses crafted lists, and keeps session names safe. It needs no Herdr, and it runs in a second. |
+| `tests/bench-hopen.sh` | Measures how long `hopen` takes with 20 projects. `tests/run-linux.sh` runs it after the server setup. See [Benchmark](#benchmark). |
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
 
 A container cannot run macOS. For that reason, `tests/run-macos.sh` does not change macOS shortcuts or install Homebrew packages.
@@ -66,6 +67,22 @@ Each test prints one `PASS` or `FAIL` line for each check, and a `RESULT` line a
 | `APT_MIRROR_DEBIAN=<address>` | Try this Debian mirror before the default one, for example `http://<mirror>/debian`. |
 | `CLIENT_BASE=<image>` | `run-client-linux.sh`: test another client image. |
 | `tests/run-macos.sh server` | Test only the server, or only the `client`. |
+
+## Benchmark
+
+`tests/run-linux.sh` prints the time of the server setup and of `hopen` with a list of 20 projects:
+
+```text
+RESULT bench setup=<seconds>s
+RESULT bench plain first=<seconds>s second=<seconds>s projects=20
+RESULT bench code first=<seconds>s second=<seconds>s projects=20
+```
+
+`first` is the run that creates 20 workspaces. `second` is a run that adds nothing. `plain` opens one pane in each workspace, and `code` splits each workspace into the panes of the `code` template. The benchmark fails only if a workspace is missing. To use another count, run `tests/bench-hopen.sh 50` on a server machine.
+
+Compare a new run with this reference run. If a time is much longer, find the cause before a release.
+
+REFERENCE_TABLE
 
 ## Test in a sandbox
 
