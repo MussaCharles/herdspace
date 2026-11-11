@@ -49,6 +49,8 @@ hopen work
 
 The name of the folder, `work`, is the name of the session. The first workspace has the name of the session and opens the folder of the list. Run `hopen` again after you add a project. It adds only the new projects.
 
+To choose a list from a menu, run `hopen` with no name. It uses [fzf](https://github.com/junegunn/fzf) if it is installed, and the server setup installs it. With no fzf, or in a terminal with no `TERM`, `hopen` shows a numbered menu. Type a number or a name.
+
 To open every list at once, run this command:
 
 ```bash
@@ -80,6 +82,7 @@ hopen .
 | Command | Effect |
 |---------|--------|
 | `hopen work` | Open the projects of one list, and attach to that session. |
+| `hopen` | Choose a list from a menu. |
 | `hopen .` | Open the current folder, with no list. See [Open one folder](#open-one-folder). |
 | `hopen work --file <path>` | Read the list from another file. |
 | `hopen work --no-attach` | Open the projects, but do not attach. |

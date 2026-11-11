@@ -11,6 +11,7 @@
 # each. After a stopped session starts again, hopen starts those programs again.
 #
 # Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]
+#        hopen                   In a terminal, choose a list from a menu.
 #        hopen <folder>          Open a folder, for example "hopen .". A list in
 #                                the folder wins. Else one workspace, no list.
 #        hopen --all [session] [--template NAME]
@@ -49,6 +50,7 @@ FOLDER=""
 
 usage() {
   echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]"
+  echo "       hopen            (in a terminal: choose a list from a menu)"
   echo "       hopen <folder>   (for example: hopen .)"
   echo "       hopen --all [session] [--template NAME]"
   echo "       hopen --list"
@@ -58,6 +60,9 @@ usage() {
   echo "       hopen --completion zsh|bash"
   echo "       hopen --version"
 }
+# short_path PATH shows a path in the home folder as ~/... The ~ is in a
+# variable, because bash 5 expands a ~ in the replacement text.
+short_path() { local tilde='~'; printf '%s' "${1/#$HOME/$tilde}"; }
 warn() { printf '  [warn] %s\n' "$*" >&2; }
 die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
 
@@ -693,7 +698,7 @@ list_trusted() {
   awk -F '\t' -v f="$file" -v h="$hash" '$1 == f && $2 == h { found = 1 } END { exit !found }' "$(trust_file)" 2>/dev/null && return 0
   if [ "$TRUST_FLAG" -ne 1 ]; then
     [ -t 0 ] || return 1
-    printf '  [info] %s runs these commands and sets these values:\n%s\n' "${file/#$HOME/~}" "$actions"
+    printf '  [info] %s runs these commands and sets these values:\n%s\n' "$(short_path "$file")" "$actions"
     printf '  Use them? Answer yes only for a list that you trust. [y/N] '
     IFS= read -r answer || answer=""
     case "$answer" in y | Y | yes | Yes) ;; *) return 1 ;; esac
@@ -731,7 +736,7 @@ prepare_session() {
   actions="$(list_actions "$items")"
   if [ -n "$actions" ] && ! list_trusted "$LIST_FILE" "$actions" "$(grep $'^F\x1e' <<<"$items" || true)"; then
     trusted=0
-    warn "hopen did not use the commands and values of ${LIST_FILE/#$HOME/~}. Run hopen in a terminal to approve them, or add --trust."
+    warn "hopen did not use the commands and values of $(short_path "$LIST_FILE"). Run hopen in a terminal to approve them, or add --trust."
   fi
   existing="$(workspaces | cut -f1)"
   while IFS=$'\x1e' read -r kind label folder template extra envs; do
@@ -826,7 +831,7 @@ show_lists() {
       state="stopped"
       count="-"
     fi
-    printf '%-22s %-9s %-11s %s\n' "$name" "$state" "$count" "${LIST_FILE/#$HOME/~}"
+    printf '%-22s %-9s %-11s %s\n' "$name" "$state" "$count" "$(short_path "$LIST_FILE")"
   done <<<"$lists"
 }
 
@@ -971,7 +976,7 @@ with open(target, "w", encoding="utf-8") as handle:
     handle.write("\n".join(lines).rstrip() + "\n")
 PY
   rm -f "$items"
-  printf '  [info] Wrote %s. hopen now uses it in place of %s.\n' "${target/#$HOME/~}" "${source/#$HOME/~}"
+  printf '  [info] Wrote %s. hopen now uses it in place of %s.\n' "$(short_path "$target")" "$(short_path "$source")"
 }
 
 case "$ACTION" in
@@ -1000,6 +1005,42 @@ if [ "$ACTION" = all ]; then
   exit 0
 fi
 
+# pick_list lets the person choose a list when hopen gets no name in a
+# terminal. It uses fzf if it is installed, else a numbered menu.
+pick_list() {
+  local lists shown answer="" name file i=0
+  lists="$(find_lists)"
+  [ -n "$lists" ] || die "No project lists. Create ~/work/herdspace.toml, or run hopen . in a folder."
+  shown="$(while IFS=$'\t' read -r name file; do printf '%s\t%s\n' "$name" "$(short_path "$file")"; done <<<"$lists")"
+  # fzf draws nothing with no TERM, or with TERM=dumb.
+  if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
+    SESSION="$(fzf --delimiter '\t' --prompt 'hopen > ' --header 'Choose a list. Esc cancels.' --height 40% --reverse --no-multi <<<"$shown" | cut -f1)" || true
+  else
+    while IFS=$'\t' read -r name file; do
+      i=$((i + 1))
+      printf '  %2d) %-22s %s\n' "$i" "$name" "$file"
+    done <<<"$shown"
+    printf '  Open which list? Type a number or a name: '
+    IFS= read -r answer || answer=""
+    case "$answer" in
+      "") ;;
+      *[!0-9]*) SESSION="$(awk -F '\t' -v n="$answer" '$1 == n {print $1; exit}' <<<"$shown")" ;;
+      *) SESSION="$(awk -F '\t' -v n="$answer" 'NR == n {print $1; exit}' <<<"$shown")" ;;
+    esac
+  fi
+  if [ -z "$SESSION" ]; then
+    [ -z "$answer" ] || die "No list ${answer}."
+    exit 0
+  fi
+}
+
+if [ -z "$SESSION" ] && [ -t 0 ] && [ -t 1 ]; then
+  if [ "${HERDR_ENV:-}" = "1" ] && [ "$ATTACH" -eq 1 ]; then
+    die "You are in a Herdr pane. Press ctrl+b, then q, and run this command again."
+  fi
+  pick_list
+fi
+
 [ -n "$SESSION" ] || { usage >&2; exit 2; }
 
 # open_folder handles "hopen <folder>". It uses the list in the folder, if the
@@ -1017,7 +1058,7 @@ open_folder() {
       # session of another list. Its commands and values still need approval.
       owner="$(find_list_for "$SESSION" 2>/dev/null)"
       if [ -n "$owner" ] && [ "$owner" != "$list" ]; then
-        die "${list/#$HOME/~} uses the session ${SESSION}, which ${owner/#$HOME/~} has. Give the list another session name."
+        die "$(short_path "$list") uses the session ${SESSION}, which $(short_path "$owner") has. Give the list another session name."
       fi
       return 0
     fi
@@ -1027,7 +1068,7 @@ open_folder() {
   SESSION="$(printf '%s' "$name" | tr -c 'A-Za-z0-9._-' '-')"
   [ "$SESSION" != "." ] && [ "$SESSION" != ".." ] || SESSION="-"
   list="$(find_list_for "$SESSION" 2>/dev/null)"
-  [ -z "$list" ] || warn "The list ${list/#$HOME/~} uses the session ${SESSION}. hopen adds the folder to that session."
+  [ -z "$list" ] || warn "The list $(short_path "$list") uses the session ${SESSION}. hopen adds the folder to that session."
 }
 
 case "$SESSION" in

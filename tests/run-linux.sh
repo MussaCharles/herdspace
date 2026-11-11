@@ -19,8 +19,11 @@ for base in "$@"; do
   apt_cache_args "$base"
   docker run --rm --name "${tag}-$$" ${APT_CACHE[@]+"${APT_CACHE[@]}"} "$tag" bash -c "
     set -e
+    start=\$(date +%s)
     ./bootstrap.sh server ${flags}
+    echo \"RESULT bench setup=\$((\$(date +%s) - start))s\"
     tests/verify-server.sh linux
+    tests/bench-hopen.sh
     tests/test-install.sh
     echo '== idempotent'
     tests/test-idempotent.sh bootstrap.sh \$HOME/.config/herdr/config.toml server ${flags}

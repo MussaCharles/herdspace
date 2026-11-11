@@ -69,6 +69,7 @@ A list is like a Herdr session, and each project in the list is like a Herdr wor
 | Task | Command |
 |------|---------|
 | Open all the projects of a list | `hopen work` |
+| Choose a list from a menu | `hopen` |
 | Open the current folder, with no list | `hopen .` |
 | Open every list | `hopen --all` |
 | Open every list, and attach to one session | `hopen --all work` |

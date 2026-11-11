@@ -114,6 +114,7 @@ hopen work
 | Command | Effect |
 |---------|--------|
 | `hopen work` | Open the projects of one list, and attach to that session. |
+| `hopen` | Choose a list from a menu. |
 | `hopen .` | Open the current folder, with no list. |
 | `hopen --all` | Open every list. |
 | `hopen --list` | Show every list and its state. |

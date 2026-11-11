@@ -15,7 +15,7 @@ RS=$'\x1e'
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 # shellcheck disable=SC1090 # The functions come from bin/hopen.
-source <(sed -n '/^read_list() {/,/^}/p;/^find_lists() {/,/^}/p;/^valid_name() {/,/^}/p;/^list_actions() {/,/^}/p;/^file_hash() {/,/^}/p;/^list_trusted() {/,/^}/p;/^trust_file() {/p;/^warn() {/p' bin/hopen)
+source <(sed -n '/^read_list() {/,/^}/p;/^find_lists() {/,/^}/p;/^valid_name() {/,/^}/p;/^list_actions() {/,/^}/p;/^file_hash() {/,/^}/p;/^list_trusted() {/,/^}/p;/^trust_file() {/p;/^warn() {/p;/^short_path() {/p' bin/hopen)
 mkdir -p "$tmp/code/a" "$tmp/code/b"
 
 # Settings.
