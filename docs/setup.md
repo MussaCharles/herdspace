@@ -62,7 +62,7 @@ Each run starts with a prerequisites step. It lists what the setup needs before 
 | System | Items that the step can install |
 |--------|---------------------------------|
 | Debian or Ubuntu | `sudo`, when you run the setup as root. The locale that your SSH session asks for, for example `en_US.UTF-8`. |
-| macOS | Homebrew. Python 3 for `hopen` on a server. Ghostty on a client, from an admin account. |
+| macOS | Homebrew. Python 3.11 or later for `hopen` on a server. Ghostty on a client, from an admin account. |
 
 If the step cannot install an item, it prints what to do, for example the command to run from an admin account. The step reports the SSH connection to each server, but it never changes the server. With `--yes`, the step installs the missing items with no question. With no terminal, it installs only the items that need no password.
 

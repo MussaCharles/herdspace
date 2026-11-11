@@ -5,19 +5,23 @@ description: Change the hopen command or its pane templates in the herdspace rep
 
 # Change hopen
 
-`bin/hopen` opens each folder of a VS Code workspace file as a Herdr workspace in one named Herdr session. The [hopen guide](../../../docs/hopen.md) is the user view. This skill is the code view.
+`bin/hopen` opens each project of a list as a Herdr workspace in one named Herdr session. A list is a `herdspace.toml` file, or a VS Code workspace file. The [hopen guide](../../../docs/hopen.md) is the user view. This skill is the code view.
 
 ## How it works
 
-1. `find_lists` finds a list at `~/<name>.code-workspace` or `~/<name>/<name>.code-workspace`. The name of the file is the name of the session.
-2. `list_folders` reads the list. VS Code accepts comments and trailing commas, so the function removes them before it parses the JSON.
+1. `find_lists` finds a list at `~/<name>.code-workspace`, `~/<name>/<name>.code-workspace`, or `~/<name>/herdspace.toml`. The session has the name of the file or the folder, unless the list sets `hopen.session` or `session`. If two lists name one session, `herdspace.toml` wins, with a warning.
+2. `read_list FILE items` reads either format with Python, and prints one line for each workspace and each extra tab: `R` (the parent workspace), `P` (a project), `T` (a tab), and `W` (a warning). The fields are separated by the byte `0x1e`, which is not white space, so that bash keeps each field in its place. An empty field is `-`, and an empty name is refused. `emit` writes every line and cleans every field, so no field holds a control character. Environment values are `KEY=VALUE` items, separated by the byte `0x1f`. VS Code accepts comments and trailing commas, so the reader removes them before it parses the JSON. `herdspace.toml` needs `tomllib`, so Python 3.11 or later.
 3. If the Herdr session is stopped, `start_session` starts it.
 4. For each folder with no workspace, `hopen` creates a workspace. The first workspace has the name of the session and opens the folder that holds the list file.
-5. `apply_template` splits the new workspace into named panes, and it starts the program of each pane.
-6. `remember_template` writes one line for each workspace to `~/.local/state/hopen/<session>.tsv`: `label<TAB>template<TAB>id=name id=name`.
+5. The `onOpen` command runs in the first pane. Then `apply_template` splits the new workspace into named panes, and it starts the program of each pane. Then each extra tab opens, with its own template and command. `ENV_ARGS` gives the `--env` values to each `workspace create`, `tab create`, and `pane split`.
+6. `remember_template` writes one line for each workspace to `~/.local/state/hopen/<session>.tsv`: `label<TAB>template<TAB>id=name id=name`. An extra tab has the label `workspace/tab`.
 7. After a stopped session starts again, `restart_programs` starts each template program again in a pane that shows only its shell. Herdr keeps the pane IDs after a restart, so `hopen` finds each pane by its ID. If the ID is gone, it uses the label.
 
 `hopen` never closes a workspace, a tab, or a pane.
+
+## Trust
+
+A list can come from another person, so its commands and environment values are not trusted by default. `list_trusted` asks before `hopen` uses them, and it saves the checksum of an approved file in `~/.local/state/hopen/trusted.tsv`. A changed file needs a new approval. With no terminal, only `--trust` approves a list. `find_lists` keeps a list whose own name is the session over a list that only claims the name with `session` or `hopen.session`. Keep both rules when you change the reader.
 
 ## Templates
 

@@ -163,11 +163,16 @@ is_admin() { id -Gn | tr ' ' '\n' | grep -qx admin; }
 # Mac with two accounts, Homebrew can belong to the other account.
 brew_writable() { have brew && [ -w "$(brew --prefix)" ] && [ -w "$(brew --prefix)/Cellar" ]; }
 
-# python_ready exits 0 if a real Python 3 exists. hopen needs it. Without the
-# Command Line Tools, /usr/bin/python3 only opens an install window.
+# python_ready exits 0 if python3 is Python 3.11 or later. hopen needs it to
+# read a herdspace.toml list. Without the Command Line Tools, /usr/bin/python3
+# only opens an install window, so the check does not run it then.
 python_ready() {
-  xcode-select -p >/dev/null 2>&1 && return 0
-  have brew && [ -x "$(brew --prefix)/bin/python3" ]
+  local py
+  py="$(command -v python3)" || return 1
+  if [ "$py" = /usr/bin/python3 ] && ! xcode-select -p >/dev/null 2>&1; then
+    return 1
+  fi
+  "$py" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null
 }
 install_python() { brew install python; }
 
