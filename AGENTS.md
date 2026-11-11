@@ -46,6 +46,8 @@ If you rename or remove a skill, change or remove its link too. `tests/test-skil
 - Do not add personal data, host names, private project names, or secrets to a file, a commit, an issue, or a pull request. This repository is public.
 - Add or change a test for each change in behavior. Make sure that the test fails without the change.
 - Before you open a pull request, run the tests that the change touches. Put the `RESULT` lines in the description.
+- CI runs the tests again for each pull request. Merge only after every CI job passes. `docs/ci.md` explains the jobs.
+- If you change a workflow in `.github/workflows/`, follow the security rules in `docs/ci.md`.
 - Shell scripts must pass `shellcheck -S warning` with no output.
 - Change the docs in the same pull request as the code.
 - Add each change that a person can see to `CHANGELOG.md`, under `## [Unreleased]`.
