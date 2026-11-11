@@ -136,6 +136,18 @@ attach_all="$(python3 "$ROOT/tests/pty_run.py" 8 '\x02q' hopen --all hb-all-two 
 contains "$attach_all" 'status=0' 'hopen --all attaches to the named session'
 contains "$(hopen --all no-such-list 2>&1)" 'No project list' 'hopen --all rejects an unknown name'
 
+# hopen with no name shows a menu in a terminal: fzf, or a numbered menu.
+picked="$(python3 "$ROOT/tests/pty_run.py" 6 'hb-all-two\r' hopen --no-attach 2>&1)"
+contains "$picked" 'Session hb-all-two' 'hopen with no name opens the list chosen in fzf'
+nofzf="$work/nofzf"
+mkdir -p "$nofzf"
+for tool in hopen herdr python3; do ln -sf "$(command -v "$tool")" "$nofzf/$tool"; done
+picked="$(python3 "$ROOT/tests/pty_run.py" 6 'hb-all-one\r' env PATH="$nofzf:/usr/bin:/bin" hopen --no-attach 2>&1)"
+contains "$picked" 'Open which list' 'with no fzf, hopen shows a numbered menu'
+contains "$picked" 'Session hb-all-one' 'the numbered menu opens the list with that name'
+contains "$(python3 "$ROOT/tests/pty_run.py" 6 'no-such\r' env PATH="$nofzf:/usr/bin:/bin" hopen --no-attach 2>&1)" 'No list no-such' 'the numbered menu rejects an unknown name'
+contains "$(hopen </dev/null 2>&1; echo "status=$?")" 'status=2' 'with no terminal, hopen with no name prints the usage'
+
 # hopen <folder> opens one folder with no list, or the list in the folder.
 mkdir -p "$work/hb folder" "$work/hb-listed/app"
 (cd "$work/hb folder" && hopen . --no-attach >/dev/null 2>&1)

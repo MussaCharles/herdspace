@@ -6,9 +6,14 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Added
 
+- `hopen` with no name shows a menu of the lists, and opens the one you choose. It uses fzf when it is installed, and a numbered menu when it is not.
 - `hopen .` opens the current folder as one workspace, with no list, as `code .` does in VS Code. `hopen <path>` opens another folder. A list in the folder wins.
 - Shell completion for `hopen` in zsh and bash. Tab completes list names, options, and template names. The server setup turns it on for zsh, and `hopen --completion zsh|bash` prints the script.
 - `env_file` in `herdspace.toml`, and `hopen.envFile` in a VS Code workspace file, load the environment values of a project from a `.env` file. The approval question hides the values whose names look like secrets.
+
+### Fixed
+
+- With bash 5, `hopen --list` and the messages of `hopen` showed a path in the home folder in full, in place of `~/...`.
 
 ## [0.3.0] - 2026-11-11
 
