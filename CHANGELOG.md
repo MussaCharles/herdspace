@@ -10,6 +10,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - `hopen --find` (the shell command `ff`) opens a file that you choose with fzf, like Ctrl+P in VS Code. `hopen --grep TEXT` (the shell command `fif`) searches the files and opens a result at its line, like Ctrl+Shift+F.
 - `hopen --ports` shows each TCP port that your programs listen on, with the program and its project, like the Ports view of VS Code.
 - A command palette, like Ctrl+Shift+P in VS Code: `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux opens `hopen --palette` in Herdr. It runs tasks, finds files, searches, shows the ports, applies templates, and opens lazygit. Ghostty no longer opens its own command palette with that key, unless you keep the keys of your terminal.
+- The guide `docs/vscode.md` lists the herdspace command or key for each VS Code action, with a Neovim cheat sheet and links to the official Neovim guides.
+- The cheat sheet explains how to give each agent its own git worktree with Herdr.
 
 ## [0.4.0] - 2026-11-11
 
