@@ -28,6 +28,7 @@ Read the skill for the part that you change. Each skill is in `.agents/skills/<n
 | `herdspace-bootstrap` | Change a setup script, a configuration file, or a pinned version. |
 | `herdspace-docs` | Write or change a doc, the README, or a skill. |
 | `herdspace-release` | Update the changelog, or make a release. |
+| `herdspace-test` | Run the tests on the sandboxes of this machine, or check a published release. |
 | `simple-english` | Write any text that a person reads. |
 
 ## Rules for every change

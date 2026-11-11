@@ -80,6 +80,12 @@ A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it dow
    tools/release.sh 0.1.2 --publish
    ```
 
+4. Install the published release in fresh sandboxes, and try each feature. See [After a release](testing.md#after-a-release):
+
+   ```bash
+   tests/run-release-check.sh --version 0.1.2
+   ```
+
 The docs use the `releases/latest` address, so they do not change for a release. A pre-release does not become the latest release.
 
 The script reads the repository name from `gh`, and it writes the name into `bootstrap.sh` and `install.sh`.
