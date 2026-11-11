@@ -10,8 +10,8 @@ name="${tag}-$$"
 # shellcheck disable=SC2046 # build_flags prints one option or nothing.
 docker build -q $(build_flags) -f tests/Dockerfile.systemd -t "$tag" . >/dev/null || exit 1
 apt_cache_args ubuntu:24.04
-docker run -d --rm --name "$name" --privileged --cgroupns=host ${APT_CACHE[@]+"${APT_CACHE[@]}"} \
-  --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:rw "$tag" >/dev/null || exit 1
+docker run -d --rm --name "$name" --privileged --cgroupns=private ${APT_CACHE[@]+"${APT_CACHE[@]}"} \
+  --tmpfs /run --tmpfs /run/lock "$tag" >/dev/null || exit 1
 trap 'docker rm -f "$name" >/dev/null 2>&1; remove_images "$tag"' EXIT
 
 uid="$(docker exec "$name" id -u tester)"
@@ -52,5 +52,9 @@ for _ in $(seq 1 45); do
   sleep 1
 done
 if [ "$now" != "$before" ] && [ "$now" != 0 ]; then pass 'service restarts after a crash'; else fail 'service restarts after a crash'; fi
+if [ "$status" -ne 0 ]; then
+  echo "== systemd state: $(docker exec "$name" systemctl is-system-running 2>&1)"
+  docker logs "$name" 2>&1 | tail -n 30
+fi
 echo "RESULT exit=${status}"
 exit "$status"
