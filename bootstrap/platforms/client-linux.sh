@@ -6,11 +6,14 @@
 # only the parts that are not done. Use --no-ghostty with another terminal.
 #
 # Usage: ./bootstrap.sh client [options] [--server HOST]... [--no-ghostty]
+#        [--keep-terminal-keys | --use-herdspace-keys]
 #
 # With no option, the script asks about each file that you changed.
 #   --check          Report what is done, missing, or different. Change nothing.
 #   --keep-existing  Add what is missing, and change no existing file.
 #   --replace-all    Use the repository version of every file, with backups.
+#   --keep-terminal-keys  Keep the keys of Ghostty. The choice stays.
+#   --use-herdspace-keys  Use the editor keys of herdspace again (the default).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -31,7 +34,7 @@ source "${REPO_ROOT}/bootstrap/lib/client.sh"
 source "${REPO_ROOT}/tools/versions.env"
 
 while [ "$#" -gt 0 ]; do
-  if apply_mode_flag "$1"; then
+  if apply_mode_flag "$1" || keys_flag "$1"; then
     shift
     continue
   fi
@@ -78,7 +81,8 @@ fi
 
 if [ "$USE_GHOSTTY" -eq 1 ]; then
   run_part "Ghostty" ghostty_ready install_ghostty
-  install_file "${REPO_ROOT}/config/ghostty/config-linux.ghostty" "${HOME}/.config/ghostty/config.ghostty"
+  load_keys
+  install_ghostty_config "${REPO_ROOT}/config/ghostty/config-linux.ghostty"
   if [ "${#SERVERS[@]}" -gt 0 ]; then
     for server in "${SERVERS[@]}"; do
       run_part "Terminal description on ${server}" terminfo_ready copy_terminfo "$server"

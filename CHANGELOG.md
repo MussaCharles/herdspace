@@ -9,6 +9,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - The hopen guide, `docs/hopen.md`, has every `hopen` command, and the steps to install, update, and remove it.
 - The herdspace skill, `skills/herdspace`, teaches a coding agent to use `hopen` and the setup. Install it with `npx skills add MussaCharles/herdspace --skill herdspace -g`.
 - `AGENTS.md` and the skills in `.agents/skills/` give coding agents the rules of this project.
+- The keyboard shortcuts guide, `docs/keyboard-shortcuts.md`, lists each key that the client setup changes.
+- The client option `--keep-terminal-keys` keeps the keys of Ghostty and macOS. The setup saves the choice, and `--use-herdspace-keys` changes it back.
 
 ### Changed
 

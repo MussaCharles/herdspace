@@ -57,5 +57,13 @@ key q
 WAIT=3 key ctrl+shift+k
 shot go-to
 key Escape
+
+# --keep-terminal-keys keeps the keys of Ghostty, and a later run keeps the choice.
+cfg=/home/tester/.config/ghostty/config.ghostty
+cli_user ./bootstrap.sh client --keep-terminal-keys --server my-server >/dev/null 2>&1 || fail 'keys: terminal run'
+if cli_user grep -q unbind "$cfg"; then fail 'keys: terminal keys in Ghostty'; else pass 'keys: terminal keys in Ghostty'; fi
+if cli_user ./bootstrap.sh client --check --server my-server >/dev/null 2>&1; then pass 'keys: a later check keeps the choice'; else fail 'keys: a later check keeps the choice'; fi
+cli_user ./bootstrap.sh client --use-herdspace-keys --server my-server >/dev/null 2>&1 || fail 'keys: herdspace run'
+if cli_user cmp -s config/ghostty/config-linux.ghostty "$cfg"; then pass 'keys: herdspace keys again'; else fail 'keys: herdspace keys again'; fi
 echo "RESULT exit=${status}"
 exit "$status"

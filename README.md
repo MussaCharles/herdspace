@@ -36,7 +36,7 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 ### Client machine
 
-Set up the server machine first. Then run this command on the client machine. It sets up Ghostty, the shell, and the Herdr keys. Give the SSH name of the server in place of `my-server`:
+Set up the server machine first. Then run this command on the client machine. It sets up Ghostty, the shell, and the [Herdr keys](docs/keyboard-shortcuts.md). Give the SSH name of the server in place of `my-server`:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- client --server my-server
@@ -176,6 +176,7 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 - [hopen guide](docs/hopen.md): open your projects, install, update, or remove `hopen`, and write a list.
 - [Setup guide](docs/setup.md): set up a server and a client, every option, and what the setup installs.
 - [Templates and panes](docs/templates.md): each template, how to add your own, and videos of the pane keys.
+- [Keyboard shortcuts](docs/keyboard-shortcuts.md): the keys that the setup changes, and how to keep the keys of your terminal.
 - [Cheat sheet](docs/cheat-sheet.md): keys and commands for daily use.
 - [Connect to the server with SSH](docs/ssh.md): what `my-server` means, and how to set up the SSH name and key.
 - [Windows with WSL](docs/windows-wsl.md): use a Windows machine as a client.
