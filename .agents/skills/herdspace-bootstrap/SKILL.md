@@ -74,6 +74,7 @@ Each of these mistakes broke the setup one time:
 - The last command of `~/.zshrc` sets the status of the first prompt. If the file is missing, `[[ -f FILE ]] && source FILE` ends with status 1. Use `if`. `tests/verify-server.sh` checks that a new shell starts with status 0.
 - If another account can write to the Oh My Zsh folders, Oh My Zsh warns at each start. The setup runs `chmod -R go-w` on the folder.
 - Neovim starts a language server only for a matching file. The setup installs the Mason packages by name, so that the first real start shows no install messages.
+- After a failed plugin download, `nvim --headless "+Lazy! restore" +qa` can still exit 0. The plugin step looks for `~/.local/share/nvim/lazy/LazyVim`, and tries again. With the folder still missing, it writes no done mark. Check the result of a step, not only the exit code of the tool. `tests/test-nvim-plugins.sh` tests it.
 - A Linux client has no Cmd key. Each Herdr key that uses `cmd+` also needs a `ctrl+shift+` key in `config/herdr/config.toml`.
 - On macOS, `brew install --cask` writes to `/Applications`, so it works only from an admin account. The prerequisites step prints the command for an admin account.
 - `server` and then `client` on one machine write two different roles. Use `both`.

@@ -29,8 +29,20 @@ nvim_plugins_ready() {
   have nvim && [ -d "${HOME}/.local/share/nvim/lazy/LazyVim" ] && done_ready nvim-plugins "$(nvim_lock_sha)"
 }
 
+# install_nvim_plugins restores the plugins of lazy-lock.json. Lazy can exit 0
+# when a download fails, so the step looks for LazyVim, and tries one more
+# time. With LazyVim still missing, it writes no done mark, and the next run
+# tries again.
 install_nvim_plugins() {
-  nvim --headless "+Lazy! restore" +qa >/dev/null 2>&1 || warn "Neovim could not restore all its plugins."
+  local _try
+  for _try in 1 2; do
+    nvim --headless "+Lazy! restore" +qa >/dev/null 2>&1 || true
+    [ -d "${HOME}/.local/share/nvim/lazy/LazyVim" ] && break
+  done
+  if [ ! -d "${HOME}/.local/share/nvim/lazy/LazyVim" ]; then
+    warn "Neovim could not download its plugins. Check the network, and run the setup again."
+    return 0
+  fi
   done_mark nvim-plugins "$(nvim_lock_sha)"
 }
 
