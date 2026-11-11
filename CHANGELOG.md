@@ -14,6 +14,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Fixed
 
+- The Auto Title plugin could replace the name of an extra tab of a list. `hopen` now keeps the tab names for 30 seconds, as it does for template pane names.
 - With bash 5, `hopen --list` and the messages of `hopen` showed a path in the home folder in full, in place of `~/...`.
 
 ## [0.3.0] - 2026-11-11
