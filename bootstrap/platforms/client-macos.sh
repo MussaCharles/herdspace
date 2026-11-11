@@ -12,6 +12,7 @@
 #   --check          Report what is done, missing, or different. Change nothing.
 #   --keep-existing  Add what is missing, and change no existing file.
 #   --replace-all    Use the repository version of every file, with backups.
+#   --yes            Install the missing prerequisites with no question.
 #   --keep-terminal-keys  Keep the keys of Ghostty and macOS. The choice stays.
 #   --use-herdspace-keys  Use the editor keys of herdspace again (the default).
 set -euo pipefail
@@ -26,6 +27,8 @@ export TERMINFO="${GHOSTTY_TERMINFO:-/Applications/Ghostty.app/Contents/Resource
 
 # shellcheck source=bootstrap/lib/common.sh
 source "${REPO_ROOT}/bootstrap/lib/common.sh"
+# shellcheck source=bootstrap/lib/prereqs.sh
+source "${REPO_ROOT}/bootstrap/lib/prereqs.sh"
 # shellcheck source=bootstrap/lib/shell.sh
 source "${REPO_ROOT}/bootstrap/lib/shell.sh"
 # shellcheck source=bootstrap/lib/client.sh
@@ -58,8 +61,6 @@ load_homebrew
 formulas_ready() { brew_formulas_ready $FORMULAS; }
 # shellcheck disable=SC2086
 install_formulas() { brew_install $FORMULAS; }
-ghostty_ready() { [ -d /Applications/Ghostty.app ] || { have brew && brew list --cask ghostty >/dev/null 2>&1; }; }
-install_ghostty() { brew install --cask ghostty; }
 
 # set_hotkey turns one macOS shortcut on (true) or off (false). The key code is
 # the arrow key, and 8650752 is the Ctrl key.
@@ -100,10 +101,16 @@ set_mission_control() {
   info "If a Ctrl arrow key does not do what you expect, log out and log in."
 }
 
+prereq_add "Homebrew" necessary homebrew_ready install_homebrew yes "Install Homebrew from https://brew.sh, and run the setup again."
+prereq_add "Homebrew can write to its folder" necessary brew_writable - no "Run the setup from the account that owns Homebrew, or give this account write access to $(brew --prefix 2>/dev/null || echo /opt/homebrew)."
+prereq_add "Ghostty" necessary ghostty_ready install_ghostty_app no "Ghostty needs an admin account. From an admin account, run: brew install --cask ghostty"
+if [ "${#SERVERS[@]}" -gt 0 ]; then
+  prereq_add "SSH connection to each server" optional servers_ready - no "$(ssh_fix "${SERVERS[*]}")"
+fi
+run_prereqs
+
 step "Checking this machine"
-run_part "Homebrew" homebrew_ready install_homebrew
 run_part "Homebrew packages" formulas_ready install_formulas
-run_part "Ghostty" ghostty_ready install_ghostty
 setup_shell client
 setup_zprofile client
 load_keys

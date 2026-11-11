@@ -27,6 +27,14 @@ description: Change the herdspace setup scripts, add a tool or a configuration f
 
 The manifest at `~/.local/share/herdspace/manifest.tsv` keeps the checksum of each file that the script wrote. `install_file` uses it to know if a person changed a file.
 
+## Prerequisites
+
+Each platform script adds its prerequisites with `prereq_add LABEL KIND READY_FN APPLY_FN PASSWORD FIX`, and then calls `run_prereqs`. The functions are in `bootstrap/lib/prereqs.sh`. KIND is `necessary` or `optional`. APPLY_FN is `-` when the setup cannot install the item, and then FIX tells the person what to do. `--yes` installs with no question. With no terminal, the step installs only the items that need no password.
+
+Never add a prerequisite that turns on remote access, installs an SSH server, or copies a key to a server. Remote access is a choice of the owner of the server.
+
+`tests/run-prereqs.sh` tests the step on Linux. `HS_PREREQS_ONLY=1` stops a run after the step.
+
 ## Modes
 
 | Option | Effect |

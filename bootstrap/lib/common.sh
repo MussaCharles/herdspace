@@ -22,14 +22,18 @@ TODO=0
 EDITED=0
 KEPT_LIST=""
 ASK_ALL=""
+# shellcheck disable=SC2034 # prereqs.sh reads ASSUME_YES.
+ASSUME_YES=0
 MANIFEST="${STATE_DIR}/manifest.tsv"
 
 # apply_mode_flag sets MODE. It returns 1 if the option is something else.
+# shellcheck disable=SC2034 # prereqs.sh reads ASSUME_YES.
 apply_mode_flag() {
   case "$1" in
     --check) MODE="check" ;;
     --keep-existing) MODE="keep" ;;
     --replace-all) MODE="replace" ;;
+    --yes) ASSUME_YES=1 ;;
     *) return 1 ;;
   esac
 }

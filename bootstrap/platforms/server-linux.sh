@@ -10,6 +10,7 @@
 #   --check          Report what is done, missing, or different. Change nothing.
 #   --keep-existing  Add what is missing, and change no existing file.
 #   --replace-all    Use the repository version of every file, with backups.
+#   --yes            Install the missing prerequisites with no question.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -26,6 +27,8 @@ source "${REPO_ROOT}/bootstrap/lib/shell.sh"
 source "${REPO_ROOT}/bootstrap/lib/server.sh"
 # shellcheck source=bootstrap/lib/linux-tools.sh
 source "${REPO_ROOT}/bootstrap/lib/linux-tools.sh"
+# shellcheck source=bootstrap/lib/prereqs.sh
+source "${REPO_ROOT}/bootstrap/lib/prereqs.sh"
 # shellcheck source=bootstrap/lib/service-linux.sh
 source "${REPO_ROOT}/bootstrap/lib/service-linux.sh"
 # shellcheck source=tools/versions.env
@@ -56,6 +59,10 @@ install_packages() {
   apt_install $PACKAGES
   link_debian_tools
 }
+
+prereq_add "sudo" necessary sudo_ready install_sudo no "Run the setup as root, or ask an admin to give this account sudo."
+prereq_add "Locale $(wanted_locale)" optional locale_ready install_locale yes "Run: sudo apt-get install locales && sudo locale-gen $(wanted_locale)"
+run_prereqs
 
 step "Checking this machine"
 run_part "System packages" packages_ready install_packages

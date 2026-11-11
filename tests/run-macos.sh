@@ -17,6 +17,8 @@ TEST_HOME="$(mktemp -d /tmp/hbt.XXXXXX)"
 STUBS="${TEST_HOME}/stubs"
 CALLS="${TEST_HOME}/calls.log"
 mkdir -p "$STUBS" "${TEST_HOME}/home/.claude" "${TEST_HOME}/home/.pi/agent/extensions"
+# The Homebrew folder of the stub, so that the prerequisites step finds it writable.
+mkdir -p "${TEST_HOME}/brew/Cellar" "${TEST_HOME}/brew/bin"
 
 for name in defaults chsh activate-stub; do
   cat >"${STUBS}/${name}" <<STUB
@@ -47,6 +49,7 @@ cat >"${STUBS}/brew" <<STUB
 echo "brew \$*" >>"${CALLS}"
 case "\$1" in
   shellenv) exit 0 ;;
+  --prefix) echo "${TEST_HOME}/brew"; exit 0 ;;
   list)
     if [ "\$2" = --formula ]; then cat "${TEST_HOME}/brew-installed" 2>/dev/null; fi
     exit 0
