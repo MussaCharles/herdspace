@@ -1,0 +1,47 @@
+name: Bug report
+description: Something in herdspace does not work.
+labels: [bug]
+body:
+  - type: input
+    id: release
+    attributes:
+      label: Release
+      description: The output of `hopen --version`, or the tag in the curl command.
+      placeholder: v0.1.1
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options: [macOS, Debian, Ubuntu, Windows with WSL, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Machine
+      options: [Server machine, Client machine, One machine as both, Only hopen]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: The commands that you ran, in order.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Result
+      description: What happened, and the full error text. Remove host names and other personal data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
