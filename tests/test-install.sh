@@ -11,7 +11,7 @@ fail() { printf 'FAIL %s\n' "$1"; failures=$((failures + 1)); }
 contains() { case "$1" in *"$2"*) pass "$3" ;; *) fail "$3: ${1:0:300}" ;; esac; }
 
 tmp="$(mktemp -d)"
-trap 'rm -rf "$tmp" dist/v9.9.9-test' EXIT
+trap 'rm -rf "$tmp" dist/9.9.9-test dist/9.9.9-test.notes.md dist/9.9.9-guard.notes.md' EXIT
 tag=9.9.9-test
 tools/release.sh "$tag" --repo example/hopen-test >/dev/null || { echo "FAIL release build"; exit 1; }
 dist="$(pwd)/dist/${tag}"
@@ -63,6 +63,16 @@ run_install >/dev/null
 out="$(run_install --uninstall)"
 contains "$out" 'Removed' 'uninstall removes hopen'
 if [ ! -e "${home}/.local/bin/hopen" ] && [ -d "${home}/.config/hopen/templates" ]; then pass 'uninstall keeps the templates'; else fail 'uninstall keeps the templates'; fi
+
+# The release notes come from the changelog section of the tag.
+cl="${tmp}/CHANGELOG.md"
+printf '# Changelog\n\n## [Unreleased]\n\n## [%s] - 2026-01-01\n\n### Fixed\n\n- A test item.\n\n## [0.0.1] - 2025-01-01\n\n- An old item.\n\n[%s]: https://example.com\n' "$tag" "$tag" >"$cl"
+HS_CHANGELOG="$cl" tools/release.sh "$tag" --repo example/hopen-test >/dev/null 2>&1
+notes="$(cat "dist/${tag}.notes.md" 2>/dev/null)"
+contains "$notes" '- A test item.' 'the notes have the changelog section'
+contains "$notes" "blob/${tag}/README.md#quick-start" 'the notes link to the install steps'
+case "$notes" in *'An old item'*|*'example.com'*) fail 'the notes stop at the next section' ;; *) pass 'the notes stop at the next section' ;; esac
+contains "$(HS_CHANGELOG=/nonexistent tools/release.sh "$tag" --repo example/hopen-test 2>&1)" 'has no section' 'a missing section is reported'
 
 touch release-guard-test.txt
 contains "$(tools/release.sh v9.9.9 --repo example/hopen-test 2>&1)" 'no v in front' 'release.sh refuses a tag with v'

@@ -81,12 +81,35 @@ rm -f "${out}/hopen.tagged"
 )
 ls -1 "$out"
 
+# The release notes are the section of CHANGELOG.md for this tag, with a link
+# to the install steps at the top. HS_CHANGELOG names another file for tests.
+changelog="${HS_CHANGELOG:-CHANGELOG.md}"
+notes="dist/${TAG}.notes.md"
+section="$(awk -v tag="$TAG" '
+  index($0, "## [" tag "]") == 1 { found = 1; next }
+  found && (/^## \[/ || /^\[[^]]+\]: /) { exit }
+  found { print }
+' "$changelog" 2>/dev/null | sed '/./,$!d')" || section=""
+if [ -z "$section" ]; then
+  if [ "$PUBLISH" -eq 1 ]; then
+    echo "${changelog} has no section for ${TAG}. Add \"## [${TAG}] - <date>\" with the changes, and commit it." >&2
+    exit 1
+  fi
+  echo "Note: ${changelog} has no section for ${TAG}, so ${notes} has only the install link." >&2
+fi
+{
+  printf 'To install, follow the [Quick start](https://github.com/%s/blob/%s/README.md#quick-start). The [setup guide](https://github.com/%s/blob/%s/docs/setup.md) has every option.\n' "$REPO" "$TAG" "$REPO" "$TAG"
+  [ -z "$section" ] || printf '\n%s\n' "$section"
+} >"$notes"
+echo "$notes"
+
 if [ "$PUBLISH" -eq 1 ]; then
   pre=""
   case "$TAG" in *-*) pre="--prerelease" ;; esac
   if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
     gh release upload "$TAG" --repo "$REPO" --clobber "${out}"/*
+    gh release edit "$TAG" --repo "$REPO" --notes-file "$notes"
   else
-    gh release create "$TAG" --repo "$REPO" --target main $pre --title "$TAG" --generate-notes "${out}"/*
+    gh release create "$TAG" --repo "$REPO" --target main $pre --title "$TAG" --notes-file "$notes" "${out}"/*
   fi
 fi

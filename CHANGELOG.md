@@ -1,0 +1,21 @@
+# Changelog
+
+All notable changes to herdspace are in this file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.1.1] - 2026-11-11
+
+The first release of herdspace.
+
+### Added
+
+- `hopen` opens each folder of a VS Code workspace file as a Herdr workspace in one named session. It starts the template programs again after a restart.
+- Five pane templates: `plain`, `code`, `agent`, `grid`, and `review`. You can add your own.
+- `bootstrap.sh server`, `client`, and `both` set up macOS, Debian, Ubuntu, and Windows with WSL with one command. A run does only what is missing, and it asks before it replaces a file that you changed.
+- `install.sh` installs only `hopen` on a machine that has Herdr.
+- `install.md` has steps that a coding agent follows to do the setup.
+- Guides for setup, SSH, templates, WSL, updating, and testing.
+
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.1.1...HEAD
+[0.1.1]: https://github.com/MussaCharles/herdspace/releases/tag/0.1.1
