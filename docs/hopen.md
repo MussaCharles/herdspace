@@ -2,7 +2,7 @@
 
 Scope: open your projects in Herdr with `hopen`, and install, update, or remove it.
 
-`hopen` reads a list of projects and opens each project as a Herdr workspace in one named session. A list is a `herdspace.toml` file. If you come from VS Code, `hopen` also reads a VS Code workspace file. See [Use a VS Code workspace file](#use-a-vs-code-workspace-file). The server setup installs `hopen`. The [templates guide](templates.md) explains how to split each project into named panes.
+`hopen` reads a list of projects and opens each project as a Herdr workspace in one named session. A list is a `herdspace.toml` file. If you come from VS Code, `hopen` also reads a VS Code workspace file. See [Use a VS Code workspace file](#use-a-vs-code-workspace-file), and the [From VS Code](vscode.md) guide. The server setup installs `hopen`. The [templates guide](templates.md) explains how to split each project into named panes.
 
 ## Write a list
 

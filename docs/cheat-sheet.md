@@ -239,6 +239,20 @@ Use Herdr to start an opencode agent named coder in a split next to you. Give it
 
 The skill works for each agent program that the server setup found. Every program in a pane can read and type into other panes. Do not let one agent answer the approval prompt of another agent.
 
+## One worktree for each agent
+
+A git worktree is a second checkout of a repository, on its own branch. Give each agent its own worktree, so that two agents do not change the same files. Herdr creates the worktree and opens it as a new workspace.
+
+| Task | Command or key |
+|------|----------------|
+| New worktree from the selected workspace | `Ctrl+B`, then `Shift+G` |
+| New worktree on a branch | `herdr worktree create --branch fix-login` |
+| List the worktrees | `herdr worktree list` |
+| Open an existing worktree | `herdr worktree open` |
+| Remove a worktree checkout | `herdr worktree remove --workspace <id>` |
+
+Herdr puts each checkout in a folder with the name of the repository and the branch. The [Herdr docs](https://herdr.dev/llms.txt) list every option. `hopen` does not close a worktree workspace.
+
 ## Jump to folders
 
 zoxide knows only the folders that you visited. Use `cd` with the full path the first time.

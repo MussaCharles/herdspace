@@ -124,7 +124,7 @@ hopen work
 
 Run `hopen` again at any time. It starts a stopped session and adds only the new projects. It never closes anything. A list can also set a start command, environment values, and extra tabs for each project. The [hopen guide](docs/hopen.md) has every command and setting.
 
-If you come from VS Code, `hopen` also reads a VS Code workspace file, so that VS Code and Herdr share one list. See [Use a VS Code workspace file](docs/hopen.md#use-a-vs-code-workspace-file).
+If you come from VS Code, `hopen` also reads a VS Code workspace file, so that VS Code and Herdr share one list. See [Use a VS Code workspace file](docs/hopen.md#use-a-vs-code-workspace-file). The [From VS Code](docs/vscode.md) guide has the herdspace match for each VS Code action.
 
 ## Templates
 
@@ -180,6 +180,7 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 - [hopen guide](docs/hopen.md): write a list, its settings, the commands, and how to install, update, or remove `hopen`.
 - [Setup guide](docs/setup.md): set up a server and a client, every option, and what the setup installs.
 - [Templates and panes](docs/templates.md): each template, how to add your own, and videos of the pane keys.
+- [From VS Code](docs/vscode.md): the herdspace command or key for each VS Code action.
 - [Keyboard shortcuts](docs/keyboard-shortcuts.md): the keys that the setup changes, and how to keep the keys of your terminal.
 - [Cheat sheet](docs/cheat-sheet.md): keys and commands for daily use.
 - [Connect to the server with SSH](docs/ssh.md): what `my-server` means, and how to set up the SSH name and key.
