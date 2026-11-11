@@ -1,0 +1,60 @@
+---
+name: herdspace-docs
+description: Write or change the herdspace docs, the README, install.md, a skill, or the screenshots and videos. Use when you add a guide, change a sentence that a person reads, add a link, or record media again.
+---
+
+# Write the docs
+
+The docs are for a person who does not know Herdr or herdspace. Write each sentence so that the person understands it on one read.
+
+## Language
+
+Follow the `simple-english` skill for every doc. These rules matter most here:
+
+- Short sentences, active voice, and simple tenses.
+- Put a condition before the command: "If the check fails, run it again."
+- Use `can`, `must`, and `will`. Do not use `should`, `may`, `might`, or `could`.
+- No contractions, no semicolons, and no em-dashes.
+- Use one word for one meaning in all docs. For example, "machine" and not "computer".
+
+## Words of this project
+
+| Word | Meaning |
+|------|---------|
+| server machine | The machine that runs Herdr, the projects, and the agents. |
+| client machine | The machine that the person uses. It connects to the server machine with SSH. |
+| one machine as both | One machine that is the server machine and the client machine. |
+| SSH name | A short name for a server in `~/.ssh/config`, for example `my-server`. |
+| list | A VS Code workspace file that `hopen` reads. |
+
+Define each of these at its first use in a doc, before you use it.
+
+## Links
+
+- Link text is a name, not a file name: `[setup guide](docs/setup.md)`, not `[setup.md](docs/setup.md)`. The target keeps `.md`, because GitHub needs it.
+- Link to the section that answers the question: `docs/setup.md#one-machine-as-server-and-client`.
+- The `curl` commands use `https://github.com/MussaCharles/herdspace/releases/latest/download/`. Do not put a fixed tag in a doc.
+- The agent prompts read `install.md` from `main`.
+- `CHANGELOG.md` text goes to the release page, where a relative link does not work. In the changelog, name a file as text, for example `docs/hopen.md`.
+
+## Structure
+
+- Each guide starts with a `Scope:` line that says what the guide covers.
+- Commands go in their own code block, one command for each block. Explanations go in the text.
+- A list is for three or more items. A table is for items with the same fields.
+- A fix lives in one doc. Other docs link to it.
+- If you add a guide, add it to the Documentation list in `README.md`.
+
+## Changes that the maintainer asks for
+
+For a wording change that the maintainer asks for, show a preview of the new text first. Change the file only after the maintainer approves it.
+
+## Screenshots and videos
+
+`tests/capture-media.sh` records the images and videos in `docs/media` with real Ghostty and real key presses. The files go to `tests/.work/media`. Before you copy a file to `docs/media`, look at it. The GIF files play 3 times faster than the recording, and `SPEED` changes it.
+
+## Make sure that it works
+
+1. Make sure that each relative link and anchor resolves.
+2. Make sure that each new external link opens.
+3. Make sure that a new `curl` command runs.
