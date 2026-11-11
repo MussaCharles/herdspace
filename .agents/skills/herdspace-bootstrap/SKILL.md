@@ -52,15 +52,18 @@ The role goes to `~/.config/herdspace/env.zsh` and to the `~/.zprofile` block. F
 
 `bootstrap/lib/client.sh` keeps the key choice: `herdspace` (the default) or `terminal`. `--keep-terminal-keys` and `--use-herdspace-keys` change it, and `load_keys` saves it in `~/.config/herdspace/keys`, so that a later run keeps it. With `terminal`, `install_ghostty_config` removes the lines between `# herdspace keys: start` and `# herdspace keys: end` from the Ghostty file, and the macOS client gives the `Ctrl` arrow keys back to Mission Control. If you add a key, put it between the marks, and add it to `docs/keyboard-shortcuts.md`.
 
+Before you add a Herdr key, compare it with the default keys of Herdr. For example, `prefix+shift+p` renames a pane, and `prefix+shift+t` renames a tab. `prefix+o` opens the target of a notification, and `prefix+shift+g` makes a new worktree. If Ghostty uses a key that Herdr must get, add `keybind = <key>=unbind` to both Ghostty files, between the marks. `tests/run-client-linux.sh` presses the real keys.
+
 ## Add a tool or a file
 
-1. Decide where it belongs: `bootstrap/lib/server.sh` for every server, one script in `bootstrap/platforms/` for one system, or `config/` for a configuration file.
-2. Add the step with `run_part` and a ready function, so that a second run skips it.
-3. Use `install_file` for a file that herdspace owns, and `ensure_block` for lines in a file that the person owns.
-4. Pin each download. `tools/update-versions.sh` writes the release files and their checksums to `tools/versions.tsv`, and the Git commits to `tools/versions.env`. Review its output before you commit it. If the person did not agree, do not run `curl | sh` from a new source.
-5. Add a check to `tests/verify-server.sh`, or to the test of the client.
-6. Add the tool to "What the setup installs" in `docs/setup.md`, and to the credits in `README.md`.
-7. Add a line to `CHANGELOG.md`.
+1. Read what Herdr and the installed tools already do. If one of them does the job, use it, and install nothing new.
+2. Decide where it belongs: `bootstrap/lib/server.sh` for every server, one script in `bootstrap/platforms/` for one system, or `config/` for a configuration file.
+3. Add the step with `run_part` and a ready function, so that a second run skips it.
+4. Use `install_file` for a file that herdspace owns, and `ensure_block` for lines in a file that the person owns.
+5. Pin each download. `tools/update-versions.sh` writes the release files and their checksums to `tools/versions.tsv`, and the Git commits to `tools/versions.env`. Review its output before you commit it. If the person did not agree, do not run `curl | sh` from a new source.
+6. Add a check to `tests/verify-server.sh`, or to the test of the client.
+7. Add the tool to "What the setup installs" in `docs/setup.md`, and to the credits in `README.md`.
+8. Add a line to `CHANGELOG.md`.
 
 ## Rules
 

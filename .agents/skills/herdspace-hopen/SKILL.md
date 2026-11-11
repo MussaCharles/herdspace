@@ -43,6 +43,23 @@ If you add a template, add it to `docs/templates.md`, and record its image with 
 
 The Auto Title plugin also names panes. It keeps a name that a person chose, but every session writes its choices to one shared file, and pane IDs repeat across sessions. After a restart, the plugin can rename a template pane. For `HOPEN_GUARD_SECONDS` (30 by default), `guard_names` runs in the background and puts back each template pane name and each list tab name (`GUARD_TABS`) that changed. `HOPEN_GUARD_SECONDS=0` turns it off. Keep the guard while the plugin uses one shared file for all sessions.
 
+## Pitfalls
+
+Each of these mistakes broke `hopen` one time:
+
+- Before you add a feature, read what Herdr and the installed tools already do. Read `herdr --help` and the Herdr docs. If a tool already does it, use that tool, and install nothing new.
+- `bin/hopen` runs from the top to the bottom. Define a function above the dispatch code that calls it.
+- `choose` gets its items on stdin, so it reads the answer from `/dev/tty`. A menu that reads stdin gets an item, not the answer.
+- With an empty `TERM`, or `TERM=dumb`, fzf draws nothing. `choose` uses the numbered menu then.
+- In bash 5, `${path/#$HOME/~}` expands the `~` again, and prints the full path. Use `short_path`.
+- The Python parts must run on Python 3.11. Python 3.11 refuses a backslash inside the braces of an f-string. Use `.format`.
+- The bash completion must run on bash 3.2, the bash of macOS. Do not use `mapfile` or `compopt`.
+- On macOS, `/var` is a link to `/private/var`, and `lsof` shows the real path. Compare folders with their real paths.
+- Small Linux systems have no `ss` and no `lsof`. `--ports` reads `/proc/net/tcp` and `/proc/net/tcp6` on Linux.
+- A command line is visible to each user in `ps`. Send an environment value to a child program on stdin, not as an argument.
+- A checksum that is not 64 hexadecimal characters means "not approved". An empty checksum must never match.
+- A Herdr popup has `HERDR_ACTIVE_PANE_ID` and no `HERDR_PANE_ID`. Use `${HERDR_PANE_ID:-${HERDR_ACTIVE_PANE_ID:-}}` for the pane to split.
+
 ## Rules
 
 - `hopen` must be safe to run again. A second run adds only the folders with no workspace.
@@ -60,4 +77,4 @@ tests/run-macos.sh server
 tests/run-linux.sh
 ```
 
-Both run `tests/verify-server.sh`, which opens real lists in a throwaway Herdr session and restarts it. Do not test against the Herdr server of the person, and do not close their panes. If you change a template, run `tests/capture-media.sh`. Before you copy the new images to `docs/media`, look at them.
+Follow the `herdspace-test` skill to find the sandboxes of the machine. Both run `tests/verify-server.sh`, which opens real lists in a throwaway Herdr session and restarts it. Do not test against the Herdr server of the person, and do not close their panes. If you change a template, run `tests/capture-media.sh`. Before you copy the new images to `docs/media`, look at them.
