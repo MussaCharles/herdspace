@@ -13,11 +13,11 @@ Run each check. Do not install a missing tool without the agreement of the perso
 
 | Sandbox | Signs that it is ready | The tests that need it |
 |---------|----------------|------------------------|
-| Linux containers | `docker info` answers | `tests/run-linux.sh`, `tests/run-systemd.sh`, `tests/run-prereqs.sh`, `tests/test-install.sh` |
+| Linux containers | `docker info` answers | `tests/run-linux.sh`, `tests/run-systemd.sh`, `tests/run-prereqs.sh`, `tests/capture-media.sh` |
 | Ghostty in a container | Docker answers, and the machine can build `tests/Dockerfile.client` | `tests/run-client-linux.sh` (real key presses) |
-| macOS stubs | `uname -s` is `Darwin`, and Homebrew has Python 3.11 or later | `tests/run-macos.sh` |
+| macOS stubs | `uname -s` is `Darwin`, and Homebrew has the server tools (Herdr, Neovim, and the others) and Python 3.11 or later. The test uses the real tools, with a temporary home folder. Only commands that change the system are stubs. | `tests/run-macos.sh` |
 | macOS VM | `uname -m` is `arm64` on a Mac, `tart` is installed, and `tart list --quiet` shows the base image (`tahoe-base`) | the macOS part of `tests/run-release-check.sh` |
-| Any machine | bash and Python 3.11 or later | `tests/test-hopen-list.sh`, `tests/test-skills.sh`, `shellcheck` |
+| Any machine | bash, git, and Python 3.11 or later | `tests/test-hopen-list.sh`, `tests/test-skills.sh`, `tests/test-install.sh`, `shellcheck` |
 
 ## 2. Run the tests that the change touches
 
@@ -61,6 +61,10 @@ If you add a feature that a person can see, add a step for it to `tests/tour-rel
 - A small Linux image has no `ss`, `lsof`, `curl`, or `procps`. Do not let a test depend on a tool that the setup does not install.
 - In a Tart VM, host names can fail because the DNS proxy of the host refuses the VM. Set a public DNS server in the VM. Do not start the base image. Clone it.
 - Apple allows two macOS VMs at a time on one Mac.
+- Herdr stops in a terminal with no size. `tests/pty_run.py` gives its terminal a size. A test window must have a size before Herdr starts in it.
+- If the Ghostty window of a client test does not open, the test must stop with the Ghostty log. A test that waits for a window can wait forever.
+- A slow or broken package mirror looks like a stuck test. Set `APT_MIRROR_UBUNTU` or `APT_MIRROR_DEBIAN`. See the testing guide.
+- Find the real cause of a failed test before you add code. Code that answers the terminal queries of fzf did not fix a fzf test, because the cause was a race. The code was removed again.
 
 ## Rules
 

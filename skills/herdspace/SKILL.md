@@ -23,7 +23,7 @@ If `hopen --version` fails, herdspace is not installed. Follow the agent install
 | Open new projects with a template | `hopen work --template code --no-attach` |
 | See every template | `hopen --templates` |
 | See the tasks of the project of the current folder | `hopen --task </dev/null` |
-| Run a task of the project, in a new Herdr pane | `hopen --task test` (only in a Herdr pane) |
+| Run a task of the project | `hopen --task test`. In a Herdr pane, the task opens a new pane. Outside Herdr, it runs in the current terminal. |
 | See which programs listen on a TCP port, and their projects | `hopen --ports` |
 
 These commands are for the person, in their own terminal. They open a menu or an editor, so do not run them yourself:
@@ -53,11 +53,11 @@ hopen work
 
 ## Split a tab with a template
 
-`hopen --apply grid` splits the current tab with the `grid` template. It works only inside Herdr, in the tab to split. The templates are in `~/.config/hopen/templates`. Each line of a template file is one pane: `NAME FROM DIRECTION SIZE COMMAND`.
+`hopen --apply grid` splits the current tab with the `grid` template. It works only inside Herdr, in a tab that has only one pane. The templates are in `~/.config/hopen/templates`. Each line of a template file is one pane: `NAME FROM DIRECTION SIZE COMMAND`.
 
 ## Check or update the setup
 
-On a server machine, a client machine, or one machine as both, `--check` reports what is done and what is missing. It changes nothing:
+On a server machine, a client machine, or one machine as both, `--check` reports what is done and what is missing. It changes nothing in the setup. From `curl`, it only downloads the release files first. If an item is not done, it exits with status 1:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server --check
@@ -75,6 +75,6 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/in
 
 - Do not stop the Herdr server, and do not close a workspace, a tab, or a pane of the person.
 - Before you change a list file or a template, ask the person.
-- A list can run commands and set environment values. With no terminal, `hopen` uses them only with `--trust`. Show the person the `onOpen`, `tabs`, `tasks`, `env`, and `envFile` entries of the list. Add `--trust` only after the person agrees. Do not print the values of an env file, because they can be secrets.
+- A list can run commands and set environment values. With no terminal, `hopen` uses them only with `--trust`. Show the person the entries of the list that run commands or set values. In a `herdspace.toml` list, they are `on_open`, `tabs`, `tasks`, `env`, and `env_file`. In a VS Code workspace file, they are `hopen.onOpen`, `hopen.tabs`, `hopen.tasks`, `hopen.env`, and `hopen.envFile`. Add `--trust` only after the person agrees. Do not print the values of an env file, because they can be secrets.
 - If a command asks for a password, stop. Give the command to the person to run in their own terminal.
 - Do not print the contents of `~/.ssh` or of another secret file.

@@ -45,6 +45,20 @@ Define each of these at its first use in a doc, before you use it.
 - A fix lives in one doc. Other docs link to it.
 - If you add a guide, add it to the Documentation list in `README.md`.
 
+## Add a skill
+
+1. Put a contributor skill in `.agents/skills/<name>/SKILL.md`, and the user skill in `skills/<name>/SKILL.md`.
+2. Link each contributor skill for Claude Code, in the same pull request:
+
+   ```bash
+   ln -s ../../.agents/skills/<name> .claude/skills/<name>
+   ```
+
+3. Add the skill to the table of skills in `AGENTS.md`.
+4. Run `tests/test-skills.sh`. It fails for a missing link, a broken link, or a skill that `AGENTS.md` does not list.
+
+If you rename or remove a skill, change or remove its link too.
+
 ## Changes that the maintainer asks for
 
 For a wording change that the maintainer asks for, show a preview of the new text first. Change the file only after the maintainer approves it.

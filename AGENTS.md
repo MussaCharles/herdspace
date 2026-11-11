@@ -20,7 +20,15 @@ A CLI workspace and session manager for Herdr, the terminal multiplexer for codi
 
 ## Skills
 
-Read the skill for the part that you change. Each skill is in `.agents/skills/<name>/SKILL.md`. `.claude/skills/` has a link to each one, so that Claude Code finds them.
+Read the skill for the part that you change. Each skill is in `.agents/skills/<name>/SKILL.md`. `.claude/skills/` has a symbolic link to each one, so that Claude Code finds them.
+
+If you add a skill, add its link in the same pull request, and add the skill to the table below:
+
+```bash
+ln -s ../../.agents/skills/<name> .claude/skills/<name>
+```
+
+If you rename or remove a skill, change or remove its link too. `tests/test-skills.sh` fails for a skill with no link, and for a broken link.
 
 | Skill | Use it when you |
 |-------|-----------------|
@@ -47,7 +55,7 @@ Read the skill for the part that you change. Each skill is in `.agents/skills/<n
 ## Commands
 
 ```bash
-shellcheck -S warning bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
+shellcheck -S warning bin/hopen bin/herdr-update-check bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
 ```
 
 ```bash
@@ -74,7 +82,7 @@ tests/run-macos.sh
 tests/run-linux.sh
 ```
 
-`tests/run-linux.sh`, `tests/run-systemd.sh`, and `tests/run-client-linux.sh` need Docker. A command that runs for more than two minutes goes in the background, with its output in a log file.
+`tests/run-linux.sh`, `tests/run-systemd.sh`, `tests/run-client-linux.sh`, `tests/run-prereqs.sh`, `tests/capture-media.sh`, and the Linux part of `tests/run-release-check.sh` need Docker. A command that runs for more than two minutes goes in the background, with its output in a log file.
 
 ## Pull requests
 
