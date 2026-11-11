@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-11
+
 ### Added
 
 - Each setup run starts with a prerequisites step. It lists the missing items, installs them after one question, and lets you skip the optional ones. `--yes` installs them with no question.
@@ -51,6 +53,7 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/MussaCharles/herdspace/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/MussaCharles/herdspace/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/MussaCharles/herdspace/releases/tag/0.1.1
