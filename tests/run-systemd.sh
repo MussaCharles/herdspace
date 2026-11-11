@@ -2,13 +2,17 @@
 # run-systemd.sh tests the Linux login service in a container with real systemd.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
+# shellcheck source=tests/lib-docker.sh
+source tests/lib-docker.sh
 mkdir -p tests/.work
 tag="hb-test-systemd"
 name="${tag}-$$"
-docker build -q -f tests/Dockerfile.systemd -t "$tag" . >/dev/null || exit 1
-docker run -d --rm --name "$name" --privileged --cgroupns=host \
+# shellcheck disable=SC2046 # build_flags prints one option or nothing.
+docker build -q $(build_flags) -f tests/Dockerfile.systemd -t "$tag" . >/dev/null || exit 1
+apt_cache_args ubuntu:24.04
+docker run -d --rm --name "$name" --privileged --cgroupns=host ${APT_CACHE[@]+"${APT_CACHE[@]}"} \
   --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:rw "$tag" >/dev/null || exit 1
-trap 'docker rm -f "$name" >/dev/null 2>&1; docker rmi -f "$tag" >/dev/null 2>&1' EXIT
+trap 'docker rm -f "$name" >/dev/null 2>&1; remove_images "$tag"' EXIT
 
 uid="$(docker exec "$name" id -u tester)"
 for _ in $(seq 1 60); do

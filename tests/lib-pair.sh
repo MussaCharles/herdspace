@@ -4,6 +4,8 @@
 #
 # Set OPEN_CMD to the command that the Ghostty window runs on the client.
 cd "$(dirname "$0")/.." || exit 1
+# shellcheck source=tests/lib-docker.sh
+source tests/lib-docker.sh
 mkdir -p tests/.work/shots
 net="hb-test-net-$$"
 srv="hb-test-srv-$$"
@@ -12,7 +14,7 @@ cli="hb-test-cli-$$"
 cleanup() {
   docker rm -f "$srv" "$cli" >/dev/null 2>&1
   docker network rm "$net" >/dev/null 2>&1
-  docker rmi -f hb-test-srv hb-test-cli >/dev/null 2>&1
+  remove_images hb-test-srv hb-test-cli
 }
 trap cleanup EXIT
 status=0
@@ -21,10 +23,14 @@ pass() { echo "PASS $1"; }
 fail() { echo "FAIL $1"; status=1; }
 
 docker network create "$net" >/dev/null || exit 1
-docker build -q --build-arg BASE=ubuntu:24.04 -f tests/Dockerfile.linux -t hb-test-srv . >/dev/null || exit 1
-docker build -q --build-arg "BASE=${CLIENT_BASE:-ubuntu:26.04}" -f tests/Dockerfile.client -t hb-test-cli . >/dev/null || exit 1
-docker run -d --name "$srv" --network "$net" --network-alias my-server --user root hb-test-srv sleep 7200 >/dev/null || exit 1
-docker run -d --name "$cli" --network "$net" hb-test-cli sleep 7200 >/dev/null || exit 1
+# shellcheck disable=SC2046 # build_flags prints one option or nothing.
+docker build -q $(build_flags) --build-arg BASE=ubuntu:24.04 -f tests/Dockerfile.linux -t hb-test-srv . >/dev/null || exit 1
+# shellcheck disable=SC2046
+docker build -q $(build_flags) --build-arg "BASE=${CLIENT_BASE:-ubuntu:26.04}" -f tests/Dockerfile.client -t hb-test-cli . >/dev/null || exit 1
+apt_cache_args ubuntu:24.04
+docker run -d --name "$srv" --network "$net" --network-alias my-server --user root ${APT_CACHE[@]+"${APT_CACHE[@]}"} hb-test-srv sleep 7200 >/dev/null || exit 1
+apt_cache_args "${CLIENT_BASE:-ubuntu:26.04}"
+docker run -d --name "$cli" --network "$net" ${APT_CACHE[@]+"${APT_CACHE[@]}"} hb-test-cli sleep 7200 >/dev/null || exit 1
 
 # docker exec can start with no file mask, so set the usual one.
 in_mask=(sh -c 'umask 022; exec "$@"' sh)

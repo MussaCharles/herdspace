@@ -76,4 +76,4 @@ tests/run-macos.sh
 tests/run-linux.sh
 ```
 
-For a login service change, also run `tests/run-systemd.sh`. For a client change, also run `tests/run-client-linux.sh`, which presses real keys in Ghostty. The macOS test uses a temporary home folder and stub commands, so it does not change the account of the person.
+The Linux tests reuse their apt downloads between runs. Add `NO_CACHE=1` to download every package again, for example after a change to a package list. For a login service change, also run `tests/run-systemd.sh`. For a client change, also run `tests/run-client-linux.sh`, which presses real keys in Ghostty. The macOS test uses a temporary home folder and stub commands, so it does not change the account of the person.
