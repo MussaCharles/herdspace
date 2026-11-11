@@ -4,11 +4,11 @@
 # commands that change the system, so the real account does not change.
 #
 # The test needs Homebrew with the tools installed.
-# Usage: tests/run-macos.sh [server|client|keys|both]...   Default: server client keys both
+# Usage: tests/run-macos.sh [server|client|prereqs|keys|both]...   Default: server client prereqs keys both
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 [ "$(uname -s)" = Darwin ] || { echo 'This test runs only on macOS.'; exit 1; }
-[ "$#" -gt 0 ] || set -- server client keys both
+[ "$#" -gt 0 ] || set -- server client prereqs keys both
 
 TEST_TERMINFO="${HOME}/.terminfo"
 
@@ -52,6 +52,7 @@ case "\$1" in
   --prefix) echo "${TEST_HOME}/brew"; exit 0 ;;
   list)
     if [ "\$2" = --formula ]; then cat "${TEST_HOME}/brew-installed" 2>/dev/null; fi
+    if [ "\$2" = --cask ] && [ -n "\${STUB_NO_GHOSTTY:-}" ]; then exit 1; fi
     exit 0
     ;;
   install)
@@ -108,6 +109,17 @@ for target in "$@"; do
       run "$ROOT/tests/test-idempotent.sh" bootstrap.sh "${TEST_HOME}/home/.config/ghostty/config.ghostty" client --server example-server || status=1
       out="$(run zsh -i -c 'print -r -- CLIENT_OK' </dev/null 2>&1)"
       case "$out" in *CLIENT_OK*) echo 'PASS client shell starts' ;; *) echo "FAIL client shell starts: ${out:0:200}"; status=1 ;; esac
+      ;;
+    prereqs)
+      # On an account that is not an admin, the setup cannot install Ghostty.
+      # It must name the command for an admin account, and stop.
+      if id -Gn | tr ' ' '\n' | grep -qx admin; then
+        echo 'PASS prereqs: skipped, because this account is an admin'
+      else
+        out="$(run env STUB_NO_GHOSTTY=1 HS_PREREQS_ONLY=1 "$ROOT/bootstrap.sh" client --yes </dev/null 2>&1)"; rc=$?
+        case "$out" in *"brew install --cask ghostty"*) echo 'PASS prereqs: names the Ghostty command for an admin' ;; *) echo "FAIL prereqs: names the Ghostty command for an admin: ${out:0:300}"; status=1 ;; esac
+        [ "$rc" -ne 0 ] && echo 'PASS prereqs: stops without Ghostty' || { echo 'FAIL prereqs: stops without Ghostty'; status=1; }
+      fi
       ;;
     keys)
       # --keep-terminal-keys keeps the keys of Ghostty and macOS. A later run
