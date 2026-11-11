@@ -35,7 +35,7 @@ The prefix key of Herdr is `Ctrl+B`. Press it, release it, and then press the ke
 | Previous or next tab | `Ctrl+B`, then `P` or `N` |
 | Next or previous pane | `Ctrl+B`, then `Tab` or `Shift+Tab` |
 | lazygit | `Ctrl+B`, then `D` |
-| The command palette of `hopen` | `Ctrl+B`, then `Shift+P` |
+| The command palette of `hopen` | `Ctrl+B`, then `A` |
 
 The [cheat sheet](cheat-sheet.md) has every key for daily use.
 

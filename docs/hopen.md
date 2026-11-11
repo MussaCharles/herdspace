@@ -164,7 +164,7 @@ A task is a command from the list, so it needs the same approval as `on_open`. S
 
 ## The command palette
 
-In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. `Ctrl+B`, then `Shift+P` also works. A menu shows the actions that fit the current folder:
+In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. `Ctrl+B`, then `A` also works. A menu shows the actions that fit the current folder:
 
 - Run a task of the project.
 - Find a file, or search in the files, and open the result.
