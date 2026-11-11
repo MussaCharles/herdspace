@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- The herdspace agent skill knows the tasks, `hopen --ports`, and the commands that only a person runs: `ff`, `fif`, and the command palette.
+
 ## [0.5.0] - 2026-11-12
 
 ### Added

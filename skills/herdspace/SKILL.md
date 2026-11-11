@@ -23,6 +23,18 @@ If `hopen --version` fails, herdspace is not installed. Follow the agent install
 | Open new projects with a template | `hopen work --template code --no-attach` |
 | See every template | `hopen --templates` |
 | See the tasks of the project of the current folder | `hopen --task </dev/null` |
+| Run a task of the project, in a new Herdr pane | `hopen --task test` (only in a Herdr pane) |
+| See which programs listen on a TCP port, and their projects | `hopen --ports` |
+
+These commands are for the person, in their own terminal. They open a menu or an editor, so do not run them yourself:
+
+| Command | What it does |
+|---------|--------------|
+| `ff`, or `hopen --find` | Choose a file with fzf, and open it in the editor. |
+| `fif TEXT`, or `hopen --grep TEXT` | Search the files, and open a result at its line. |
+| `hopen --palette` | A menu of actions for the current folder, like the command palette of VS Code. In Herdr, `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) opens it. |
+
+`ff` and `fif` load only in an interactive zsh. A person who comes from VS Code can read the VS Code guide: `https://github.com/MussaCharles/herdspace/blob/main/docs/vscode.md`.
 
 When you run `hopen` yourself, add `--no-attach`. You cannot use the session. Tell the person to attach in their own terminal:
 
@@ -63,6 +75,6 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/in
 
 - Do not stop the Herdr server, and do not close a workspace, a tab, or a pane of the person.
 - Before you change a list file or a template, ask the person.
-- A list can run commands and set environment values. With no terminal, `hopen` uses them only with `--trust`. Show the person the `onOpen`, `tabs`, `env`, and `envFile` entries of the list, and add `--trust` only after the person agrees. Do not print the values of an env file, because they can be secrets.
+- A list can run commands and set environment values. With no terminal, `hopen` uses them only with `--trust`. Show the person the `onOpen`, `tabs`, `tasks`, `env`, and `envFile` entries of the list. Add `--trust` only after the person agrees. Do not print the values of an env file, because they can be secrets.
 - If a command asks for a password, stop. Give the command to the person to run in their own terminal.
 - Do not print the contents of `~/.ssh` or of another secret file.
