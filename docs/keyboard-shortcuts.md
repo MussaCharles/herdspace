@@ -13,6 +13,7 @@ By default, the client setup changes some keys of Ghostty and macOS. With the ch
 | `Cmd+K` | `Ctrl+Shift+K` | Ghostty, on a Mac: clear the screen | Herdr: go to any workspace, tab, or agent |
 | `Cmd+E` | `Ctrl+Shift+E` | Ghostty: search for the selected text on a Mac, or split down on Linux | Neovim: go to the file tree |
 | `Cmd+Shift+G` | `Ctrl+Shift+G` | Ghostty, on a Mac: go to the previous search result | Herdr: open lazygit over the pane |
+| `Cmd+Shift+P` | `Ctrl+Shift+P` | Ghostty: the command palette of Ghostty | Herdr: the command palette of `hopen` |
 | | `Ctrl+Shift+F` | Ghostty: search | Neovim: search the project |
 | `Option` | | macOS: type special characters, for example `å` | Sends `Alt`, for the `Alt` keys of Herdr and Neovim |
 | `Ctrl+Left`, `Ctrl+Right` | | macOS: move one Mission Control space to the left or right | Herdr: the previous or next tab |
@@ -34,6 +35,7 @@ The prefix key of Herdr is `Ctrl+B`. Press it, release it, and then press the ke
 | Previous or next tab | `Ctrl+B`, then `P` or `N` |
 | Next or previous pane | `Ctrl+B`, then `Tab` or `Shift+Tab` |
 | lazygit | `Ctrl+B`, then `D` |
+| The command palette of `hopen` | `Ctrl+B`, then `A` |
 
 The [cheat sheet](cheat-sheet.md) has every key for daily use.
 

@@ -18,5 +18,6 @@ keybind = super+w=unbind
 keybind = super+k=unbind
 keybind = super+e=unbind
 keybind = super+shift+g=unbind
+keybind = super+shift+p=unbind
 macos-option-as-alt = true
 # herdspace keys: end

@@ -144,6 +144,16 @@ contains "$found" 'OPENED src/a.txt' 'hopen --find opens the chosen file in the 
 found="$(cd "$work/hb-find" && python3 "$ROOT/tests/pty_run.py" 6 '\r' env TERM=xterm-256color EDITOR='echo OPENED' hopen --grep 'needle()' 2>&1)"
 contains "$found" 'OPENED +2 src/a.txt' 'hopen --grep opens the file at the line of the result'
 
+# hopen --palette shows the actions, and runs the chosen one.
+pal="$(cd "$work" && python3 "$ROOT/tests/pty_run.py" 6 'ports\r' env TERM=dumb hopen --palette 2>&1)"
+contains "$pal" 'Find a file' 'the palette offers to find a file'
+contains "$pal" 'Open the list' 'outside Herdr, the palette offers each list'
+contains "$pal" 'listens on' 'the palette runs the chosen action'
+pal="$(cd "$work" && python3 "$ROOT/tests/pty_run.py" 4 '\r' env TERM=dumb HERDR_ACTIVE_PANE_ID=w1:p1 hopen --palette 2>&1)"
+contains "$pal" 'with the template code' 'in a Herdr popup, the palette offers the templates'
+lacks "$pal" 'Open the list' 'in a Herdr popup, the palette does not offer to attach to a list'
+check 'Herdr has the palette key' grep -qF -- 'hopen\" --palette' "$HOME/.config/herdr/config.toml"
+
 # hopen with no name shows a menu in a terminal: fzf, or a numbered menu.
 # Only Enter: if the keys hold a filter too, fzf can take Enter before the
 # filter, and pick the first list.

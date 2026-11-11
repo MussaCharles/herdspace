@@ -98,6 +98,7 @@ hopen .
 | `hopen --find` | Choose a file of the current folder with fzf, and open it in the editor. The shell command `ff` does the same. |
 | `hopen --grep TEXT` | Search the files of the current folder for TEXT, choose a result, and open the file at that line. The shell command `fif TEXT` does the same. |
 | `hopen --ports` | Show each TCP port that your programs listen on, with the program and its project, like the Ports view of VS Code. |
+| `hopen --palette` | Choose an action from a menu, like the command palette of VS Code. In Herdr, `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) opens it. See [The command palette](#the-command-palette). |
 | `hopen --version` | Show the installed release. |
 
 ## Settings
@@ -160,6 +161,19 @@ hopen --task test
 `hopen` finds the project that holds the current folder. In Herdr, the task runs in a new pane below the current pane, and the pane has the name of the task. Outside Herdr, the task runs in the current terminal. The task gets the environment values of the project, and it runs in the folder where you started it. With no name, `hopen --task` shows a menu of the tasks. Tab completes the task names.
 
 A task is a command from the list, so it needs the same approval as `on_open`. See [Commands and values from a list](#commands-and-values-from-a-list).
+
+## The command palette
+
+In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. `Ctrl+B`, then `A` also works. A menu shows the actions that fit the current folder:
+
+- Run a task of the project.
+- Find a file, or search in the files, and open the result.
+- Open lazygit.
+- Show the ports that your programs listen on.
+- Split the current tab with a template.
+- Show every list, or open every list.
+
+Outside Herdr, run `hopen --palette`. There, the menu also offers to open a list or the current folder. The palette uses fzf if it is installed, and a numbered menu if not. Esc closes it.
 
 ## Use a VS Code workspace file
 

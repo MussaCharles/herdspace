@@ -56,6 +56,15 @@ next_workspace = "ctrl+down"
 cycle_pane_next = ["prefix+tab", "alt+up"]
 cycle_pane_previous = ["prefix+shift+tab", "alt+down"]
 
+# The hopen command palette, like Ctrl+Shift+P in VS Code. Esc closes it.
+[[keys.command]]
+key = ["cmd+shift+p", "ctrl+shift+p", "prefix+a"]
+type = "popup"
+command = "cd \"${HERDR_ACTIVE_PANE_CWD:-.}\" && exec \"$HOME/.local/bin/hopen\" --palette"
+description = "Command palette"
+width = "80%"
+height = "70%"
+
 # Lazygit over the focused pane. q closes it.
 [[keys.command]]
 key = ["cmd+shift+g", "ctrl+shift+g", "prefix+d"]
