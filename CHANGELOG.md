@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- `hopen .` opens the current folder as one workspace, with no list, as `code .` does in VS Code. `hopen <path>` opens another folder. A list in the folder wins.
+
 ## [0.3.0] - 2026-11-11
 
 ### Added

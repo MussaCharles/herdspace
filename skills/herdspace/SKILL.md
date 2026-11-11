@@ -17,6 +17,7 @@ If `hopen --version` fails, herdspace is not installed. Follow the agent install
 | The person wants to | Run |
 |---------------------|-----|
 | Open the projects of the list `work` | `hopen work --no-attach` |
+| Open one folder, with no list | `hopen ~/code/api --no-attach` |
 | Open every list | `hopen --all` |
 | See every list and its state | `hopen --list` |
 | Open new projects with a template | `hopen work --template code --no-attach` |

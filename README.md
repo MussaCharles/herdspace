@@ -114,6 +114,7 @@ hopen work
 | Command | Effect |
 |---------|--------|
 | `hopen work` | Open the projects of one list, and attach to that session. |
+| `hopen .` | Open the current folder, with no list. |
 | `hopen --all` | Open every list. |
 | `hopen --list` | Show every list and its state. |
 | `hopen work --template code` | Split each new project with a template. |
