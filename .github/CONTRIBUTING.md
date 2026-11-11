@@ -4,7 +4,7 @@ Thank you for your help. This guide tells you how to report a problem, how to su
 
 All people in this project follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-If you work with a coding agent, it reads the [agent instructions](AGENTS.md) in `AGENTS.md`. That file has the rules of this project and a list of skills for each part of the code.
+If you work with a coding agent, it reads the [agent instructions](../AGENTS.md) in `AGENTS.md`. That file has the rules of this project and a list of skills for each part of the code.
 
 ## Report a bug
 
@@ -24,7 +24,7 @@ Before you write code for a large change, open an issue with the feature templat
 git clone https://github.com/MussaCharles/herdspace.git
 ```
 
-You need Docker for the Linux tests, and a Mac for the macOS test. [Testing](docs/testing.md) tells you how to run each test.
+You need Docker for the Linux tests, and a Mac for the macOS test. [Testing](../docs/testing.md) tells you how to run each test.
 
 ## Rules for a change
 
@@ -64,4 +64,4 @@ A change that a person cannot see, such as a change to a test, does not go in th
 
 ## License
 
-herdspace uses the [MIT License](LICENSE). When you send a contribution, you agree that it uses the same license.
+herdspace uses the [MIT License](../LICENSE). When you send a contribution, you agree that it uses the same license.

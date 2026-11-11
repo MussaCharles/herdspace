@@ -90,4 +90,4 @@ tests/run-linux.sh
 
 - Make one change for each branch and pull request.
 - Write a commit subject in the imperative mood, for example `Add the both command`.
-- Follow `CONTRIBUTING.md`.
+- Follow `.github/CONTRIBUTING.md`.
