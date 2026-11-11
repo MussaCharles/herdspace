@@ -1223,7 +1223,7 @@ show_ports() {
     read_list "$file" items 2>/dev/null | awk -F '\036' -v s="$name" '$1 == "R" { print $3 "\t" s } $1 == "P" { print $3 "\t" s "/" $2 }'
   done)"
   printf '%s' "$projects" | python3 -I -c '
-import os, re, subprocess, sys
+import os, subprocess, sys
 
 home = os.path.expanduser("~")
 projects = [line.split("\t", 1) for line in sys.stdin.read().split("\n") if "\t" in line]
@@ -1256,13 +1256,42 @@ if sys.platform == "darwin":
         out = run("lsof", "-a", "-p", pid, "-d", "cwd", "-Fn")
         return next((line[1:] for line in out.splitlines() if line[:1] == "n"), "")
 else:
-    for line in run("ss", "-ltnpH").splitlines():
-        fields = line.split()
-        if len(fields) < 4:
+    # /proc has the listening sockets and the processes that hold them, so
+    # this needs no ss command.
+    def address_of(text):
+        address, port = text.split(":")
+        raw = bytes.fromhex(address)
+        if len(raw) == 4:
+            host = ".".join(str(b) for b in raw[::-1])
+        else:
+            words = [raw[i:i + 4][::-1] for i in range(0, 16, 4)]
+            host = ":".join(b"".join(words)[i:i + 2].hex() for i in range(0, 16, 2))
+            host = {"0000:0000:0000:0000:0000:0000:0000:0000": "::",
+                    "0000:0000:0000:0000:0000:0000:0000:0001": "::1"}.get(host, host)
+        return host, int(port, 16)
+    listening = {}
+    for table in ("/proc/net/tcp", "/proc/net/tcp6"):
+        try:
+            lines = open(table).read().splitlines()[1:]
+        except OSError:
             continue
-        address, _, port = fields[3].rpartition(":")
-        for name, pid in re.findall(r"\(\"([^\"]*)\",pid=(\d+)", line):
-            ports.setdefault((int(port), pid), (name, address))
+        for line in lines:
+            fields = line.split()
+            if len(fields) > 9 and fields[3] == "0A":
+                listening[fields[9]] = address_of(fields[1])
+    for entry in os.listdir("/proc"):
+        if not entry.isdigit():
+            continue
+        try:
+            links = [os.readlink(f"/proc/{entry}/fd/{fd}") for fd in os.listdir(f"/proc/{entry}/fd")]
+            name = open(f"/proc/{entry}/comm").read().strip()
+        except OSError:
+            continue
+        for link in links:
+            inode = link[8:-1] if link.startswith("socket:[") else None
+            if inode in listening:
+                host, port = listening[inode]
+                ports.setdefault((port, entry), (name, host))
     def cwd_of(pid):
         try:
             return os.readlink(f"/proc/{pid}/cwd")
