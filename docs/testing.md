@@ -51,8 +51,33 @@ Each test prints one `PASS` or `FAIL` line for each check, and a `RESULT` line a
 |--------|--------|
 | `tests/run-linux.sh ubuntu:26.04` | Test another image. The default images are `ubuntu:24.04` and `debian:12`. |
 | `FULL=1` | Also install the Neovim language tools. A run takes longer. |
+| `NO_CACHE=1` | Build each image from the start, remove it after the run, and download every package again. |
+| `APT_MIRROR_UBUNTU=<address>` | Try this Ubuntu mirror before the default one. On an ARM machine, use a mirror with `ubuntu-ports`, for example `http://<mirror>/ubuntu-ports`. |
+| `APT_MIRROR_DEBIAN=<address>` | Try this Debian mirror before the default one, for example `http://<mirror>/debian`. |
 | `CLIENT_BASE=<image>` | `run-client-linux.sh`: test another client image. |
 | `tests/run-macos.sh server` | Test only the server, or only the `client`. |
+
+## The download cache
+
+By default, the Linux tests keep their Docker images, and they share the apt downloads of each base image between runs. Each test still starts from a new container and runs the full setup. Only the downloads are reused, so a second run is faster, and a slow package mirror costs less time.
+
+The downloads are in Docker volumes with names that start with `herdspace-test-apt-`. To test a fresh download, run a test with `NO_CACHE=1`:
+
+```bash
+NO_CACHE=1 tests/run-linux.sh
+```
+
+If the default mirror is slow or does not answer, give a mirror that is near you. apt tries that mirror first. If it fails, apt uses the default mirror:
+
+```bash
+APT_MIRROR_UBUNTU=http://<mirror>/ubuntu-ports APT_MIRROR_DEBIAN=http://<mirror>/debian tests/run-linux.sh
+```
+
+To remove the cache, remove the volumes:
+
+```bash
+docker volume ls -q --filter name=herdspace-test-apt- | xargs docker volume rm
+```
 
 ## Make the screenshots and videos again
 

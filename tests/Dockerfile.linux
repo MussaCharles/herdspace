@@ -1,12 +1,20 @@
 # A throwaway Linux server for tests. The account has sudo, as a real server does.
 ARG BASE=ubuntu:24.04
 FROM ${BASE}
-RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends sudo ca-certificates procps >/dev/null \
+# APT_MIRROR_UBUNTU and APT_MIRROR_DEBIAN put another mirror in front of the
+# default one. tests/lib-docker.sh passes them. With none, nothing changes.
+ARG APT_MIRROR_UBUNTU=""
+ARG APT_MIRROR_DEBIAN=""
+COPY tests/apt-mirror.sh /usr/local/sbin/apt-mirror.sh
+# The last step keeps apt downloads, so that tests/lib-docker.sh can share them.
+RUN APT_MIRROR_UBUNTU="$APT_MIRROR_UBUNTU" APT_MIRROR_DEBIAN="$APT_MIRROR_DEBIAN" /usr/local/sbin/apt-mirror.sh \
+  && apt-get update -qq && apt-get install -y -qq --no-install-recommends sudo ca-certificates procps >/dev/null \
   && useradd -m -s /bin/bash tester \
   && echo 'tester ALL=(ALL) NOPASSWD:ALL' >/etc/sudoers.d/tester \
   && printf '#!/bin/sh\nexit 0\n' >/usr/local/bin/claude \
   && cp /usr/local/bin/claude /usr/local/bin/pi \
-  && chmod 755 /usr/local/bin/claude /usr/local/bin/pi
+  && chmod 755 /usr/local/bin/claude /usr/local/bin/pi \
+  && rm -f /etc/apt/apt.conf.d/docker-clean
 COPY --chown=tester:tester . /home/tester/repo
 USER tester
 # A real agent program creates these folders when it first runs.

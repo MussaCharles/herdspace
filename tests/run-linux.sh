@@ -4,6 +4,8 @@
 # Set FULL=1 to install the Neovim language tools too.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
+# shellcheck source=tests/lib-docker.sh
+source tests/lib-docker.sh
 mkdir -p tests/.work
 [ "$#" -gt 0 ] || set -- ubuntu:24.04 debian:12
 flags="--skip-login-service"
@@ -12,8 +14,10 @@ status=0
 for base in "$@"; do
   tag="hb-test-$(printf '%s' "$base" | tr -c 'a-z0-9' '-')"
   log="tests/.work/${tag}.log"
-  docker build -q --build-arg "BASE=${base}" -f tests/Dockerfile.linux -t "$tag" . >"$log" 2>&1 || { echo "FAIL build ${base}"; tail -n 20 "$log"; status=1; continue; }
-  docker run --rm --name "${tag}-$$" "$tag" bash -c "
+  # shellcheck disable=SC2046 # build_flags prints one option or nothing.
+  docker build -q $(build_flags) --build-arg "BASE=${base}" -f tests/Dockerfile.linux -t "$tag" . >"$log" 2>&1 || { echo "FAIL build ${base}"; tail -n 20 "$log"; status=1; continue; }
+  apt_cache_args "$base"
+  docker run --rm --name "${tag}-$$" ${APT_CACHE[@]+"${APT_CACHE[@]}"} "$tag" bash -c "
     set -e
     ./bootstrap.sh server ${flags}
     tests/verify-server.sh linux
@@ -39,6 +43,6 @@ for base in "$@"; do
   grep -E '^(FAIL|RESULT)' "$log" | cut -c1-200
   echo "${base}: exit ${rc}"
   [ "$rc" -eq 0 ] || status=1
-  docker rmi -f "$tag" >/dev/null 2>&1 || true
+  remove_images "$tag"
 done
 exit "$status"
