@@ -1,6 +1,6 @@
 # Ask an agent to do the setup
 
-Scope: what to say to a coding agent, so that it can do the setup for you. To install, the agent follows the [agent install steps](../install.md). To change herdspace, an agent in a clone follows the skill files in [skills](../skills/).
+Scope: what to say to a coding agent, so that it can do the setup for you. To install, the agent follows the [agent install steps](../install.md). To use herdspace every day, install the [herdspace skill](#teach-your-agent-to-use-herdspace). To change herdspace, an agent in a clone follows the skills that the [agent instructions](../AGENTS.md) list.
 
 herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH.
 
@@ -30,12 +30,6 @@ sequenceDiagram
   end
 ```
 
-| Skill | Use |
-|------------|-----|
-| [Server skill](../skills/herdspace-server/SKILL.md) | Set up a Linux or macOS server |
-| [Client skill](../skills/herdspace-client/SKILL.md) | Set up the macOS or Linux machine that you use for SSH |
-| [Update skill](../skills/herdspace-update/SKILL.md) | Add a tool or a setting to this repository |
-
 ## Install with an agent
 
 Start the agent on the machine that you want to set up. Paste one of these prompts. The agent reads the [agent install steps](../install.md), which use the `curl` commands of the newest release. It does not clone the repository.
@@ -64,20 +58,32 @@ On a machine that has Herdr already, to install only `hopen`:
 Install only hopen from herdspace on this machine. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md
 ```
 
-## Work in a clone of this repository
+## Teach your agent to use herdspace
 
-The skill files are for a person who changes herdspace. Start the agent in the folder of a clone. If you name the path of a skill file, the agent reads it. You do not need to install the skill.
+The herdspace skill teaches a coding agent to use `hopen` and the setup on any machine. With it, the agent can open your projects, add a project to a list, split a tab with a template, and check or update the setup. Install it for every project, with the [skills CLI](https://github.com/vercel-labs/skills):
 
-To set up this machine from the files in the clone:
-
-```text
-Read skills/herdspace-server/SKILL.md in this repository and follow it to set up this machine. Show me the plan before you change anything.
+```bash
+npx skills add MussaCharles/herdspace --skill herdspace -g
 ```
 
-To add something new, replace the last sentence:
+Then ask the agent, for example: "Open my work projects in Herdr with the code template."
+
+## Work in a clone of this repository
+
+A clone has skills for a person who changes herdspace. They are in `.agents/skills/`, and `.claude/skills/` links to them for Claude Code. The [agent instructions](../AGENTS.md) in `AGENTS.md` list them, and an agent in the clone finds them by itself.
+
+| Skill | Use it when you |
+|-------|-----------------|
+| `herdspace-hopen` | Change `hopen` or a template. |
+| `herdspace-bootstrap` | Change a setup script, a configuration file, or a pinned version. |
+| `herdspace-docs` | Write or change a doc. |
+| `herdspace-release` | Update the changelog, or make a release. |
+| `simple-english` | Write any text that a person reads. |
+
+To add a tool, start the agent in the clone, and replace the last sentence:
 
 ```text
-Read skills/herdspace-update/SKILL.md in this repository and follow it. I want to add this tool: <name of the tool and why you want it>.
+Use the herdspace-bootstrap skill. I want to add this tool: <name of the tool and why you want it>.
 ```
 
 ## What stays with you
@@ -87,11 +93,3 @@ The agent must stop and ask you in these cases:
 - `sudo` or the Homebrew installer asks for a password.
 - A step replaces a file that is not from this repository, and you did not agree.
 - A step stops a running Herdr server. A stop closes every pane.
-
-## Install a skill for regular use
-
-To make a skill available in every session of Claude Code, copy its folder:
-
-```bash
-cp -R skills/herdspace-server ~/.claude/skills/
-```

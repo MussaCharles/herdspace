@@ -84,6 +84,8 @@ Set up herdspace on this machine as both the server and the client. Fetch and fo
 
 The agent shows you what will change before it changes anything, and it gives you each command that needs your password.
 
+To teach your agent to use herdspace every day, install the herdspace skill. See [Teach your agent to use herdspace](docs/agent-setup.md#teach-your-agent-to-use-herdspace).
+
 ### How the commands work
 
 `bootstrap.sh` finds the system, downloads the newest release, and compares its checksum. Then it runs the setup for that system. It does only what is missing, and it asks before it replaces a file that you changed. To install a specific release, add `--version <tag>`. The [setup guide](docs/setup.md) has every option and the steps for each system.

@@ -7,11 +7,17 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 ### Added
 
 - The hopen guide, `docs/hopen.md`, has every `hopen` command, and the steps to install, update, and remove it.
+- The herdspace skill, `skills/herdspace`, teaches a coding agent to use `hopen` and the setup. Install it with `npx skills add MussaCharles/herdspace --skill herdspace -g`.
+- `AGENTS.md` and the skills in `.agents/skills/` give coding agents the rules of this project.
 
 ### Changed
 
 - The install commands in the docs use the newest release. To install a specific release, add `--version <tag>`.
 - The Quick start starts with a table of the options, with a link to each one.
+
+### Removed
+
+- The skills `herdspace-server`, `herdspace-client`, and `herdspace-update`. `install.md`, the herdspace skill, and the `herdspace-bootstrap` skill replace them.
 
 ## [0.1.1] - 2026-11-11
 
