@@ -30,17 +30,18 @@ printf '{ "folders": [ %s ] }\n' "$folders" >"${work}/bench.code-workspace"
 failures=0
 # measure SESSION TEMPLATE prints the seconds of a first and a second run.
 measure() {
-  local session="$1" template="$2" start first second
+  local session="$1" template="$2" start first second output found
   start="$(now)"
-  hopen "$session" --file "${work}/bench.code-workspace" --template "$template" --no-attach >/dev/null 2>&1
+  output="$(hopen "$session" --file "${work}/bench.code-workspace" --template "$template" --no-attach 2>&1)" || { echo "FAIL bench ${template}: ${output}"; failures=$((failures + 1)); return; }
   first="$(since "$start")"
   start="$(now)"
-  hopen "$session" --file "${work}/bench.code-workspace" --template "$template" --no-attach >/dev/null 2>&1
+  output="$(hopen "$session" --file "${work}/bench.code-workspace" --template "$template" --no-attach 2>&1)" || { echo "FAIL bench ${template}, second run: ${output}"; failures=$((failures + 1)); return; }
   second="$(since "$start")"
   echo "RESULT bench ${template} first=${first}s second=${second}s projects=${count}"
   # The parent workspace and one workspace for each project.
-  if [ "$(workspace_count "$session")" -ne $((count + 1)) ]; then
-    echo "FAIL bench ${template}: $(workspace_count "$session") workspaces, wanted $((count + 1))"
+  found="$(workspace_count "$session" 2>/dev/null)"
+  if [ "${found:-0}" != $((count + 1)) ]; then
+    echo "FAIL bench ${template}: ${found:-no} workspaces, wanted $((count + 1)). ${output}"
     failures=$((failures + 1))
   fi
 }
