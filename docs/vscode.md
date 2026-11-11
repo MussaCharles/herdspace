@@ -35,6 +35,34 @@ herdspace is terminal first. Herdr holds the terminals, `hopen` opens your proje
 | A branch for each task | A git worktree for each agent. See [One worktree for each agent](cheat-sheet.md#one-worktree-for-each-agent). |
 | Notifications | The sidebar of Herdr marks each agent that waits for you, and each agent that is done. |
 
+## Neovim for VS Code users
+
+Neovim has modes. You start in Normal mode, where keys move and run commands. Press `i` to type text, and `Esc` to return to Normal mode. The [cheat sheet](cheat-sheet.md#neovim) has the keys that herdspace adds, such as `Ctrl+P` and the file tree.
+
+| In VS Code | In Neovim (Normal mode) |
+|------------|-------------------------|
+| Type text | `i`, then type. `Esc` stops. |
+| Save | `:w`, then `Enter` |
+| Close the file | `:q`. `:q!` closes and drops the changes. |
+| Undo, redo | `u`, `Ctrl+R` |
+| Go to a line | `:42`, then `Enter` |
+| Go to the start or the end of the file | `gg`, `G` |
+| Find in the file | `g`, then `/`, the text, and `Enter`. `n` goes to the next result. |
+| Copy and paste a line | `yy`, then `p` |
+| Delete a line | `dd` |
+| Go to the definition | `gd`, or `Ctrl`-click |
+| Show the documentation of a name | `K` |
+| Rename a name | `Space`, `c`, `r` |
+| Show all the keys | `Space`, then wait |
+| Split the window | `:vsplit` or `:split` |
+| Move to the next window | `Ctrl+W`, then `W` |
+
+To learn more:
+
+- Run `:Tutor` in Neovim. It is a 30-minute lesson, inside Neovim.
+- The [Neovim user manual](https://neovim.io/doc/user/usr_toc.html) and the [quick reference](https://neovim.io/doc/user/quickref.html) are the official guides.
+- The [LazyVim keymaps](https://www.lazyvim.org/keymaps) list each key of the Neovim setup that herdspace installs.
+
 ## Keys and settings
 
 | In VS Code | In herdspace |
