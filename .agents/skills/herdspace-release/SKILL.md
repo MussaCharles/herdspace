@@ -19,7 +19,7 @@ Follow these steps only when the person asks for a release.
 
 1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Change the links at the end of the file.
 2. Run all tests. `docs/testing.md` lists them. All tests must pass.
-3. Merge the change to `main`.
+3. Merge the change to `main` after CI passes. The `herdspace-ci` skill has the merge command.
 4. Build the files:
 
    ```bash

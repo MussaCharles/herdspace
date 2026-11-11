@@ -54,6 +54,16 @@ Each of these made a job fail one time:
 
 Do not change a setting only in the web page of GitHub. The next `--apply` puts the value of the script back.
 
+## Merge a pull request
+
+Only the repository admin role can merge, through the bypass of "main: who can merge". Wait until every CI job passes, then merge with `--admin`:
+
+```bash
+gh pr merge <number> --repo MussaCharles/herdspace --merge --admin --delete-branch
+```
+
+Without `--admin`, `gh` answers "the base branch policy prohibits the merge", also after CI passes. `--admin` does not skip the CI checks, because nobody can bypass that ruleset. An agent with no admin access opens the pull request, and the owner merges it.
+
 ## Rules
 
 - Do not turn off a required check or a ruleset to merge a pull request. Fix the cause.

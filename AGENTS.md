@@ -101,5 +101,6 @@ tests/run-linux.sh
 ## Pull requests
 
 - Make one change for each branch and pull request.
+- Only the owner, or an agent of the owner, can merge. Follow "Merge a pull request" in the `herdspace-ci` skill.
 - Write a commit subject in the imperative mood, for example `Add the both command`.
 - Follow `.github/CONTRIBUTING.md`.
