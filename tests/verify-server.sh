@@ -136,6 +136,14 @@ attach_all="$(python3 "$ROOT/tests/pty_run.py" 8 '\x02q' hopen --all hb-all-two 
 contains "$attach_all" 'status=0' 'hopen --all attaches to the named session'
 contains "$(hopen --all no-such-list 2>&1)" 'No project list' 'hopen --all rejects an unknown name'
 
+# hopen --find and --grep open a file, or a search result at its line.
+mkdir -p "$work/hb-find/src"
+printf 'one\ntwo needle()\n' >"$work/hb-find/src/a.txt"
+found="$(cd "$work/hb-find" && python3 "$ROOT/tests/pty_run.py" 6 '\r' env TERM=xterm-256color EDITOR='echo OPENED' hopen --find 2>&1)"
+contains "$found" 'OPENED src/a.txt' 'hopen --find opens the chosen file in the editor'
+found="$(cd "$work/hb-find" && python3 "$ROOT/tests/pty_run.py" 6 '\r' env TERM=xterm-256color EDITOR='echo OPENED' hopen --grep 'needle()' 2>&1)"
+contains "$found" 'OPENED +2 src/a.txt' 'hopen --grep opens the file at the line of the result'
+
 # hopen with no name shows a menu in a terminal: fzf, or a numbered menu.
 # Only Enter: if the keys hold a filter too, fzf can take Enter before the
 # filter, and pick the first list.
