@@ -4,7 +4,7 @@ Scope: set up a new server machine or client machine with `bootstrap.sh`, or ins
 
 herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. Set up the server machine first. Use one section for each machine. If one machine is both, follow [One machine as server and client](#one-machine-as-server-and-client).
 
-You need an SSH connection from the client machine to the server machine that works with no password. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`. If you connect with an IP address, follow [Connect with an IP address](#connect-with-an-ip-address) first.
+You need an SSH connection from the client machine to the server machine that works with no password. The name `my-server` in this document is an example of an SSH name. If you do not have an SSH name for your server, or you connect with an IP address, follow [Connect to the server with SSH](ssh.md) first.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -65,37 +65,7 @@ The script never stops a server that was already running.
 
 ## Connect with an IP address
 
-The client setup connects to the server with SSH and an SSH key. A password does not work for this step. If you connect with an IP address and a password, do these steps on the client first. In the examples, the user on the server is `me`, and the address of the server is `203.0.113.10`.
-
-1. If you do not have an SSH key, make one. Press Enter at each question.
-
-   ```bash
-   ssh-keygen -t ed25519
-   ```
-
-2. Copy the key to the server. Type the password of the server one more time.
-
-   ```bash
-   ssh-copy-id me@203.0.113.10
-   ```
-
-3. Give the server a short name. Add these lines to `~/.ssh/config` on the client:
-
-   ```text
-   Host my-server
-     HostName 203.0.113.10
-     User me
-   ```
-
-4. Make sure that the connection works with no password. The command prints `ok`.
-
-   ```bash
-   ssh -o BatchMode=yes my-server true && echo ok
-   ```
-
-Then use `--server my-server`, and connect each day with `ssh my-server`. If the address of the server changes, change only the `HostName` line.
-
-You can also give the address to the setup with no name: `--server me@203.0.113.10`. Steps 1 and 2 are still necessary.
+Follow [Connect to the server with SSH](ssh.md). The steps are the same for an IP address and for a host name.
 
 ## Get the script
 

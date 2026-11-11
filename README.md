@@ -17,7 +17,7 @@ herdspace has two parts. `hopen` opens your projects. `bootstrap.sh` sets up a m
 
 ## Quick start
 
-Set up the server machine first.
+The setup is one command on each machine. First run the server command on the server machine. Then run the client command on the client machine, which connects to the server with SSH. If you use one machine for everything, run only the command in [One machine as both](#one-machine-as-both).
 
 ### Server machine
 
@@ -29,13 +29,13 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bo
 
 ### Client machine
 
-Run this command on the client machine. It sets up Ghostty, the shell, and the Herdr keys. Give the SSH name of the server:
+Run this command on the client machine. It sets up Ghostty, the shell, and the Herdr keys. Give the SSH name of the server in place of `my-server`:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- client --server my-server
 ```
 
-If you connect with an IP address, read [Connect with an IP address](docs/setup.md#connect-with-an-ip-address) first.
+`my-server` is an example of an SSH name, a short name for the server in `~/.ssh/config`. If you do not have one, or you connect with an IP address, follow [Connect to the server with SSH](docs/ssh.md) first.
 
 ### One machine as both
 
@@ -167,6 +167,7 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 - [Setup guide](docs/setup.md): set up a server and a client, every option, and what the setup installs.
 - [Templates and panes](docs/templates.md): each template, how to add your own, and videos of the pane keys.
 - [Cheat sheet](docs/cheat-sheet.md): keys and commands for daily use.
+- [Connect to the server with SSH](docs/ssh.md): what `my-server` means, and how to set up the SSH name and key.
 - [Windows with WSL](docs/windows-wsl.md): use a Windows machine as a client.
 - [Ask an agent to do the setup](docs/agent-setup.md): what to say to a coding agent.
 - [Updating](docs/updating.md): update the tools, add something new, and make a release.
