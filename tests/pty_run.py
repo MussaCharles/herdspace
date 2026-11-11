@@ -19,10 +19,16 @@ while time.time() - start < limit:
         if not data:
             break
         output += data
-        # A program such as fzf asks for the cursor position, and waits for
-        # the answer. A real terminal answers, so this one answers too.
+        # A program such as fzf asks the terminal questions, and waits for
+        # the answers. A real terminal answers, so this one answers too.
+        for mode in re.findall(rb"\x1b\[\?(\d+)\$p", data):
+            os.write(fd, b"\x1b[?" + mode + b";2$y")
         if b"\x1b[6n" in data:
             os.write(fd, b"\x1b[1;1R")
+        if re.search(rb"\x1b\[0?c", data):
+            os.write(fd, b"\x1b[?62;22c")
+        if b"\x1b]11;?" in data:
+            os.write(fd, b"\x1b]11;rgb:0000/0000/0000\x1b\\")
     if keys and not sent and time.time() - start > limit / 2:
         os.write(fd, keys.encode().decode("unicode_escape").encode())
         sent = True
