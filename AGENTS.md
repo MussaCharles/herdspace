@@ -54,6 +54,10 @@ tests/test-install.sh
 ```
 
 ```bash
+tests/test-hopen-list.sh
+```
+
+```bash
 tests/test-skills.sh
 ```
 

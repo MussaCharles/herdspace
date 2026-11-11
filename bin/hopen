@@ -187,21 +187,41 @@ while pairs and time.time() < end:
 # A problem with one setting prints a W<TAB>message line, and the rest still works.
 read_list() {
   python3 -I - "$1" "$2" "${TEMPLATE_FLAG:-}" <<'PY'
-import json, os, re, sys
+import json, os, re, sys, unicodedata
 
 path, what, forced = sys.argv[1:4]
 path = os.path.abspath(path)
 base = os.path.dirname(path)
 
-def warn(text):
-    print("W", text, sep="\t")
+
+# Unicode categories that a list must not show or pass on: control characters
+# (for example ESC), format characters (for example bidi marks that reorder
+# text), and line or paragraph separators.
+HIDDEN = ("Cc", "Cf", "Zl", "Zp", "Cs", "Co")
+
+def has_hidden(value):
+    return any(unicodedata.category(c) in HIDDEN for c in str(value))
 
 def clean(value):
-    # Tabs and new lines become spaces. Every other control character, for
-    # example ESC, becomes "?", so that a list cannot change what the approval
+    # Tabs and new lines become spaces. Every other hidden character becomes
+    # "?", so that a list cannot add a line or change what the approval
     # question shows.
-    text = str(value).replace("\t", " ").replace("\n", " ")
-    return re.sub(r"[\x00-\x1f\x7f-\x9f]", "?", text).strip()
+    text = str(value).replace("\t", " ").replace("\n", " ").replace("\r", " ")
+    return "".join("?" if unicodedata.category(c) in HIDDEN else c for c in text).strip()
+
+def emit(kind, *fields, env=None):
+    # Each output line goes through here, so each field is clean. The
+    # environment values are a list of clean KEY=VALUE items.
+    parts = [kind] + [clean(value) for value in fields]
+    if env is not None:
+        parts.append("\x1f".join(env) if env else "-")
+    print("\t".join(parts))
+
+def warn(text):
+    emit("W", text)
+
+if has_hidden(base):
+    sys.exit("The folder of the list has a control character in its name.")
 
 TEMPLATE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 
@@ -217,6 +237,12 @@ def template_name(value, where):
 
 def field(value):
     return clean(value) or "-"
+
+def list_path(raw):
+    # A path with a hidden character could break the output lines.
+    if has_hidden(raw):
+        return None
+    return os.path.normpath(os.path.join(base, os.path.expanduser(str(raw))))
 
 if os.path.basename(path) == "herdspace.toml":
     if sys.version_info < (3, 11):
@@ -296,12 +322,12 @@ default = template_name(default, "template") or "plain"
 def template(value, where=""):
     return forced or template_name(value, where or "template") or default
 
-def env_field(label, values):
+def env_items(label, values):
     if not values:
-        return ""
+        return []
     if not isinstance(values, dict):
         warn(f"{label}: env must be a map of names to values. hopen skips it.")
-        return ""
+        return []
     items = []
     for key, value in values.items():
         if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", str(key)) or isinstance(value, (dict, list)):
@@ -310,14 +336,17 @@ def env_field(label, values):
         if isinstance(value, bool):
             value = "true" if value else "false"
         items.append(f"{key}={clean(value)}")
-    return "\x1f".join(items)
+    return items
 
 if parent:
-    print("R", clean(session), base, template(parent_template, clean(session)), field(parent_open), field(env_field(session, parent_env)), sep="\t")
+    emit("R", session, base, template(parent_template, clean(session)), field(parent_open), env=env_items(clean(session), parent_env))
 for project in projects:
-    full = os.path.normpath(os.path.join(base, os.path.expanduser(str(project["path"]))))
+    full = list_path(project["path"])
+    if full is None:
+        warn(f"A project path has a control character, so hopen skips it: {project['path']}")
+        continue
     label = clean(project["name"] or os.path.basename(full))
-    print("P", label, full, template(project["template"], label), field(project["on_open"]), field(env_field(label, project["env"])), sep="\t")
+    emit("P", label, full, template(project["template"], label), field(project["on_open"]), env=env_items(label, project["env"]))
     tabs = project["tabs"]
     if not isinstance(tabs, list):
         warn(f"{label}: tabs must be a list. hopen skips them.")
@@ -326,7 +355,7 @@ for project in projects:
         if not isinstance(tab, dict) or not tab.get("name"):
             warn(f"{label}: each tab needs a name. hopen skips one tab.")
             continue
-        print("T", label, clean(tab["name"]), template_name(tab.get("template"), f"{label}, tab {clean(tab['name'])}") or "plain", field(tab.get("run", "")), sep="\t")
+        emit("T", label, tab["name"], template_name(tab.get("template"), f"{label}, tab {clean(tab['name'])}") or "plain", field(tab.get("run", "")))
 PY
 }
 
