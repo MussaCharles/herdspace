@@ -1,0 +1,93 @@
+# The tests of herdspace on GitHub-hosted runners. docs/ci.md explains each job.
+name: CI
+
+on:
+  pull_request:
+  schedule:
+    # Once a week, to find changes outside the repository: new packages,
+    # new Homebrew formulae, or a new runner image.
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Fast checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: shellcheck
+        run: shellcheck -S warning bin/hopen bin/herdr-update-check bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
+      - name: Skills
+        run: tests/test-skills.sh
+      - name: hopen list reader
+        run: tests/test-hopen-list.sh
+      - name: Release build and install
+        run: tests/test-install.sh
+
+  linux:
+    name: Linux server (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Server setup in Ubuntu and Debian containers
+        env:
+          # The weekly run also installs the Neovim language tools.
+          FULL: ${{ github.event_name == 'schedule' && '1' || '0' }}
+        run: tests/run-linux.sh
+      - name: Prerequisites step
+        run: tests/run-prereqs.sh
+      - name: Show the logs
+        if: failure()
+        run: tail -n 80 tests/.work/*.log
+
+  linux-services:
+    name: Linux login service and client keys
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Login service with systemd
+        run: tests/run-systemd.sh
+      - name: Client with real Ghostty keys
+        run: tests/run-client-linux.sh
+      - name: Show the logs
+        if: failure()
+        run: tail -n 80 tests/.work/*.log
+
+  macos:
+    name: macOS server
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The runner is a throwaway Mac, so the real setup runs on it.
+      - name: Real server setup
+        run: ./bootstrap.sh server --yes --skip-nvim-tools </dev/null
+      - name: Server check
+        run: ./bootstrap.sh server --check --skip-nvim-tools </dev/null
+      - name: macOS scripts with stubs
+        run: tests/run-macos.sh
+      - name: Show the logs
+        if: failure()
+        run: tail -n 80 tests/.work/*.log || true

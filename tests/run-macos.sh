@@ -10,13 +10,16 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 [ "$(uname -s)" = Darwin ] || { echo 'This test runs only on macOS.'; exit 1; }
 [ "$#" -gt 0 ] || set -- server client prereqs keys both
 
-TEST_TERMINFO="${HOME}/.terminfo"
-
 # A Unix socket path has a short limit, so the home folder must have a short path.
 TEST_HOME="$(mktemp -d /tmp/hbt.XXXXXX)"
 STUBS="${TEST_HOME}/stubs"
 CALLS="${TEST_HOME}/calls.log"
 mkdir -p "$STUBS" "${TEST_HOME}/home/.claude" "${TEST_HOME}/home/.pi/agent/extensions"
+# The client sends the Ghostty terminal description to the server. A machine
+# with no Ghostty has none, so the test makes one from xterm-256color.
+TEST_TERMINFO="${TEST_HOME}/terminfo"
+infocmp -x xterm-256color | sed '1,/^xterm-256color|/s/^xterm-256color|/xterm-ghostty|/' | tic -x -o "$TEST_TERMINFO" - ||
+  { echo "FAIL the test could not make a terminal description"; exit 1; }
 # hopen needs Python 3.11 or later. The test uses the newest Homebrew Python.
 for py in /opt/homebrew/bin/python3.1[1-9]; do
   [ -x "$py" ] && ln -sf "$py" "${STUBS}/python3"

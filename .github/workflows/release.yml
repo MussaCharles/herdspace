@@ -1,0 +1,54 @@
+# Installs a published release from the latest links, as a person would, and
+# tries each hopen feature. docs/ci.md explains it.
+name: Release check
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The release to check, for example 0.5.0. Empty means the latest release."
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux (${{ matrix.runner }})
+    if: ${{ !github.event.release.prerelease }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the release in fresh containers, and try each feature
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: tests/run-release-check.sh --only linux ${TAG:+--version "$TAG"}
+      - name: Show the logs
+        if: failure()
+        run: tail -n 80 tests/.work/release-check-*.log
+
+  macos:
+    name: macOS
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the release from the latest links, and try each feature
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh \
+            | bash -s -- server --yes --skip-nvim-tools ${TAG:+--version "$TAG"}
+          zsh -lc "bash tests/tour-release.sh $TAG"

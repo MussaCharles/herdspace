@@ -77,7 +77,7 @@ if [ "$ONLY" != linux ]; then
     tart run "$vm" --no-graphics --dir="check:$PWD/tests:ro" >/dev/null 2>&1 &
     for _ in $(seq 1 40); do tart exec "$vm" true 2>/dev/null && break; sleep 3; done
     [ -z "$VM_DNS" ] || tart exec "$vm" sudo networksetup -setdnsservers Ethernet "$VM_DNS"
-    tart exec "$vm" zsh -lc "cp -R '/Volumes/My Shared Files/check' ~/check && curl -fsSL ${URL} | bash -s -- server --yes --skip-nvim-tools ${version_flag} </dev/null && zsh -lc 'bash ~/check/tour-release.sh ${TAG}'" >"$log" 2>&1
+    tart exec "$vm" zsh -lc "cp -R '/Volumes/My Shared Files/check' ~/check && curl -fsSL ${URL} | bash -s -- server --yes --skip-nvim-tools ${version_flag} && zsh -lc 'bash ~/check/tour-release.sh ${TAG}'" >"$log" 2>&1
     report macos "$log" "$?"
     ran=$((ran + 1))
     cleanup

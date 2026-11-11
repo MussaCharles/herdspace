@@ -34,6 +34,10 @@ Run each check. Do not install a missing tool without the agreement of the perso
 
 Run a test that takes more than two minutes in the background, with its output in a log file in `tests/.work`. Watch it with a quiet script. The script prints a line in two cases: the test ends, or the log stops growing for five minutes. Start such a script with `bash` by name, because your own shell can be zsh. If a test stops moving, find the cause. For example, a question can wait for an answer. Do not wait forever.
 
+## CI
+
+GitHub Actions runs the tests on fresh runners for each pull request, each release, and once a week. The [CI guide](../../../docs/ci.md) lists the jobs. CI does not replace a local run: run the tests of the change before you push. If a test passes on your machine and fails in CI, the test can depend on your machine. Make the test create what it needs, for example a stub program or a terminal description. The Tart check stays local, because no hosted runner can start a macOS VM.
+
 ## 3. Report
 
 Copy the `FAIL` and `RESULT` lines into the pull request or the reply. Name each sandbox that this machine does not have, and the tests that did not run for that reason. If you skipped a sandbox, do not say that all tests pass.
@@ -58,6 +62,7 @@ If you add a feature that a person can see, add a step for it to `tests/tour-rel
 - fzf draws nothing with no `TERM`. A test of the numbered menu sets `TERM=dumb`.
 - The zsh setup loads `ff`, `fif`, and the completion only in a terminal. `zsh -ic ... </dev/null` has no terminal. Use `tests/pty_run.py`.
 - On macOS, `/var` is a link to `/private/var`, so compare folders by their real paths.
+- `curl ... | bash -s -- ARGS </dev/null` gives bash an empty script, because the redirect replaces the pipe. zsh joins both inputs (`MULTIOS`), so the same line works in zsh and fails in bash.
 - A small Linux image has no `ss`, `lsof`, `curl`, or `procps`. Do not let a test depend on a tool that the setup does not install.
 - In a Tart VM, host names can fail because the DNS proxy of the host refuses the VM. Set a public DNS server in the VM. Do not start the base image. Clone it.
 - Apple allows two macOS VMs at a time on one Mac.

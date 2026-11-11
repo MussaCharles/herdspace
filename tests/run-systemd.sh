@@ -10,16 +10,21 @@ name="${tag}-$$"
 # shellcheck disable=SC2046 # build_flags prints one option or nothing.
 docker build -q $(build_flags) -f tests/Dockerfile.systemd -t "$tag" . >/dev/null || exit 1
 apt_cache_args ubuntu:24.04
-docker run -d --rm --name "$name" --privileged --cgroupns=host ${APT_CACHE[@]+"${APT_CACHE[@]}"} \
-  --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:rw "$tag" >/dev/null || exit 1
+docker run -d --rm --name "$name" --privileged --cgroupns=private ${APT_CACHE[@]+"${APT_CACHE[@]}"} \
+  --tmpfs /run --tmpfs /run/lock "$tag" >/dev/null || exit 1
 trap 'docker rm -f "$name" >/dev/null 2>&1; remove_images "$tag"' EXIT
 
 uid="$(docker exec "$name" id -u tester)"
-for _ in $(seq 1 60); do
-  [ "$(docker exec "$name" systemctl is-system-running 2>/dev/null)" != starting ] && break
+# Wait until systemd is up. On a slow host, an early answer can be an error.
+for _ in $(seq 1 90); do
+  case "$(docker exec "$name" systemctl is-system-running 2>/dev/null)" in running | degraded) break ;; esac
   sleep 1
 done
-docker exec "$name" loginctl enable-linger tester
+# The login manager can start a moment later than systemd itself.
+for _ in $(seq 1 30); do
+  docker exec "$name" loginctl enable-linger tester && break
+  sleep 1
+done
 for _ in $(seq 1 30); do
   docker exec "$name" test -S "/run/user/${uid}/bus" && break
   sleep 1
@@ -52,5 +57,13 @@ for _ in $(seq 1 45); do
   sleep 1
 done
 if [ "$now" != "$before" ] && [ "$now" != 0 ]; then pass 'service restarts after a crash'; else fail 'service restarts after a crash'; fi
+if [ "$status" -ne 0 ]; then
+  echo "== systemd state: $(docker exec "$name" systemctl is-system-running 2>&1)"
+  docker exec "$name" systemctl --failed --no-legend 2>&1 | head -n 10
+  docker exec "$name" systemctl status systemd-logind --no-pager 2>&1 | tail -n 10
+  docker exec "$name" loginctl list-users 2>&1 | head -n 5
+  docker exec "$name" ls -la "/run/user/${uid}" 2>&1 | head -n 5
+  docker logs "$name" 2>&1 | tail -n 30
+fi
 echo "RESULT exit=${status}"
 exit "$status"

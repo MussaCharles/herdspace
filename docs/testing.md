@@ -2,6 +2,8 @@
 
 Scope: the tests of this repository, what each test proves, and how to run it.
 
+GitHub Actions runs most of these tests for each pull request, each release, and once a week. See the [CI guide](ci.md).
+
 The Linux tests use throwaway Docker containers. The macOS test runs on a Mac with a temporary home folder and stub commands. For a test of the real macOS setup, use a VM. See [Test in a sandbox](#test-in-a-sandbox). No test changes your own account.
 
 ## The tests
