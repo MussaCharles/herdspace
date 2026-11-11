@@ -76,6 +76,7 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 Show the output to the person, and tell them what a run changes:
 
+- The first step, Prerequisites, lists what the setup needs before it starts. A necessary item that is missing shows `[todo]`. An optional item that is missing shows `(optional)`. Ask the person which optional items to install.
 - A line with `[todo]` is a part that the setup adds.
 - A line with `[diff]` is a file that is different from the herdspace version. Ask the person if the setup can replace these files. The setup keeps a backup of each file that it replaces.
 - On Linux, the setup makes zsh the login shell.
@@ -85,12 +86,12 @@ Wait until the person agrees.
 
 ## 6. Run the setup
 
-Run the same command as in step 5, without `--check`. Add one of these options from the answer of the person:
+Run the same command as in step 5, without `--check`. Add `--yes`, so that the setup installs the missing prerequisites with no question. Then add one of these options from the answer of the person:
 
 - `--replace-all`: replace each `[diff]` file, with a backup.
 - `--keep-existing`: add only what is missing, and change no existing file.
 
-When you run the setup, it cannot ask questions. For that reason, one of these options is necessary. Homebrew or `sudo` can ask for a password. If that happens, stop, give the full command to the person, and ask them to run it in their own terminal.
+When you run the setup, it cannot ask questions. For that reason, one of these options is necessary. With no terminal, the setup installs only the prerequisites that need no password, and it prints a command for each of the others. Homebrew or `sudo` can also ask for a password later. If that happens, stop, give the full command to the person, and ask them to run it in their own terminal. Then run the setup again.
 
 ## 7. Make sure that it works
 

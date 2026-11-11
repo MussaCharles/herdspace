@@ -13,6 +13,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/run-client-linux.sh` | A Linux client connects to a server in a second container. Real Ghostty key presses reach Herdr over SSH. |
 | `tests/run-macos.sh` | The macOS scripts work with a temporary home folder and stub commands. |
 | `tests/test-install.sh` | A release builds, `install.sh` installs `hopen`, and `bootstrap.sh` from `curl` picks the right script. |
+| `tests/run-prereqs.sh` | The prerequisites step finds and installs a missing locale, stops with a fix when `sudo` is missing, works as root, and reports a server with no SSH. |
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
 
 A container cannot run macOS. For that reason, `tests/run-macos.sh` does not change macOS shortcuts or install Homebrew packages.
@@ -39,6 +40,10 @@ tests/run-macos.sh
 
 ```bash
 tests/test-install.sh
+```
+
+```bash
+tests/run-prereqs.sh
 ```
 
 ```bash

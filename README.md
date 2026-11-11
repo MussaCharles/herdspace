@@ -17,7 +17,7 @@ herdspace has two parts. [`hopen`](docs/hopen.md) opens your projects in Herdr. 
 
 ## Quick start
 
-Choose the option that matches how you plan to use herdspace. Each option is one command, and you can run it again at any time.
+Choose the option that matches how you plan to use herdspace. Each option is one command, and you can run it again at any time. Read [Before you start](docs/setup.md#before-you-start) for the few items that you do yourself.
 
 | You want to | Use |
 |-------------|-----|

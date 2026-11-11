@@ -10,6 +10,7 @@
 #   --check          Report what is done, missing, or different. Change nothing.
 #   --keep-existing  Add what is missing, and change no existing file.
 #   --replace-all    Use the repository version of every file, with backups.
+#   --yes            Install the missing prerequisites with no question.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -20,6 +21,8 @@ FORMULAS="herdr neovim lazygit git-delta eza zoxide fzf bat fd ripgrep node"
 
 # shellcheck source=bootstrap/lib/common.sh
 source "${REPO_ROOT}/bootstrap/lib/common.sh"
+# shellcheck source=bootstrap/lib/prereqs.sh
+source "${REPO_ROOT}/bootstrap/lib/prereqs.sh"
 # shellcheck source=bootstrap/lib/shell.sh
 source "${REPO_ROOT}/bootstrap/lib/shell.sh"
 # shellcheck source=bootstrap/lib/server.sh
@@ -49,8 +52,12 @@ formulas_ready() { brew_formulas_ready $FORMULAS; }
 # shellcheck disable=SC2086
 install_formulas() { brew_install $FORMULAS; }
 
+prereq_add "Homebrew" necessary homebrew_ready install_homebrew yes "Install Homebrew from https://brew.sh, and run the setup again."
+prereq_add "Homebrew can write to its folder" necessary brew_writable - no "Run the setup from the account that owns Homebrew, or give this account write access to $(brew --prefix 2>/dev/null || echo /opt/homebrew)."
+prereq_add "Python 3 for hopen" necessary python_ready install_python no "Run: xcode-select --install"
+run_prereqs
+
 step "Checking this machine"
-run_part "Homebrew" homebrew_ready install_homebrew
 run_part "Homebrew packages" formulas_ready install_formulas
 setup_shell server
 setup_zprofile server

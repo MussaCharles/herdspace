@@ -58,6 +58,10 @@ tests/test-skills.sh
 ```
 
 ```bash
+tests/run-prereqs.sh
+```
+
+```bash
 tests/run-macos.sh
 ```
 

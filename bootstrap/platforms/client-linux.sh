@@ -12,6 +12,7 @@
 #   --check          Report what is done, missing, or different. Change nothing.
 #   --keep-existing  Add what is missing, and change no existing file.
 #   --replace-all    Use the repository version of every file, with backups.
+#   --yes            Install the missing prerequisites with no question.
 #   --keep-terminal-keys  Keep the keys of Ghostty. The choice stays.
 #   --use-herdspace-keys  Use the editor keys of herdspace again (the default).
 set -euo pipefail
@@ -28,6 +29,8 @@ source "${REPO_ROOT}/bootstrap/lib/common.sh"
 source "${REPO_ROOT}/bootstrap/lib/shell.sh"
 # shellcheck source=bootstrap/lib/linux-tools.sh
 source "${REPO_ROOT}/bootstrap/lib/linux-tools.sh"
+# shellcheck source=bootstrap/lib/prereqs.sh
+source "${REPO_ROOT}/bootstrap/lib/prereqs.sh"
 # shellcheck source=bootstrap/lib/client.sh
 source "${REPO_ROOT}/bootstrap/lib/client.sh"
 # shellcheck source=tools/versions.env
@@ -65,6 +68,13 @@ install_packages() {
   apt_install $PACKAGES
   link_debian_tools
 }
+
+prereq_add "sudo" necessary sudo_ready install_sudo no "Run the setup as root, or ask an admin to give this account sudo."
+prereq_add "Locale $(wanted_locale)" optional locale_ready install_locale yes "Run: sudo apt-get install locales && sudo locale-gen $(wanted_locale)"
+if [ "${#SERVERS[@]}" -gt 0 ]; then
+  prereq_add "SSH connection to each server" optional servers_ready - no "$(ssh_fix "${SERVERS[*]}")"
+fi
+run_prereqs
 
 step "Checking this machine"
 run_part "System packages" packages_ready install_packages

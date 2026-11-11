@@ -13,6 +13,7 @@
 #   --check               Report what is done, missing, or different. Change nothing.
 #   --keep-existing       Add what is missing, and change no existing file.
 #   --replace-all         Use the repository version of every file, with backups.
+#   --yes                 Install the missing prerequisites with no question.
 #   --version TAG         With curl: the release to download. The default is
 #                         the release of this file.
 #   -h, --help            Show this help.
@@ -45,7 +46,7 @@ PASS=()
 
 die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
 info() { printf '  [info] %s\n' "$*"; }
-usage() { sed -n '2,36p' "${BASH_SOURCE[0]}" 2>/dev/null | sed 's/^# \{0,1\}//' || echo "Usage: bootstrap.sh server|client|both [options]"; }
+usage() { sed -n '2,37p' "${BASH_SOURCE[0]}" 2>/dev/null | sed 's/^# \{0,1\}//' || echo "Usage: bootstrap.sh server|client|both [options]"; }
 
 ARGS=("$@")
 i=0

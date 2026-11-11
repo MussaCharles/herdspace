@@ -31,6 +31,41 @@ flowchart LR
 
 Each agent program creates its configuration folder at its first start. Herdr needs that folder for the integration.
 
+## Before you start
+
+The setup installs most of what it needs. You do these items yourself:
+
+| Item | Server machine | Client machine |
+|------|:--------------:|:--------------:|
+| `curl`, to run the first command | yes | yes |
+| An account that can use `sudo` (Linux) or that has admin rights (macOS) | yes | yes |
+| SSH access from the client machine, which you turn on yourself | yes | |
+| An SSH key and an SSH name for the server, in `~/.ssh/config` | | yes |
+
+The setup does not turn on remote access, because that is a security choice for the owner of the server. To turn on SSH on the server machine, follow the official guide for its system:
+
+- macOS: [Allow a remote computer to access your Mac](https://support.apple.com/guide/mac-help/allow-a-remote-computer-to-access-your-mac-mchlp1066/mac)
+- Ubuntu: [OpenSSH server](https://documentation.ubuntu.com/server/how-to/security/openssh-server/)
+- Debian: [SSH](https://wiki.debian.org/SSH)
+
+Then follow [Connect to the server with SSH](ssh.md) on the client machine. On one machine as both, you need no SSH.
+
+These items are optional:
+
+- Agent programs: for the Herdr integration, start each agent program, for example Claude Code, one time before the setup. It makes its configuration folder at its first start.
+- WSL login service: in WSL, Herdr starts at login only with systemd. See the [Windows with WSL guide](windows-wsl.md).
+
+### The prerequisites step
+
+Each run starts with a prerequisites step. It lists what the setup needs before it can start, and it marks each missing item as necessary or optional. Then it asks one question: "Install the missing necessary items?" The default is yes. For each optional item, it asks again, so that you can skip it. If an install needs a password, `sudo` or the Homebrew installer asks for it.
+
+| System | Items that the step can install |
+|--------|---------------------------------|
+| Debian or Ubuntu | `sudo`, when you run the setup as root. The locale that your SSH session asks for, for example `en_US.UTF-8`. |
+| macOS | Homebrew. Python 3 for `hopen` on a server. Ghostty on a client, from an admin account. |
+
+If the step cannot install an item, it prints what to do, for example the command to run from an admin account. The step reports the SSH connection to each server, but it never changes the server. With `--yes`, the step installs the missing items with no question. With no terminal, it installs only the items that need no password.
+
 ## What a server script does
 
 ```mermaid
@@ -105,6 +140,7 @@ The first word is `server`, `client`, or `both`. The script finds the system. Ea
 | `--check` | Report what is done, missing, or different. Change nothing. |
 | `--keep-existing` | Add what is missing, and change no existing file. |
 | `--replace-all` | Use the repository version of every file, with backups. |
+| `--yes` | Install the missing prerequisites with no question. See [The prerequisites step](#the-prerequisites-step). |
 | `--version <tag>` | With `curl`: download another release. |
 | `--skip-nvim-tools` | Server: do not install the Neovim language tools. |
 | `--skip-login-service` | Server: do not start Herdr at login. |

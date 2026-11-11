@@ -16,7 +16,7 @@ You need these items:
 
 - The address of the server machine: an IP address such as `203.0.113.10`, or a host name such as `my-server.local`.
 - Your user name on the server machine.
-- SSH on the server machine. On macOS, turn on Remote Login in System Settings, in General, then Sharing. On Debian or Ubuntu, install it with `sudo apt install openssh-server`.
+- SSH access to the server machine. The owner of the server turns it on. See [Before you start](setup.md#before-you-start) in the setup guide for the official guides.
 
 In the examples, the user on the server is `me`, and the address of the server is `203.0.113.10`.
 
