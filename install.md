@@ -45,7 +45,7 @@ For each server, run:
 ssh -o BatchMode=yes -o ConnectTimeout=5 my-server true && echo ok
 ```
 
-If the command does not print `ok`, the server needs an SSH key. Follow [Connect with an IP address](https://github.com/MussaCharles/herdspace/blob/v0.1.1/docs/setup.md#connect-with-an-ip-address):
+If the command does not print `ok`, the server needs an SSH key. Follow [Connect to the server with SSH](https://github.com/MussaCharles/herdspace/blob/v0.1.1/docs/ssh.md):
 
 - Before you change `~/.ssh/config`, ask the person.
 - `ssh-copy-id` asks for the password of the server. Give the command to the person, and ask them to run it in their own terminal.
