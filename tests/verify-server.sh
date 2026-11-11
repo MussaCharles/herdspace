@@ -232,14 +232,16 @@ rm -rf "$work"
 # The list settings: a session name, no parent workspace, an on-open command,
 # and extra tabs. A second run adds nothing.
 mkdir -p "$HOME/hb-set/web"
+printf 'HB_FILE=from-file\nHB_VALUE=from-file\n' >"$HOME/hb-set/web/.env"
 cat >"$HOME/hb-set/hb-set.code-workspace" <<'JSON'
 {
   "folders": [ { "name": "web", "path": "./web" } ],
   "settings": {
     "hopen.session": "hb-named",
     "hopen.parentWorkspace": false,
-    "hopen.onOpen": { "web": "printf %s \"$HB_VALUE\" > opened.txt" },
+    "hopen.onOpen": { "web": "printf '%s %s' \"$HB_VALUE\" \"$HB_FILE\" > opened.txt" },
     "hopen.env": { "web": { "HB_VALUE": "from-env" } },
+    "hopen.envFile": { "web": ".env" },
     "hopen.tabs": { "web": [ { "name": "logs", "run": "printf %s \"$HB_VALUE\" > tab-ran.txt" }, { "name": "side", "template": "agent" }, { "template": "grid" } ] }
   }
 }
@@ -252,7 +254,7 @@ contains "$set_out" 'each tab needs a name' 'a tab with no name gives a clear me
 tabs_of() { HERDR_SESSION="$1" herdr tab list --workspace "$(HERDR_SESSION="$1" herdr workspace list | python3 -c 'import json,sys; print([w["workspace_id"] for w in json.load(sys.stdin)["result"]["workspaces"] if w["label"] == sys.argv[1]][0])' "$2")" | python3 -c 'import json,sys; print(",".join(t["label"] for t in json.load(sys.stdin)["result"]["tabs"]))'; }
 contains "$(tabs_of hb-named web)" 'logs,side' 'hopen.tabs adds the named tabs'
 sleep 3
-contains "$(cat "$HOME/hb-set/web/opened.txt" 2>/dev/null)" 'from-env' 'hopen.onOpen runs with the hopen.env values'
+contains "$(cat "$HOME/hb-set/web/opened.txt" 2>/dev/null)" 'from-env from-file' 'hopen.onOpen runs with the hopen.env values and the env file, and env wins'
 contains "$(cat "$HOME/hb-set/web/tab-ran.txt" 2>/dev/null)" 'from-env' 'a tab runs its command with the hopen.env values' 
 contains "$(HERDR_SESSION=hb-named herdr pane list | python3 -c 'import json,sys; print(",".join(sorted(p.get("label") or "" for p in json.load(sys.stdin)["result"]["panes"])))')" 'agent' 'a tab gets its template'
 before_tabs="$(tabs_of hb-named web)"

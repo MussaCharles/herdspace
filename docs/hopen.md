@@ -107,6 +107,7 @@ path = "~/code/website"       # or a path relative to this folder
 template = "code"
 on_open = "npm install"
 env = { PORT = "3000" }
+env_file = ".env"
 tabs = [{ name = "logs", run = "tail -f log/dev.log" }]
 
 [[project]]
@@ -125,9 +126,10 @@ path = "~/code/api"
 | `template` | In a project: the template of this project. |
 | `on_open` | A command. It runs one time, when `hopen` creates the workspace, before the template programs start. |
 | `env` | Environment values. Each workspace, tab, and pane that `hopen` creates for the project gets them. |
+| `env_file` | A `.env` file with more environment values. A relative path starts at the folder of the project, or of the list at the top. A value in `env` wins over the same name in the file. |
 | `tabs` | More tabs. Each tab has a `name`, and an optional `template` and `run` command. |
 
-`on_open`, `env`, and `tabs` apply when `hopen` creates a workspace. A workspace that exists does not change. A setting with a wrong value gives a warning, and the other projects still open. `on_open` and `tabs` run commands, and `env` sets values. See [Commands and values from a list](#commands-and-values-from-a-list).
+A `.env` file has one `KEY=VALUE` on each line. `hopen` skips empty lines and lines that start with `#`. It accepts `export ` in front, and quotes around a value. `on_open`, `env`, `env_file`, and `tabs` apply when `hopen` creates a workspace. A workspace that exists does not change. A setting with a wrong value gives a warning, and the other projects still open. `on_open` and `tabs` run commands, and `env` sets values. See [Commands and values from a list](#commands-and-values-from-a-list).
 
 ## Use a VS Code workspace file
 
@@ -157,6 +159,7 @@ If you use VS Code, you can keep one list for VS Code and Herdr. `hopen` reads a
 | `hopen.parentWorkspace` | `parent_workspace` |
 | `hopen.onOpen` | `on_open` |
 | `hopen.env` | `env` |
+| `hopen.envFile` | `env_file` |
 | `hopen.tabs` | `tabs` |
 
 A setting for one folder uses the name of the folder. A setting for the parent workspace uses the name of the session. A VS Code workspace file also works with a Python 3 that is older than 3.11.
@@ -171,9 +174,9 @@ hopen --convert work
 
 A list file can come from another person, for example in a repository that you clone. For that reason, `hopen` asks before it uses the commands and environment values of a list:
 
-1. The first time, `hopen` shows each command and value, and asks "Use them?". The default answer is no.
+1. The first time, `hopen` shows each command and value, and asks "Use them?". The default answer is no. For an env file, it shows the file and the names, but not the values, because a `.env` file often holds secrets.
 2. If you answer yes, `hopen` saves a checksum of the list file in `~/.local/state/hopen/trusted.tsv`. A later run uses the commands and values with no question.
-3. After each change to the list file, `hopen` asks again.
+3. After each change to the list file or to the values of its env files, `hopen` asks again.
 
 With no answer, `hopen` still opens the workspaces, but it runs no command and sets no value from the list. With no terminal, for example in a script, add `--trust` to approve the list.
 

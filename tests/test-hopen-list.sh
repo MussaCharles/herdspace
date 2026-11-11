@@ -15,7 +15,7 @@ RS=$'\x1e'
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 # shellcheck disable=SC1090 # The functions come from bin/hopen.
-source <(sed -n '/^read_list() {/,/^}/p;/^find_lists() {/,/^}/p;/^valid_name() {/,/^}/p;/^warn() {/p' bin/hopen)
+source <(sed -n '/^read_list() {/,/^}/p;/^find_lists() {/,/^}/p;/^valid_name() {/,/^}/p;/^list_actions() {/,/^}/p;/^file_hash() {/,/^}/p;/^list_trusted() {/,/^}/p;/^trust_file() {/p;/^warn() {/p' bin/hopen)
 mkdir -p "$tmp/code/a" "$tmp/code/b"
 
 # Settings.
@@ -88,15 +88,48 @@ fields="$(grep "^P${RS}b${RS}" <<<"$empty" | awk -F "$RS" '{print NF}')"
 contains "$fields" '6' 'each project line has six fields'
 lacks "$empty" 'echo hidden' 'the command of a refused tab is dropped'
 
+# An env file: comments, export, quotes, and a value that env sets too.
+mkdir -p "$tmp/envs/app"
+cat >"$tmp/envs/app/.env" <<'ENV'
+# A comment
+export TOKEN="s3cret value"
+PORT=4000 # the port
+NAME='single'
+not a line
+EMPTY=
+ENV
+printf '{ "folders": [ { "name": "app", "path": "./app" } ], "settings": { "hopen.envFile": { "app": ".env" }, "hopen.env": { "app": { "PORT": "5000" } } } }\n' >"$tmp/envs/envs.code-workspace"
+envout="$(read_list "$tmp/envs/envs.code-workspace" items)"
+contains "$envout" "F${RS}app${RS}${tmp}/envs/app/.env${RS}TOKEN, PORT, NAME, EMPTY${RS}TOKEN=s3cret value"$'\x1f'"PORT=4000"$'\x1f'"NAME=single"$'\x1f'"EMPTY=" 'an env file gives its names and values'
+contains "$envout" 'line 5 of' 'a line that is not KEY=VALUE gives a warning'
+contains "$(grep -A1 "^F${RS}" <<<"$envout" | tail -n 1 | cut -c1-5)" "P${RS}app" 'the F line comes just before its project'
+actions="$(list_actions "$envout")"
+contains "$actions" "app: load ${tmp}/envs/app/.env (TOKEN, PORT, NAME, EMPTY)" 'the approval question names the env file and its names'
+lacks "$actions" 's3cret' 'the approval question does not show a secret value'
+contains "$(read_list "$tmp/envs/envs.code-workspace" items 2>&1; printf '{ "folders": [ { "name": "app", "path": "./app" } ], "settings": { "hopen.envFile": { "app": "missing.env" } } }\n' >"$tmp/envs/m.code-workspace"; read_list "$tmp/envs/m.code-workspace" items)" 'cannot read the env file' 'a missing env file gives a warning'
+
+# A change in the env file asks again.
+# shellcheck disable=SC2034 # list_trusted reads these.
+STATE_DIR="$tmp/state"
+TRUST_FLAG=1
+list_trusted "$tmp/envs/envs.code-workspace" "$actions" "TOKEN=a" </dev/null
+# shellcheck disable=SC2034
+TRUST_FLAG=0
+if list_trusted "$tmp/envs/envs.code-workspace" "$actions" "TOKEN=a" </dev/null; then pass 'an approved list stays approved'; else fail 'an approved list stays approved'; fi
+if list_trusted "$tmp/envs/envs.code-workspace" "$actions" "TOKEN=b" </dev/null; then fail 'a changed env file needs a new approval'; else pass 'a changed env file needs a new approval'; fi
+
 # hopen --convert writes a herdspace.toml with the same projects and settings.
 chome="$tmp/convert-home"
 mkdir -p "$chome/code/a"
-printf '{ "folders": [ { "name": "a", "path": "./code/a" } ], "settings": { "hopen.templates": { "a": "code" }, "hopen.onOpen": { "a": "make" }, "hopen.env": { "a": { "PORT": "1" } }, "hopen.tabs": { "a": [ { "name": "logs", "run": "tail -f x" } ] } } }\n' >"$chome/w.code-workspace"
+printf 'X=1\n' >"$chome/code/a/.env"
+printf '{ "folders": [ { "name": "a", "path": "./code/a" } ], "settings": { "hopen.envFile": { "a": ".env" }, "hopen.templates": { "a": "code" }, "hopen.onOpen": { "a": "make" }, "hopen.env": { "a": { "PORT": "1" } }, "hopen.tabs": { "a": [ { "name": "logs", "run": "tail -f x" } ] } } }\n' >"$chome/w.code-workspace"
 contains "$(HOME="$chome" bin/hopen --convert w 2>&1)" 'Wrote' 'hopen --convert writes a file'
 converted="$(cat "$chome/w/herdspace.toml" 2>/dev/null)"
 contains "$converted" 'template = "code"' 'the converted file has the template'
 contains "$converted" 'on_open = "make"' 'the converted file has the command'
 contains "$converted" 'env = { PORT = "1" }' 'the converted file has the values'
+contains "$converted" 'env_file = ".env"' 'the converted file has the env file'
+lacks "$converted" 'X = ' 'the converted file has no value from the env file'
 contains "$converted" 'tabs = [{ name = "logs", template = "plain", run = "tail -f x" }]' 'the converted file has the tab'
 contains "$(HOME="$chome" bin/hopen --convert w 2>&1)" 'exists' 'hopen --convert never replaces a file'
 
