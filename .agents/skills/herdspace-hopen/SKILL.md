@@ -19,6 +19,8 @@ description: Change the hopen command or its pane templates in the herdspace rep
 
 `hopen <folder>` (an argument that is `.`, `..`, or has a `/`) goes through `open_folder`. If the folder has a list, `hopen` uses it. Else `FOLDER` is set, and `prepare_session` makes one `R` line for the folder, with no commands or values.
 
+`hopen --completion zsh|bash` prints a completion script. The script calls `hopen --complete lists|templates` for the names. The bash script must work with bash 3.2, so it uses no `mapfile` and no `compopt`. `tests/test-hopen-list.sh` runs it.
+
 `hopen` never closes a workspace, a tab, or a pane.
 
 ## Trust

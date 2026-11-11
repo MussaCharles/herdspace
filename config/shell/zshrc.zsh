@@ -30,6 +30,7 @@ if (( bootstrap_has_tty )); then
   export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --cycle'
   command -v fzf >/dev/null && source <(fzf --zsh)
   command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+  command -v hopen >/dev/null && source <(hopen --completion zsh)
   if command -v eza >/dev/null; then
     alias ls="eza"
     alias ll="eza -la"
