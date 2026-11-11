@@ -65,11 +65,22 @@ hopen --all work
 
 ![Herdr with one workspace for each project](media/herdr-sessions.png)
 
+## Open one folder
+
+To open one folder with no list, as `code .` does in VS Code, run this command in the folder:
+
+```bash
+hopen .
+```
+
+`hopen` opens the folder as one workspace, in a session with the name of the folder. A path also works, for example `hopen ~/code/api`. A path must have a `/`, or `hopen` reads it as the name of a list. If the folder has a `herdspace.toml` file or a `<folder>.code-workspace` file, `hopen` opens that list. `hopen` asks before it uses the commands and values of that list, as for each list. If the list names a session that another list has, `hopen` stops. In a session name, each character that is not a letter, a number, `.`, `-`, or `_` becomes `-`.
+
 ## Commands
 
 | Command | Effect |
 |---------|--------|
 | `hopen work` | Open the projects of one list, and attach to that session. |
+| `hopen .` | Open the current folder, with no list. See [Open one folder](#open-one-folder). |
 | `hopen work --file <path>` | Read the list from another file. |
 | `hopen work --no-attach` | Open the projects, but do not attach. |
 | `hopen work --template code` | Split each new project with a template. |

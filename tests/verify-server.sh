@@ -135,6 +135,23 @@ contains "$(hopen --list 2>&1)" 'running' 'hopen --list shows a running session'
 attach_all="$(python3 "$ROOT/tests/pty_run.py" 8 '\x02q' hopen --all hb-all-two 2>&1; echo "status=$?")"
 contains "$attach_all" 'status=0' 'hopen --all attaches to the named session'
 contains "$(hopen --all no-such-list 2>&1)" 'No project list' 'hopen --all rejects an unknown name'
+
+# hopen <folder> opens one folder with no list, or the list in the folder.
+mkdir -p "$work/hb folder" "$work/hb-listed/app"
+(cd "$work/hb folder" && hopen . --no-attach >/dev/null 2>&1)
+contains "$(labels_of hb-folder)" 'hb-folder' 'hopen . opens the current folder as a session'
+hopen "$work/hb folder" --no-attach >/dev/null 2>&1
+if [ "$(labels_of hb-folder)" = "hb-folder" ]; then pass 'hopen . adds nothing on a second run'; else fail 'hopen . adds nothing on a second run'; fi
+printf '[[project]]\nname = "app"\npath = "app"\n' >"$work/hb-listed/herdspace.toml"
+hopen "$work/hb-listed" --no-attach >/dev/null 2>&1
+contains "$(labels_of hb-listed)" 'hb-listed,app' 'hopen <folder> uses the list in the folder'
+contains "$(hopen "$work/no-such-folder" 2>&1)" 'No folder' 'hopen <folder> rejects a missing folder'
+mkdir -p "$work/hb-claim"
+printf 'session = "hb-all-one"\n' >"$work/hb-claim/herdspace.toml"
+contains "$(hopen "$work/hb-claim" --no-attach 2>&1)" 'which' 'a list in a folder cannot take the session of another list'
+for name in hb-folder hb-listed; do
+  herdr session stop "$name" >/dev/null 2>&1
+done
 for name in hb-all-one hb-all-two; do
   herdr session stop "$name" >/dev/null 2>&1
 done

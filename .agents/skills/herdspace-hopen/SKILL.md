@@ -17,6 +17,8 @@ description: Change the hopen command or its pane templates in the herdspace rep
 6. `remember_template` writes one line for each workspace to `~/.local/state/hopen/<session>.tsv`: `label<TAB>template<TAB>id=name id=name`. An extra tab has the label `workspace/tab`.
 7. After a stopped session starts again, `restart_programs` starts each template program again in a pane that shows only its shell. Herdr keeps the pane IDs after a restart, so `hopen` finds each pane by its ID. If the ID is gone, it uses the label.
 
+`hopen <folder>` (an argument that is `.`, `..`, or has a `/`) goes through `open_folder`. If the folder has a list, `hopen` uses it. Else `FOLDER` is set, and `prepare_session` makes one `R` line for the folder, with no commands or values.
+
 `hopen` never closes a workspace, a tab, or a pane.
 
 ## Trust

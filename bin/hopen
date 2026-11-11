@@ -11,6 +11,8 @@
 # each. After a stopped session starts again, hopen starts those programs again.
 #
 # Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]
+#        hopen <folder>          Open a folder, for example "hopen .". A list in
+#                                the folder wins. Else one workspace, no list.
 #        hopen --all [session] [--template NAME]
 #        hopen --list            Show every list and its state.
 #        hopen --templates       Show every template.
@@ -39,9 +41,12 @@ GUARD_PAIRS=""
 # project that hopen opens now. Each new workspace, tab, and pane gets them.
 ENV_ARGS=()
 TRUST_FLAG=0
+# FOLDER is set for "hopen <folder>" when the folder has no list of its own.
+FOLDER=""
 
 usage() {
   echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]"
+  echo "       hopen <folder>   (for example: hopen .)"
   echo "       hopen --all [session] [--template NAME]"
   echo "       hopen --list"
   echo "       hopen --templates"
@@ -582,7 +587,12 @@ prepare_session() {
   STARTED=0
   session_answers || start_session
   [ "$STARTED" -eq 0 ] || restart_programs
-  items="$(read_list "$LIST_FILE" items)" || die "Could not read ${LIST_FILE}."
+  if [ -n "$FOLDER" ]; then
+    # A folder with no list: one workspace, with no commands or values.
+    items="$(printf 'R\036%s\036%s\036%s\036-\036-' "$SESSION" "$FOLDER" "${TEMPLATE_FLAG:-plain}")"
+  else
+    items="$(read_list "$LIST_FILE" items)" || die "Could not read ${LIST_FILE}."
+  fi
   local actions trusted=1
   actions="$(list_actions "$items")"
   if [ -n "$actions" ] && ! list_trusted "$LIST_FILE" "$actions"; then
@@ -813,17 +823,53 @@ if [ "$ACTION" = all ]; then
 fi
 
 [ -n "$SESSION" ] || { usage >&2; exit 2; }
+
+# open_folder handles "hopen <folder>". It uses the list in the folder, if the
+# folder has one. Else the session and its one workspace get the folder name.
+open_folder() {
+  local path name list owner
+  path="$(cd "$SESSION" 2>/dev/null && pwd -P)" || die "No folder ${SESSION}."
+  [[ "$path" != *[[:cntrl:]]* ]] || die "The folder name has a control character."
+  name="$(basename "$path")"
+  for list in "${path}/herdspace.toml" "${path}/${name}.code-workspace"; do
+    if [ -f "$list" ]; then
+      LIST_FILE="$list"
+      SESSION="$(read_list "$list" session)" || die "Could not read ${list}."
+      # The same rule as find_lists: a list in a folder cannot take the
+      # session of another list. Its commands and values still need approval.
+      owner="$(find_list_for "$SESSION" 2>/dev/null)"
+      if [ -n "$owner" ] && [ "$owner" != "$list" ]; then
+        die "${list/#$HOME/~} uses the session ${SESSION}, which ${owner/#$HOME/~} has. Give the list another session name."
+      fi
+      return 0
+    fi
+  done
+  FOLDER="$path"
+  # A session name uses letters, numbers, dots, dashes, and underscores only.
+  SESSION="$(printf '%s' "$name" | tr -c 'A-Za-z0-9._-' '-')"
+  [ "$SESSION" != "." ] && [ "$SESSION" != ".." ] || SESSION="-"
+  list="$(find_list_for "$SESSION" 2>/dev/null)"
+  [ -z "$list" ] || warn "The list ${list/#$HOME/~} uses the session ${SESSION}. hopen adds the folder to that session."
+}
+
+case "$SESSION" in
+  . | .. | */*)
+    [ -z "$LIST_FILE" ] || die "Use --file with a session name, not with a folder."
+    open_folder
+    ;;
+esac
+
 valid_name "$SESSION" || die "A session name can use only letters, numbers, dots, dashes, and underscores."
 
 if [ "${HERDR_ENV:-}" = "1" ] && [ "$ATTACH" -eq 1 ]; then
   die "You are in a Herdr pane. Press ctrl+b, then q, and run this command again."
 fi
 
-if [ -z "$LIST_FILE" ]; then
+if [ -z "$LIST_FILE" ] && [ -z "$FOLDER" ]; then
   LIST_FILE="$(find_list_for "$SESSION")"
 fi
 
-if [ -z "$LIST_FILE" ] || [ ! -f "$LIST_FILE" ]; then
+if [ -z "$FOLDER" ] && { [ -z "$LIST_FILE" ] || [ ! -f "$LIST_FILE" ]; }; then
   die "No list of projects for ${SESSION}. Create ~/${SESSION}.code-workspace or ~/${SESSION}/herdspace.toml."
 fi
 
