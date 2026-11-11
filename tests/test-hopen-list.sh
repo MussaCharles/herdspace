@@ -99,17 +99,19 @@ not a line
 EMPTY=
 PROMPT_COMMAND=touch /tmp/owned
 LD_PRELOAD=/tmp/evil.so
+node_options=--require /tmp/x.js
 ENV
 printf '{ "folders": [ { "name": "app", "path": "./app" } ], "settings": { "hopen.envFile": { "app": ".env" }, "hopen.env": { "app": { "PORT": "5000" } } } }\n' >"$tmp/envs/envs.code-workspace"
 envout="$(read_list "$tmp/envs/envs.code-workspace" items)"
-contains "$envout" "F${RS}app${RS}${tmp}/envs/app/.env${RS}TOKEN, PORT, NAME, EMPTY${RS}TOKEN=s3cret value"$'\x1f'"PORT=4000"$'\x1f'"NAME=single"$'\x1f'"EMPTY=" 'an env file gives its names and values'
+contains "$envout" "F${RS}app${RS}${tmp}/envs/app/.env${RS}TOKEN=(hidden), PORT=4000, NAME=single, EMPTY=${RS}TOKEN=s3cret value"$'\x1f'"PORT=4000"$'\x1f'"NAME=single"$'\x1f'"EMPTY=" 'an env file gives its names and values'
 contains "$envout" 'line 5 of' 'a line that is not KEY=VALUE gives a warning'
 contains "$(grep -A1 "^F${RS}" <<<"$envout" | tail -n 1 | cut -c1-5)" "P${RS}app" 'the F line comes just before its project'
 actions="$(list_actions "$envout")"
-contains "$actions" "app: load ${tmp}/envs/app/.env (TOKEN, PORT, NAME, EMPTY)" 'the approval question names the env file and its names'
+contains "$actions" "app: load ${tmp}/envs/app/.env (TOKEN=(hidden), PORT=4000, NAME=single, EMPTY=)" 'the approval question shows the values, and hides a secret'
 lacks "$actions" 's3cret' 'the approval question does not show a secret value'
 contains "$envout" 'cannot set PROMPT_COMMAND' 'an env file cannot set a name that runs code'
 lacks "$(grep "^F" <<<"$envout")" 'LD_PRELOAD' 'an env file cannot set LD_PRELOAD'
+lacks "$(grep "^F" <<<"$envout")" 'node_options' 'the risky names match in any case'
 contains "$(read_list "$tmp/envs/envs.code-workspace" items 2>&1; printf '{ "folders": [ { "name": "app", "path": "./app" } ], "settings": { "hopen.envFile": { "app": "missing.env" } } }\n' >"$tmp/envs/m.code-workspace"; read_list "$tmp/envs/m.code-workspace" items)" 'cannot read the env file' 'a missing env file gives a warning'
 
 # A change in the env file asks again.

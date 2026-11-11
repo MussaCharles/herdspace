@@ -19,7 +19,7 @@ description: Change the hopen command or its pane templates in the herdspace rep
 
 `hopen <folder>` (an argument that is `.`, `..`, or has a `/`) goes through `open_folder`. If the folder has a list, `hopen` uses it. Else `FOLDER` is set, and `prepare_session` makes one `R` line for the folder, with no commands or values.
 
-An env file gives an `F` line just before its `R` or `P` line. The approval question shows the names of its values, not the values. `file_hash` adds the values to the checksum, so a change to them asks again. A value in `env` wins over the same name in the file.
+An env file gives an `F` line just before its `R` or `P` line. An env file cannot set a name in `RISKY` (names that make a program run code). The approval question shows its values, but hides a value whose name matches `SECRET`. `file_hash` adds the values to the checksum, so a change to them asks again. A value in `env` wins over the same name in the file.
 
 `hopen --completion zsh|bash` prints a completion script. The script calls `hopen --complete lists|templates` for the names. The bash script must work with bash 3.2, so it uses no `mapfile` and no `compopt`. `tests/test-hopen-list.sh` runs it.
 

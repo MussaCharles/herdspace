@@ -417,11 +417,14 @@ def env_items(label, values):
 
 ENV_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
-# The approval question does not show the values of an env file. So an env
-# file cannot set a name that makes a shell or a program run code.
-RISKY = re.compile(r"PATH|HOME|SHELL|ENV|BASH_ENV|ZDOTDIR|PROMPT_COMMAND|PS[0-4]|IFS"
-                   r"|LD_.*|DYLD_.*|NODE_OPTIONS|PYTHON.*|PERL5?OPT|PERL5LIB|RUBYOPT|RUBYLIB"
-                   r"|GIT_.*|.*_COMMAND|EDITOR|VISUAL|PAGER|BROWSER")
+# An env file cannot set a name that makes a shell or a program run code.
+# The approval question shows each other value, but it hides a value whose
+# name looks like a secret.
+RISKY = re.compile(r"PATH|HOME|SHELL|ENV|BASH_ENV|ZDOTDIR|PROMPT_COMMAND|PS[0-4]|IFS|TERM|TMPDIR"
+                   r"|LD_.*|DYLD_.*|NODE_.*|NPM_CONFIG_.*|PYTHON.*|PERL.*|RUBY.*|GEM_.*|JAVA_.*|_JAVA_.*"
+                   r"|GIT_.*|SSH_.*|XDG_.*|LESS.*|.*_COMMAND|.*_OPTIONS|.*_OPTS|.*PAGER|.*ASKPASS|.*EDITOR"
+                   r"|VISUAL|BROWSER|HERDR_.*|HOPEN_.*", re.I)
+SECRET = re.compile(r".*(TOKEN|SECRET|PASSWORD|PASSWD|PASS|PWD|KEY|CREDENTIAL|AUTH|PRIVATE|SESSION|COOKIE|DSN).*", re.I)
 
 def env_file(label, raw, folder):
     # env_file reads a .env file: KEY=VALUE lines, with "#" comments, an
@@ -459,7 +462,7 @@ def env_file(label, raw, folder):
             warn(f"{label}: an env file cannot set {key}, because it can run code. Put it in env, where the approval question shows it.")
             continue
         items.append(f"{key}={clean(value)}")
-        names.append(key)
+        names.append(f"{key}=(hidden)" if SECRET.fullmatch(key) else f"{key}={clean(value)}")
     if items:
         emit("F", label, file, ", ".join(names), env=items)
 
