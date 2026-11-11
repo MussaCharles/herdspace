@@ -44,7 +44,7 @@ Define each of these at its first use in a doc, before you use it.
 - A list is for three or more items. A table is for items with the same fields.
 - A fix lives in one doc. Other docs link to it.
 - If you add a guide, add it to the Documentation list in `README.md`.
-- The community files are in `.github/`: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, and `SECURITY.md`. GitHub reads that folder first. A link from them to a file in the root folder starts with `../`. `LICENSE`, `README.md`, `CHANGELOG.md`, `AGENTS.md`, and `install.md` stay in the root folder.
+- The community files are in `.github/`: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, and `SECURITY.md`. GitHub reads that folder first. A link in them starts with `/`, from the root of the repository, for example `[Testing](/docs/testing.md)`. GitHub also shows `CONTRIBUTING.md` on the Contributing tab of the repository, and that tab reads a relative link such as `../AGENTS.md` from the wrong folder. A link that starts with `/` works on both pages. `LICENSE`, `README.md`, `CHANGELOG.md`, `AGENTS.md`, and `install.md` stay in the root folder.
 
 ## Add a skill
 
