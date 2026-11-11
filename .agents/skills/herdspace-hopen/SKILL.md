@@ -12,20 +12,20 @@ description: Change the hopen command or its pane templates in the herdspace rep
 1. `find_lists` finds a list at `~/<name>.code-workspace`, `~/<name>/<name>.code-workspace`, or `~/<name>/herdspace.toml`. The session has the name of the file or the folder, unless the list sets `hopen.session` or `session`. If two lists name one session, `herdspace.toml` wins, with a warning.
 2. `read_list FILE items` reads either format with Python, and prints one line for each workspace and each extra tab: `R` (the parent workspace), `P` (a project), `T` (a tab), and `W` (a warning). The fields are separated by the byte `0x1e`, which is not white space, so that bash keeps each field in its place. An empty field is `-`, and an empty name is refused. `emit` writes every line and cleans every field, so no field holds a control character. Environment values are `KEY=VALUE` items, separated by the byte `0x1f`. VS Code accepts comments and trailing commas, so the reader removes them before it parses the JSON. `herdspace.toml` needs `tomllib`, so Python 3.11 or later.
 3. If the Herdr session is stopped, `start_session` starts it.
-4. For each folder with no workspace, `hopen` creates a workspace. The first workspace has the name of the session and opens the folder that holds the list file.
+4. For each folder with no workspace, `hopen` creates a workspace. The first workspace has the name of the session and opens the folder that holds the list file. A list with `parent_workspace = false` (or `hopen.parentWorkspace: false`) has no such workspace.
 5. The `onOpen` command runs in the first pane. Then `apply_template` splits the new workspace into named panes, and it starts the program of each pane. Then each extra tab opens, with its own template and command. `ENV_ARGS` gives the `--env` values to each `workspace create`, `tab create`, and `pane split`.
 6. `remember_template` writes one line for each workspace to `~/.local/state/hopen/<session>.tsv`: `label<TAB>template<TAB>id=name id=name`. An extra tab has the label `workspace/tab`.
 7. After a stopped session starts again, `restart_programs` starts each template program again in a pane that shows only its shell. Herdr keeps the pane IDs after a restart, so `hopen` finds each pane by its ID. If the ID is gone, it uses the label.
 
-`hopen <folder>` (an argument that is `.`, `..`, or has a `/`) goes through `open_folder`. If the folder has a list, `hopen` uses it. Else `FOLDER` is set, and `prepare_session` makes one `R` line for the folder, with no commands or values.
+`hopen <folder>` (an argument that is `.`, `..`, or has a `/`) goes through `open_folder`. If the folder has a list, `hopen` uses it. If that list names the session of another list, `hopen` stops with an error. Else `FOLDER` is set, and the session gets the name of the folder. Each character outside `A-Za-z0-9._-` becomes `-`. Then `prepare_session` makes one `R` line for the folder, with no commands or values.
 
 An env file gives an `F` line just before its `R` or `P` line. An env file cannot set a name in `RISKY` (names that make a program run code). The approval question shows its values, but hides a value whose name matches `SECRET`. `file_hash` adds the values to the checksum, so a change to them asks again. A value in `env` wins over the same name in the file.
 
-A task gives a `K` line after its `R` or `P` line. `hopen --task` finds the project with `project_for_dir` (the deepest project folder that holds the current folder), checks the approval of the list, and splits `HERDR_PANE_ID`, or `HERDR_ACTIVE_PANE_ID` in a popup. `choose` is the menu for lists and tasks: fzf, or a numbered menu.
+A task gives a `K` line after its `R` or `P` line. `hopen --task` finds the project with `project_for_dir` (the deepest project folder that holds the current folder), checks the approval of the list, and splits `HERDR_PANE_ID`, or `HERDR_ACTIVE_PANE_ID` in a popup. Outside Herdr, the task runs in the current terminal with `exec`. With no name and no terminal, `hopen --task` prints the tasks. `choose` is the menu for lists and tasks: fzf, or a numbered menu.
 
 `hopen --palette` builds a menu of actions with `choose`, and runs the chosen one with `exec "$0" ...`. In a Herdr popup (`HERDR_ACTIVE_PANE_ID` set, no `HERDR_PANE_ID`), `then_wait` waits for Enter after an action that prints a result, because the popup closes when its command ends. The key is a `[[keys.command]]` popup in `config/herdr/config.toml`.
 
-`hopen --completion zsh|bash` prints a completion script. The script calls `hopen --complete lists|templates` for the names. The bash script must work with bash 3.2, so it uses no `mapfile` and no `compopt`. `tests/test-hopen-list.sh` runs it.
+`hopen --completion zsh|bash` prints a completion script. The script calls `hopen --complete lists|templates|tasks` for the names. The bash script must work with bash 3.2, so it uses no `mapfile` and no `compopt`. `tests/test-hopen-list.sh` runs it.
 
 `hopen` never closes a workspace, a tab, or a pane.
 
@@ -47,6 +47,11 @@ The Auto Title plugin also names panes. It keeps a name that a person chose, but
 
 Each of these mistakes broke `hopen` one time:
 
+- In a split of a line, bash joins two tabs in a row, so an empty field moves the fields after it. For this reason, the reader uses the byte `0x1e` and writes `-` for an empty field. Do not go back to tabs.
+- Python `splitlines()` also ends a line at the byte `0x1e`. Split the output of the reader at new lines only.
+- A template name from a list must match `[A-Za-z0-9][A-Za-z0-9_-]*`. A name such as `../../x` loads a file from outside the templates folder, and runs its programs with no approval.
+- A list can hide terminal escape codes or bidi characters in a name. `emit` shows each control, format, and separator character as `?`. Keep each new field in `emit`.
+- An automated security review of each change to the list reader or to the approval found a real problem four times in a row. After such a change, ask for a security review before the merge.
 - Before you add a feature, read what Herdr and the installed tools already do. Read `herdr --help` and the Herdr docs. If a tool already does it, use that tool, and install nothing new.
 - `bin/hopen` runs from the top to the bottom. Define a function above the dispatch code that calls it.
 - `choose` gets its items on stdin, so it reads the answer from `/dev/tty`. A menu that reads stdin gets an item, not the answer.

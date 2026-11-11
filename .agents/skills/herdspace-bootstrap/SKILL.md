@@ -19,7 +19,8 @@ description: Change the herdspace setup scripts, add a tool or a configuration f
 | Function | File | Use |
 |----------|------|-----|
 | `run_part LABEL READY_FN APPLY_FN` | `common.sh` | One step. If `READY_FN` exits 0, the step is done, and the script skips it. |
-| `install_file SRC DEST` | `common.sh` | Make a file match the repository version. It updates a file that the script wrote. It asks before it replaces a file that a person changed. |
+| `install_file SRC DEST [MODE]` | `common.sh` | Make a file match the repository version. It updates a file that the script wrote. It asks before it replaces a file that a person changed. The mode is 644 by default. |
+| `install_tree SRC_DIR DEST_DIR` | `common.sh` | `install_file` for each file of a folder, for example `config/nvim` and the templates. A file in `SEED_ONLY` goes through `seed_file`, which writes only a missing file. Neovim changes `lazy-lock.json` after the first start, so it is seeded. |
 | `ensure_block FILE NAME TEXT` | `common.sh` | Keep a marked block of lines in a file that the person owns, for example `~/.zprofile`. |
 | `git_pin URL DIR REF` | `common.sh` | Clone a repository at one pinned commit. |
 | `setup_shell ROLE` | `shell.sh` | The shell files and the prompt color. |
@@ -46,7 +47,7 @@ Never add a prerequisite that turns on remote access, installs an SSH server, or
 
 ## Roles
 
-The role goes to `~/.config/herdspace/env.zsh` and to the `~/.zprofile` block. For `both`, `bootstrap.sh` sets `HS_ROLE=both`, so that the server script and the client script write the same role. Do not run `server` and then `client` on one machine. Each one undoes a part of the other.
+The role goes to `~/.config/herdspace/env.zsh` as `BOOTSTRAP_ROLE`. The `~/.zprofile` block does not keep the role. The block starts `herdr-update-check` only for a server role. For `both`, `bootstrap.sh` sets `HS_ROLE=both`, so that the server script and the client script write the same role. Do not run `server` and then `client` on one machine. Each one undoes a part of the other.
 
 ## Keys
 
@@ -60,10 +61,22 @@ Before you add a Herdr key, compare it with the default keys of Herdr. For examp
 2. Decide where it belongs: `bootstrap/lib/server.sh` for every server, one script in `bootstrap/platforms/` for one system, or `config/` for a configuration file.
 3. Add the step with `run_part` and a ready function, so that a second run skips it.
 4. Use `install_file` for a file that herdspace owns, and `ensure_block` for lines in a file that the person owns.
-5. Pin each download. `tools/update-versions.sh` writes the release files and their checksums to `tools/versions.tsv`, and the Git commits to `tools/versions.env`. Review its output before you commit it. If the person did not agree, do not run `curl | sh` from a new source.
+5. Pin each download. On macOS, Homebrew installs the tools, and their versions are not pinned. `tools/update-versions.sh` writes the release files and their checksums to `tools/versions.tsv`, and the Git commits to `tools/versions.env`. Review its output before you commit it. If the person did not agree, do not run `curl | sh` from a new source.
 6. Add a check to `tests/verify-server.sh`, or to the test of the client.
 7. Add the tool to "What the setup installs" in `docs/setup.md`, and to the credits in `README.md`.
 8. Add a line to `CHANGELOG.md`.
+
+## Pitfalls
+
+Each of these mistakes broke the setup one time:
+
+- From `curl ... | bash`, stdin is the script, not the terminal. `bootstrap.sh` runs the downloaded copy with `</dev/tty`, so that the questions about changed files still get an answer. With no terminal, a question takes the safe answer.
+- The last command of `~/.zshrc` sets the status of the first prompt. If the file is missing, `[[ -f FILE ]] && source FILE` ends with status 1. Use `if`. `tests/verify-server.sh` checks that a new shell starts with status 0.
+- If another account can write to the Oh My Zsh folders, Oh My Zsh warns at each start. The setup runs `chmod -R go-w` on the folder.
+- Neovim starts a language server only for a matching file. The setup installs the Mason packages by name, so that the first real start shows no install messages.
+- A Linux client has no Cmd key. Each Herdr key that uses `cmd+` also needs a `ctrl+shift+` key in `config/herdr/config.toml`.
+- On macOS, `brew install --cask` writes to `/Applications`, so it works only from an admin account. The prerequisites step prints the command for an admin account.
+- `server` and then `client` on one machine write two different roles. Use `both`.
 
 ## Rules
 
