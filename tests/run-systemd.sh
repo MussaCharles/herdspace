@@ -54,6 +54,10 @@ done
 if [ "$now" != "$before" ] && [ "$now" != 0 ]; then pass 'service restarts after a crash'; else fail 'service restarts after a crash'; fi
 if [ "$status" -ne 0 ]; then
   echo "== systemd state: $(docker exec "$name" systemctl is-system-running 2>&1)"
+  docker exec "$name" systemctl --failed --no-legend 2>&1 | head -n 10
+  docker exec "$name" systemctl status systemd-logind --no-pager 2>&1 | tail -n 10
+  docker exec "$name" loginctl list-users 2>&1 | head -n 5
+  docker exec "$name" ls -la "/run/user/${uid}" 2>&1 | head -n 5
   docker logs "$name" 2>&1 | tail -n 30
 fi
 echo "RESULT exit=${status}"
