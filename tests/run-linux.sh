@@ -29,6 +29,11 @@ for base in "$@"; do
     if [ \"${FULL:-0}\" = 1 ]; then [ \"\$(ls \$HOME/.local/share/nvim/site/parser | wc -l)\" -gt 0 ]; fi
     echo \"RESULT mason=\$(ls \$HOME/.local/share/nvim/mason/packages 2>/dev/null | tr '\\n' ' ')\"
     if [ \"${FULL:-0}\" = 1 ]; then ls \$HOME/.local/share/nvim/mason/packages | grep -q pyright; fi
+    echo '== both on one machine'
+    ./bootstrap.sh both --no-ghostty ${flags}
+    grep -q 'BOOTSTRAP_ROLE=both' \$HOME/.config/herdspace/env.zsh
+    ./bootstrap.sh both --check --no-ghostty ${flags} >/tmp/both-check.log 2>&1 || { cat /tmp/both-check.log; exit 1; }
+    echo RESULT both-check-clean
   " >>"$log" 2>&1
   rc=$?
   grep -E '^(FAIL|RESULT)' "$log" | cut -c1-200

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# bootstrap.sh sets up a Herdr server, or a machine that you use to connect to
-# one. It finds the system, and it runs the script for that system from the
-# folder bootstrap/platforms/. It is safe to run again.
+# bootstrap.sh sets up a server machine, a client machine, or both on one
+# machine. It finds the system, and it runs the scripts for that system from
+# the folder bootstrap/platforms/. It is safe to run again.
 #
 # Usage: ./bootstrap.sh server [options]
 #        ./bootstrap.sh client --server HOST [--server HOST]... [options]
+#        ./bootstrap.sh both [options]
 #        curl -fsSL <release-url>/bootstrap.sh | bash -s -- server
 #
 # Options for every machine:
@@ -26,6 +27,9 @@
 #   --no-ghostty          Linux: use another terminal. WSL always uses this.
 #   --skip-mission-control  macOS: keep the Mission Control shortcuts.
 #
+# both runs the server setup and then the client setup on this machine. It
+# takes the options of both, and --server is not necessary.
+#
 # With curl, the script downloads the release into
 # ~/.local/share/herdspace/<tag>, compares its checksum, and runs it.
 set -euo pipefail
@@ -39,15 +43,15 @@ PASS=()
 
 die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
 info() { printf '  [info] %s\n' "$*"; }
-usage() { sed -n '2,29p' "${BASH_SOURCE[0]}" 2>/dev/null | sed 's/^# \{0,1\}//' || echo "Usage: bootstrap.sh server|client [options]"; }
+usage() { sed -n '2,34p' "${BASH_SOURCE[0]}" 2>/dev/null | sed 's/^# \{0,1\}//' || echo "Usage: bootstrap.sh server|client|both [options]"; }
 
 ARGS=("$@")
 i=0
 while [ "$i" -lt "${#ARGS[@]}" ]; do
   arg="${ARGS[$i]}"
   case "$arg" in
-    server | client)
-      [ -z "$ROLE" ] || die "Give server or client once."
+    server | client | both)
+      [ -z "$ROLE" ] || die "Give server, client, or both once."
       ROLE="$arg"
       ;;
     --os)
@@ -139,15 +143,65 @@ case "${ROLE}-${OS}" in
   server-linux | server-wsl) script="server-linux.sh" ;;
   client-macos) script="client-macos.sh" ;;
   client-linux) script="client-linux.sh" ;;
-  client-wsl)
+  client-wsl | both-wsl)
     script="client-linux.sh"
     case " ${PASS[*]:-} " in *" --no-ghostty "*) ;; *) PASS+=("--no-ghostty") ;; esac
     ;;
+  both-macos) script="client-macos.sh" ;;
+  both-linux) script="client-linux.sh" ;;
 esac
 
-info "Setting up a ${ROLE} on ${OS}."
+if [ "$ROLE" != "both" ]; then
+  info "Setting up a ${ROLE} on ${OS}."
+  if [ -n "${HS_DRY_RUN:-}" ]; then
+    echo "bootstrap/platforms/${script} ${PASS[*]:-}"
+    exit 0
+  fi
+  exec "${HERE}/bootstrap/platforms/${script}" ${PASS[@]+"${PASS[@]}"}
+fi
+
+# both: give each script only its own options. The shell files get the role
+# "both", so that the second script does not undo the first one.
+case "$OS" in
+  macos) server_script="server-macos.sh" ;;
+  *) server_script="server-linux.sh" ;;
+esac
+PASS_SERVER=()
+PASS_CLIENT=()
+check=0
+j=0
+while [ "$j" -lt "${#PASS[@]}" ]; do
+  arg="${PASS[$j]}"
+  case "$arg" in
+    --skip-nvim-tools | --skip-login-service) PASS_SERVER+=("$arg") ;;
+    --no-ghostty | --skip-mission-control) PASS_CLIENT+=("$arg") ;;
+    --server)
+      j=$((j + 1))
+      PASS_CLIENT+=("$arg" "${PASS[$j]}")
+      ;;
+    *)
+      [ "$arg" = "--check" ] && check=1
+      PASS_SERVER+=("$arg")
+      PASS_CLIENT+=("$arg")
+      ;;
+  esac
+  j=$((j + 1))
+done
+
+info "Setting up a server and a client on ${OS}, on this one machine."
 if [ -n "${HS_DRY_RUN:-}" ]; then
-  echo "bootstrap/platforms/${script} ${PASS[*]:-}"
+  echo "bootstrap/platforms/${server_script} ${PASS_SERVER[*]:-}"
+  echo "bootstrap/platforms/${script} ${PASS_CLIENT[*]:-}"
   exit 0
 fi
-exec "${HERE}/bootstrap/platforms/${script}" ${PASS[@]+"${PASS[@]}"}
+export HS_ROLE=both
+info "Part 1 of 2: the server setup."
+rc=0
+"${HERE}/bootstrap/platforms/${server_script}" ${PASS_SERVER[@]+"${PASS_SERVER[@]}"} || rc=$?
+# A check reports both parts. A real run stops if the server part fails.
+if [ "$rc" -ne 0 ] && [ "$check" -eq 0 ]; then
+  exit "$rc"
+fi
+info "Part 2 of 2: the client setup."
+"${HERE}/bootstrap/platforms/${script}" ${PASS_CLIENT[@]+"${PASS_CLIENT[@]}"} || rc=$?
+exit "$rc"

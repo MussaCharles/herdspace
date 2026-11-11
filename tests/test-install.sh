@@ -85,6 +85,11 @@ printf 'x' >>"${bad}/herdspace-${tag}.tar.gz"
 out="$(piped "$bad" server)"
 contains "$out" 'checksum' 'piped bootstrap.sh stops on a wrong checksum'
 contains "$(HS_DRY_RUN=1 ./bootstrap.sh client --os mac 2>&1)" '--os must be' 'bootstrap.sh refuses an unknown system'
+out="$(HS_DRY_RUN=1 ./bootstrap.sh both --os macos --check --skip-nvim-tools --skip-mission-control 2>&1)"
+contains "$out" 'bootstrap/platforms/server-macos.sh --check --skip-nvim-tools' 'both gives the server script its options'
+contains "$out" 'bootstrap/platforms/client-macos.sh --check --skip-mission-control' 'both gives the client script its options'
+out="$(HS_DRY_RUN=1 ./bootstrap.sh both --os wsl 2>&1)"
+contains "$out" 'bootstrap/platforms/client-linux.sh --no-ghostty' 'both on WSL uses no Ghostty'
 
 printf 'RESULT failures=%s\n' "$failures"
 [ "$failures" -eq 0 ]

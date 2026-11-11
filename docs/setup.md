@@ -2,7 +2,7 @@
 
 Scope: set up a new server machine or client machine with `bootstrap.sh`, or install only `hopen`.
 
-herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. Set up the server machine first. Use one section for each machine.
+herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. Set up the server machine first. Use one section for each machine. If one machine is both, follow [One machine as server and client](#one-machine-as-server-and-client).
 
 You need an SSH connection from the client machine to the server machine that works with no password. The name `my-server` in this document is an example. Use a host name from your `~/.ssh/config`. If you connect with an IP address, follow [Connect with an IP address](#connect-with-an-ip-address) first.
 
@@ -104,7 +104,7 @@ You can run the script in two ways.
 To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdspace/<tag>`, compares its checksum, and runs it from there:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- server
 ```
 
 To read or change the files first, clone this repository, and run the script from the clone:
@@ -127,7 +127,7 @@ cd ~/herdspace && ./bootstrap.sh server
 
 ## Options
 
-The first word is `server` or `client`. The script finds the system. Each option below works with `curl` too, after `bash -s --`.
+The first word is `server`, `client`, or `both`. The script finds the system. Each option below works with `curl` too, after `bash -s --`.
 
 | Option | Use |
 |--------|-----|
@@ -322,6 +322,24 @@ On Linux, the direct keys use `Ctrl+Shift` in place of `Cmd`. The script release
 
 Follow [windows-wsl.md](windows-wsl.md).
 
+## One machine as server and client
+
+If Herdr runs on the machine that you use, and you do not connect to another machine with SSH, use this section. `both` runs the server setup and then the client setup on this machine. It takes the options of both setups. `--server` is not necessary.
+
+```bash
+./bootstrap.sh both
+```
+
+With `curl`:
+
+```bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- both
+```
+
+Do not run `server` and `client` one after the other on the same machine. Each one writes its own role into `~/.config/herdspace/env.zsh` and `~/.zprofile`. Then each check reports the file of the other one as not done. `both` writes one role for the two setups.
+
+To start Herdr in a terminal on this machine, open Ghostty and run `herdr`. You do not need SSH. If you do not want Herdr to start at login, add `--skip-login-service`.
+
 ## Effects to know about
 
 - Ghostty cannot limit a key to one program. The keys that Herdr uses do nothing in a Ghostty window that has no Herdr.
@@ -348,7 +366,7 @@ If a key does nothing, Ghostty or the desktop still uses that key. Run the clien
 On a machine that has Herdr already, you can install `hopen` and its templates without the rest of the setup. You need Python 3 and curl:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/install.sh | bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/install.sh | bash
 ```
 
 `install.sh` copies `hopen` to `~/.local/bin` and the templates to `~/.config/hopen/templates`, after a checksum check. `hopen --version` shows the installed release.
@@ -358,7 +376,7 @@ To update `hopen`, run the install command of the new release. Each release page
 To remove `hopen`, run the same command with `--uninstall`. It keeps your templates:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/install.sh | bash -s -- --uninstall
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/install.sh | bash -s -- --uninstall
 ```
 
 ### Write a list

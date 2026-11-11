@@ -43,19 +43,25 @@ Start the agent on the machine that you want to set up. Paste one of these promp
 On the server machine:
 
 ```text
-Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
+Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.1/install.md
 ```
 
 On the client machine. Replace the server names:
 
 ```text
-Set up herdspace on this machine as the client for my-server and my-other-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
+Set up herdspace on this machine as the client for my-server and my-other-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.1/install.md
+```
+
+On one machine that is both:
+
+```text
+Set up herdspace on this machine as both the server and the client. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.1/install.md
 ```
 
 On a machine that has Herdr already, to install only `hopen`:
 
 ```text
-Install only hopen from herdspace on this machine. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
+Install only hopen from herdspace on this machine. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.1/install.md
 ```
 
 ## Work in a clone of this repository
