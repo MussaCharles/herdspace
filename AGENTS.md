@@ -33,6 +33,7 @@ If you rename or remove a skill, change or remove its link too. `tests/test-skil
 | Skill | Use it when you |
 |-------|-----------------|
 | `herdspace-hopen` | Change `bin/hopen` or a template. |
+| `herdspace-ci` | Change a workflow, a repository setting, or find the cause of a failed CI job. |
 | `herdspace-bootstrap` | Change a setup script, a configuration file, or a pinned version. |
 | `herdspace-docs` | Write or change a doc, the README, or a skill. |
 | `herdspace-release` | Update the changelog, or make a release. |
@@ -53,6 +54,17 @@ If you rename or remove a skill, change or remove its link too. `tests/test-skil
 - Add each change that a person can see to `CHANGELOG.md`, under `## [Unreleased]`.
 - Write the docs in simple English. Follow the `simple-english` skill.
 - If the person did not ask for a release, do not run `tools/release.sh --publish`.
+
+## Keep the skills current
+
+At the end of each task, before you report that it is done, review the skills:
+
+1. List what you learned in the task that no skill has yet. For example: a mistake that broke something, a quirk of a tool, a rule, a command, or a fact of the code.
+2. Find the skill that owns that part, from the table in [Skills](#skills). Add the lesson there, or fix the fact that is no longer true.
+3. If no skill covers the part, and the lesson can help in a later task, add a new skill. Link it for Claude Code, and add it to the table.
+4. Put the skill change in the same pull request as the task, or in a pull request right after it. Run `tests/test-skills.sh`.
+
+A lesson goes to one skill only. Other skills link to it. Write only public facts: no names of machines, accounts, or private projects.
 
 ## Commands
 
