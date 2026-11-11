@@ -11,6 +11,7 @@ fail() { echo "FAIL $1"; failures=$((failures + 1)); }
 contains() { case "$1" in *"$2"*) pass "$3" ;; *) fail "$3: ${1:0:300}" ;; esac; }
 lacks() { case "$1" in *"$2"*) fail "$3: found [$2]" ;; *) pass "$3" ;; esac; }
 
+RS=$'\x1e'
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 # shellcheck disable=SC1090 # The functions come from bin/hopen.
@@ -32,10 +33,10 @@ cat >"$tmp/work.code-workspace" <<'JSON'
 }
 JSON
 out="$(read_list "$tmp/work.code-workspace" items)"
-contains "$out" "R	work	${tmp}	agent	-	-" 'the parent workspace uses the default template'
-contains "$out" "P	a	${tmp}/code/a	code	make setup	PORT=3000"$'\x1f'"DEBUG=true" 'a project has its template, command, and values'
-contains "$out" "P	b	${tmp}/code/b	agent	-	-" 'a project with no settings uses the defaults'
-contains "$out" "T	a	logs	plain	tail -f log" 'a tab has its name and command'
+contains "$out" "R${RS}work${RS}${tmp}${RS}agent${RS}-${RS}-" 'the parent workspace uses the default template'
+contains "$out" "P${RS}a${RS}${tmp}/code/a${RS}code${RS}make setup${RS}PORT=3000"$'\x1f'"DEBUG=true" 'a project has its template, command, and values'
+contains "$out" "P${RS}b${RS}${tmp}/code/b${RS}agent${RS}-${RS}-" 'a project with no settings uses the defaults'
+contains "$out" "T${RS}a${RS}logs${RS}plain${RS}tail -f log" 'a tab has its name and command'
 contains "$(read_list "$tmp/work.code-workspace" session)" 'work' 'the session has the name of the file'
 
 # A list that tries to add a line, hide text, or load another file.
@@ -56,7 +57,7 @@ data = {
 open(sys.argv[1], "w").write(json.dumps(data))
 PY
 bad="$(read_list "$tmp/bad.code-workspace" items)"
-kinds="$(cut -f1 <<<"$bad" | sort | uniq -c | tr -s ' ' | tr '\n' ' ')"
+kinds="$(cut -d "$RS" -f1 <<<"$bad" | sort | uniq -c | tr -s ' ' | tr '\n' ' ')"
 contains "$kinds" '1 P' 'a crafted list adds no project line'
 lacks "$(grep -v '^W' <<<"$bad")" 'injected' 'a path with a new line is refused'
 lacks "$(grep -v '^W' <<<"$bad")" 'curl evil' 'an environment name with a new line adds no line'
@@ -65,6 +66,27 @@ contains "$bad" 'the template name /tmp/x is not valid' 'a tab template with a p
 contains "$bad" 'echo ?[2Jsafe?' 'control and bidi characters show as ?'
 contains "$bad" 'OK=v?hidden' 'an environment value has no hidden characters'
 lacks "$bad" $'\x1b' 'no escape character reaches the output'
+
+# An empty name is refused, so that no field can move to another place.
+python3 -I - "$tmp/empty.code-workspace" <<'PY'
+import json, sys
+data = {
+    "folders": [{"name": "\t", "path": "./code/a"}, {"name": "b", "path": "./code/b"}],
+    "settings": {
+        "hopen.onOpen": {"b": "echo shown"},
+        "hopen.env": {"b": {"X": "1"}},
+        "hopen.tabs": {"b": [{"name": "\t", "run": "echo hidden"}, {"name": "\u200b", "run": "echo marked"}]},
+    },
+}
+open(sys.argv[1], "w").write(json.dumps(data))
+PY
+empty="$(read_list "$tmp/empty.code-workspace" items)"
+contains "$empty" 'A project has an empty name, so hopen skips it' 'a project with an empty name is refused'
+contains "$empty" 'each tab needs a name' 'a tab with an empty name is refused'
+contains "$empty" "T${RS}b${RS}?${RS}plain${RS}echo marked" 'a hidden character in a tab name shows as ?'
+fields="$(grep "^P${RS}b${RS}" <<<"$empty" | awk -F "$RS" '{print NF}')"
+contains "$fields" '6' 'each project line has six fields'
+lacks "$empty" 'echo hidden' 'the command of a refused tab is dropped'
 
 # Session names.
 home="$tmp/home"

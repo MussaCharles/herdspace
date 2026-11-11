@@ -178,13 +178,15 @@ while pairs and time.time() < end:
 
 # read_list FILE WHAT prints facts about one list. WHAT is one of:
 #   session  the session name
-#   items    one line for each workspace and each extra tab:
-#            R<TAB>label<TAB>path<TAB>template<TAB>on_open<TAB>env   (the parent workspace)
-#            P<TAB>label<TAB>path<TAB>template<TAB>on_open<TAB>env   (a project)
+#   items    one line for each workspace and each extra tab. The fields are
+#            separated by the byte 0x1e (RS below), which is not white space,
+#            so that bash keeps each field in its place:
+#            R RS label RS path RS template RS on_open RS env   (the parent workspace)
+#            P RS label RS path RS template RS on_open RS env   (a project)
+#            T RS label RS tab name RS template RS command
+#            W RS message                                       (a warning)
 #            env is KEY=VALUE items, separated by the byte 0x1f. An empty
-#            field is "-", because bash joins two tabs in a row into one.
-#            T<TAB>label<TAB>tab name<TAB>template<TAB>command
-# A problem with one setting prints a W<TAB>message line, and the rest still works.
+#            field is "-". No field holds a control character.
 read_list() {
   python3 -I - "$1" "$2" "${TEMPLATE_FLAG:-}" <<'PY'
 import json, os, re, sys, unicodedata
@@ -210,12 +212,13 @@ def clean(value):
     return "".join("?" if unicodedata.category(c) in HIDDEN else c for c in text).strip()
 
 def emit(kind, *fields, env=None):
-    # Each output line goes through here, so each field is clean. The
-    # environment values are a list of clean KEY=VALUE items.
-    parts = [kind] + [clean(value) for value in fields]
+    # Each output line goes through here, so each field is clean, and an
+    # empty field is "-". The environment values are a list of clean
+    # KEY=VALUE items.
+    parts = [kind] + [clean(value) or "-" for value in fields]
     if env is not None:
         parts.append("\x1f".join(env) if env else "-")
-    print("\t".join(parts))
+    print("\x1e".join(parts))
 
 def warn(text):
     emit("W", text)
@@ -314,6 +317,8 @@ if not isinstance(parent, bool):
     parent = True
 
 if what == "session":
+    if not clean(session):
+        sys.exit("The session name of the list is empty.")
     print(clean(session))
     sys.exit(0)
 
@@ -339,6 +344,8 @@ def env_items(label, values):
     return items
 
 if parent:
+    if not clean(session):
+        sys.exit("The session name of the list is empty.")
     emit("R", session, base, template(parent_template, clean(session)), field(parent_open), env=env_items(clean(session), parent_env))
 for project in projects:
     full = list_path(project["path"])
@@ -346,13 +353,16 @@ for project in projects:
         warn(f"A project path has a control character, so hopen skips it: {project['path']}")
         continue
     label = clean(project["name"] or os.path.basename(full))
+    if not label or label == "-":
+        warn(f"A project has an empty name, so hopen skips it: {project['path']}")
+        continue
     emit("P", label, full, template(project["template"], label), field(project["on_open"]), env=env_items(label, project["env"]))
     tabs = project["tabs"]
     if not isinstance(tabs, list):
         warn(f"{label}: tabs must be a list. hopen skips them.")
         continue
     for tab in tabs:
-        if not isinstance(tab, dict) or not tab.get("name"):
+        if not isinstance(tab, dict) or clean(tab.get("name") or "") in ("", "-"):
             warn(f"{label}: each tab needs a name. hopen skips one tab.")
             continue
         emit("T", label, tab["name"], template_name(tab.get("template"), f"{label}, tab {clean(tab['name'])}") or "plain", field(tab.get("run", "")))
@@ -525,7 +535,7 @@ restart_programs() {
 
 # list_actions ITEMS prints each command and environment value of a list.
 list_actions() {
-  awk -F '\t' '
+  awk -F '\036' '
     ($1 == "R" || $1 == "P") && $5 != "-" { print "    " $2 ": run " $5 }
     ($1 == "R" || $1 == "P") && $6 != "-" { gsub("\037", ", ", $6); print "    " $2 ": set " $6 }
     $1 == "T" && $5 != "-" { print "    " $2 ", tab " $3 ": run " $5 }
@@ -580,7 +590,7 @@ prepare_session() {
     warn "hopen did not use the commands and values of ${LIST_FILE/#$HOME/~}. Run hopen in a terminal to approve them, or add --trust."
   fi
   existing="$(workspaces | cut -f1)"
-  while IFS=$'\t' read -r kind label folder template extra envs; do
+  while IFS=$'\x1e' read -r kind label folder template extra envs; do
     [ "$extra" != "-" ] && [ "$trusted" -eq 1 ] || extra=""
     [ "$envs" != "-" ] && [ "$trusted" -eq 1 ] || envs=""
     case "$kind" in
@@ -734,7 +744,7 @@ def env_table(pairs):
 parent = None
 projects = []
 for raw in open(items, encoding="utf-8").read().splitlines():
-    kind, *fields = raw.split("\t")
+    kind, *fields = raw.split("\x1e")
     fields = ["" if value == "-" else value for value in fields] + [""] * 5
     if kind in ("R", "P"):
         entry = {"label": fields[0], "path": fields[1], "template": fields[2], "on_open": fields[3], "tabs": [],
