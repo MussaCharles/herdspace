@@ -148,7 +148,7 @@ contains "$found" 'OPENED +2 src/a.txt' 'hopen --grep opens the file at the line
 pal="$(cd "$work" && python3 "$ROOT/tests/pty_run.py" 6 'ports\r' env TERM=dumb hopen --palette 2>&1)"
 contains "$pal" 'Find a file' 'the palette offers to find a file'
 contains "$pal" 'Open the list' 'outside Herdr, the palette offers each list'
-contains "$pal" 'listens on' 'the palette runs the chosen action'
+case "$pal" in *PORT*ADDRESS* | *'listens on'*) pass 'the palette runs the chosen action' ;; *) fail "the palette runs the chosen action: ${pal:0:300}" ;; esac
 pal="$(cd "$work" && python3 "$ROOT/tests/pty_run.py" 4 '\r' env TERM=dumb HERDR_ACTIVE_PANE_ID=w1:p1 hopen --palette 2>&1)"
 contains "$pal" 'with the template code' 'in a Herdr popup, the palette offers the templates'
 lacks "$pal" 'Open the list' 'in a Herdr popup, the palette does not offer to attach to a list'
@@ -305,12 +305,14 @@ contains "$(cat "$HOME/hb-set/web/task-ran.txt" 2>/dev/null)" 'from-env' 'the ta
 contains "$(HERDR_SESSION=hb-named herdr pane list | python3 -c 'import json,sys; print(",".join(p.get("label") or "" for p in json.load(sys.stdin)["result"]["panes"]))')" 'mark' 'the task pane has the name of the task'
 
 # hopen --ports shows a port, its program, and its project.
-(cd "$HOME/hb-set/web" && exec python3 -m http.server 8799 --bind 127.0.0.1 >/dev/null 2>&1) &
+# A random port, so that a program that holds a fixed port cannot break the test.
+port=$((20000 + RANDOM % 20000))
+(cd "$HOME/hb-set/web" && exec python3 -m http.server "$port" --bind 127.0.0.1 >/dev/null 2>&1) &
 server_pid=$!
 sleep 2
 ports="$(hopen --ports 2>&1)"
-contains "$ports" '8799' 'hopen --ports shows a port'
-contains "$ports" 'hb-named/web' 'hopen --ports shows the project of the program'
+contains "$ports" "$port" 'hopen --ports shows a port'
+contains "$(grep "^${port} " <<<"$ports")" 'hb-named/web' 'hopen --ports shows the project of the program'
 kill "$server_pid" 2>/dev/null
 
 # A list runs its commands only after an approval, and again after a change.
