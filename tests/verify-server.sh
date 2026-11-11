@@ -271,6 +271,19 @@ printf '{ "folders": [], "settings": { "hopen.session": "hb-named" } }\n' >"$HOM
 contains "$(hopen --list 2>&1)" 'hopen skips' 'a list that claims a used session name is skipped'
 rm -rf "$HOME/hb-claim"
 
+# A template name from a list cannot leave the templates folder, and a control
+# character in a command shows as "?" in the approval question.
+mkdir -p "$HOME/hb-bad/w"
+printf '{ "folders": [ { "name": "w", "path": "./w" } ], "settings": { "hopen.templates": { "w": "../../tmp/evil" }, "hopen.onOpen": { "w": "echo \\u001b[2Jhidden" } } }\n' >"$HOME/hb-bad/hb-bad.code-workspace"
+bad_out="$(hopen hb-bad --no-attach 2>&1 </dev/null)"
+contains "$bad_out" 'is not valid. hopen uses the default' 'a template name with a path is refused'
+contains "$(HERDR_SESSION=hb-bad herdr pane list | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["result"]["panes"]))')" '2' 'the workspaces open with one pane each'
+contains "$(printf 'n\n' | python3 "$ROOT/tests/pty_run.py" 6 'n\r' hopen hb-bad --no-attach 2>&1 | cat -v)" 'echo ?[2Jhidden' 'the approval question shows a control character as ?'
+herdr session stop hb-bad >/dev/null 2>&1
+sleep 1
+herdr session delete hb-bad >/dev/null 2>&1
+rm -rf "$HOME/hb-bad" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-bad.tsv"
+
 # herdspace.toml needs Python 3.11 or later.
 if python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))'; then
   mkdir -p "$HOME/hb-toml/app"

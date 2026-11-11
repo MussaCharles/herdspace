@@ -91,8 +91,13 @@ valid_name() {
 
 template_file() { printf '%s/%s.layout' "$TEMPLATE_DIR" "$1"; }
 
-# template_exists exits 0 for a template file, and for "plain", which means no panes.
-template_exists() { [ "$1" = plain ] || [ -f "$(template_file "$1")" ]; }
+# template_exists exits 0 for a template file, and for "plain", which means no
+# panes. A name is letters, numbers, "-", and "_", so it cannot leave the folder.
+template_exists() {
+  [ "$1" = plain ] && return 0
+  [[ "$1" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] || return 1
+  [ -f "$(template_file "$1")" ]
+}
 
 template_lines() { grep -vE '^[[:space:]]*(#|$)' "$(template_file "$1")"; }
 
@@ -192,7 +197,23 @@ def warn(text):
     print("W", text, sep="\t")
 
 def clean(value):
-    return str(value).replace("\t", " ").replace("\n", " ").strip()
+    # Tabs and new lines become spaces. Every other control character, for
+    # example ESC, becomes "?", so that a list cannot change what the approval
+    # question shows.
+    text = str(value).replace("\t", " ").replace("\n", " ")
+    return re.sub(r"[\x00-\x1f\x7f-\x9f]", "?", text).strip()
+
+TEMPLATE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
+
+def template_name(value, where):
+    # A template is a file in the templates folder of the person. A name with
+    # "/" or ".." could point at a file from somewhere else, so it is refused.
+    if value is None or value == "":
+        return None
+    if not isinstance(value, str) or not TEMPLATE_NAME.fullmatch(value):
+        warn(f"{where}: the template name {clean(value)} is not valid. hopen uses the default.")
+        return None
+    return value
 
 def field(value):
     return clean(value) or "-"
@@ -270,8 +291,10 @@ if what == "session":
     print(clean(session))
     sys.exit(0)
 
-def template(value):
-    return forced or value or default
+default = template_name(default, "template") or "plain"
+
+def template(value, where=""):
+    return forced or template_name(value, where or "template") or default
 
 def env_field(label, values):
     if not values:
@@ -290,11 +313,11 @@ def env_field(label, values):
     return "\x1f".join(items)
 
 if parent:
-    print("R", clean(session), base, template(parent_template), field(parent_open), field(env_field(session, parent_env)), sep="\t")
+    print("R", clean(session), base, template(parent_template, clean(session)), field(parent_open), field(env_field(session, parent_env)), sep="\t")
 for project in projects:
     full = os.path.normpath(os.path.join(base, os.path.expanduser(str(project["path"]))))
     label = clean(project["name"] or os.path.basename(full))
-    print("P", label, full, template(project["template"]), field(project["on_open"]), field(env_field(label, project["env"])), sep="\t")
+    print("P", label, full, template(project["template"], label), field(project["on_open"]), field(env_field(label, project["env"])), sep="\t")
     tabs = project["tabs"]
     if not isinstance(tabs, list):
         warn(f"{label}: tabs must be a list. hopen skips them.")
@@ -303,7 +326,7 @@ for project in projects:
         if not isinstance(tab, dict) or not tab.get("name"):
             warn(f"{label}: each tab needs a name. hopen skips one tab.")
             continue
-        print("T", label, clean(tab["name"]), tab.get("template") or "plain", field(tab.get("run", "")), sep="\t")
+        print("T", label, clean(tab["name"]), template_name(tab.get("template"), f"{label}, tab {clean(tab['name'])}") or "plain", field(tab.get("run", "")), sep="\t")
 PY
 }
 
