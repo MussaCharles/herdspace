@@ -4,6 +4,15 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- The hopen guide, `docs/hopen.md`, has every `hopen` command, and the steps to install, update, and remove it.
+
+### Changed
+
+- The install commands in the docs use the newest release. To install a specific release, add `--version <tag>`.
+- The Quick start starts with a table of the options, with a link to each one.
+
 ## [0.1.1] - 2026-11-11
 
 The first release of herdspace.

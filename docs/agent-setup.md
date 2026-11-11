@@ -1,6 +1,6 @@
 # Ask an agent to do the setup
 
-Scope: what to say to a coding agent, so that it can do the setup for you. To install, the agent follows [install.md](../install.md). To change herdspace, an agent in a clone follows the skill files in [skills](../skills/).
+Scope: what to say to a coding agent, so that it can do the setup for you. To install, the agent follows the [agent install steps](../install.md). To change herdspace, an agent in a clone follows the skill files in [skills](../skills/).
 
 herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH.
 
@@ -30,38 +30,38 @@ sequenceDiagram
   end
 ```
 
-| Skill file | Use |
+| Skill | Use |
 |------------|-----|
-| [skills/herdspace-server/SKILL.md](../skills/herdspace-server/SKILL.md) | Set up a Linux or macOS server |
-| [skills/herdspace-client/SKILL.md](../skills/herdspace-client/SKILL.md) | Set up the macOS or Linux machine that you use for SSH |
-| [skills/herdspace-update/SKILL.md](../skills/herdspace-update/SKILL.md) | Add a tool or a setting to this repository |
+| [Server skill](../skills/herdspace-server/SKILL.md) | Set up a Linux or macOS server |
+| [Client skill](../skills/herdspace-client/SKILL.md) | Set up the macOS or Linux machine that you use for SSH |
+| [Update skill](../skills/herdspace-update/SKILL.md) | Add a tool or a setting to this repository |
 
 ## Install with an agent
 
-Start the agent on the machine that you want to set up. Paste one of these prompts. The agent reads [install.md](../install.md), which uses the `curl` commands of the release. It does not clone the repository.
+Start the agent on the machine that you want to set up. Paste one of these prompts. The agent reads the [agent install steps](../install.md), which use the `curl` commands of the newest release. It does not clone the repository.
 
 On the server machine:
 
 ```text
-Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/0.1.1/install.md
+Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md
 ```
 
 On the client machine. Replace the server names:
 
 ```text
-Set up herdspace on this machine as the client for my-server and my-other-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/0.1.1/install.md
+Set up herdspace on this machine as the client for my-server and my-other-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md
 ```
 
 On one machine that is both:
 
 ```text
-Set up herdspace on this machine as both the server and the client. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/0.1.1/install.md
+Set up herdspace on this machine as both the server and the client. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md
 ```
 
 On a machine that has Herdr already, to install only `hopen`:
 
 ```text
-Install only hopen from herdspace on this machine. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/0.1.1/install.md
+Install only hopen from herdspace on this machine. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md
 ```
 
 ## Work in a clone of this repository

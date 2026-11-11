@@ -1,6 +1,6 @@
 # Herdr cheat sheet
 
-Scope: the commands and keys for daily use of Herdr, with the tools around it. The install steps are in [setup.md](setup.md).
+Scope: the commands and keys for daily use of Herdr, with the tools around it. The install steps are in the [setup guide](setup.md).
 
 ## Words
 
@@ -309,7 +309,7 @@ herdr server reload-config
 | Start the Auto Title plugin | `herdr plugin action invoke restart --plugin herdr.auto-title` |
 | Show the state of the integrations | `herdr integration status` |
 
-To update the tools, follow [updating.md](updating.md). To see what a machine still needs, run its script with `--check`.
+To update the tools, follow the [updating guide](updating.md). To see what a machine still needs, run its script with `--check`.
 
 ## Problems
 
