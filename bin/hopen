@@ -743,7 +743,10 @@ def env_table(pairs):
 
 parent = None
 projects = []
-for raw in open(items, encoding="utf-8").read().splitlines():
+# splitlines() also ends a line at the byte 0x1e, so split at new lines only.
+for raw in open(items, encoding="utf-8").read().split("\n"):
+    if not raw:
+        continue
     kind, *fields = raw.split("\x1e")
     fields = ["" if value == "-" else value for value in fields] + [""] * 5
     if kind in ("R", "P"):

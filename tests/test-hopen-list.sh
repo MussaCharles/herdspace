@@ -88,6 +88,18 @@ fields="$(grep "^P${RS}b${RS}" <<<"$empty" | awk -F "$RS" '{print NF}')"
 contains "$fields" '6' 'each project line has six fields'
 lacks "$empty" 'echo hidden' 'the command of a refused tab is dropped'
 
+# hopen --convert writes a herdspace.toml with the same projects and settings.
+chome="$tmp/convert-home"
+mkdir -p "$chome/code/a"
+printf '{ "folders": [ { "name": "a", "path": "./code/a" } ], "settings": { "hopen.templates": { "a": "code" }, "hopen.onOpen": { "a": "make" }, "hopen.env": { "a": { "PORT": "1" } }, "hopen.tabs": { "a": [ { "name": "logs", "run": "tail -f x" } ] } } }\n' >"$chome/w.code-workspace"
+contains "$(HOME="$chome" bin/hopen --convert w 2>&1)" 'Wrote' 'hopen --convert writes a file'
+converted="$(cat "$chome/w/herdspace.toml" 2>/dev/null)"
+contains "$converted" 'template = "code"' 'the converted file has the template'
+contains "$converted" 'on_open = "make"' 'the converted file has the command'
+contains "$converted" 'env = { PORT = "1" }' 'the converted file has the values'
+contains "$converted" 'tabs = [{ name = "logs", template = "plain", run = "tail -f x" }]' 'the converted file has the tab'
+contains "$(HOME="$chome" bin/hopen --convert w 2>&1)" 'exists' 'hopen --convert never replaces a file'
+
 # Session names.
 home="$tmp/home"
 mkdir -p "$home/evil" "$home/x1" "$home/x2" "$home/solo"
