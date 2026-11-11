@@ -76,6 +76,7 @@ hopen --all work
 | `hopen --list` | Show every list and its state. |
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
+| `hopen work --trust` | Use the commands and values of the list with no question. See [Commands and values from a list](#commands-and-values-from-a-list). |
 | `hopen --convert work` | Write `~/work/herdspace.toml` from the VS Code list `work`. It never replaces a file. |
 | `hopen --version` | Show the installed release. |
 
@@ -114,7 +115,7 @@ This example opens the project `website` with the `code` template. It installs t
 
 `hopen.onOpen`, `hopen.env`, and `hopen.tabs` apply when `hopen` creates a workspace. A workspace that exists does not change. A setting with a wrong value gives a warning, and the other folders still open.
 
-`hopen.onOpen` and `hopen.tabs` run commands from the list file. Open only a list that you trust.
+`hopen.onOpen` and `hopen.tabs` run commands, and `hopen.env` sets values. See [Commands and values from a list](#commands-and-values-from-a-list).
 
 ## A herdspace.toml list
 
@@ -154,6 +155,20 @@ To make a `herdspace.toml` from a VS Code list, run:
 ```bash
 hopen --convert work
 ```
+
+## Commands and values from a list
+
+A list file can come from another person, for example in a repository that you clone. For that reason, `hopen` asks before it uses the commands and environment values of a list:
+
+1. The first time, `hopen` shows each command and value, and asks "Use them?". The default answer is no.
+2. If you answer yes, `hopen` saves a checksum of the list file in `~/.local/state/hopen/trusted.tsv`. A later run uses the commands and values with no question.
+3. After each change to the list file, `hopen` asks again.
+
+With no answer, `hopen` still opens the workspaces, but it runs no command and sets no value from the list. With no terminal, for example in a script, add `--trust` to approve the list.
+
+## Session names
+
+The name of the session comes from the file name, or the folder name for `herdspace.toml`. `hopen.session` and `session` can set another name. A list that only claims a name never takes over a list whose own file or folder has that name. `hopen` skips the claiming list, and it prints a warning. If two lists claim one name and no list has it as its own, `hopen` skips both, and it names them.
 
 ## Install only hopen
 

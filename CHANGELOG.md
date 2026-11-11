@@ -11,6 +11,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - New list settings for `hopen`: `hopen.session`, `hopen.parentWorkspace`, `hopen.onOpen`, `hopen.env`, and `hopen.tabs`.
 - `hopen` reads a `herdspace.toml` list, the TOML list format of herdspace. It needs Python 3.11 or later.
 - `hopen --convert` writes a `herdspace.toml` from a VS Code list.
+- `hopen` asks before it uses the commands and environment values of a list, and again after the list changes. `--trust` approves a list with no question.
 
 ## [0.2.0] - 2026-11-11
 

@@ -10,12 +10,16 @@
 # A template splits a new workspace into named panes and starts a program in
 # each. After a stopped session starts again, hopen starts those programs again.
 #
-# Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach]
+# Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]
 #        hopen --all [session] [--template NAME]
 #        hopen --list            Show every list and its state.
 #        hopen --templates       Show every template.
 #        hopen --apply NAME      Split the current tab with a template.
 #        hopen --convert NAME    Write ~/NAME/herdspace.toml from the VS Code list NAME.
+#
+# A list can run commands (on-open and tab commands) and set environment
+# values. hopen asks before it uses them the first time, and again after the
+# list changes. With no terminal, it uses them only with --trust.
 set -euo pipefail
 
 # The release script writes the release tag here.
@@ -34,9 +38,10 @@ GUARD_PAIRS=""
 # ENV_ARGS holds one "--env KEY=VALUE" pair for each environment value of the
 # project that hopen opens now. Each new workspace, tab, and pane gets them.
 ENV_ARGS=()
+TRUST_FLAG=0
 
 usage() {
-  echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach]"
+  echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]"
   echo "       hopen --all [session] [--template NAME]"
   echo "       hopen --list"
   echo "       hopen --templates"
@@ -60,6 +65,7 @@ while [ "$#" -gt 0 ]; do
       shift 2
       ;;
     --no-attach) ATTACH=0; shift ;;
+    --trust) TRUST_FLAG=1; shift ;;
     --all) ACTION="all"; shift ;;
     --list) ACTION="list"; shift ;;
     --templates) ACTION="templates"; shift ;;
@@ -301,16 +307,21 @@ for project in projects:
 PY
 }
 
-# find_lists prints one "session<TAB>file" line for each project list. If a
-# herdspace.toml and a .code-workspace file name the same session, hopen uses
-# herdspace.toml.
+# find_lists prints one "session<TAB>file" line for each project list.
+#
+# A list can name its session with "session" or "hopen.session". That name
+# never takes over a list whose own file or folder has the name of the session:
+# a list that only claims a name gets a warning, and hopen skips it. If two
+# lists only claim one name, hopen skips both. If a herdspace.toml and a VS Code
+# list both have the name, hopen uses herdspace.toml, and it prints a warning.
 find_lists() {
   local file name session
   {
     for file in "$HOME"/*/herdspace.toml; do
       [ -f "$file" ] || continue
+      name="$(basename "$(dirname "$file")")"
       session="$(read_list "$file" session 2>&1)" || { warn "Skipped ${file}. ${session}"; continue; }
-      valid_name "$session" && printf '%s\t%s\n' "$session" "$file"
+      valid_name "$session" && printf '%s\t%s\t%s\n' "$session" "$file" "$([ "$session" = "$name" ] && echo own || echo claimed)"
     done
     for file in "$HOME"/*.code-workspace "$HOME"/*/*.code-workspace; do
       [ -f "$file" ] || continue
@@ -320,9 +331,33 @@ find_lists() {
         *) continue ;;
       esac
       session="$(read_list "$file" session 2>&1)" || { warn "Skipped ${file}. ${session}"; continue; }
-      valid_name "$session" && printf '%s\t%s\n' "$session" "$file"
+      valid_name "$session" && printf '%s\t%s\t%s\n' "$session" "$file" "$([ "$session" = "$name" ] && echo own || echo claimed)"
     done
-  } | awk -F '\t' '{ if (seen[$1]++) { printf "  [warn] Session %s has two lists. hopen uses %s.\n", $1, first[$1] > "/dev/stderr" } else { first[$1] = $2; print } }'
+  } | awk -F '\t' '
+    { order[NR] = $1; file[NR] = $2; kind[NR] = $3; count[$1 SUBSEP $3]++ }
+    END {
+      for (i = 1; i <= NR; i++) {
+        s = order[i]
+        if (done[s]) continue
+        if (count[s SUBSEP "own"] > 0) {
+          if (kind[i] != "own") continue
+          done[s] = 1
+          print s "\t" file[i]
+          for (j = 1; j <= NR; j++) {
+            if (j == i || order[j] != s) continue
+            if (kind[j] == "own") printf "  [warn] Session %s has two lists. hopen uses %s.\n", s, file[i] > "/dev/stderr"
+            else printf "  [warn] %s claims the session %s, which %s has. hopen skips it.\n", file[j], s, file[i] > "/dev/stderr"
+          }
+        } else if (count[s SUBSEP "claimed"] > 1) {
+          done[s] = 1
+          printf "  [warn] Two lists claim the session %s. hopen skips both. Give one another name:\n", s > "/dev/stderr"
+          for (j = 1; j <= NR; j++) if (order[j] == s) printf "         %s\n", file[j] > "/dev/stderr"
+        } else {
+          done[s] = 1
+          print s "\t" file[i]
+        }
+      }
+    }'
 }
 
 find_list_for() {
@@ -434,6 +469,39 @@ restart_programs() {
   [ "$restarted" -eq 0 ] || printf '  [info] Session %s: %s programs started again.\n' "$SESSION" "$restarted"
 }
 
+# ---------- trust
+
+# list_actions ITEMS prints each command and environment value of a list.
+list_actions() {
+  awk -F '\t' '
+    ($1 == "R" || $1 == "P") && $5 != "-" { print "    " $2 ": run " $5 }
+    ($1 == "R" || $1 == "P") && $6 != "-" { gsub("\037", ", ", $6); print "    " $2 ": set " $6 }
+    $1 == "T" && $5 != "-" { print "    " $2 ", tab " $3 ": run " $5 }
+  ' <<<"$1"
+}
+
+file_hash() { python3 -I -c 'import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$1"; }
+trust_file() { printf '%s/trusted.tsv' "$STATE_DIR"; }
+
+# list_trusted FILE ACTIONS exits 0 if hopen can use the commands and values of
+# FILE: the person approved this version of the file before, approves it now,
+# or gave --trust. A changed file needs a new approval.
+list_trusted() {
+  local file="$1" actions="$2" hash answer
+  hash="$(file_hash "$file")"
+  awk -F '\t' -v f="$file" -v h="$hash" '$1 == f && $2 == h { found = 1 } END { exit !found }' "$(trust_file)" 2>/dev/null && return 0
+  if [ "$TRUST_FLAG" -ne 1 ]; then
+    [ -t 0 ] || return 1
+    printf '  [info] %s runs these commands and sets these values:\n%s\n' "${file/#$HOME/~}" "$actions"
+    printf '  Use them? Answer yes only for a list that you trust. [y/N] '
+    IFS= read -r answer || answer=""
+    case "$answer" in y | Y | yes | Yes) ;; *) return 1 ;; esac
+  fi
+  mkdir -p "$STATE_DIR"
+  { awk -F '\t' -v f="$file" '$1 != f' "$(trust_file)" 2>/dev/null || true; printf '%s\t%s\n' "$file" "$hash"; } >"$(trust_file).new"
+  mv "$(trust_file).new" "$(trust_file)"
+}
+
 # open_template TEMPLATE PANE STATE_LABEL splits PANE with TEMPLATE, starts its
 # programs, and remembers the panes under STATE_LABEL.
 open_template() {
@@ -453,10 +521,16 @@ prepare_session() {
   session_answers || start_session
   [ "$STARTED" -eq 0 ] || restart_programs
   items="$(read_list "$LIST_FILE" items)" || die "Could not read ${LIST_FILE}."
+  local actions trusted=1
+  actions="$(list_actions "$items")"
+  if [ -n "$actions" ] && ! list_trusted "$LIST_FILE" "$actions"; then
+    trusted=0
+    warn "hopen did not use the commands and values of ${LIST_FILE/#$HOME/~}. Run hopen in a terminal to approve them, or add --trust."
+  fi
   existing="$(workspaces | cut -f1)"
   while IFS=$'\t' read -r kind label folder template extra envs; do
-    [ "$extra" != "-" ] || extra=""
-    [ "$envs" != "-" ] || envs=""
+    [ "$extra" != "-" ] && [ "$trusted" -eq 1 ] || extra=""
+    [ "$envs" != "-" ] && [ "$trusted" -eq 1 ] || envs=""
     case "$kind" in
       W) warn "$label"; continue ;;
       T)

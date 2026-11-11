@@ -227,7 +227,7 @@ cat >"$HOME/hb-set/hb-set.code-workspace" <<'JSON'
   }
 }
 JSON
-set_out="$(hopen hb-named --no-attach 2>&1)"
+set_out="$(hopen hb-named --no-attach --trust 2>&1)"
 contains "$(hopen --list 2>&1)" 'hb-named' 'hopen.session names the session'
 contains "$(labels_of hb-named)" 'web' 'the session has the project'
 if [ "$(labels_of hb-named)" = "web" ]; then pass 'hopen.parentWorkspace false adds no parent workspace'; else fail "hopen.parentWorkspace false adds no parent workspace: $(labels_of hb-named)"; fi
@@ -239,8 +239,37 @@ contains "$(cat "$HOME/hb-set/web/opened.txt" 2>/dev/null)" 'from-env' 'hopen.on
 contains "$(cat "$HOME/hb-set/web/tab-ran.txt" 2>/dev/null)" 'from-env' 'a tab runs its command with the hopen.env values' 
 contains "$(HERDR_SESSION=hb-named herdr pane list | python3 -c 'import json,sys; print(",".join(sorted(p.get("label") or "" for p in json.load(sys.stdin)["result"]["panes"])))')" 'agent' 'a tab gets its template'
 before_tabs="$(tabs_of hb-named web)"
-hopen hb-named --no-attach >/dev/null 2>&1
+hopen hb-named --no-attach --trust >/dev/null 2>&1
 if [ "$(tabs_of hb-named web)" = "$before_tabs" ]; then pass 'a second run adds no tab'; else fail 'a second run adds no tab'; fi
+
+# A list runs its commands only after an approval, and again after a change.
+mkdir -p "$HOME/hb-trust/w"
+trust_list="$HOME/hb-trust/hb-trust.code-workspace"
+printf '{ "folders": [ { "name": "w", "path": "./w" } ], "settings": { "hopen.onOpen": { "w": "touch ran.txt" } } }\n' >"$trust_list"
+reset_trust() { herdr session stop hb-trust >/dev/null 2>&1; sleep 1; herdr session delete hb-trust >/dev/null 2>&1; rm -f "$HOME/hb-trust/w/ran.txt"; }
+contains "$(hopen hb-trust --no-attach 2>&1 </dev/null)" 'did not use the commands' 'with no terminal, hopen does not run the commands of a new list'
+sleep 2
+check 'the command did not run' test ! -e "$HOME/hb-trust/w/ran.txt"
+reset_trust
+hopen hb-trust --no-attach --trust >/dev/null 2>&1 </dev/null
+sleep 2
+check 'with --trust, the command runs' test -f "$HOME/hb-trust/w/ran.txt"
+reset_trust
+hopen hb-trust --no-attach >/dev/null 2>&1 </dev/null
+sleep 2
+check 'an approved list runs its command on a later run' test -f "$HOME/hb-trust/w/ran.txt"
+reset_trust
+printf '{ "folders": [ { "name": "w", "path": "./w" } ], "settings": { "hopen.onOpen": { "w": "touch ran.txt && echo changed" } } }\n' >"$trust_list"
+contains "$(hopen hb-trust --no-attach 2>&1 </dev/null)" 'did not use the commands' 'a changed list needs a new approval'
+reset_trust
+rm -rf "$HOME/hb-trust" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-trust.tsv"
+
+# A list that only claims the name of a session never takes it over.
+mkdir -p "$HOME/hb-claim"
+printf 'session = "hb-named"\n' >"$HOME/hb-claim/herdspace.toml"
+printf '{ "folders": [], "settings": { "hopen.session": "hb-named" } }\n' >"$HOME/hb-claim/hb-claim.code-workspace"
+contains "$(hopen --list 2>&1)" 'hopen skips' 'a list that claims a used session name is skipped'
+rm -rf "$HOME/hb-claim"
 
 # herdspace.toml needs Python 3.11 or later.
 if python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))'; then
@@ -254,7 +283,7 @@ name = "app"
 path = "app"
 tabs = [{ name = "logs" }]
 TOML
-  hopen hb-toml --no-attach >/dev/null 2>&1
+  hopen hb-toml --no-attach --trust >/dev/null 2>&1
   contains "$(labels_of hb-toml)" 'hb-toml,app' 'herdspace.toml opens its projects'
   contains "$(tabs_of hb-toml app)" 'logs' 'herdspace.toml adds the tabs'
   sleep 2
@@ -262,7 +291,7 @@ TOML
   converted="$(hopen --convert hb-named 2>&1)"
   contains "$converted" 'Wrote' 'hopen --convert writes a herdspace.toml'
   contains "$(cat "$HOME/hb-named/herdspace.toml" 2>/dev/null)" 'name = "logs"' 'the converted file has the tabs'
-  contains "$(hopen --list 2>&1)" 'has two lists' 'hopen warns about two lists for one session'
+  contains "$(hopen --list 2>&1)" 'claims the session hb-named' 'the converted list wins over the list that only claims its name'
   contains "$(hopen --convert hb-named 2>&1)" 'exists' 'hopen --convert never replaces a file'
   herdr session stop hb-toml >/dev/null 2>&1
   sleep 1
