@@ -41,6 +41,8 @@ STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hopen"
 STARTED=0
 # GUARD_PAIRS holds one "pane id<TAB>name" line for each pane that a template named.
 GUARD_PAIRS=""
+# GUARD_TABS holds one "root pane id<TAB>name" line for each tab that a list named.
+GUARD_TABS=""
 # ENV_ARGS holds one "--env KEY=VALUE" pair for each environment value of the
 # project that hopen opens now. Each new workspace, tab, and pane gets them.
 ENV_ARGS=()
@@ -210,8 +212,8 @@ $(printf '%s\t%s' "$pane" "$id")"
   done < <(template_lines "$name")
 }
 
-# guard_names keeps the template pane names for a short time. A plugin such as
-# Auto Title names panes too. It keeps a name that you chose, but after a
+# guard_names keeps the template pane names and the tab names of a list for a
+# short time. A plugin such as Auto Title names panes and tabs too. It keeps a name that you chose, but after a
 # restart it can forget that choice, because every session writes its choices
 # to one shared file, with pane IDs that repeat across sessions. So for
 # HOPEN_GUARD_SECONDS (default 30), a background job puts back each template
@@ -219,25 +221,44 @@ $(printf '%s\t%s' "$pane" "$id")"
 # again. HOPEN_GUARD_SECONDS=0 turns the guard off.
 guard_names() {
   local seconds="${HOPEN_GUARD_SECONDS:-30}"
-  [ -n "$GUARD_PAIRS" ] && [ "$seconds" != 0 ] || return 0
-  printf '%s' "$GUARD_PAIRS" | nohup python3 -I -c '
+  [ -n "$GUARD_PAIRS$GUARD_TABS" ] && [ "$seconds" != 0 ] || return 0
+  printf '%s\036%s' "$GUARD_PAIRS" "$GUARD_TABS" | nohup python3 -I -c '
 import json, subprocess, sys, time
-pairs = [line.split("\t", 1) for line in sys.stdin.read().splitlines() if "\t" in line]
+panes_text, _, tabs_text = sys.stdin.read().partition("\x1e")
+pairs = [line.split("\t", 1) for line in panes_text.split("\n") if "\t" in line]
+# A tab is found by its first pane, because a tab create answer has that pane.
+tabs = [line.split("\t", 1) for line in tabs_text.split("\n") if "\t" in line]
 end = time.time() + float(sys.argv[1])
-while pairs and time.time() < end:
+
+def herdr(*args):
+    out = subprocess.run(["herdr", *args], capture_output=True, text=True, timeout=5).stdout
+    return json.loads(out)["result"]
+
+while (pairs or tabs) and time.time() < end:
     time.sleep(0.5)
     try:
-        out = subprocess.run(["herdr", "pane", "list"], capture_output=True, text=True, timeout=5).stdout
-        labels = {p["pane_id"]: p.get("label") or "" for p in json.loads(out)["result"]["panes"]}
+        panes = herdr("pane", "list")["panes"]
+        labels = {p["pane_id"]: p.get("label") or "" for p in panes}
+        tab_of = {p["pane_id"]: (p["workspace_id"], p["tab_id"]) for p in panes}
+        tab_labels = {}
+        for workspace in {tab_of[pane][0] for pane, _ in tabs if pane in tab_of}:
+            for tab in herdr("tab", "list", "--workspace", workspace)["tabs"]:
+                tab_labels[tab["tab_id"]] = tab.get("label") or ""
     except Exception:
         continue
     pairs = [(pane, name) for pane, name in pairs if pane in labels]
     for pane, name in pairs:
         if labels[pane] != name:
             subprocess.run(["herdr", "pane", "rename", pane, name], capture_output=True, timeout=5)
+    tabs = [(pane, name) for pane, name in tabs if pane in tab_of and tab_of[pane][1] in tab_labels]
+    for pane, name in tabs:
+        tab = tab_of[pane][1]
+        if tab_labels[tab] != name:
+            subprocess.run(["herdr", "tab", "rename", tab, name], capture_output=True, timeout=5)
 ' "$seconds" >/dev/null 2>&1 &
   disown
   GUARD_PAIRS=""
+  GUARD_TABS=""
 }
 
 # ---------- project lists
@@ -759,6 +780,7 @@ prepare_session() {
         fi
         output="$(HERDR_SESSION="$SESSION" herdr tab create --workspace "$current_id" --cwd "$current_folder" --label "$folder" --no-focus ${ENV_ARGS[@]+"${ENV_ARGS[@]}"})"
         root="$(json_get "d['result']['root_pane']['pane_id']" <<<"$output")"
+        GUARD_TABS="${GUARD_TABS}${root}"$'\t'"${folder}"$'\n'
         open_template "$template" "$root" "${label}/${folder}"
         [ -z "$extra" ] || HERDR_SESSION="$SESSION" herdr pane run "$root" "$extra" >/dev/null
         continue

@@ -150,7 +150,7 @@ flowchart LR
 
 Herdr restores the panes and their names after a restart, but not the programs in them. `hopen` starts each template program again, in a pane that shows only its shell prompt. It does this only when it starts a stopped session, so a program that you closed on purpose stays closed.
 
-The Auto Title plugin names tabs and panes, and it keeps a name that you set. But all sessions save those names in one shared file, and the pane IDs repeat across sessions. For that reason, Auto Title can forget the template names of a session after a restart. `hopen` saves the ID of each template pane, and it uses the IDs to start the programs again. For 30 seconds after it names or restarts panes, `hopen` also puts back each template name that changed. Auto Title still names every other pane.
+The Auto Title plugin names tabs and panes, and it keeps a name that you set. But all sessions save those names in one shared file, and the pane IDs repeat across sessions. For that reason, Auto Title can forget the template names of a session after a restart. `hopen` saves the ID of each template pane, and it uses the IDs to start the programs again. For 30 seconds after it names or restarts panes, `hopen` also puts back each template name that changed. The same watch keeps the name of each extra tab of a list. Auto Title still names every other pane and tab.
 
 If you rename a template pane by hand in those 30 seconds, `hopen` puts the template name back. To turn the watch off, set `HOPEN_GUARD_SECONDS=0`.
 

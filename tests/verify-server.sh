@@ -329,6 +329,8 @@ path = "app"
 tabs = [{ name = "logs" }]
 TOML
   hopen hb-toml --no-attach --trust >/dev/null 2>&1
+  # Give Auto Title time to name the new tab. hopen must keep the name.
+  sleep 4
   contains "$(labels_of hb-toml)" 'hb-toml,app' 'herdspace.toml opens its projects'
   contains "$(tabs_of hb-toml app)" 'logs' 'herdspace.toml adds the tabs'
   sleep 2
