@@ -62,6 +62,6 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/in
 
 - Do not stop the Herdr server, and do not close a workspace, a tab, or a pane of the person.
 - Before you change a list file or a template, ask the person.
-- A list can run commands and set environment values. With no terminal, `hopen` uses them only with `--trust`. Show the person the `onOpen`, `tabs`, and `env` entries of the list, and add `--trust` only after the person agrees.
+- A list can run commands and set environment values. With no terminal, `hopen` uses them only with `--trust`. Show the person the `onOpen`, `tabs`, `env`, and `envFile` entries of the list, and add `--trust` only after the person agrees. Do not print the values of an env file, because they can be secrets.
 - If a command asks for a password, stop. Give the command to the person to run in their own terminal.
 - Do not print the contents of `~/.ssh` or of another secret file.

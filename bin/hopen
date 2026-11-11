@@ -249,6 +249,8 @@ while pairs and time.time() < end:
 #            R RS label RS path RS template RS on_open RS env   (the parent workspace)
 #            P RS label RS path RS template RS on_open RS env   (a project)
 #            T RS label RS tab name RS template RS command
+#            F RS label RS file RS names RS env  (the values of an env file;
+#                                                 it comes before its R or P line)
 #            W RS message                                       (a warning)
 #            env is KEY=VALUE items, separated by the byte 0x1f. An empty
 #            field is "-". No field holds a control character.
@@ -336,9 +338,11 @@ if os.path.basename(path) == "herdspace.toml":
             "on_open": entry.get("on_open", ""),
             "tabs": entry.get("tabs", []),
             "env": entry.get("env", {}),
+            "env_file": entry.get("env_file"),
         })
     parent_open = data.get("on_open", "")
     parent_env = data.get("env", {})
+    parent_env_file = data.get("env_file")
     parent_template = data.get("parent_template")
 else:
     with open(path, encoding="utf-8") as handle:
@@ -358,6 +362,7 @@ else:
     per_open = settings.get("hopen.onOpen", {}) or {}
     per_tabs = settings.get("hopen.tabs", {}) or {}
     per_env = settings.get("hopen.env", {}) or {}
+    per_env_file = settings.get("hopen.envFile", {}) or {}
     projects = []
     for folder in data.get("folders", []):
         if not isinstance(folder, dict) or "path" not in folder:
@@ -372,9 +377,11 @@ else:
             "on_open": per_open.get(label, ""),
             "tabs": per_tabs.get(label, []),
             "env": per_env.get(label, {}),
+            "env_file": per_env_file.get(label),
         })
     parent_open = per_open.get(session, "")
     parent_env = per_env.get(session, {})
+    parent_env_file = per_env_file.get(session)
     parent_template = per_template.get(session)
 
 if not isinstance(parent, bool):
@@ -408,9 +415,61 @@ def env_items(label, values):
         items.append(f"{key}={clean(value)}")
     return items
 
+ENV_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+
+# An env file cannot set a name that makes a shell or a program run code.
+# The approval question shows each other value, but it hides a value whose
+# name looks like a secret.
+RISKY = re.compile(r"PATH|HOME|SHELL|ENV|BASH_ENV|ZDOTDIR|PROMPT_COMMAND|PS[0-4]|IFS|TERM|TMPDIR"
+                   r"|LD_.*|DYLD_.*|NODE_.*|NPM_CONFIG_.*|PYTHON.*|PERL.*|RUBY.*|GEM_.*|JAVA_.*|_JAVA_.*"
+                   r"|GIT_.*|SSH_.*|XDG_.*|LESS.*|.*_COMMAND|.*_OPTIONS|.*_OPTS|.*PAGER|.*ASKPASS|.*EDITOR"
+                   r"|VISUAL|BROWSER|HERDR_.*|HOPEN_.*", re.I)
+SECRET = re.compile(r".*(TOKEN|SECRET|PASSWORD|PASSWD|PASS|PWD|KEY|CREDENTIAL|AUTH|PRIVATE|SESSION|COOKIE|DSN).*", re.I)
+
+def env_file(label, raw, folder):
+    # env_file reads a .env file: KEY=VALUE lines, with "#" comments, an
+    # optional "export ", and optional quotes. A relative path starts at the
+    # folder of the project. It emits one F line before the R or P line.
+    if raw is None or raw == "":
+        return
+    if not isinstance(raw, str) or has_hidden(raw):
+        warn(f"{label}: env_file must be a path. hopen skips it.")
+        return
+    file = os.path.normpath(os.path.join(folder, os.path.expanduser(raw)))
+    try:
+        with open(file, encoding="utf-8") as handle:
+            lines = handle.read().split("\n")
+    except (OSError, UnicodeDecodeError):
+        warn(f"{label}: hopen cannot read the env file {clean(file)}. hopen skips it.")
+        return
+    items, names = [], []
+    for number, line in enumerate(lines, 1):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export "):].lstrip()
+        key, sep, value = line.partition("=")
+        key, value = key.strip(), value.strip()
+        if not sep or not ENV_NAME.fullmatch(key):
+            warn(f"{label}: line {number} of {clean(file)} is not KEY=VALUE. hopen skips it.")
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        elif " #" in value:
+            value = value.split(" #", 1)[0].rstrip()
+        if RISKY.fullmatch(key):
+            warn(f"{label}: an env file cannot set {key}, because it can run code. Put it in env, where the approval question shows it.")
+            continue
+        items.append(f"{key}={clean(value)}")
+        names.append(f"{key}=(hidden)" if SECRET.fullmatch(key) else f"{key}={clean(value)}")
+    if items:
+        emit("F", label, file, ", ".join(names), env=items)
+
 if parent:
     if not clean(session):
         sys.exit("The session name of the list is empty.")
+    env_file(clean(session), parent_env_file, base)
     emit("R", session, base, template(parent_template, clean(session)), field(parent_open), env=env_items(clean(session), parent_env))
 for project in projects:
     full = list_path(project["path"])
@@ -421,6 +480,7 @@ for project in projects:
     if not label or label == "-":
         warn(f"A project has an empty name, so hopen skips it: {project['path']}")
         continue
+    env_file(label, project["env_file"], full)
     emit("P", label, full, template(project["template"], label), field(project["on_open"]), env=env_items(label, project["env"]))
     tabs = project["tabs"]
     if not isinstance(tabs, list):
@@ -604,18 +664,32 @@ list_actions() {
     ($1 == "R" || $1 == "P") && $5 != "-" { print "    " $2 ": run " $5 }
     ($1 == "R" || $1 == "P") && $6 != "-" { gsub("\037", ", ", $6); print "    " $2 ": set " $6 }
     $1 == "T" && $5 != "-" { print "    " $2 ", tab " $3 ": run " $5 }
+    $1 == "F" { print "    " $2 ": load " $3 " (" $4 ")" }
   ' <<<"$1"
 }
 
-file_hash() { python3 -I -c 'import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$1"; }
+# file_hash FILE [EXTRA] prints the checksum of FILE. EXTRA is the values that
+# the list loads from env files, so that a change to them asks again. EXTRA
+# goes on stdin, because another user can read the arguments of a process.
+file_hash() {
+  printf '%s' "${2:-}" | python3 -I -c '
+import hashlib, sys
+digest = hashlib.sha256(open(sys.argv[1], "rb").read())
+extra = sys.stdin.buffer.read()
+if extra:
+    digest.update(b"\0" + extra)
+print(digest.hexdigest())
+' "$1"
+}
 trust_file() { printf '%s/trusted.tsv' "$STATE_DIR"; }
 
-# list_trusted FILE ACTIONS exits 0 if hopen can use the commands and values of
+# list_trusted FILE ACTIONS [EXTRA] exits 0 if hopen can use the commands and values of
 # FILE: the person approved this version of the file before, approves it now,
 # or gave --trust. A changed file needs a new approval.
 list_trusted() {
   local file="$1" actions="$2" hash answer
-  hash="$(file_hash "$file")"
+  hash="$(file_hash "$file" "${3:-}")" || return 1
+  [[ "$hash" =~ ^[0-9a-f]{64}$ ]] || return 1
   awk -F '\t' -v f="$file" -v h="$hash" '$1 == f && $2 == h { found = 1 } END { exit !found }' "$(trust_file)" 2>/dev/null && return 0
   if [ "$TRUST_FLAG" -ne 1 ]; then
     [ -t 0 ] || return 1
@@ -643,7 +717,7 @@ open_template() {
 # A new workspace gets its template, its on-open command, and its extra tabs.
 prepare_session() {
   local items existing added=0 kind label folder template extra envs output root workspace_id item
-  local current="" current_folder="" current_id=""
+  local current="" current_folder="" current_id="" file_env="" key
   STARTED=0
   session_answers || start_session
   [ "$STARTED" -eq 0 ] || restart_programs
@@ -655,7 +729,7 @@ prepare_session() {
   fi
   local actions trusted=1
   actions="$(list_actions "$items")"
-  if [ -n "$actions" ] && ! list_trusted "$LIST_FILE" "$actions"; then
+  if [ -n "$actions" ] && ! list_trusted "$LIST_FILE" "$actions" "$(grep $'^F\x1e' <<<"$items" || true)"; then
     trusted=0
     warn "hopen did not use the commands and values of ${LIST_FILE/#$HOME/~}. Run hopen in a terminal to approve them, or add --trust."
   fi
@@ -665,6 +739,12 @@ prepare_session() {
     [ "$envs" != "-" ] && [ "$trusted" -eq 1 ] || envs=""
     case "$kind" in
       W) warn "$label"; continue ;;
+      F)
+        # The values of an env file, for the R or P line that comes next.
+        # "extra" holds them here, and it is empty with no approval.
+        file_env="$extra"
+        continue
+        ;;
       T)
         # A tab line: label, tab name (in "folder"), template, command.
         [ "$label" = "$current" ] && [ -n "$current_id" ] || continue
@@ -691,6 +771,16 @@ prepare_session() {
         [ -z "$item" ] || ENV_ARGS+=(--env "$item")
       done <<<"${envs}"$'\x1f'
     fi
+    # A value from the env file is used only if env does not set the name.
+    if [ -n "$file_env" ]; then
+      while IFS= read -r -d $'\x1f' item; do
+        key="${item%%=*}"
+        [ -n "$item" ] || continue
+        case $'\x1f'"${envs}"$'\x1f' in *$'\x1f'"${key}="*) continue ;; esac
+        ENV_ARGS+=(--env "$item")
+      done <<<"${file_env}"$'\x1f'
+    fi
+    file_env=""
     if grep -Fxq -- "$label" <<<"$existing"; then
       continue
     fi
@@ -811,17 +901,32 @@ def where(path):
 def env_table(pairs):
     return "{ " + ", ".join(key + " = " + quote(value) for key, value in pairs) + " }"
 
+def near(path, folder):
+    # A path relative to folder if it is inside folder, else ~/... or absolute.
+    relative = os.path.relpath(path, folder)
+    if not relative.startswith(".."):
+        return relative
+    if path.startswith(home + os.sep):
+        return "~/" + os.path.relpath(path, home)
+    return path
+
 parent = None
 projects = []
+pending_file = ""
 # splitlines() also ends a line at the byte 0x1e, so split at new lines only.
 for raw in open(items, encoding="utf-8").read().split("\n"):
     if not raw:
         continue
     kind, *fields = raw.split("\x1e")
     fields = ["" if value == "-" else value for value in fields] + [""] * 5
-    if kind in ("R", "P"):
+    if kind == "F":
+        # Keep the path of the env file, not its values.
+        pending_file = fields[1]
+    elif kind in ("R", "P"):
         entry = {"label": fields[0], "path": fields[1], "template": fields[2], "on_open": fields[3], "tabs": [],
-                 "env": [item.split("=", 1) for item in fields[4].split("\x1f") if "=" in item]}
+                 "env": [item.split("=", 1) for item in fields[4].split("\x1f") if "=" in item],
+                 "env_file": pending_file}
+        pending_file = ""
         if kind == "R":
             parent = entry
         else:
@@ -839,6 +944,8 @@ else:
         lines.append("on_open = " + quote(parent["on_open"]))
     if parent["env"]:
         lines.append("env = " + env_table(parent["env"]))
+    if parent["env_file"]:
+        lines.append("env_file = " + quote(near(parent["env_file"], target_dir)))
     if len(lines) > 2:
         lines.append("")
 for project in projects:
@@ -849,6 +956,8 @@ for project in projects:
         lines.append("on_open = " + quote(project["on_open"]))
     if project["env"]:
         lines.append("env = " + env_table(project["env"]))
+    if project["env_file"]:
+        lines.append("env_file = " + quote(near(project["env_file"], project["path"])))
     if project["tabs"]:
         tabs = []
         for tab in project["tabs"]:
