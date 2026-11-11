@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-11
+
 ### Added
 
 - The hopen guide, `docs/hopen.md`, has every `hopen` command, and the steps to install, update, and remove it.
@@ -34,5 +36,6 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/MussaCharles/herdspace/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/MussaCharles/herdspace/releases/tag/0.1.1
