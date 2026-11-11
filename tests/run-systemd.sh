@@ -15,11 +15,16 @@ docker run -d --rm --name "$name" --privileged --cgroupns=private ${APT_CACHE[@]
 trap 'docker rm -f "$name" >/dev/null 2>&1; remove_images "$tag"' EXIT
 
 uid="$(docker exec "$name" id -u tester)"
-for _ in $(seq 1 60); do
-  [ "$(docker exec "$name" systemctl is-system-running 2>/dev/null)" != starting ] && break
+# Wait until systemd is up. On a slow host, an early answer can be an error.
+for _ in $(seq 1 90); do
+  case "$(docker exec "$name" systemctl is-system-running 2>/dev/null)" in running | degraded) break ;; esac
   sleep 1
 done
-docker exec "$name" loginctl enable-linger tester
+# The login manager can start a moment later than systemd itself.
+for _ in $(seq 1 30); do
+  docker exec "$name" loginctl enable-linger tester && break
+  sleep 1
+done
 for _ in $(seq 1 30); do
   docker exec "$name" test -S "/run/user/${uid}/bus" && break
   sleep 1
