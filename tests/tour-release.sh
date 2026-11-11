@@ -5,9 +5,11 @@
 # tests/run-release-check.sh runs it. pty_run.py must be in the same folder.
 # Usage: tour-release.sh [expected-version]
 set -u
+# The folder of this script, before the cd, so that a relative path works.
+HERE="$(cd "$(dirname "$0")" && pwd)"
 cd "$HOME" || exit 1
 export PATH="$HOME/.local/bin:$PATH"
-PTY="python3 $(dirname "$0")/pty_run.py"
+PTY="python3 ${HERE}/pty_run.py"
 ok=0; bad=0
 pass() { echo "PASS $1"; ok=$((ok+1)); }
 fail() { echo "FAIL $1"; bad=$((bad+1)); }
