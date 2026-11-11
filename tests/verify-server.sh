@@ -148,7 +148,7 @@ for tool in hopen herdr python3; do ln -sf "$(command -v "$tool")" "$nofzf/$tool
 picked="$(python3 "$ROOT/tests/pty_run.py" 6 'hb-all-one\r' env PATH="$nofzf:/usr/bin:/bin" hopen --no-attach 2>&1)"
 contains "$picked" 'Open which list' 'with no fzf, hopen shows a numbered menu'
 contains "$picked" 'Session hb-all-one' 'the numbered menu opens the list with that name'
-contains "$(python3 "$ROOT/tests/pty_run.py" 6 'no-such\r' env PATH="$nofzf:/usr/bin:/bin" hopen --no-attach 2>&1)" 'No list no-such' 'the numbered menu rejects an unknown name'
+contains "$(python3 "$ROOT/tests/pty_run.py" 6 'no-such\r' env PATH="$nofzf:/usr/bin:/bin" hopen --no-attach 2>&1)" 'No item no-such' 'the numbered menu rejects an unknown name'
 contains "$(hopen </dev/null 2>&1; echo "status=$?")" 'status=2' 'with no terminal, hopen with no name prints the usage'
 contains "$(python3 "$ROOT/tests/pty_run.py" 6 'hb-all-one\r' env TERM=dumb hopen --no-attach 2>&1)" 'Open which list' 'with TERM=dumb, hopen shows the numbered menu'
 
@@ -258,6 +258,7 @@ cat >"$HOME/hb-set/hb-set.code-workspace" <<'JSON'
     "hopen.onOpen": { "web": "printf '%s %s' \"$HB_VALUE\" \"$HB_FILE\" > opened.txt" },
     "hopen.env": { "web": { "HB_VALUE": "from-env" } },
     "hopen.envFile": { "web": ".env" },
+    "hopen.tasks": { "web": { "mark": "printf %s \"$HB_VALUE\" > task-ran.txt" } },
     "hopen.tabs": { "web": [ { "name": "logs", "run": "printf %s \"$HB_VALUE\" > tab-ran.txt" }, { "name": "side", "template": "agent" }, { "template": "grid" } ] }
   }
 }
@@ -276,6 +277,14 @@ contains "$(HERDR_SESSION=hb-named herdr pane list | python3 -c 'import json,sys
 before_tabs="$(tabs_of hb-named web)"
 hopen hb-named --no-attach --trust >/dev/null 2>&1
 if [ "$(tabs_of hb-named web)" = "$before_tabs" ]; then pass 'a second run adds no tab'; else fail 'a second run adds no tab'; fi
+
+# hopen --task runs a task of the project in a new pane below the current pane.
+web_pane="$(HERDR_SESSION=hb-named herdr pane list | python3 -c 'import json,sys; print([p["pane_id"] for p in json.load(sys.stdin)["result"]["panes"] if p["cwd"].endswith("/hb-set/web")][0])')"
+task_out="$(cd "$HOME/hb-set/web" && HERDR_SESSION=hb-named HERDR_ENV=1 HERDR_PANE_ID="$web_pane" hopen --task mark --trust 2>&1)"
+contains "$task_out" 'runs in a new pane' 'hopen --task opens a pane for the task'
+sleep 2
+contains "$(cat "$HOME/hb-set/web/task-ran.txt" 2>/dev/null)" 'from-env' 'the task runs in the project folder with the project values'
+contains "$(HERDR_SESSION=hb-named herdr pane list | python3 -c 'import json,sys; print(",".join(p.get("label") or "" for p in json.load(sys.stdin)["result"]["panes"]))')" 'mark' 'the task pane has the name of the task'
 
 # A list runs its commands only after an approval, and again after a change.
 mkdir -p "$HOME/hb-trust/w"

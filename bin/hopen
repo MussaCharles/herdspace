@@ -20,6 +20,7 @@
 #        hopen --apply NAME      Split the current tab with a template.
 #        hopen --convert NAME    Write ~/NAME/herdspace.toml from the VS Code list NAME.
 #        hopen --completion zsh|bash   Print a shell completion script.
+#        hopen --task [NAME]     Run a task of the project of the current folder.
 #
 # A list can run commands (on-open and tab commands) and set environment
 # values. hopen asks before it uses them the first time, and again after the
@@ -47,6 +48,7 @@ GUARD_TABS=""
 # project that hopen opens now. Each new workspace, tab, and pane gets them.
 ENV_ARGS=()
 TRUST_FLAG=0
+TASK_NAME=""
 # FOLDER is set for "hopen <folder>" when the folder has no list of its own.
 FOLDER=""
 
@@ -60,6 +62,7 @@ usage() {
   echo "       hopen --apply NAME"
   echo "       hopen --convert NAME"
   echo "       hopen --completion zsh|bash"
+  echo "       hopen --task [NAME]"
   echo "       hopen --version"
 }
 # short_path PATH shows a path in the home folder as ~/... The ~ is in a
@@ -81,6 +84,14 @@ while [ "$#" -gt 0 ]; do
         --complete) ACTION="complete"; COMPLETE_WHAT="$2" ;;
       esac
       shift 2
+      ;;
+    --task)
+      ACTION="task"
+      shift
+      if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
+        TASK_NAME="$1"
+        shift
+      fi
       ;;
     --no-attach) ATTACH=0; shift ;;
     --trust) TRUST_FLAG=1; shift ;;
@@ -116,10 +127,11 @@ completion_script() {
 #compdef hopen
 _hopen() {
   local -a options
-  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --completion --version --help)
+  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --task --completion --version --help)
   case "${words[CURRENT-1]}" in
     --template | --apply) compadd -- ${(f)"$(hopen --complete templates 2>/dev/null)"}; return ;;
     --convert) compadd -- ${(f)"$(hopen --complete lists 2>/dev/null)"}; return ;;
+    --task) compadd -- ${(f)"$(hopen --complete tasks 2>/dev/null)"}; return ;;
     --file) _files; return ;;
     --completion) compadd zsh bash; return ;;
   esac
@@ -140,11 +152,12 @@ _hopen() {
   case "$prev" in
     --template | --apply) words="$(hopen --complete templates 2>/dev/null)" ;;
     --convert) words="$(hopen --complete lists 2>/dev/null)" ;;
+    --task) words="$(hopen --complete tasks 2>/dev/null)" ;;
     --completion) words=$'zsh\nbash' ;;
     --file) COMPREPLY=($(compgen -f -- "$cur")); return ;;
     *)
       case "$cur" in
-        -*) words=$'--all\n--list\n--templates\n--apply\n--convert\n--file\n--template\n--no-attach\n--trust\n--completion\n--version\n--help' ;;
+        -*) words=$'--all\n--list\n--templates\n--apply\n--convert\n--file\n--template\n--no-attach\n--trust\n--task\n--completion\n--version\n--help' ;;
         */* | .*) COMPREPLY=($(compgen -d -- "$cur")); return ;;
         *) words="$(hopen --complete lists 2>/dev/null)" ;;
       esac
@@ -277,6 +290,7 @@ while (pairs or tabs) and time.time() < end:
 #            T RS label RS tab name RS template RS command
 #            F RS label RS file RS names RS env  (the values of an env file;
 #                                                 it comes before its R or P line)
+#            K RS label RS task name RS command   (a task; it comes after its R or P line)
 #            W RS message                                       (a warning)
 #            env is KEY=VALUE items, separated by the byte 0x1f. An empty
 #            field is "-". No field holds a control character.
@@ -365,8 +379,10 @@ if os.path.basename(path) == "herdspace.toml":
             "tabs": entry.get("tabs", []),
             "env": entry.get("env", {}),
             "env_file": entry.get("env_file"),
+            "tasks": entry.get("tasks", {}),
         })
     parent_open = data.get("on_open", "")
+    parent_tasks = data.get("tasks", {})
     parent_env = data.get("env", {})
     parent_env_file = data.get("env_file")
     parent_template = data.get("parent_template")
@@ -389,6 +405,7 @@ else:
     per_tabs = settings.get("hopen.tabs", {}) or {}
     per_env = settings.get("hopen.env", {}) or {}
     per_env_file = settings.get("hopen.envFile", {}) or {}
+    per_tasks = settings.get("hopen.tasks", {}) or {}
     projects = []
     for folder in data.get("folders", []):
         if not isinstance(folder, dict) or "path" not in folder:
@@ -404,7 +421,9 @@ else:
             "tabs": per_tabs.get(label, []),
             "env": per_env.get(label, {}),
             "env_file": per_env_file.get(label),
+            "tasks": per_tasks.get(label, {}),
         })
+    parent_tasks = per_tasks.get(session, {})
     parent_open = per_open.get(session, "")
     parent_env = per_env.get(session, {})
     parent_env_file = per_env_file.get(session)
@@ -492,11 +511,27 @@ def env_file(label, raw, folder):
     if items:
         emit("F", label, file, ", ".join(names), env=items)
 
+TASK_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]*")
+
+def tasks(label, values):
+    # A task is a name and a command, like a task of tasks.json in VS Code.
+    if not values:
+        return
+    if not isinstance(values, dict):
+        warn(f"{label}: tasks must be a map of names to commands. hopen skips them.")
+        return
+    for name, command in values.items():
+        if not TASK_NAME.fullmatch(str(name)) or not isinstance(command, str) or not clean(command):
+            warn(f"{label}: the task {clean(name)} is not valid. A task is a name of letters, numbers, and . _ : -, and a command.")
+            continue
+        emit("K", label, name, command)
+
 if parent:
     if not clean(session):
         sys.exit("The session name of the list is empty.")
     env_file(clean(session), parent_env_file, base)
     emit("R", session, base, template(parent_template, clean(session)), field(parent_open), env=env_items(clean(session), parent_env))
+    tasks(clean(session), parent_tasks)
 for project in projects:
     full = list_path(project["path"])
     if full is None:
@@ -508,6 +543,7 @@ for project in projects:
         continue
     env_file(label, project["env_file"], full)
     emit("P", label, full, template(project["template"], label), field(project["on_open"]), env=env_items(label, project["env"]))
+    tasks(label, project["tasks"])
     tabs = project["tabs"]
     if not isinstance(tabs, list):
         warn(f"{label}: tabs must be a list. hopen skips them.")
@@ -691,6 +727,7 @@ list_actions() {
     ($1 == "R" || $1 == "P") && $6 != "-" { gsub("\037", ", ", $6); print "    " $2 ": set " $6 }
     $1 == "T" && $5 != "-" { print "    " $2 ", tab " $3 ": run " $5 }
     $1 == "F" { print "    " $2 ": load " $3 " (" $4 ")" }
+    $1 == "K" { print "    " $2 ", task " $3 ": run " $4 }
   ' <<<"$1"
 }
 
@@ -928,6 +965,9 @@ def where(path):
 def env_table(pairs):
     return "{ " + ", ".join(key + " = " + quote(value) for key, value in pairs) + " }"
 
+def task_table(pairs):
+    return "{ " + ", ".join(quote(name) + " = " + quote(command) for name, command in pairs) + " }"
+
 def near(path, folder):
     # A path relative to folder if it is inside folder, else ~/... or absolute.
     relative = os.path.relpath(path, folder)
@@ -958,6 +998,10 @@ for raw in open(items, encoding="utf-8").read().split("\n"):
             parent = entry
         else:
             projects.append(entry)
+    elif kind == "K":
+        owner = projects[-1] if projects else parent
+        if owner is not None and owner["label"] == fields[0]:
+            owner.setdefault("tasks", []).append((fields[1], fields[2]))
     elif kind == "T" and projects and projects[-1]["label"] == fields[0]:
         projects[-1]["tabs"].append({"name": fields[1], "template": fields[2], "run": fields[3]})
 
@@ -973,6 +1017,8 @@ else:
         lines.append("env = " + env_table(parent["env"]))
     if parent["env_file"]:
         lines.append("env_file = " + quote(near(parent["env_file"], target_dir)))
+    if parent.get("tasks"):
+        lines.append("tasks = " + task_table(parent["tasks"]))
     if len(lines) > 2:
         lines.append("")
 for project in projects:
@@ -985,6 +1031,8 @@ for project in projects:
         lines.append("env = " + env_table(project["env"]))
     if project["env_file"]:
         lines.append("env_file = " + quote(near(project["env_file"], project["path"])))
+    if project.get("tasks"):
+        lines.append("tasks = " + task_table(project["tasks"]))
     if project["tabs"]:
         tabs = []
         for tab in project["tabs"]:
@@ -1001,13 +1049,122 @@ PY
   printf '  [info] Wrote %s. hopen now uses it in place of %s.\n' "$(short_path "$target")" "$(short_path "$source")"
 }
 
+# choose PROMPT shows a menu of the lines on stdin, one "key<TAB>text" line for
+# each item, and prints the key that the person chose. It uses fzf if it is
+# installed, else a numbered menu that takes a number or a key. It prints
+# nothing if the person cancels, and it exits 1 for an unknown answer.
+choose() {
+  local prompt="$1" items answer="" name text i=0
+  items="$(cat)"
+  # fzf draws nothing with no TERM, or with TERM=dumb.
+  if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
+    fzf --delimiter '\t' --with-nth 2.. --prompt "${prompt} > " --header 'Esc cancels.' --height 40% --reverse --no-multi <<<"$items" | cut -f1 || true
+    return 0
+  fi
+  while IFS=$'\t' read -r name text; do
+    i=$((i + 1))
+    printf '  %2d) %s\n' "$i" "$text" >&2
+  done <<<"$items"
+  printf '  %s? Type a number or a name: ' "$prompt" >&2
+  # The items came on stdin, so the answer comes from the terminal.
+  IFS= read -r answer </dev/tty || answer=""
+  case "$answer" in
+    "") return 0 ;;
+    *[!0-9]*) name="$(awk -F '\t' -v n="$answer" '$1 == n {print $1; exit}' <<<"$items")" ;;
+    *) name="$(awk -F '\t' -v n="$answer" 'NR == n {print $1; exit}' <<<"$items")" ;;
+  esac
+  [ -n "$name" ] || { printf '  [err]  No item %s.\n' "$answer" >&2; return 1; }
+  printf '%s\n' "$name"
+}
+
+# project_for_dir DIR prints "list file<TAB>label" for the project that holds
+# DIR. The deepest project folder wins, so a project wins over the parent
+# workspace of its list.
+project_for_dir() {
+  local dir="$1" name file
+  find_lists 2>/dev/null | while IFS=$'\t' read -r name file; do
+    read_list "$file" items 2>/dev/null | awk -F '\036' -v f="$file" '($1 == "R" || $1 == "P") { print $3 "\t" f "\t" $2 }'
+  done | awk -F '\t' -v d="$dir" '
+    (d == $1 || index(d, $1 "/") == 1) && length($1) > best { best = length($1); found = $2 "\t" $3 }
+    END { if (found == "") exit 1; print found }'
+}
+
+# env_for ITEMS LABEL sets ENV_ARGS to the environment values of one project:
+# its env values, and the values of its env file that env does not set.
+env_for() {
+  local items="$1" label="$2" envs file_env item key
+  envs="$(awk -F '\036' -v l="$label" '($1 == "R" || $1 == "P") && $2 == l && $6 != "-" { print $6; exit }' <<<"$items")"
+  file_env="$(awk -F '\036' -v l="$label" '$1 == "F" && $2 == l { print $5; exit }' <<<"$items")"
+  ENV_ARGS=()
+  if [ -n "$envs" ]; then
+    while IFS= read -r -d $'\x1f' item; do
+      [ -z "$item" ] || ENV_ARGS+=(--env "$item")
+    done <<<"${envs}"$'\x1f'
+  fi
+  if [ -n "$file_env" ]; then
+    while IFS= read -r -d $'\x1f' item; do
+      key="${item%%=*}"
+      [ -n "$item" ] || continue
+      case $'\x1f'"${envs}"$'\x1f' in *$'\x1f'"${key}="*) continue ;; esac
+      ENV_ARGS+=(--env "$item")
+    done <<<"${file_env}"$'\x1f'
+  fi
+}
+
+# run_task runs a task of the project of the current folder. In Herdr, it runs
+# in a new pane below the current pane. A popup of Herdr has no pane of its
+# own, so there it splits the active pane. Outside Herdr, it runs here.
+run_task() {
+  local dir="${HERDR_ACTIVE_PANE_CWD:-$PWD}" match file label items tasks command actions output pane item
+  match="$(project_for_dir "$dir")" || die "No project of a list holds the folder $(short_path "$dir")."
+  file="${match%%$'\t'*}"
+  label="${match#*$'\t'}"
+  items="$(read_list "$file" items)" || die "Could not read ${file}."
+  tasks="$(awk -F '\036' -v l="$label" '$1 == "K" && $2 == l { print $3 "\t" $4 }' <<<"$items")"
+  [ -n "$tasks" ] || die "The project ${label} has no tasks. Add tasks to $(short_path "$file"). See docs/hopen.md."
+  if [ -z "$TASK_NAME" ]; then
+    if [ -t 0 ] && [ -t 1 ]; then
+      TASK_NAME="$(while IFS=$'\t' read -r item command; do printf '%s\t%-14s %s\n' "$item" "$item" "$command"; done <<<"$tasks" | choose "Run which task")" || exit 1
+      [ -n "$TASK_NAME" ] || exit 0
+    else
+      printf '%s\n' "$tasks"
+      return 0
+    fi
+  fi
+  command="$(awk -F '\t' -v n="$TASK_NAME" '$1 == n { print $2; exit }' <<<"$tasks")"
+  [ -n "$command" ] || die "The project ${label} has no task ${TASK_NAME}. Its tasks: $(cut -f1 <<<"$tasks" | tr '\n' ' ')"
+  actions="$(list_actions "$items")"
+  list_trusted "$file" "$actions" "$(grep $'^F\x1e' <<<"$items" || true)" ||
+    die "hopen runs a task only from an approved list. Run hopen --task in a terminal to approve $(short_path "$file"), or add --trust."
+  env_for "$items" "$label"
+  pane="${HERDR_PANE_ID:-${HERDR_ACTIVE_PANE_ID:-}}"
+  if [ -n "$pane" ]; then
+    output="$(herdr pane split "$pane" --direction down --ratio 0.65 --focus ${ENV_ARGS[@]+"${ENV_ARGS[@]}"})" || die "Could not split the pane."
+    pane="$(json_get "d['result']['pane']['pane_id']" <<<"$output")"
+    herdr pane rename "$pane" "$TASK_NAME" >/dev/null
+    herdr pane run "$pane" "cd $(printf '%q' "$dir") && ${command}" >/dev/null
+    printf '  [info] Task %s runs in a new pane: %s\n' "$TASK_NAME" "$command"
+  else
+    printf '  [info] Task %s: %s\n' "$TASK_NAME" "$command"
+    for item in ${ENV_ARGS[@]+"${ENV_ARGS[@]}"}; do
+      [ "$item" = --env ] || export "${item?}"
+    done
+    cd "$dir" && exec "${SHELL:-/bin/sh}" -c "$command"
+  fi
+}
+
 case "$ACTION" in
   completion) completion_script "$SHELL_NAME"; exit 0 ;;
+  task) run_task; exit 0 ;;
   complete)
     # The completion scripts call this. It prints one name on each line.
     case "$COMPLETE_WHAT" in
       lists) find_lists 2>/dev/null | cut -f1 ;;
       templates) show_templates | tail -n +2 | cut -d ' ' -f1 ;;
+      tasks)
+        match="$(project_for_dir "$PWD")" || exit 0
+        read_list "${match%%$'\t'*}" items 2>/dev/null | awk -F '\036' -v l="${match#*$'\t'}" '$1 == "K" && $2 == l { print $3 }'
+        ;;
     esac
     exit 0
     ;;
@@ -1028,32 +1185,13 @@ if [ "$ACTION" = all ]; then
 fi
 
 # pick_list lets the person choose a list when hopen gets no name in a
-# terminal. It uses fzf if it is installed, else a numbered menu.
+# terminal.
 pick_list() {
-  local lists shown answer="" name file i=0
+  local lists name file
   lists="$(find_lists)"
   [ -n "$lists" ] || die "No project lists. Create ~/work/herdspace.toml, or run hopen . in a folder."
-  shown="$(while IFS=$'\t' read -r name file; do printf '%s\t%s\n' "$name" "$(short_path "$file")"; done <<<"$lists")"
-  # fzf draws nothing with no TERM, or with TERM=dumb.
-  if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
-    SESSION="$(fzf --delimiter '\t' --prompt 'hopen > ' --header 'Choose a list. Esc cancels.' --height 40% --reverse --no-multi <<<"$shown" | cut -f1)" || true
-  else
-    while IFS=$'\t' read -r name file; do
-      i=$((i + 1))
-      printf '  %2d) %-22s %s\n' "$i" "$name" "$file"
-    done <<<"$shown"
-    printf '  Open which list? Type a number or a name: '
-    IFS= read -r answer || answer=""
-    case "$answer" in
-      "") ;;
-      *[!0-9]*) SESSION="$(awk -F '\t' -v n="$answer" '$1 == n {print $1; exit}' <<<"$shown")" ;;
-      *) SESSION="$(awk -F '\t' -v n="$answer" 'NR == n {print $1; exit}' <<<"$shown")" ;;
-    esac
-  fi
-  if [ -z "$SESSION" ]; then
-    [ -z "$answer" ] || die "No list ${answer}."
-    exit 0
-  fi
+  SESSION="$(while IFS=$'\t' read -r name file; do printf '%s\t%-22s %s\n' "$name" "$name" "$(short_path "$file")"; done <<<"$lists" | choose "Open which list")" || exit 1
+  [ -n "$SESSION" ] || exit 0
 }
 
 if [ -z "$SESSION" ] && [ -t 0 ] && [ -t 1 ]; then

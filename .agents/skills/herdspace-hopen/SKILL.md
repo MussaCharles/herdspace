@@ -21,6 +21,8 @@ description: Change the hopen command or its pane templates in the herdspace rep
 
 An env file gives an `F` line just before its `R` or `P` line. An env file cannot set a name in `RISKY` (names that make a program run code). The approval question shows its values, but hides a value whose name matches `SECRET`. `file_hash` adds the values to the checksum, so a change to them asks again. A value in `env` wins over the same name in the file.
 
+A task gives a `K` line after its `R` or `P` line. `hopen --task` finds the project with `project_for_dir` (the deepest project folder that holds the current folder), checks the approval of the list, and splits `HERDR_PANE_ID`, or `HERDR_ACTIVE_PANE_ID` in a popup. `choose` is the menu for lists and tasks: fzf, or a numbered menu.
+
 `hopen --completion zsh|bash` prints a completion script. The script calls `hopen --complete lists|templates` for the names. The bash script must work with bash 3.2, so it uses no `mapfile` and no `compopt`. `tests/test-hopen-list.sh` runs it.
 
 `hopen` never closes a workspace, a tab, or a pane.

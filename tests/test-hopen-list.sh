@@ -5,6 +5,8 @@
 #
 # Usage: tests/test-hopen-list.sh
 cd "$(dirname "$0")/.." || exit 1
+ROOT="$PWD"
+bin_hopen() { "$ROOT/bin/hopen" "$@"; }
 failures=0
 pass() { echo "PASS $1"; }
 fail() { echo "FAIL $1"; failures=$((failures + 1)); }
@@ -159,6 +161,29 @@ else
   pass 'herdspace.toml checks skipped: Python is older than 3.11'
 fi
 
+# Tasks, like tasks.json in VS Code. The $ in the commands is text.
+thome="$tmp/task-home"
+mkdir -p "$thome/tw/api/sub"
+# shellcheck disable=SC2016
+printf '{ "folders": [ { "name": "api", "path": "./api" } ], "settings": { "hopen.tasks": { "api": { "test": "echo ran-test-$HB_T", "bad name": "x" }, "tw": { "all": "echo parent" } }, "hopen.env": { "api": { "HB_T": "with-env" } } } }\n' >"$thome/tw/tw.code-workspace"
+titems="$(read_list "$thome/tw/tw.code-workspace" items)"
+contains "$titems" "K${RS}api${RS}test${RS}echo ran-test-\$HB_T" 'a project task is read'
+contains "$titems" "K${RS}tw${RS}all${RS}echo parent" 'a task of the parent workspace is read'
+contains "$titems" 'the task bad name is not valid' 'a task name with a space is refused'
+# shellcheck disable=SC2016
+contains "$(list_actions "$titems")" 'api, task test: run echo ran-test-$HB_T' 'the approval question shows each task'
+contains "$(cd "$thome/tw/api/sub" && HOME="$thome" bin_hopen --task </dev/null)" 'echo ran-test' 'hopen --task with no terminal lists the tasks of the project of the folder'
+contains "$(cd "$thome/tw/api/sub" && HOME="$thome" bin_hopen --task test </dev/null 2>&1)" 'only from an approved list' 'a task of a list that is not approved does not run'
+contains "$(cd "$thome/tw/api/sub" && HOME="$thome" bin_hopen --task test --trust </dev/null 2>&1)" 'ran-test-with-env' 'a task runs in the folder with the values of the project'
+contains "$(cd "$thome/tw/api" && HOME="$thome" python3 "$ROOT/tests/pty_run.py" 4 '1\r' env TERM=dumb "$ROOT/bin/hopen" --task --trust 2>&1)" 'ran-test-with-env' 'the task menu runs the chosen task'
+contains "$(cd "$thome/tw" && HOME="$thome" bin_hopen --task all </dev/null 2>&1)" 'parent' 'the folder of the list runs the tasks of the parent workspace'
+contains "$(cd "$thome/tw/api" && HOME="$thome" bin_hopen --task nope </dev/null 2>&1)" 'has no task nope' 'an unknown task gives the names of the tasks'
+contains "$(cd "$tmp" && HOME="$thome" bin_hopen --task test </dev/null 2>&1)" 'No project of a list' 'a folder outside each project has no tasks'
+HOME="$thome" bin_hopen --convert tw >/dev/null 2>&1
+# shellcheck disable=SC2016
+contains "$(cat "$thome/tw/herdspace.toml" 2>/dev/null)" 'tasks = { "test" = "echo ran-test-$HB_T" }' 'hopen --convert keeps the tasks'
+contains "$(cat "$thome/tw/herdspace.toml" 2>/dev/null)" 'tasks = { "all" = "echo parent" }' 'hopen --convert keeps the tasks of the parent workspace'
+
 # Shell completion.
 complete_bash() {
   HOME="$home" HOPEN_TEMPLATES=config/templates PATH="$PWD/bin:$PATH" bash -c 'eval "$(hopen --completion bash)"; COMP_WORDS=("$@"); COMP_CWORD=$(($# - 1)); _hopen; echo "${COMPREPLY[*]}"' _ "$@"
@@ -167,6 +192,7 @@ contains "$(complete_bash hopen --template c)" 'code' 'bash completion offers te
 contains "$(complete_bash hopen --no)" '--no-attach' 'bash completion offers options'
 contains "$(complete_bash hopen re)" 'renamed' 'bash completion offers list names'
 contains "$(complete_bash hopen ./bi)" './bin' 'bash completion offers folders for a path'
+contains "$(cd "$thome/tw/api" && HOME="$thome" HOPEN_TEMPLATES="$ROOT/config/templates" PATH="$ROOT/bin:$PATH" bash -c 'eval "$(hopen --completion bash)"; COMP_WORDS=(hopen --task t); COMP_CWORD=2; _hopen; echo "${COMPREPLY[*]}"')" 'test' 'bash completion offers the task names'
 if command -v zsh >/dev/null; then
   if bin/hopen --completion zsh | zsh -n; then pass 'the zsh completion script has no syntax error'; else fail 'the zsh completion script has no syntax error'; fi
 fi

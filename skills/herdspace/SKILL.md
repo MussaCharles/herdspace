@@ -22,6 +22,7 @@ If `hopen --version` fails, herdspace is not installed. Follow the agent install
 | See every list and its state | `hopen --list` |
 | Open new projects with a template | `hopen work --template code --no-attach` |
 | See every template | `hopen --templates` |
+| See the tasks of the project of the current folder | `hopen --task </dev/null` |
 
 When you run `hopen` yourself, add `--no-attach`. You cannot use the session. Tell the person to attach in their own terminal:
 
