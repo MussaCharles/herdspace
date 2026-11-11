@@ -33,6 +33,8 @@ jobs:
         run: tests/test-hopen-list.sh
       - name: Release build and install
         run: tests/test-install.sh
+      - name: Neovim plugin step
+        run: tests/test-nvim-plugins.sh
 
   linux:
     name: Linux server (${{ matrix.runner }})

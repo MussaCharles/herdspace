@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- After a failed download of the Neovim plugins, the setup still reported the step as done. The step now tries again, warns, and tries again on the next run.
+
 ### Changed
 
 - The herdspace agent skill knows the tasks, `hopen --ports`, and the commands that only a person runs: `ff`, `fif`, and the command palette.
