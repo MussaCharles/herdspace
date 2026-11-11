@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-12
+
 ### Added
 
 - Tasks, like `tasks.json` in VS Code: `tasks` in `herdspace.toml`, or `hopen.tasks` in a VS Code workspace file, names the commands of a project. `hopen --task test` runs one in a new Herdr pane, and `hopen --task` shows a menu.
@@ -77,7 +79,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/MussaCharles/herdspace/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/MussaCharles/herdspace/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/MussaCharles/herdspace/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/MussaCharles/herdspace/compare/0.1.1...0.2.0
