@@ -40,6 +40,10 @@ The manifest at `~/.local/share/herdspace/manifest.tsv` keeps the checksum of ea
 
 The role goes to `~/.config/herdspace/env.zsh` and to the `~/.zprofile` block. For `both`, `bootstrap.sh` sets `HS_ROLE=both`, so that the server script and the client script write the same role. Do not run `server` and then `client` on one machine. Each one undoes a part of the other.
 
+## Keys
+
+`bootstrap/lib/client.sh` keeps the key choice: `herdspace` (the default) or `terminal`. `--keep-terminal-keys` and `--use-herdspace-keys` change it, and `load_keys` saves it in `~/.config/herdspace/keys`, so that a later run keeps it. With `terminal`, `install_ghostty_config` removes the lines between `# herdspace keys: start` and `# herdspace keys: end` from the Ghostty file, and the macOS client gives the `Ctrl` arrow keys back to Mission Control. If you add a key, put it between the marks, and add it to `docs/keyboard-shortcuts.md`.
+
 ## Add a tool or a file
 
 1. Decide where it belongs: `bootstrap/lib/server.sh` for every server, one script in `bootstrap/platforms/` for one system, or `config/` for a configuration file.

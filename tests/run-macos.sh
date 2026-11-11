@@ -4,11 +4,11 @@
 # commands that change the system, so the real account does not change.
 #
 # The test needs Homebrew with the tools installed.
-# Usage: tests/run-macos.sh [server|client|both]...   Default: server client both
+# Usage: tests/run-macos.sh [server|client|keys|both]...   Default: server client keys both
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 [ "$(uname -s)" = Darwin ] || { echo 'This test runs only on macOS.'; exit 1; }
-[ "$#" -gt 0 ] || set -- server client both
+[ "$#" -gt 0 ] || set -- server client keys both
 
 TEST_TERMINFO="${HOME}/.terminfo"
 
@@ -105,6 +105,20 @@ for target in "$@"; do
       run "$ROOT/tests/test-idempotent.sh" bootstrap.sh "${TEST_HOME}/home/.config/ghostty/config.ghostty" client --server example-server || status=1
       out="$(run zsh -i -c 'print -r -- CLIENT_OK' </dev/null 2>&1)"
       case "$out" in *CLIENT_OK*) echo 'PASS client shell starts' ;; *) echo "FAIL client shell starts: ${out:0:200}"; status=1 ;; esac
+      ;;
+    keys)
+      # --keep-terminal-keys keeps the keys of Ghostty and macOS. A later run
+      # with no key option keeps the choice. --use-herdspace-keys goes back.
+      cfg="${TEST_HOME}/home/.config/ghostty/config.ghostty"
+      : >"$CALLS"
+      run "$ROOT/bootstrap.sh" client --keep-terminal-keys --server example-server >/dev/null || status=1
+      if grep -q 'unbind\|macos-option-as-alt' "$cfg"; then echo 'FAIL keys: terminal keys in Ghostty'; status=1; else echo 'PASS keys: terminal keys in Ghostty'; fi
+      grep -q '^terminal$' "${TEST_HOME}/home/.config/herdspace/keys" && echo 'PASS keys: the choice is saved' || { echo 'FAIL keys: the choice is saved'; status=1; }
+      [ "$(grep -c 'symbolichotkeys.*<true/>' "$CALLS")" = 4 ] && echo 'PASS keys: Mission Control gets its keys back' || { echo 'FAIL keys: Mission Control gets its keys back'; status=1; }
+      if run "$ROOT/bootstrap.sh" client --check --server example-server >/dev/null && ! grep -q unbind "$cfg"; then echo 'PASS keys: a later run keeps the choice'; else echo 'FAIL keys: a later run keeps the choice'; status=1; fi
+      run "$ROOT/bootstrap.sh" client --use-herdspace-keys --server example-server >/dev/null || status=1
+      cmp -s "$ROOT/config/ghostty/config.ghostty" "$cfg" && echo 'PASS keys: herdspace keys again' || { echo 'FAIL keys: herdspace keys again'; status=1; }
+      [ "$(grep -c 'symbolichotkeys.*<false/>' "$CALLS")" = 4 ] && echo 'PASS keys: Mission Control releases the keys again' || { echo 'FAIL keys: Mission Control releases the keys again'; status=1; }
       ;;
     both)
       # One machine that is a server and a client. A check after the run must

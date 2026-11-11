@@ -79,7 +79,7 @@ Show the output to the person, and tell them what a run changes:
 - A line with `[todo]` is a part that the setup adds.
 - A line with `[diff]` is a file that is different from the herdspace version. Ask the person if the setup can replace these files. The setup keeps a backup of each file that it replaces.
 - On Linux, the setup makes zsh the login shell.
-- On a macOS client or `both`, the setup changes four Mission Control shortcuts. Ask if they want to keep them. If they do, add `--skip-mission-control`.
+- On a client or `both`, the setup changes some keys of Ghostty and macOS, so that Herdr and Neovim use the keys of a code editor. On a Mac, this includes four Mission Control shortcuts and the Option key. Ask the person which keys they want. To keep every key, add `--keep-terminal-keys`. To keep only the Mission Control shortcuts, add `--skip-mission-control`. The list of keys is at `https://github.com/MussaCharles/herdspace/blob/main/docs/keyboard-shortcuts.md`.
 
 Wait until the person agrees.
 

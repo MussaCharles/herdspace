@@ -111,6 +111,8 @@ The first word is `server`, `client`, or `both`. The script finds the system. Ea
 | `--server <name>` | Client: the SSH name of a server, or `user@address`. Repeat it for each server. |
 | `--no-ghostty` | Linux client: use another terminal. WSL always uses this. |
 | `--skip-mission-control` | macOS client: keep the Mission Control shortcuts. |
+| `--keep-terminal-keys` | Client: keep the keys of Ghostty and macOS. The setup saves the choice. See the [keyboard shortcuts guide](keyboard-shortcuts.md). |
+| `--use-herdspace-keys` | Client: use the editor keys of herdspace again. This is the default. |
 | `-h`, `--help` | Show every option. |
 
 `bootstrap.sh` runs one script from the folder `bootstrap/platforms/`, one for each role and system.
@@ -272,7 +274,7 @@ flowchart LR
   c --> d["Free the keys<br/>that Herdr uses"]:::step
 ```
 
-Without the terminal description, programs on the server can show errors. Herdr uses the `Ctrl` arrow keys, so the script turns off those Mission Control shortcuts. To keep the macOS shortcuts, add `--skip-mission-control`.
+Without the terminal description, programs on the server can show errors. Herdr uses the `Ctrl` arrow keys, so the script turns off those Mission Control shortcuts. To keep the macOS shortcuts, add `--skip-mission-control`. To keep every key of Ghostty and macOS, add `--keep-terminal-keys`. The [keyboard shortcuts guide](keyboard-shortcuts.md) lists each key that changes.
 
 Press `Cmd+Shift+,` in Ghostty to reload the configuration. After a change to `background-opacity`, quit Ghostty and open it again.
 
@@ -312,6 +314,7 @@ To start Herdr in a terminal on this machine, open Ghostty and run `herdr`. You 
 
 ## Effects to know about
 
+- The client setup changes some keys of Ghostty and macOS, so that Herdr and Neovim use the keys of a code editor. The [keyboard shortcuts guide](keyboard-shortcuts.md) lists each key, and it explains `--keep-terminal-keys`, which keeps your keys.
 - Ghostty cannot limit a key to one program. The keys that Herdr uses do nothing in a Ghostty window that has no Herdr.
 - On a Mac, the Option key sends Alt in Ghostty, so it does not type special characters there.
 - The script manages `~/.zshrc`. Put your own lines in `~/.zshrc.local`, so that they stay when `~/.zshrc` changes.

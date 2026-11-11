@@ -19,3 +19,47 @@ copy_terminfo() {
   local server="$1"
   infocmp -x xterm-ghostty | ssh -- "$server" tic -x - 2>/dev/null || warn "Could not copy the terminal description to ${server}."
 }
+
+# The keys. KEYS is "herdspace" (the default) or "terminal". With "herdspace",
+# Ghostty lets the editor keys reach Herdr and Neovim, and on a Mac, Option
+# sends Alt and the Ctrl arrow keys leave Mission Control. With "terminal",
+# Ghostty and macOS keep their own keys. The choice stays in KEYS_FILE, so
+# that a later run keeps it. docs/keyboard-shortcuts.md lists each key.
+KEYS_FILE="${HOME}/.config/herdspace/keys"
+KEYS_FLAG=""
+
+# keys_flag reads one key option. It returns 1 if the option is something else.
+keys_flag() {
+  case "$1" in
+    --keep-terminal-keys) KEYS_FLAG="terminal" ;;
+    --use-herdspace-keys) KEYS_FLAG="herdspace" ;;
+    *) return 1 ;;
+  esac
+}
+
+# load_keys sets KEYS from the option, then from KEYS_FILE, then the default.
+load_keys() {
+  KEYS="${KEYS_FLAG:-$(cat "$KEYS_FILE" 2>/dev/null || true)}"
+  case "$KEYS" in
+    herdspace | terminal) ;;
+    *) KEYS="herdspace" ;;
+  esac
+  if [ "$MODE" != "check" ] && [ "$(cat "$KEYS_FILE" 2>/dev/null || true)" != "$KEYS" ]; then
+    mkdir -p "$(dirname "$KEYS_FILE")"
+    printf '%s\n' "$KEYS" >"$KEYS_FILE"
+  fi
+  info "Keys: ${KEYS}. See docs/keyboard-shortcuts.md."
+}
+
+# install_ghostty_config SRC installs the Ghostty configuration for KEYS.
+install_ghostty_config() {
+  local src="$1" tmp
+  if [ "$KEYS" = "herdspace" ]; then
+    install_file "$src" "${HOME}/.config/ghostty/config.ghostty"
+    return 0
+  fi
+  tmp="$(mktemp)"
+  sed '/^# herdspace keys: start/,/^# herdspace keys: end/d' "$src" >"$tmp"
+  install_file "$tmp" "${HOME}/.config/ghostty/config.ghostty"
+  rm -f "$tmp"
+}

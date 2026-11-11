@@ -1,6 +1,6 @@
 # Herdr cheat sheet
 
-Scope: the commands and keys for daily use of Herdr, with the tools around it. The install steps are in the [setup guide](setup.md).
+Scope: the commands and keys for daily use of Herdr, with the tools around it. The install steps are in the [setup guide](setup.md). The [keyboard shortcuts guide](keyboard-shortcuts.md) explains which keys the setup changes.
 
 ## Words
 

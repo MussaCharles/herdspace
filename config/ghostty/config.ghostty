@@ -10,6 +10,7 @@ macos-titlebar-style = tabs
 window-width = 80
 window-height = 25
 
+# herdspace keys: start. --keep-terminal-keys removes the lines up to the end mark.
 # Let these Cmd keys reach Herdr and Neovim. Ghostty cannot limit a key to one
 # program, so these keys do nothing in a Ghostty window with no Herdr.
 keybind = super+t=unbind
@@ -18,3 +19,4 @@ keybind = super+k=unbind
 keybind = super+e=unbind
 keybind = super+shift+g=unbind
 macos-option-as-alt = true
+# herdspace keys: end

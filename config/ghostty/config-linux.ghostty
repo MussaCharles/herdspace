@@ -5,9 +5,11 @@ background-opacity = 0.905
 window-width = 120
 window-height = 34
 
+# herdspace keys: start. --keep-terminal-keys removes the lines up to the end mark.
 # Let these keys reach Herdr and Neovim. Ghostty cannot limit a key to one
 # program, so these keys do nothing in a Ghostty window with no Herdr.
 keybind = ctrl+shift+t=unbind
 keybind = ctrl+shift+w=unbind
 keybind = ctrl+shift+f=unbind
 keybind = ctrl+shift+e=unbind
+# herdspace keys: end

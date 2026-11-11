@@ -26,6 +26,8 @@
 #                         for each server.
 #   --no-ghostty          Linux: use another terminal. WSL always uses this.
 #   --skip-mission-control  macOS: keep the Mission Control shortcuts.
+#   --keep-terminal-keys  Keep the keys of Ghostty and macOS. The choice stays.
+#   --use-herdspace-keys  Use the editor keys of herdspace again (the default).
 #
 # both runs the server setup and then the client setup on this machine. It
 # takes the options of both, and --server is not necessary.
@@ -43,7 +45,7 @@ PASS=()
 
 die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
 info() { printf '  [info] %s\n' "$*"; }
-usage() { sed -n '2,34p' "${BASH_SOURCE[0]}" 2>/dev/null | sed 's/^# \{0,1\}//' || echo "Usage: bootstrap.sh server|client|both [options]"; }
+usage() { sed -n '2,36p' "${BASH_SOURCE[0]}" 2>/dev/null | sed 's/^# \{0,1\}//' || echo "Usage: bootstrap.sh server|client|both [options]"; }
 
 ARGS=("$@")
 i=0
@@ -174,7 +176,7 @@ while [ "$j" -lt "${#PASS[@]}" ]; do
   arg="${PASS[$j]}"
   case "$arg" in
     --skip-nvim-tools | --skip-login-service) PASS_SERVER+=("$arg") ;;
-    --no-ghostty | --skip-mission-control) PASS_CLIENT+=("$arg") ;;
+    --no-ghostty | --skip-mission-control | --keep-terminal-keys | --use-herdspace-keys) PASS_CLIENT+=("$arg") ;;
     --server)
       j=$((j + 1))
       PASS_CLIENT+=("$arg" "${PASS[$j]}")

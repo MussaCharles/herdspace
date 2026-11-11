@@ -6,11 +6,14 @@
 # are not done.
 #
 # Usage: ./bootstrap.sh client [options] [--server HOST]... [--skip-mission-control]
+#        [--keep-terminal-keys | --use-herdspace-keys]
 #
 # With no option, the script asks about each file that you changed.
 #   --check          Report what is done, missing, or different. Change nothing.
 #   --keep-existing  Add what is missing, and change no existing file.
 #   --replace-all    Use the repository version of every file, with backups.
+#   --keep-terminal-keys  Keep the keys of Ghostty and macOS. The choice stays.
+#   --use-herdspace-keys  Use the editor keys of herdspace again (the default).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -31,7 +34,7 @@ source "${REPO_ROOT}/bootstrap/lib/client.sh"
 source "${REPO_ROOT}/tools/versions.env"
 
 while [ "$#" -gt 0 ]; do
-  if apply_mode_flag "$1"; then
+  if apply_mode_flag "$1" || keys_flag "$1"; then
     shift
     continue
   fi
@@ -58,30 +61,43 @@ install_formulas() { brew_install $FORMULAS; }
 ghostty_ready() { [ -d /Applications/Ghostty.app ] || { have brew && brew list --cask ghostty >/dev/null 2>&1; }; }
 install_ghostty() { brew install --cask ghostty; }
 
-# release_hotkey turns off one macOS shortcut. The key code is the arrow key.
-release_hotkey() {
-  local id="$1" key="$2"
+# set_hotkey turns one macOS shortcut on (true) or off (false). The key code is
+# the arrow key, and 8650752 is the Ctrl key.
+set_hotkey() {
+  local id="$1" key="$2" enabled="$3"
   defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$id" \
-    "<dict><key>enabled</key><false/><key>value</key><dict><key>type</key><string>standard</string><key>parameters</key><array><integer>65535</integer><integer>${key}</integer><integer>8650752</integer></array></dict></dict>"
+    "<dict><key>enabled</key><${enabled}/><key>value</key><dict><key>type</key><string>standard</string><key>parameters</key><array><integer>65535</integer><integer>${key}</integer><integer>8650752</integer></array></dict></dict>"
 }
 
+# With the herdspace keys, the Ctrl arrow keys leave Mission Control. With the
+# terminal keys, Mission Control gets them back if this script took them.
 mission_control_ready() {
   [ "$SKIP_MISSION_CONTROL" -eq 1 ] && return 0
-  [ -f "${STATE_DIR}/done/mission-control" ]
+  if [ "$KEYS" = "terminal" ]; then
+    [ ! -f "${STATE_DIR}/done/mission-control" ]
+  else
+    [ -f "${STATE_DIR}/done/mission-control" ]
+  fi
 }
 
-release_mission_control() {
+set_mission_control() {
+  local enabled="false"
+  [ "$KEYS" = "terminal" ] && enabled="true"
   # 32 Mission Control, 33 Application windows, 79 and 81 move one space.
-  release_hotkey 32 126
-  release_hotkey 33 125
-  release_hotkey 79 123
-  release_hotkey 81 124
+  set_hotkey 32 126 "$enabled"
+  set_hotkey 33 125 "$enabled"
+  set_hotkey 79 123 "$enabled"
+  set_hotkey 81 124 "$enabled"
   if [ -x "$ACTIVATE_SETTINGS" ]; then
     "$ACTIVATE_SETTINGS" -u >/dev/null 2>&1 || true
   fi
   mkdir -p "${STATE_DIR}/done"
-  touch "${STATE_DIR}/done/mission-control"
-  info "If a Ctrl arrow key still moves a space, log out and log in."
+  if [ "$enabled" = "true" ]; then
+    rm -f "${STATE_DIR}/done/mission-control"
+  else
+    touch "${STATE_DIR}/done/mission-control"
+  fi
+  info "If a Ctrl arrow key does not do what you expect, log out and log in."
 }
 
 step "Checking this machine"
@@ -90,11 +106,12 @@ run_part "Homebrew packages" formulas_ready install_formulas
 run_part "Ghostty" ghostty_ready install_ghostty
 setup_shell client
 setup_zprofile client
-install_file "${REPO_ROOT}/config/ghostty/config.ghostty" "${HOME}/.config/ghostty/config.ghostty"
+load_keys
+install_ghostty_config "${REPO_ROOT}/config/ghostty/config.ghostty"
 if [ "${#SERVERS[@]}" -gt 0 ]; then
   for server in "${SERVERS[@]}"; do
     run_part "Terminal description on ${server}" terminfo_ready copy_terminfo "$server"
   done
 fi
-run_part "Mission Control shortcuts" mission_control_ready release_mission_control
+run_part "Mission Control shortcuts" mission_control_ready set_mission_control
 finish_run "Open a new Ghostty window. Press Cmd+Shift+, to reload the configuration."

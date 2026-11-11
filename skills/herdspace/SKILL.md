@@ -49,7 +49,7 @@ On a server machine, a client machine, or one machine as both, `--check` reports
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server --check
 ```
 
-Use `client --server <name>` or `both` in place of `server`, for the role of the machine. To update, run the same command with no `--check`. Show the person the output of `--check` first, and ask before the run.
+Use `client --server <name>` or `both` in place of `server`, for the role of the machine. If the person does not want the editor keys of herdspace, add `--keep-terminal-keys` to a client or `both` run. The setup saves the choice. To update, run the same command with no `--check`. Show the person the output of `--check` first, and ask before the run.
 
 To update only `hopen`:
 
