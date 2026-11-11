@@ -189,6 +189,7 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 - [Updating](docs/updating.md): update the tools, add something new, and make a release.
 - [Testing](docs/testing.md): the tests, and how to run them.
 - [CI](docs/ci.md): the tests that GitHub Actions runs for each pull request and each release.
+- [Repository settings](docs/repository-settings.md): the GitHub settings of this repository, and the reason for each one.
 
 ## Credits
 

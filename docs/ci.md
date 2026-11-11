@@ -68,6 +68,10 @@ These rules follow [Secure use of GitHub Actions](https://docs.github.com/en/act
 - A value from an event goes to a step through `env`, not inside the script text.
 - The workflows use no secrets and no self-hosted runner.
 
+## Required checks
+
+Each CI job is a required check for a merge to `main`. The [repository settings](repository-settings.md) list the checks. If you rename a job, change the name in `tools/repo-settings.sh` in the same pull request.
+
 ## Limits
 
 | Limit | Value |
