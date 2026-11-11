@@ -94,6 +94,7 @@ hopen .
 | `hopen --apply grid` | Split the current tab with a template. |
 | `hopen --convert work` | Write `~/work/herdspace.toml` from the VS Code workspace file `work`. It never replaces a file. |
 | `hopen --completion zsh` | Print the shell completion script for zsh or bash. See [Shell completion](#shell-completion). |
+| `hopen --task test` | Run the task `test` of the project of the current folder. With no name, choose a task from a menu. See [Tasks](#tasks). |
 | `hopen --version` | Show the installed release. |
 
 ## Settings
@@ -111,6 +112,7 @@ template = "code"
 on_open = "npm install"
 env = { PORT = "3000" }
 env_file = ".env"
+tasks = { test = "npm test", dev = "npm run dev" }
 tabs = [{ name = "logs", run = "tail -f log/dev.log" }]
 
 [[project]]
@@ -130,9 +132,31 @@ path = "~/code/api"
 | `on_open` | A command. It runs one time, when `hopen` creates the workspace, before the template programs start. |
 | `env` | Environment values. Each workspace, tab, and pane that `hopen` creates for the project gets them. |
 | `env_file` | A `.env` file with more environment values. A relative path starts at the folder of the project, or of the list at the top. A value in `env` wins over the same name in the file. |
+| `tasks` | Named commands that you run when you want, with `hopen --task`. See [Tasks](#tasks). At the top, the tasks of the parent workspace. |
 | `tabs` | More tabs. Each tab has a `name`, and an optional `template` and `run` command. |
 
 A `.env` file has one `KEY=VALUE` on each line. `hopen` skips empty lines and lines that start with `#`. It accepts `export ` in front, and quotes around a value. An env file cannot set a name that can make a program run code, for example `PATH`, `LD_PRELOAD`, `NODE_OPTIONS`, or `PROMPT_COMMAND`. Put such a value in `env`. `on_open`, `env`, `env_file`, and `tabs` apply when `hopen` creates a workspace. A workspace that exists does not change. A setting with a wrong value gives a warning, and the other projects still open. `on_open` and `tabs` run commands, and `env` sets values. See [Commands and values from a list](#commands-and-values-from-a-list).
+
+## Tasks
+
+A task is a named command of a project, such as `test` or `dev`, like a task of `tasks.json` in VS Code. Add the tasks to a project:
+
+```toml
+[[project]]
+name = "website"
+path = "~/code/website"
+tasks = { test = "npm test", dev = "npm run dev" }
+```
+
+In a folder of the project, run a task:
+
+```bash
+hopen --task test
+```
+
+`hopen` finds the project that holds the current folder. In Herdr, the task runs in a new pane below the current pane, and the pane has the name of the task. Outside Herdr, the task runs in the current terminal. The task gets the environment values of the project, and it runs in the folder where you started it. With no name, `hopen --task` shows a menu of the tasks. Tab completes the task names.
+
+A task is a command from the list, so it needs the same approval as `on_open`. See [Commands and values from a list](#commands-and-values-from-a-list).
 
 ## Use a VS Code workspace file
 
@@ -149,6 +173,7 @@ If you use VS Code, you can keep one list for VS Code and Herdr. `hopen` reads a
     "hopen.templates": { "website": "code" },
     "hopen.onOpen": { "website": "npm install" },
     "hopen.env": { "website": { "PORT": "3000" } },
+    "hopen.tasks": { "website": { "test": "npm test" } },
     "hopen.tabs": { "website": [ { "name": "logs", "run": "tail -f log/dev.log" } ] }
   }
 }
@@ -163,6 +188,7 @@ If you use VS Code, you can keep one list for VS Code and Herdr. `hopen` reads a
 | `hopen.onOpen` | `on_open` |
 | `hopen.env` | `env` |
 | `hopen.envFile` | `env_file` |
+| `hopen.tasks` | `tasks` |
 | `hopen.tabs` | `tabs` |
 
 A setting for one folder uses the name of the folder. A setting for the parent workspace uses the name of the session. A VS Code workspace file also works with a Python 3 that is older than 3.11.

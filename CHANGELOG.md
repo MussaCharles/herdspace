@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- Tasks, like `tasks.json` in VS Code: `tasks` in `herdspace.toml`, or `hopen.tasks` in a VS Code workspace file, names the commands of a project. `hopen --task test` runs one in a new Herdr pane, and `hopen --task` shows a menu.
+
 ## [0.4.0] - 2026-11-11
 
 ### Added
