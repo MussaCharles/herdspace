@@ -1012,7 +1012,8 @@ pick_list() {
   lists="$(find_lists)"
   [ -n "$lists" ] || die "No project lists. Create ~/work/herdspace.toml, or run hopen . in a folder."
   shown="$(while IFS=$'\t' read -r name file; do printf '%s\t%s\n' "$name" "$(short_path "$file")"; done <<<"$lists")"
-  if command -v fzf >/dev/null 2>&1; then
+  # fzf draws nothing with no TERM, or with TERM=dumb.
+  if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
     SESSION="$(fzf --delimiter '\t' --prompt 'hopen > ' --header 'Choose a list. Esc cancels.' --height 40% --reverse --no-multi <<<"$shown" | cut -f1)" || true
   else
     while IFS=$'\t' read -r name file; do
