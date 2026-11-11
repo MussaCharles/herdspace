@@ -184,8 +184,19 @@ HOME="$thome" bin_hopen --convert tw >/dev/null 2>&1
 contains "$(cat "$thome/tw/herdspace.toml" 2>/dev/null)" 'tasks = { "test" = "echo ran-test-$HB_T" }' 'hopen --convert keeps the tasks'
 contains "$(cat "$thome/tw/herdspace.toml" 2>/dev/null)" 'tasks = { "all" = "echo parent" }' 'hopen --convert keeps the tasks of the parent workspace'
 
-# --find and --grep need a terminal.
-contains "$(bin_hopen --grep x </dev/null 2>&1)" 'needs a terminal' 'hopen --grep with no terminal stops with a message'
+# --find and --grep need rg and fzf, and a terminal. Stub programs stand in
+# for rg and fzf, so that the test does not depend on the tools of the machine.
+fakebin="$tmp/fakebin"
+mkdir -p "$fakebin"
+printf '#!/bin/sh\nexit 0\n' >"$fakebin/rg"
+cp "$fakebin/rg" "$fakebin/fzf"
+chmod 755 "$fakebin/rg" "$fakebin/fzf"
+contains "$(PATH="$fakebin:$PATH" bin_hopen --grep x </dev/null 2>&1)" 'needs a terminal' 'hopen --grep with no terminal stops with a message'
+contains "$(PATH="$fakebin:$PATH" bin_hopen --find </dev/null 2>&1)" 'needs a terminal' 'hopen --find with no terminal stops with a message'
+rm "$fakebin/rg"
+if ! PATH=/usr/bin:/bin command -v rg >/dev/null; then
+  contains "$(PATH="$fakebin:/usr/bin:/bin" bin_hopen --grep x </dev/null 2>&1)" 'needs rg' 'hopen --grep with no rg names the missing tool'
+fi
 
 # Shell completion.
 complete_bash() {
