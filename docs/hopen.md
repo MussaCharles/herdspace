@@ -97,6 +97,7 @@ hopen .
 | `hopen --task test` | Run the task `test` of the project of the current folder. With no name, choose a task from a menu. See [Tasks](#tasks). |
 | `hopen --find` | Choose a file of the current folder with fzf, and open it in the editor. The shell command `ff` does the same. |
 | `hopen --grep TEXT` | Search the files of the current folder for TEXT, choose a result, and open the file at that line. The shell command `fif TEXT` does the same. |
+| `hopen --ports` | Show each TCP port that your programs listen on, with the program and its project, like the Ports view of VS Code. |
 | `hopen --version` | Show the installed release. |
 
 ## Settings
