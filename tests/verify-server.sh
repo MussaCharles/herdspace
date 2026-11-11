@@ -137,7 +137,7 @@ contains "$attach_all" 'status=0' 'hopen --all attaches to the named session'
 contains "$(hopen --all no-such-list 2>&1)" 'No project list' 'hopen --all rejects an unknown name'
 
 # hopen with no name shows a menu in a terminal: fzf, or a numbered menu.
-picked="$(python3 "$ROOT/tests/pty_run.py" 6 'hb-all-two\r' env TERM=xterm-256color hopen --no-attach 2>&1)"
+picked="$(python3 "$ROOT/tests/pty_run.py" 10 'hb-all-two\r' env TERM=xterm-256color hopen --no-attach 2>&1)"
 contains "$picked" 'Session hb-all-two' 'hopen with no name opens the list chosen in fzf'
 nofzf="$work/nofzf"
 mkdir -p "$nofzf"
