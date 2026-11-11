@@ -71,13 +71,13 @@ A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it dow
 2. Build the files and look at them:
 
    ```bash
-   tools/release.sh v0.1.1
+   tools/release.sh v0.1.2
    ```
 
 3. Publish the release:
 
    ```bash
-   tools/release.sh v0.1.1 --publish
+   tools/release.sh v0.1.2 --publish
    ```
 
 The script reads the repository name from `gh`, and it writes the name into `bootstrap.sh` and `install.sh`.

@@ -2,7 +2,7 @@
 
 herdspace is a workspace and session manager for [Herdr](https://herdr.dev). Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running after you disconnect.
 
-herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH.
+herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. One machine can also be both.
 
 ![Four projects open in Herdr, and Ctrl+Down moves to the next project](docs/media/open-projects.gif)
 
@@ -24,7 +24,7 @@ Set up the server machine first.
 Run this command on the server machine. It installs Herdr, its tools, and `hopen`:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- server
 ```
 
 ### Client machine
@@ -32,17 +32,25 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bo
 Run this command on the client machine. It sets up Ghostty, the shell, and the Herdr keys. Give the SSH name of the server:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/bootstrap.sh | bash -s -- client --server my-server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- client --server my-server
 ```
 
 If you connect with an IP address, read [Connect with an IP address](docs/setup.md#connect-with-an-ip-address) first.
+
+### One machine as both
+
+If Herdr runs on the machine that you use, and you do not connect to another machine, run this command. It does the server setup and then the client setup on this machine:
+
+```bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- both
+```
 
 ### Only hopen, on a machine that has Herdr
 
 If a machine has Herdr already, you can install only `hopen` and its templates. You need Python 3 and curl:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.0/install.sh | bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/install.sh | bash
 ```
 
 ### How the commands work
@@ -56,13 +64,19 @@ You can also give the setup to a coding agent, for example Claude Code or Codex.
 On the server machine:
 
 ```text
-Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
+Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.1/install.md
 ```
 
 On the client machine. Replace `my-server` with the SSH name or the address of your server:
 
 ```text
-Set up herdspace on this machine as the client for my-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.0/install.md
+Set up herdspace on this machine as the client for my-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.1/install.md
+```
+
+On one machine that is both:
+
+```text
+Set up herdspace on this machine as both the server and the client. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/v0.1.1/install.md
 ```
 
 The agent shows you what will change before it changes anything, and it gives you each command that needs your password.

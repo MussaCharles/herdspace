@@ -4,11 +4,11 @@
 # commands that change the system, so the real account does not change.
 #
 # The test needs Homebrew with the tools installed.
-# Usage: tests/run-macos.sh [server|client]...   Default: server client
+# Usage: tests/run-macos.sh [server|client|both]...   Default: server client both
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 [ "$(uname -s)" = Darwin ] || { echo 'This test runs only on macOS.'; exit 1; }
-[ "$#" -gt 0 ] || set -- server client
+[ "$#" -gt 0 ] || set -- server client both
 
 TEST_TERMINFO="${HOME}/.terminfo"
 
@@ -105,6 +105,15 @@ for target in "$@"; do
       run "$ROOT/tests/test-idempotent.sh" bootstrap.sh "${TEST_HOME}/home/.config/ghostty/config.ghostty" client --server example-server || status=1
       out="$(run zsh -i -c 'print -r -- CLIENT_OK' </dev/null 2>&1)"
       case "$out" in *CLIENT_OK*) echo 'PASS client shell starts' ;; *) echo "FAIL client shell starts: ${out:0:200}"; status=1 ;; esac
+      ;;
+    both)
+      # One machine that is a server and a client. A check after the run must
+      # find nothing to do, so the two parts do not undo each other.
+      run "$ROOT/bootstrap.sh" both --skip-nvim-tools || status=1
+      grep -q 'BOOTSTRAP_ROLE=both' "${TEST_HOME}/home/.config/herdspace/env.zsh" && echo 'PASS both: one role' || { echo 'FAIL both: one role'; status=1; }
+      grep -q 'herdr-update-check' "${TEST_HOME}/home/.zprofile" && echo 'PASS both: server login block' || { echo 'FAIL both: server login block'; status=1; }
+      cmp -s "$ROOT/config/ghostty/config.ghostty" "${TEST_HOME}/home/.config/ghostty/config.ghostty" && echo 'PASS both: ghostty configuration' || { echo 'FAIL both: ghostty configuration'; status=1; }
+      if out="$(run "$ROOT/bootstrap.sh" both --check --skip-nvim-tools 2>&1)"; then echo 'PASS both: a check finds nothing to do'; else echo 'FAIL both: a check finds nothing to do'; printf '%s\n' "$out" | grep -E '\[(todo|diff)\]'; status=1; fi
       ;;
     *) echo "Unknown target: ${target}"; status=1 ;;
   esac

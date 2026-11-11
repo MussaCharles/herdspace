@@ -25,10 +25,11 @@ install_shell_pins() {
 
 # setup_shell ROLE. ROLE is "client" or "server". The folder segment of the
 # prompt has a different color on each, so a shell shows where it runs.
+# HS_ROLE=both (from bootstrap.sh both) replaces ROLE: one machine is both.
 setup_shell() {
-  local role="$1" color tmp
+  local role="${HS_ROLE:-$1}" color tmp
   case "$role" in
-    client) color="${PROMPT_COLOR_CLIENT:-166}" ;;
+    client | both) color="${PROMPT_COLOR_CLIENT:-166}" ;;
     *) color="${PROMPT_COLOR_SERVER:-30}" ;;
   esac
   run_part "Oh My Zsh and Powerlevel10k" shell_pins_ready install_shell_pins
@@ -42,11 +43,11 @@ setup_shell() {
 
 # setup_zprofile writes the login block. A server also checks for a new Herdr.
 setup_zprofile() {
-  local role="$1" text
+  local role="${HS_ROLE:-$1}" text
   # shellcheck disable=SC2016 # These lines are text for zsh.
   text='[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac'
-  if [ "$role" = "server" ]; then
+  if [ "$role" != "client" ]; then
     # shellcheck disable=SC2016
     text="${text}"'
 if [[ -n "$SSH_CONNECTION" && -t 1 && -x "$HOME/.local/bin/herdr-update-check" ]]; then
