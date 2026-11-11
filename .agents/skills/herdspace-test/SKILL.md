@@ -1,0 +1,69 @@
+---
+name: herdspace-test
+description: Run the herdspace tests on the sandboxes that this machine supports, and check a published release in a fresh sandbox. Use it for a pull request, a release, a new or changed test, or a trial of the features.
+---
+
+# Run the tests
+
+The tests run in sandboxes. Linux tests use Docker containers. macOS tests use a Tart VM, or a temporary home folder with stub commands. A machine can support some of them and not others. Find out first, run the tests for each sandbox that exists, and report each one that you skipped. The [testing guide](../../../docs/testing.md) explains each test.
+
+## 1. Find the sandboxes of this machine
+
+Run each check. Do not install a missing tool without the agreement of the person.
+
+| Sandbox | Signs that it is ready | The tests that need it |
+|---------|----------------|------------------------|
+| Linux containers | `docker info` answers | `tests/run-linux.sh`, `tests/run-systemd.sh`, `tests/run-prereqs.sh`, `tests/test-install.sh` |
+| Ghostty in a container | Docker answers, and the machine can build `tests/Dockerfile.client` | `tests/run-client-linux.sh` (real key presses) |
+| macOS stubs | `uname -s` is `Darwin`, and Homebrew has Python 3.11 or later | `tests/run-macos.sh` |
+| macOS VM | `uname -m` is `arm64` on a Mac, `tart` is installed, and `tart list --quiet` shows the base image (`tahoe-base`) | the macOS part of `tests/run-release-check.sh` |
+| Any machine | bash and Python 3.11 or later | `tests/test-hopen-list.sh`, `tests/test-skills.sh`, `shellcheck` |
+
+## 2. Run the tests that the change touches
+
+| You changed | Run |
+|-------------|-----|
+| `bin/hopen` or a template | `tests/test-hopen-list.sh`, then `tests/run-linux.sh` and `tests/run-macos.sh server` |
+| A setup script or a configuration file | `tests/test-install.sh`, `tests/run-macos.sh`, `tests/run-linux.sh` |
+| A key, or the client setup | `tests/run-client-linux.sh` too |
+| The login service | `tests/run-systemd.sh` too |
+| The prerequisites step | `tests/run-prereqs.sh` |
+| A skill or `AGENTS.md` | `tests/test-skills.sh` |
+| A release, before you publish it | every test above |
+| A release, after you publish it | `tests/run-release-check.sh` |
+
+Run a test that takes more than two minutes in the background, with its output in a log file in `tests/.work`. Watch it with a quiet script. The script prints a line in two cases: the test ends, or the log stops growing for five minutes. Start such a script with `bash` by name, because your own shell can be zsh. If a test stops moving, find the cause. For example, a question can wait for an answer. Do not wait forever.
+
+## 3. Report
+
+Copy the `FAIL` and `RESULT` lines into the pull request or the reply. Name each sandbox that this machine does not have, and the tests that did not run for that reason. If you skipped a sandbox, do not say that all tests pass.
+
+## Check a release after the publish
+
+`tests/run-release-check.sh` installs the published release from the `latest` links in the same way as a person. It uses a fresh container for each Linux image, and a fresh clone of the Tart image. Then `tests/tour-release.sh` tries each `hopen` feature there. It tries the menu, folders, approval, `env_file`, completion, tasks, find and search, ports, the palette, templates, `--convert`, and attach and detach. The VM and the containers are deleted at the end.
+
+```bash
+tests/run-release-check.sh --version 0.5.0
+```
+
+`--only linux` or `--only macos` runs one kind. A sandbox that the machine does not support prints a `SKIP` line. The containers and the VM have no Ghostty window, so the check does not press the palette key. `tests/run-client-linux.sh` does that before the release.
+
+If you add a feature that a person can see, add a step for it to `tests/tour-release.sh`.
+
+## Pitfalls that broke tests before
+
+- A fixed port can be in use by another program, or by a server that an earlier test left. Use a random port, and stop each server that a test starts.
+- `pgrep -f "hopen --palette"` finds its own command line. Write the pattern as `"hopen [-]-palette"`.
+- If the keys hold a filter and Enter, fzf can take Enter first. Send only Enter, and choose the first item.
+- fzf draws nothing with no `TERM`. A test of the numbered menu sets `TERM=dumb`.
+- The zsh setup loads `ff`, `fif`, and the completion only in a terminal. `zsh -ic ... </dev/null` has no terminal. Use `tests/pty_run.py`.
+- On macOS, `/var` is a link to `/private/var`, so compare folders by their real paths.
+- A small Linux image has no `ss`, `lsof`, `curl`, or `procps`. Do not let a test depend on a tool that the setup does not install.
+- In a Tart VM, host names can fail because the DNS proxy of the host refuses the VM. Set a public DNS server in the VM. Do not start the base image. Clone it.
+- Apple allows two macOS VMs at a time on one Mac.
+
+## Rules
+
+- Do not run a test against the Herdr server of the person, and do not close their panes. The tests make their own sessions in a sandbox.
+- Do not run `tests/tour-release.sh` on your own machine. It starts a Herdr server and writes lists in the home folder.
+- A failed check can be a mistake in the test. Before you change the code, find out where the mistake is, and tell the person.

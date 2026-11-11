@@ -51,6 +51,7 @@ The `hopen` in both archives has the tag in `HOPEN_VERSION`.
 1. Make sure that `https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh` and `install.sh` return 200.
 2. Install `hopen` with `install.sh`, and make sure that `hopen --version` shows the new tag.
 3. Run `bootstrap.sh server --check` from `curl`. It changes nothing.
+4. Follow the `herdspace-test` skill to run `tests/run-release-check.sh --version <tag>`. It installs the release in fresh sandboxes and tries each feature. Report each sandbox that it skipped.
 
 ## Rules
 

@@ -17,6 +17,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-hopen-list.sh` | `hopen` reads each list setting, refuses crafted lists, and keeps session names safe. It needs no Herdr, and it runs in a second. |
 | `tests/bench-hopen.sh` | Measures how long `hopen` takes with 20 projects. `tests/run-linux.sh` runs it after the server setup. See [Benchmark](#benchmark). |
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
+| `tests/run-release-check.sh` | A published release installs from the `latest` links in a fresh container and a fresh macOS VM, and each `hopen` feature works there. See [After a release](#after-a-release). |
 
 A container cannot run macOS. For that reason, `tests/run-macos.sh` does not change macOS shortcuts or install Homebrew packages.
 
@@ -189,3 +190,27 @@ The GIF files play 3 times faster than the recording. To change the speed, set `
 ## Before a release
 
 Run every test above. All tests must pass. Then follow [Make a release](updating.md#make-a-release).
+
+## After a release
+
+`tests/run-release-check.sh` installs the published release in the same way as a person. It uses a fresh container for each Linux image, and a fresh clone of the Tart image. In each one, `tests/tour-release.sh` tries each `hopen` feature: the menu, folders, approval, `env_file`, completion, tasks, find and search, ports, the palette, templates, `--convert`, and attach and detach.
+
+```bash
+tests/run-release-check.sh --version 0.5.0
+```
+
+The check runs only the sandboxes that the machine supports. It prints a `SKIP` line for each one that it cannot run. `--only linux` or `--only macos` runs one kind. The macOS part needs Tart and the `tahoe-base` image. See [macOS: a Tart VM](#macos-a-tart-vm). The VM and the containers are deleted at the end.
+
+Do not run `tests/tour-release.sh` on your own machine. It starts a Herdr server and writes lists in the home folder.
+
+## Pitfalls in tests
+
+These mistakes broke tests before:
+
+- A fixed port can be in use. Use a random port, and stop each server that a test starts.
+- `pgrep -f` finds its own command line. Write a pattern such as `"hopen [-]-palette"`.
+- If the keys hold a filter and Enter, fzf can take Enter first. Send only Enter.
+- fzf draws nothing with no `TERM`. A test of the numbered menu sets `TERM=dumb`.
+- The zsh setup loads `ff`, `fif`, and the completion only in a terminal. Run zsh with `tests/pty_run.py`, not with `zsh -ic` and no terminal.
+- On macOS, `/var` is a link to `/private/var`. Compare folders by their real paths.
+- A small Linux image has no `ss` or `lsof`. Do not depend on a tool that the setup does not install.
