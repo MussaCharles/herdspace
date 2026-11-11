@@ -14,8 +14,19 @@ Run this skill in the herdspace repository. Read `docs/updating.md` first.
 3. On Linux, pin a release file with `tools/update-versions.sh`. Never run `curl | sh` from a new source without the agreement of the person.
 4. Add a check to `tests/verify-server.sh`.
 5. Update `docs/setup.md` and `docs/cheat-sheet.md`. Use plain English: short sentences, active voice, and one word for one meaning.
-6. Run `tests/run-linux.sh` and `tests/run-client-linux.sh`. On a Mac, also run `tests/run-macos.sh`. Fix each `FAIL` line.
-7. Create a branch and a pull request. Do not merge without the agreement of the person.
+6. If a person who uses herdspace can see the change, add one line under `## [Unreleased]` in `CHANGELOG.md`, below the right heading: `### Added`, `### Changed`, `### Deprecated`, `### Removed`, `### Fixed`, or `### Security`. Follow "Update the changelog" in `CONTRIBUTING.md`.
+7. Run `tests/run-linux.sh` and `tests/run-client-linux.sh`. On a Mac, also run `tests/run-macos.sh`. Fix each `FAIL` line.
+8. Create a branch and a pull request. Do not merge without the agreement of the person.
+
+## Make a release
+
+Do this only when the person asks for a release. Follow "Make a release" in `docs/updating.md`:
+
+1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, add a new empty `## [Unreleased]`, and change the links at the end of the file.
+2. Change the tag in `README.md`, `install.md`, and `docs/`. A tag has no v in front, for example `0.1.2`.
+3. Run all tests, and merge.
+4. Run `tools/release.sh <tag>`, and show `dist/<tag>.notes.md` to the person.
+5. Run `tools/release.sh <tag> --publish` only after the person agrees.
 
 ## Rules
 

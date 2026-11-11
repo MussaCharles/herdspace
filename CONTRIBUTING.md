@@ -40,8 +40,25 @@ You need Docker for the Linux tests, and a Mac for the macOS test. [Testing](doc
 2. Make one change for each pull request.
 3. Run the tests that your change touches, and put the results in the description of the pull request.
 4. Write a commit subject in the imperative mood, for example `Add the both command`.
+5. If the change is visible to a person who uses herdspace, add a line to `CHANGELOG.md`. See [Update the changelog](#update-the-changelog).
 
 The maintainer reviews each pull request. When the tests pass and the review is done, the maintainer merges the pull request.
+
+## Update the changelog
+
+`CHANGELOG.md` follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The release notes of each release come from it.
+
+1. Add your line under `## [Unreleased]`, at the top of the file.
+2. Put the line under one of these headings. Add the heading if it is not there yet:
+   - `### Added` for a new feature.
+   - `### Changed` for a change in a feature that exists.
+   - `### Deprecated` for a feature that a later release removes.
+   - `### Removed` for a feature that this release removes.
+   - `### Fixed` for a bug fix.
+   - `### Security` for a fix to a security problem.
+3. Write one sentence for each change, for the person who uses herdspace. Link the issue or the pull request, for example `(#35)`.
+
+A change that a person cannot see, such as a change to a test, does not go in the changelog.
 
 ## License
 

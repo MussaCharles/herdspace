@@ -67,14 +67,15 @@ tests/run-macos.sh
 
 A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag is a version with no v in front, for example `0.1.2`. A tag with a dash, for example `0.2.0-alpha.1`, becomes a pre-release.
 
-1. Change the tag in the commands of `README.md`, `install.md`, and `docs/` to the new tag. Merge the change, and run the tests.
-2. Build the files and look at them:
+1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Change the links at the end of the file to the new tag.
+2. Change the tag in the commands of `README.md`, `install.md`, and `docs/` to the new tag. Merge the change, and run the tests.
+3. Build the files and look at them. The script writes the release notes to `dist/<tag>.notes.md`: the section of the tag from `CHANGELOG.md`, with a link to the install steps at the top.
 
    ```bash
    tools/release.sh 0.1.2
    ```
 
-3. Publish the release:
+4. Publish the release:
 
    ```bash
    tools/release.sh 0.1.2 --publish
@@ -82,7 +83,7 @@ A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it dow
 
 The script reads the repository name from `gh`, and it writes the name into `bootstrap.sh` and `install.sh`.
 
-`--publish` stops if `git status` shows a change or an untracked file, so that a release holds only committed files.
+`--publish` stops if `git status` shows a change or an untracked file, so that a release holds only committed files. It also stops if `CHANGELOG.md` has no section for the tag.
 
 ## Add something new
 
@@ -90,6 +91,7 @@ The script reads the repository name from `gh`, and it writes the name into `boo
 2. Add an install step to `bootstrap/lib/server.sh` for all servers, or to one script in `bootstrap/platforms/` for one system. Use `run_part` with a check function, so that a new run skips the step when it is done.
 3. Add a line to `tests/verify-server.sh` that proves the step works.
 4. Add the step to [setup.md](setup.md) and to the cheat sheet.
-5. Run the tests.
+5. Add a line under `## [Unreleased]` in [CHANGELOG.md](../CHANGELOG.md). See [Update the changelog](../CONTRIBUTING.md#update-the-changelog).
+6. Run the tests.
 
 Do not put names, host names, or private project names in this repository.
