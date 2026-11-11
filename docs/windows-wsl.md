@@ -38,7 +38,7 @@ wsl --install -d Ubuntu
 Open Ubuntu from the Start menu, and run the client setup there. The script finds WSL, so it sets up the shell and does not install Ghostty:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- client --server my-server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/bootstrap.sh | bash -s -- client --server my-server
 ```
 
 Windows Terminal does not need the terminal description, because it uses `xterm-256color`.
@@ -69,7 +69,7 @@ wsl --shutdown
 Then run the server setup:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/bootstrap.sh | bash -s -- server
 ```
 
 A Herdr server in WSL stops when WSL stops. Use this setup for a machine that you work on. For a server that must stay on, use Linux or macOS.

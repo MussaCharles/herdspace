@@ -4,10 +4,10 @@ These instructions are for a coding agent that installs herdspace for a person. 
 
 herdspace is a workspace and session manager for Herdr. It uses two machines. The server machine runs Herdr, the projects, and the agents. The client machine is the machine that the person uses, and it connects to the server machine with SSH.
 
-The release in these instructions is `v0.1.1`. All commands use this address:
+The release in these instructions is `0.1.1`. All commands use this address:
 
 ```text
-https://github.com/MussaCharles/herdspace/releases/download/v0.1.1
+https://github.com/MussaCharles/herdspace/releases/download/0.1.1
 ```
 
 ## 1. Find the task
@@ -34,7 +34,7 @@ For `hopen`, make sure that `herdr`, `python3`, and `curl` are installed. If one
 Do this step only for the `hopen` task. Then go to step 7.
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/install.sh | bash
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/install.sh | bash
 ```
 
 ## 4. Make sure that SSH works (client only)
@@ -45,7 +45,7 @@ For each server, run:
 ssh -o BatchMode=yes -o ConnectTimeout=5 my-server true && echo ok
 ```
 
-If the command does not print `ok`, the server needs an SSH key. Follow [Connect to the server with SSH](https://github.com/MussaCharles/herdspace/blob/v0.1.1/docs/ssh.md):
+If the command does not print `ok`, the server needs an SSH key. Follow [Connect to the server with SSH](https://github.com/MussaCharles/herdspace/blob/0.1.1/docs/ssh.md):
 
 - Before you change `~/.ssh/config`, ask the person.
 - `ssh-copy-id` asks for the password of the server. Give the command to the person, and ask them to run it in their own terminal.
@@ -57,19 +57,19 @@ If a server still fails, tell the person and leave it out.
 Run the setup with `--check`. It changes nothing. For `server`:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- server --check
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/bootstrap.sh | bash -s -- server --check
 ```
 
 For `client`, with one `--server` for each server:
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- client --server my-server --check
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/bootstrap.sh | bash -s -- client --server my-server --check
 ```
 
 For `both`, use this command. Do not run `server` and then `client` on one machine. Each one undoes a part of the other.
 
 ```bash
-curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/v0.1.1/bootstrap.sh | bash -s -- both --check
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/download/0.1.1/bootstrap.sh | bash -s -- both --check
 ```
 
 Show the output to the person, and tell them what a run changes:

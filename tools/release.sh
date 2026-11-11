@@ -8,7 +8,7 @@
 # the repository filled in, hopen-<tag>.tar.gz (hopen and the templates), and
 # SHA256SUMS. With --publish, the
 # script creates the GitHub release and uploads the files. A tag with a dash,
-# for example v0.1.0-alpha.2, becomes a pre-release.
+# for example 0.2.0-alpha.1, becomes a pre-release. A tag has no v in front.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -25,8 +25,8 @@ while [ "$#" -gt 0 ]; do
 done
 [ -n "$TAG" ] || { echo "Usage: tools/release.sh <tag> [--repo owner/name] [--publish]" >&2; exit 2; }
 case "$TAG" in
-  v[0-9]*) ;;
-  *) echo "A tag starts with v and a number, for example v0.1.0." >&2; exit 2 ;;
+  [0-9]*) ;;
+  *) echo "A tag is a version with no v in front, for example 0.1.1." >&2; exit 2 ;;
 esac
 if [ -z "$REPO" ]; then
   REPO="$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)" || true

@@ -12,7 +12,7 @@ contains() { case "$1" in *"$2"*) pass "$3" ;; *) fail "$3: ${1:0:300}" ;; esac;
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp" dist/v9.9.9-test' EXIT
-tag=v9.9.9-test
+tag=9.9.9-test
 tools/release.sh "$tag" --repo example/hopen-test >/dev/null || { echo "FAIL release build"; exit 1; }
 dist="$(pwd)/dist/${tag}"
 for f in "hopen-${tag}.tar.gz" install.sh SHA256SUMS; do
@@ -65,7 +65,8 @@ contains "$out" 'Removed' 'uninstall removes hopen'
 if [ ! -e "${home}/.local/bin/hopen" ] && [ -d "${home}/.config/hopen/templates" ]; then pass 'uninstall keeps the templates'; else fail 'uninstall keeps the templates'; fi
 
 touch release-guard-test.txt
-out="$(tools/release.sh v9.9.9-guard --repo example/hopen-test --publish 2>&1)"; rc=$?
+contains "$(tools/release.sh v9.9.9 --repo example/hopen-test 2>&1)" 'no v in front' 'release.sh refuses a tag with v'
+out="$(tools/release.sh 9.9.9-guard --repo example/hopen-test --publish 2>&1)"; rc=$?
 rm -f release-guard-test.txt
 contains "$out" 'release-guard-test.txt' 'publish lists an untracked file'
 if [ "$rc" -ne 0 ]; then pass 'publish refuses a folder with changes'; else fail 'publish refuses a folder with changes'; fi

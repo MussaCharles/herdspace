@@ -7,7 +7,7 @@ body:
     attributes:
       label: Release
       description: The output of `hopen --version`, or the tag in the curl command.
-      placeholder: v0.1.1
+      placeholder: 0.1.1
     validations:
       required: true
   - type: dropdown
