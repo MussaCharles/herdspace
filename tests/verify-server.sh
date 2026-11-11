@@ -294,6 +294,15 @@ sleep 2
 contains "$(cat "$HOME/hb-set/web/task-ran.txt" 2>/dev/null)" 'from-env' 'the task runs in the project folder with the project values'
 contains "$(HERDR_SESSION=hb-named herdr pane list | python3 -c 'import json,sys; print(",".join(p.get("label") or "" for p in json.load(sys.stdin)["result"]["panes"]))')" 'mark' 'the task pane has the name of the task'
 
+# hopen --ports shows a port, its program, and its project.
+(cd "$HOME/hb-set/web" && exec python3 -m http.server 8799 --bind 127.0.0.1 >/dev/null 2>&1) &
+server_pid=$!
+sleep 2
+ports="$(hopen --ports 2>&1)"
+contains "$ports" '8799' 'hopen --ports shows a port'
+contains "$ports" 'hb-named/web' 'hopen --ports shows the project of the program'
+kill "$server_pid" 2>/dev/null
+
 # A list runs its commands only after an approval, and again after a change.
 mkdir -p "$HOME/hb-trust/w"
 trust_list="$HOME/hb-trust/hb-trust.code-workspace"
