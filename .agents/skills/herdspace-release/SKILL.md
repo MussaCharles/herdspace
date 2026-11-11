@@ -51,7 +51,13 @@ The `hopen` in both archives has the tag in `HOPEN_VERSION`. In an early pre-rel
 1. Make sure that `https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh` and `install.sh` return 200.
 2. Install `hopen` with `install.sh`, and make sure that `hopen --version` shows the new tag.
 3. Run `bootstrap.sh server --check` from `curl`. It changes nothing in the setup. It only downloads the release files.
-4. Follow the `herdspace-test` skill to run `tests/run-release-check.sh --version <tag>`. It installs the release in fresh sandboxes and tries each feature. Report each sandbox that it skipped.
+4. The workflow "Release check" starts by itself for a published release, but not for a pre-release. It installs the release on Linux and macOS runners and tries each feature. Wait for its result:
+
+   ```bash
+   gh run list --workflow release.yml --limit 1
+   ```
+
+5. Follow the `herdspace-test` skill to run `tests/run-release-check.sh --version <tag>`. It installs the release in fresh sandboxes and tries each feature. Report each sandbox that it skipped.
 
 ## Rules
 

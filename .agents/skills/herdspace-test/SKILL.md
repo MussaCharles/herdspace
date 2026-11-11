@@ -36,7 +36,7 @@ Run a test that takes more than two minutes in the background, with its output i
 
 ## CI
 
-GitHub Actions runs the tests on fresh runners for each pull request, each release, and once a week. The [CI guide](../../../docs/ci.md) lists the jobs. CI does not replace a local run: run the tests of the change before you push. If a test passes on your machine and fails in CI, the test can depend on your machine. Make the test create what it needs, for example a stub program or a terminal description. The Tart check stays local, because no hosted runner can start a macOS VM.
+GitHub Actions runs the tests on fresh runners for each pull request, each release, and once a week. The [CI guide](../../../docs/ci.md) lists the jobs. CI does not replace a local run: run the tests of the change before you push. If a test passes on your machine and fails in CI, the test can depend on your machine. Make the test create what it needs, for example a stub program or a terminal description. The `herdspace-ci` skill lists the CI failures that happened before. The Tart check stays local, because no hosted runner can start a macOS VM.
 
 ## 3. Report
 
@@ -63,6 +63,7 @@ If you add a feature that a person can see, add a step for it to `tests/tour-rel
 - The zsh setup loads `ff`, `fif`, and the completion only in a terminal. `zsh -ic ... </dev/null` has no terminal. Use `tests/pty_run.py`.
 - On macOS, `/var` is a link to `/private/var`, so compare folders by their real paths.
 - `curl ... | bash -s -- ARGS </dev/null` gives bash an empty script, because the redirect replaces the pipe. zsh joins both inputs (`MULTIOS`), so the same line works in zsh and fails in bash.
+- A script that changes its folder must find its own files first, with `HERE="$(cd "$(dirname "$0")" && pwd)"`. A relative path from `$0` breaks after a `cd`. The release check of a macOS runner found this in `tests/tour-release.sh`.
 - A small Linux image has no `ss`, `lsof`, `curl`, or `procps`. Do not let a test depend on a tool that the setup does not install.
 - In a Tart VM, host names can fail because the DNS proxy of the host refuses the VM. Set a public DNS server in the VM. Do not start the base image. Clone it.
 - Apple allows two macOS VMs at a time on one Mac.
