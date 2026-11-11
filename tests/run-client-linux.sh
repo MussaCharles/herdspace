@@ -56,7 +56,7 @@ case "$(srv_user bash -c 'pgrep -c lazygit')" in 0|'') fail 'Ctrl+Shift+G opens 
 key q
 WAIT=5 key ctrl+shift+p
 shot palette
-case "$(srv_user bash -c 'pgrep -fc "hopen --palette"')" in 0|'') fail 'Ctrl+Shift+P opens the hopen palette' ;; *) pass 'Ctrl+Shift+P opens the hopen palette' ;; esac
+case "$(srv_user bash -c 'pgrep -fc "hopen [-]-palette"')" in 0|'') fail 'Ctrl+Shift+P opens the hopen palette' ;; *) pass 'Ctrl+Shift+P opens the hopen palette' ;; esac
 key Escape
 WAIT=3 key ctrl+shift+k
 shot go-to
