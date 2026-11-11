@@ -417,6 +417,12 @@ def env_items(label, values):
 
 ENV_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
+# The approval question does not show the values of an env file. So an env
+# file cannot set a name that makes a shell or a program run code.
+RISKY = re.compile(r"PATH|HOME|SHELL|ENV|BASH_ENV|ZDOTDIR|PROMPT_COMMAND|PS[0-4]|IFS"
+                   r"|LD_.*|DYLD_.*|NODE_OPTIONS|PYTHON.*|PERL5?OPT|PERL5LIB|RUBYOPT|RUBYLIB"
+                   r"|GIT_.*|.*_COMMAND|EDITOR|VISUAL|PAGER|BROWSER")
+
 def env_file(label, raw, folder):
     # env_file reads a .env file: KEY=VALUE lines, with "#" comments, an
     # optional "export ", and optional quotes. A relative path starts at the
@@ -449,6 +455,9 @@ def env_file(label, raw, folder):
             value = value[1:-1]
         elif " #" in value:
             value = value.split(" #", 1)[0].rstrip()
+        if RISKY.fullmatch(key):
+            warn(f"{label}: an env file cannot set {key}, because it can run code. Put it in env, where the approval question shows it.")
+            continue
         items.append(f"{key}={clean(value)}")
         names.append(key)
     if items:
@@ -657,15 +666,17 @@ list_actions() {
 }
 
 # file_hash FILE [EXTRA] prints the checksum of FILE. EXTRA is the values that
-# the list loads from env files, so that a change to them asks again.
+# the list loads from env files, so that a change to them asks again. EXTRA
+# goes on stdin, because another user can read the arguments of a process.
 file_hash() {
-  python3 -I -c '
+  printf '%s' "${2:-}" | python3 -I -c '
 import hashlib, sys
 digest = hashlib.sha256(open(sys.argv[1], "rb").read())
-if sys.argv[2]:
-    digest.update(b"\0" + sys.argv[2].encode())
+extra = sys.stdin.buffer.read()
+if extra:
+    digest.update(b"\0" + extra)
 print(digest.hexdigest())
-' "$1" "${2:-}"
+' "$1"
 }
 trust_file() { printf '%s/trusted.tsv' "$STATE_DIR"; }
 
@@ -674,7 +685,8 @@ trust_file() { printf '%s/trusted.tsv' "$STATE_DIR"; }
 # or gave --trust. A changed file needs a new approval.
 list_trusted() {
   local file="$1" actions="$2" hash answer
-  hash="$(file_hash "$file" "${3:-}")"
+  hash="$(file_hash "$file" "${3:-}")" || return 1
+  [[ "$hash" =~ ^[0-9a-f]{64}$ ]] || return 1
   awk -F '\t' -v f="$file" -v h="$hash" '$1 == f && $2 == h { found = 1 } END { exit !found }' "$(trust_file)" 2>/dev/null && return 0
   if [ "$TRUST_FLAG" -ne 1 ]; then
     [ -t 0 ] || return 1

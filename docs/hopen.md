@@ -129,7 +129,7 @@ path = "~/code/api"
 | `env_file` | A `.env` file with more environment values. A relative path starts at the folder of the project, or of the list at the top. A value in `env` wins over the same name in the file. |
 | `tabs` | More tabs. Each tab has a `name`, and an optional `template` and `run` command. |
 
-A `.env` file has one `KEY=VALUE` on each line. `hopen` skips empty lines and lines that start with `#`. It accepts `export ` in front, and quotes around a value. `on_open`, `env`, `env_file`, and `tabs` apply when `hopen` creates a workspace. A workspace that exists does not change. A setting with a wrong value gives a warning, and the other projects still open. `on_open` and `tabs` run commands, and `env` sets values. See [Commands and values from a list](#commands-and-values-from-a-list).
+A `.env` file has one `KEY=VALUE` on each line. `hopen` skips empty lines and lines that start with `#`. It accepts `export ` in front, and quotes around a value. An env file cannot set a name that can make a program run code, for example `PATH`, `LD_PRELOAD`, or `PROMPT_COMMAND`, because the approval question does not show its values. Put such a value in `env`. `on_open`, `env`, `env_file`, and `tabs` apply when `hopen` creates a workspace. A workspace that exists does not change. A setting with a wrong value gives a warning, and the other projects still open. `on_open` and `tabs` run commands, and `env` sets values. See [Commands and values from a list](#commands-and-values-from-a-list).
 
 ## Use a VS Code workspace file
 

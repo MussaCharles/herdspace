@@ -97,6 +97,8 @@ PORT=4000 # the port
 NAME='single'
 not a line
 EMPTY=
+PROMPT_COMMAND=touch /tmp/owned
+LD_PRELOAD=/tmp/evil.so
 ENV
 printf '{ "folders": [ { "name": "app", "path": "./app" } ], "settings": { "hopen.envFile": { "app": ".env" }, "hopen.env": { "app": { "PORT": "5000" } } } }\n' >"$tmp/envs/envs.code-workspace"
 envout="$(read_list "$tmp/envs/envs.code-workspace" items)"
@@ -106,6 +108,8 @@ contains "$(grep -A1 "^F${RS}" <<<"$envout" | tail -n 1 | cut -c1-5)" "P${RS}app
 actions="$(list_actions "$envout")"
 contains "$actions" "app: load ${tmp}/envs/app/.env (TOKEN, PORT, NAME, EMPTY)" 'the approval question names the env file and its names'
 lacks "$actions" 's3cret' 'the approval question does not show a secret value'
+contains "$envout" 'cannot set PROMPT_COMMAND' 'an env file cannot set a name that runs code'
+lacks "$(grep "^F" <<<"$envout")" 'LD_PRELOAD' 'an env file cannot set LD_PRELOAD'
 contains "$(read_list "$tmp/envs/envs.code-workspace" items 2>&1; printf '{ "folders": [ { "name": "app", "path": "./app" } ], "settings": { "hopen.envFile": { "app": "missing.env" } } }\n' >"$tmp/envs/m.code-workspace"; read_list "$tmp/envs/m.code-workspace" items)" 'cannot read the env file' 'a missing env file gives a warning'
 
 # A change in the env file asks again.
