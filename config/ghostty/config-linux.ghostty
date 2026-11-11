@@ -12,4 +12,5 @@ keybind = ctrl+shift+t=unbind
 keybind = ctrl+shift+w=unbind
 keybind = ctrl+shift+f=unbind
 keybind = ctrl+shift+e=unbind
+keybind = ctrl+shift+p=unbind
 # herdspace keys: end

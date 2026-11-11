@@ -24,6 +24,8 @@
 #        hopen --find            Choose a file with fzf, and open it in the editor.
 #        hopen --grep TEXT       Search the files, and open a result at its line.
 #        hopen --ports           Show the TCP ports that your programs listen on.
+#        hopen --palette         Choose an action from a menu, like the command
+#                                palette of VS Code. Cmd+Shift+P opens it in Herdr.
 #
 # A list can run commands (on-open and tab commands) and set environment
 # values. hopen asks before it uses them the first time, and again after the
@@ -70,6 +72,7 @@ usage() {
   echo "       hopen --find"
   echo "       hopen --grep TEXT"
   echo "       hopen --ports"
+  echo "       hopen --palette"
   echo "       hopen --version"
 }
 # short_path PATH shows a path in the home folder as ~/... The ~ is in a
@@ -102,6 +105,7 @@ while [ "$#" -gt 0 ]; do
       ;;
     --find) ACTION="find"; shift ;;
     --ports) ACTION="ports"; shift ;;
+    --palette) ACTION="palette"; shift ;;
     --grep)
       [ "$#" -ge 2 ] || { usage >&2; exit 2; }
       ACTION="grep"; GREP_TEXT="$2"; shift 2
@@ -140,7 +144,7 @@ completion_script() {
 #compdef hopen
 _hopen() {
   local -a options
-  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --task --find --grep --ports --completion --version --help)
+  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --task --find --grep --ports --palette --completion --version --help)
   case "${words[CURRENT-1]}" in
     --template | --apply) compadd -- ${(f)"$(hopen --complete templates 2>/dev/null)"}; return ;;
     --convert) compadd -- ${(f)"$(hopen --complete lists 2>/dev/null)"}; return ;;
@@ -170,7 +174,7 @@ _hopen() {
     --file) COMPREPLY=($(compgen -f -- "$cur")); return ;;
     *)
       case "$cur" in
-        -*) words=$'--all\n--list\n--templates\n--apply\n--convert\n--file\n--template\n--no-attach\n--trust\n--task\n--find\n--grep\n--ports\n--completion\n--version\n--help' ;;
+        -*) words=$'--all\n--list\n--templates\n--apply\n--convert\n--file\n--template\n--no-attach\n--trust\n--task\n--find\n--grep\n--ports\n--palette\n--completion\n--version\n--help' ;;
         */* | .*) COMPREPLY=($(compgen -d -- "$cur")); return ;;
         *) words="$(hopen --complete lists 2>/dev/null)" ;;
       esac
@@ -927,20 +931,22 @@ open_all() {
 
 # apply_here splits the current tab of a Herdr pane with a template.
 apply_here() {
-  [ "${HERDR_ENV:-}" = "1" ] && [ -n "${HERDR_PANE_ID:-}" ] || die "Run --apply inside a Herdr pane."
+  # A popup of Herdr has no pane of its own, so it applies to the active pane.
+  local target="${HERDR_PANE_ID:-${HERDR_ACTIVE_PANE_ID:-}}"
+  [ -n "$target" ] || die "Run --apply inside a Herdr pane."
   template_exists "$APPLY_NAME" || die "No template named ${APPLY_NAME}. Run hopen --templates."
   [ "$APPLY_NAME" != plain ] || return 0
   local tab count
   tab="$(herdr pane list | python3 -I -c '
 import json, sys
 print([p["tab_id"] for p in json.load(sys.stdin)["result"]["panes"] if p["pane_id"] == sys.argv[1]][0])
-' "$HERDR_PANE_ID")"
+' "$target")"
   count="$(herdr pane list | python3 -I -c '
 import json, sys
 print(len([p for p in json.load(sys.stdin)["result"]["panes"] if p["tab_id"] == sys.argv[1]]))
 ' "$tab")"
   [ "$count" = 1 ] || die "The current tab has ${count} panes. Open a new tab, and run --apply there."
-  apply_template "$APPLY_NAME" "$HERDR_PANE_ID"
+  apply_template "$APPLY_NAME" "$target"
   guard_names
 }
 
@@ -1310,10 +1316,76 @@ for (port, pid), (name, address) in sorted(ports.items()):
 '
 }
 
+# ---------- the command palette, like Ctrl+Shift+P in VS Code
+
+# in_popup exits 0 in a Herdr popup, which closes when its command ends.
+in_popup() { [ -z "${HERDR_PANE_ID:-}" ] && [ -n "${HERDR_ACTIVE_PANE_ID:-}" ]; }
+
+# then_wait runs a command that prints a result. In a popup, it waits for
+# Enter, so that the person can read the result.
+then_wait() {
+  "$@" || true
+  if in_popup; then
+    printf '\n  Press Enter to close.'
+    IFS= read -r _ || true
+  fi
+}
+
+# palette shows the actions that fit the current folder and place, and runs
+# the one that the person chooses.
+palette() {
+  local dir="${HERDR_ACTIVE_PANE_CWD:-$PWD}" self="$0" items="" choice match file label text name
+  [ -t 0 ] && [ -t 1 ] || die "hopen --palette needs a terminal."
+  if match="$(project_for_dir "$dir")"; then
+    file="${match%%$'\t'*}"
+    label="${match#*$'\t'}"
+    while IFS=$'\t' read -r name text; do
+      [ -n "$name" ] && items="${items}task:${name}"$'\t'"Run the task ${name}: ${text}"$'\n'
+    done < <(read_list "$file" items 2>/dev/null | awk -F '\036' -v l="$label" '$1 == "K" && $2 == l { print $3 "\t" $4 }')
+  fi
+  items="${items}find"$'\t'"Find a file, and open it (ff)"$'\n'
+  command -v rg >/dev/null 2>&1 && items="${items}grep"$'\t'"Search in the files, and open a result (fif)"$'\n'
+  command -v lazygit >/dev/null 2>&1 && items="${items}git"$'\t'"Git status (lazygit)"$'\n'
+  items="${items}ports"$'\t'"Show the ports that your programs listen on"$'\n'
+  if [ -n "${HERDR_PANE_ID:-}${HERDR_ACTIVE_PANE_ID:-}" ]; then
+    while read -r name; do
+      [ "$name" = plain ] || items="${items}apply:${name}"$'\t'"Split the current tab with the template ${name}"$'\n'
+    done < <(show_templates | tail -n +2 | cut -d ' ' -f1)
+  else
+    items="${items}folder"$'\t'"Open this folder in Herdr (hopen .)"$'\n'
+    while IFS=$'\t' read -r name file; do
+      items="${items}open:${name}"$'\t'"Open the list ${name}"$'\n'
+    done < <(find_lists 2>/dev/null)
+  fi
+  items="${items}lists"$'\t'"Show every list and its state"$'\n'
+  items="${items}all"$'\t'"Open every list in the background"$'\n'
+  choice="$(printf '%s' "$items" | choose "Action")" || exit 1
+  [ -n "$choice" ] || exit 0
+  cd "$dir" || die "No folder ${dir}."
+  case "$choice" in
+    task:*) exec "$self" --task "${choice#task:}" ;;
+    find) exec "$self" --find ;;
+    grep)
+      printf '  Search for: '
+      IFS= read -r text || exit 0
+      [ -n "$text" ] || exit 0
+      exec "$self" --grep "$text"
+      ;;
+    git) exec lazygit ;;
+    ports) then_wait "$self" --ports ;;
+    apply:*) then_wait "$self" --apply "${choice#apply:}" ;;
+    folder) exec "$self" . ;;
+    open:*) exec "$self" "${choice#open:}" ;;
+    lists) then_wait "$self" --list ;;
+    all) then_wait "$self" --all --no-attach ;;
+  esac
+}
+
 case "$ACTION" in
   completion) completion_script "$SHELL_NAME"; exit 0 ;;
   task) run_task; exit 0 ;;
   ports) show_ports; exit 0 ;;
+  palette) palette; exit 0 ;;
   find) DIR="${HERDR_ACTIVE_PANE_CWD:-$PWD}"; find_file ;;
   grep) DIR="${HERDR_ACTIVE_PANE_CWD:-$PWD}"; grep_files ;;
   complete)
