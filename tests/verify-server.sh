@@ -212,5 +212,69 @@ rm -rf "$HOME/hb-other" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-other.ts
 rm -rf "$HOME/hb-tpl" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-tpl.tsv"
 rm -rf "$work"
 
+# The list settings: a session name, no parent workspace, an on-open command,
+# and extra tabs. A second run adds nothing.
+mkdir -p "$HOME/hb-set/web"
+cat >"$HOME/hb-set/hb-set.code-workspace" <<'JSON'
+{
+  "folders": [ { "name": "web", "path": "./web" } ],
+  "settings": {
+    "hopen.session": "hb-named",
+    "hopen.parentWorkspace": false,
+    "hopen.onOpen": { "web": "printf %s \"$HB_VALUE\" > opened.txt" },
+    "hopen.env": { "web": { "HB_VALUE": "from-env" } },
+    "hopen.tabs": { "web": [ { "name": "logs", "run": "printf %s \"$HB_VALUE\" > tab-ran.txt" }, { "name": "side", "template": "agent" }, { "template": "grid" } ] }
+  }
+}
+JSON
+set_out="$(hopen hb-named --no-attach 2>&1)"
+contains "$(hopen --list 2>&1)" 'hb-named' 'hopen.session names the session'
+contains "$(labels_of hb-named)" 'web' 'the session has the project'
+if [ "$(labels_of hb-named)" = "web" ]; then pass 'hopen.parentWorkspace false adds no parent workspace'; else fail "hopen.parentWorkspace false adds no parent workspace: $(labels_of hb-named)"; fi
+contains "$set_out" 'each tab needs a name' 'a tab with no name gives a clear message'
+tabs_of() { HERDR_SESSION="$1" herdr tab list --workspace "$(HERDR_SESSION="$1" herdr workspace list | python3 -c 'import json,sys; print([w["workspace_id"] for w in json.load(sys.stdin)["result"]["workspaces"] if w["label"] == sys.argv[1]][0])' "$2")" | python3 -c 'import json,sys; print(",".join(t["label"] for t in json.load(sys.stdin)["result"]["tabs"]))'; }
+contains "$(tabs_of hb-named web)" 'logs,side' 'hopen.tabs adds the named tabs'
+sleep 3
+contains "$(cat "$HOME/hb-set/web/opened.txt" 2>/dev/null)" 'from-env' 'hopen.onOpen runs with the hopen.env values'
+contains "$(cat "$HOME/hb-set/web/tab-ran.txt" 2>/dev/null)" 'from-env' 'a tab runs its command with the hopen.env values' 
+contains "$(HERDR_SESSION=hb-named herdr pane list | python3 -c 'import json,sys; print(",".join(sorted(p.get("label") or "" for p in json.load(sys.stdin)["result"]["panes"])))')" 'agent' 'a tab gets its template'
+before_tabs="$(tabs_of hb-named web)"
+hopen hb-named --no-attach >/dev/null 2>&1
+if [ "$(tabs_of hb-named web)" = "$before_tabs" ]; then pass 'a second run adds no tab'; else fail 'a second run adds no tab'; fi
+
+# herdspace.toml needs Python 3.11 or later.
+if python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))'; then
+  mkdir -p "$HOME/hb-toml/app"
+  cat >"$HOME/hb-toml/herdspace.toml" <<'TOML'
+template = "plain"
+on_open = "touch parent-opened.txt"
+
+[[project]]
+name = "app"
+path = "app"
+tabs = [{ name = "logs" }]
+TOML
+  hopen hb-toml --no-attach >/dev/null 2>&1
+  contains "$(labels_of hb-toml)" 'hb-toml,app' 'herdspace.toml opens its projects'
+  contains "$(tabs_of hb-toml app)" 'logs' 'herdspace.toml adds the tabs'
+  sleep 2
+  check 'herdspace.toml runs the on-open command' test -f "$HOME/hb-toml/parent-opened.txt"
+  converted="$(hopen --convert hb-named 2>&1)"
+  contains "$converted" 'Wrote' 'hopen --convert writes a herdspace.toml'
+  contains "$(cat "$HOME/hb-named/herdspace.toml" 2>/dev/null)" 'name = "logs"' 'the converted file has the tabs'
+  contains "$(hopen --list 2>&1)" 'has two lists' 'hopen warns about two lists for one session'
+  contains "$(hopen --convert hb-named 2>&1)" 'exists' 'hopen --convert never replaces a file'
+  herdr session stop hb-toml >/dev/null 2>&1
+  sleep 1
+  herdr session delete hb-toml >/dev/null 2>&1
+  rm -rf "$HOME/hb-toml" "$HOME/hb-named" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-toml.tsv"
+else
+  pass 'herdspace.toml checks skipped: Python is older than 3.11'
+fi
+herdr session stop hb-named >/dev/null 2>&1
+sleep 1
+herdr session delete hb-named >/dev/null 2>&1
+rm -rf "$HOME/hb-set" "${XDG_STATE_HOME:-$HOME/.local/state}/hopen/hb-named.tsv"
+
 printf 'RESULT failures=%s\n' "$failures"
 [ "$failures" -eq 0 ]

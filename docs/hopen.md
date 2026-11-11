@@ -2,7 +2,7 @@
 
 Scope: open your projects in Herdr with `hopen`, and install, update, or remove it.
 
-`hopen` reads a VS Code workspace file and opens each folder as a Herdr workspace in one named session. The server setup installs it. The [templates guide](templates.md) explains how to split each project into named panes.
+`hopen` reads a list of projects and opens each folder as a Herdr workspace in one named session. A list is a VS Code workspace file or a `herdspace.toml` file. The server setup installs it. The [templates guide](templates.md) explains how to split each project into named panes.
 
 ## Write a list
 
@@ -76,7 +76,84 @@ hopen --all work
 | `hopen --list` | Show every list and its state. |
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
+| `hopen --convert work` | Write `~/work/herdspace.toml` from the VS Code list `work`. It never replaces a file. |
 | `hopen --version` | Show the installed release. |
+
+## Settings in a VS Code list
+
+All settings are optional. They go in the `settings` block of the VS Code workspace file, and VS Code ignores them. A setting for one folder uses the name of the folder, and the parent workspace uses the name of the session.
+
+| Setting | Effect |
+|---------|--------|
+| `hopen.session` | The name of the session, in place of the file name. |
+| `hopen.template` | The template for each folder that has no template of its own. The default is `plain`. |
+| `hopen.templates` | A template for each folder, by name. |
+| `hopen.parentWorkspace` | `false` to open no workspace for the folder of the list file. The default is `true`. |
+| `hopen.onOpen` | A command for each folder. It runs one time, when `hopen` creates the workspace, before the template programs start. |
+| `hopen.env` | Environment values for each folder. Each workspace, tab, and pane that `hopen` creates for the folder gets them. |
+| `hopen.tabs` | More tabs for each folder. Each tab has a `name`, and an optional `template` and `run` command. |
+
+This example opens the project `website` with the `code` template. It installs the packages one time, sets `PORT`, and adds a tab for the logs:
+
+```json
+{
+  "folders": [
+    { "name": "website", "path": "./code/website" },
+    { "name": "api", "path": "./code/api" }
+  ],
+  "settings": {
+    "hopen.session": "work",
+    "hopen.template": "agent",
+    "hopen.templates": { "website": "code" },
+    "hopen.onOpen": { "website": "npm install" },
+    "hopen.env": { "website": { "PORT": "3000" } },
+    "hopen.tabs": { "website": [ { "name": "logs", "run": "tail -f log/dev.log" } ] }
+  }
+}
+```
+
+`hopen.onOpen`, `hopen.env`, and `hopen.tabs` apply when `hopen` creates a workspace. A workspace that exists does not change. A setting with a wrong value gives a warning, and the other folders still open.
+
+`hopen.onOpen` and `hopen.tabs` run commands from the list file. Open only a list that you trust.
+
+## A herdspace.toml list
+
+A `herdspace.toml` file is the list format of herdspace. It holds the same settings, in [TOML](https://toml.io), the format of the Herdr configuration. Put it in a folder: `~/work/herdspace.toml` is the list of the session `work`.
+
+```toml
+# ~/work/herdspace.toml
+template = "agent"            # the template for each project with no template
+parent_template = "plain"     # the template of the parent workspace
+parent_workspace = true
+
+[[project]]
+name = "website"
+path = "~/code/website"       # or a path relative to this folder
+template = "code"
+on_open = "npm install"
+env = { PORT = "3000" }
+tabs = [{ name = "logs", run = "tail -f log/dev.log" }]
+
+[[project]]
+name = "api"
+path = "~/code/api"
+```
+
+| Key | Effect |
+|-----|--------|
+| `session` | The name of the session, in place of the folder name. |
+| `template` | The template for each project with no template of its own. |
+| `parent_workspace` | `false` to open no workspace for the folder of the file. |
+| `parent_template`, `on_open`, `env` | At the top: the template, the command, and the values of the parent workspace. |
+| `[[project]]` | One project. It needs a `path`. `name`, `template`, `on_open`, `env`, and `tabs` are optional. |
+
+A `herdspace.toml` file needs Python 3.11 or later. The Python of the macOS Command Line Tools is older. On a Mac, install a newer Python with `brew install python`. If both a `herdspace.toml` and a VS Code list name one session, `hopen` uses `herdspace.toml`, and it prints a warning.
+
+To make a `herdspace.toml` from a VS Code list, run:
+
+```bash
+hopen --convert work
+```
 
 ## Install only hopen
 

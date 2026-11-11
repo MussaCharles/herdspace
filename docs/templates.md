@@ -40,7 +40,7 @@ hopen --templates
 
 ## Choose a template
 
-Add the template names to the `settings` of your list file. `hopen.template` is the template for every folder. `hopen.templates` sets a template for one folder.
+Add the template names to the `settings` of your list file. `hopen.template` is the template for every folder. `hopen.templates` sets a template for one folder. The [hopen guide](hopen.md#settings-in-a-vs-code-list) has every setting, and the same keys for a `herdspace.toml` list.
 
 ```json
 {

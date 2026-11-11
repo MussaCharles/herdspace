@@ -8,6 +8,9 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 - Each setup run starts with a prerequisites step. It lists the missing items, installs them after one question, and lets you skip the optional ones. `--yes` installs them with no question.
 - The setup guide has a "Before you start" list, with the official guides to turn on SSH on a server.
+- New list settings for `hopen`: `hopen.session`, `hopen.parentWorkspace`, `hopen.onOpen`, `hopen.env`, and `hopen.tabs`.
+- `hopen` reads a `herdspace.toml` list, the TOML list format of herdspace. It needs Python 3.11 or later.
+- `hopen --convert` writes a `herdspace.toml` from a VS Code list.
 
 ## [0.2.0] - 2026-11-11
 

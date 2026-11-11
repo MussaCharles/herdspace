@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# hopen opens all the projects of a VS Code workspace file in one named Herdr
-# session, with one Herdr workspace for each folder, and then attaches to it.
+# hopen opens all the projects of a list in one named Herdr session, with one
+# Herdr workspace for each folder, and then attaches to it. A list is a VS Code
+# workspace file or a herdspace.toml file. docs/hopen.md explains both.
 #
 # Run it again at any time. It starts a stopped session, adds only the folders
 # that have no workspace, and closes nothing. The first workspace has the name
@@ -14,6 +15,7 @@
 #        hopen --list            Show every list and its state.
 #        hopen --templates       Show every template.
 #        hopen --apply NAME      Split the current tab with a template.
+#        hopen --convert NAME    Write ~/NAME/herdspace.toml from the VS Code list NAME.
 set -euo pipefail
 
 # The release script writes the release tag here.
@@ -29,6 +31,9 @@ STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hopen"
 STARTED=0
 # GUARD_PAIRS holds one "pane id<TAB>name" line for each pane that a template named.
 GUARD_PAIRS=""
+# ENV_ARGS holds one "--env KEY=VALUE" pair for each environment value of the
+# project that hopen opens now. Each new workspace, tab, and pane gets them.
+ENV_ARGS=()
 
 usage() {
   echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach]"
@@ -36,6 +41,7 @@ usage() {
   echo "       hopen --list"
   echo "       hopen --templates"
   echo "       hopen --apply NAME"
+  echo "       hopen --convert NAME"
   echo "       hopen --version"
 }
 warn() { printf '  [warn] %s\n' "$*" >&2; }
@@ -43,12 +49,13 @@ die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --file | --template | --apply)
+    --file | --template | --apply | --convert)
       [ "$#" -ge 2 ] || { usage >&2; exit 2; }
       case "$1" in
         --file) LIST_FILE="$2" ;;
         --template) TEMPLATE_FLAG="$2" ;;
         --apply) ACTION="apply"; APPLY_NAME="$2" ;;
+        --convert) ACTION="convert"; SESSION="$2" ;;
       esac
       shift 2
       ;;
@@ -110,7 +117,7 @@ apply_template() {
         warn "Template ${name}: the pane ${from} comes later or does not exist."
         continue
       fi
-      id="$(herdr pane split "$source" --direction "$direction" --ratio "$size" --no-focus | json_get "d['result']['pane']['pane_id']")"
+      id="$(herdr pane split "$source" --direction "$direction" --ratio "$size" --no-focus ${ENV_ARGS[@]+"${ENV_ARGS[@]}"} | json_get "d['result']['pane']['pane_id']")"
     fi
     herdr pane rename "$id" "$pane" >/dev/null
     GUARD_PAIRS="${GUARD_PAIRS}${id}"$'\t'"${pane}"$'\n'
@@ -154,52 +161,172 @@ while pairs and time.time() < end:
 
 # ---------- project lists
 
-# find_lists prints one "session<TAB>file" line for each project list.
+# A list is a VS Code workspace file, ~/<name>.code-workspace or
+# ~/<name>/<name>.code-workspace, or a herdspace file, ~/<name>/herdspace.toml.
+# The session has the name of the file or the folder, unless the list sets one.
+
+# read_list FILE WHAT prints facts about one list. WHAT is one of:
+#   session  the session name
+#   items    one line for each workspace and each extra tab:
+#            R<TAB>label<TAB>path<TAB>template<TAB>on_open<TAB>env   (the parent workspace)
+#            P<TAB>label<TAB>path<TAB>template<TAB>on_open<TAB>env   (a project)
+#            env is KEY=VALUE items, separated by the byte 0x1f. An empty
+#            field is "-", because bash joins two tabs in a row into one.
+#            T<TAB>label<TAB>tab name<TAB>template<TAB>command
+# A problem with one setting prints a W<TAB>message line, and the rest still works.
+read_list() {
+  python3 -I - "$1" "$2" "${TEMPLATE_FLAG:-}" <<'PY'
+import json, os, re, sys
+
+path, what, forced = sys.argv[1:4]
+path = os.path.abspath(path)
+base = os.path.dirname(path)
+
+def warn(text):
+    print("W", text, sep="\t")
+
+def clean(value):
+    return str(value).replace("\t", " ").replace("\n", " ").strip()
+
+def field(value):
+    return clean(value) or "-"
+
+if os.path.basename(path) == "herdspace.toml":
+    if sys.version_info < (3, 11):
+        sys.exit("herdspace.toml needs Python 3.11 or later. Install a newer Python, for example with: brew install python")
+    import tomllib
+    with open(path, "rb") as handle:
+        try:
+            data = tomllib.load(handle)
+        except tomllib.TOMLDecodeError as error:
+            sys.exit(f"{path}: {error}")
+    session = data.get("session") or os.path.basename(base)
+    default = data.get("template", "plain")
+    parent = data.get("parent_workspace", True)
+    projects = []
+    for entry in data.get("project", []):
+        if not isinstance(entry, dict) or "path" not in entry:
+            warn("A [[project]] entry has no path, so hopen skips it.")
+            continue
+        projects.append({
+            "path": entry["path"],
+            "name": entry.get("name"),
+            "template": entry.get("template"),
+            "on_open": entry.get("on_open", ""),
+            "tabs": entry.get("tabs", []),
+            "env": entry.get("env", {}),
+        })
+    parent_open = data.get("on_open", "")
+    parent_env = data.get("env", {})
+    parent_template = data.get("parent_template")
+else:
+    with open(path, encoding="utf-8") as handle:
+        text = handle.read()
+    # VS Code accepts comment lines and trailing commas.
+    text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+    text = re.sub(r",(\s*[\]}])", r"\1", text)
+    try:
+        data = json.loads(text)
+    except ValueError as error:
+        sys.exit(f"{path}: {error}")
+    settings = data.get("settings", {}) or {}
+    session = settings.get("hopen.session") or os.path.basename(path)[: -len(".code-workspace")]
+    default = settings.get("hopen.template", "plain")
+    parent = settings.get("hopen.parentWorkspace", True)
+    per_template = settings.get("hopen.templates", {}) or {}
+    per_open = settings.get("hopen.onOpen", {}) or {}
+    per_tabs = settings.get("hopen.tabs", {}) or {}
+    per_env = settings.get("hopen.env", {}) or {}
+    projects = []
+    for folder in data.get("folders", []):
+        if not isinstance(folder, dict) or "path" not in folder:
+            warn("A folder entry has no path, so hopen skips it.")
+            continue
+        full = os.path.normpath(os.path.join(base, os.path.expanduser(folder["path"])))
+        label = folder.get("name") or os.path.basename(full)
+        projects.append({
+            "path": folder["path"],
+            "name": label,
+            "template": per_template.get(label),
+            "on_open": per_open.get(label, ""),
+            "tabs": per_tabs.get(label, []),
+            "env": per_env.get(label, {}),
+        })
+    parent_open = per_open.get(session, "")
+    parent_env = per_env.get(session, {})
+    parent_template = per_template.get(session)
+
+if not isinstance(parent, bool):
+    warn("The parent workspace setting must be true or false. hopen uses true.")
+    parent = True
+
+if what == "session":
+    print(clean(session))
+    sys.exit(0)
+
+def template(value):
+    return forced or value or default
+
+def env_field(label, values):
+    if not values:
+        return ""
+    if not isinstance(values, dict):
+        warn(f"{label}: env must be a map of names to values. hopen skips it.")
+        return ""
+    items = []
+    for key, value in values.items():
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", str(key)) or isinstance(value, (dict, list)):
+            warn(f"{label}: the environment value {key} is not valid. hopen skips it.")
+            continue
+        if isinstance(value, bool):
+            value = "true" if value else "false"
+        items.append(f"{key}={clean(value)}")
+    return "\x1f".join(items)
+
+if parent:
+    print("R", clean(session), base, template(parent_template), field(parent_open), field(env_field(session, parent_env)), sep="\t")
+for project in projects:
+    full = os.path.normpath(os.path.join(base, os.path.expanduser(str(project["path"]))))
+    label = clean(project["name"] or os.path.basename(full))
+    print("P", label, full, template(project["template"]), field(project["on_open"]), field(env_field(label, project["env"])), sep="\t")
+    tabs = project["tabs"]
+    if not isinstance(tabs, list):
+        warn(f"{label}: tabs must be a list. hopen skips them.")
+        continue
+    for tab in tabs:
+        if not isinstance(tab, dict) or not tab.get("name"):
+            warn(f"{label}: each tab needs a name. hopen skips one tab.")
+            continue
+        print("T", label, clean(tab["name"]), tab.get("template") or "plain", field(tab.get("run", "")), sep="\t")
+PY
+}
+
+# find_lists prints one "session<TAB>file" line for each project list. If a
+# herdspace.toml and a .code-workspace file name the same session, hopen uses
+# herdspace.toml.
 find_lists() {
-  local file name
-  for file in "$HOME"/*.code-workspace "$HOME"/*/*.code-workspace; do
-    [ -f "$file" ] || continue
-    name="$(basename "$file" .code-workspace)"
-    valid_name "$name" || continue
-    case "$file" in
-      "${HOME}/${name}.code-workspace" | "${HOME}/${name}/${name}.code-workspace")
-        printf '%s\t%s\n' "$name" "$file"
-        ;;
-    esac
-  done | awk -F '\t' '!seen[$1]++'
+  local file name session
+  {
+    for file in "$HOME"/*/herdspace.toml; do
+      [ -f "$file" ] || continue
+      session="$(read_list "$file" session 2>&1)" || { warn "Skipped ${file}. ${session}"; continue; }
+      valid_name "$session" && printf '%s\t%s\n' "$session" "$file"
+    done
+    for file in "$HOME"/*.code-workspace "$HOME"/*/*.code-workspace; do
+      [ -f "$file" ] || continue
+      name="$(basename "$file" .code-workspace)"
+      case "$file" in
+        "${HOME}/${name}.code-workspace" | "${HOME}/${name}/${name}.code-workspace") ;;
+        *) continue ;;
+      esac
+      session="$(read_list "$file" session 2>&1)" || { warn "Skipped ${file}. ${session}"; continue; }
+      valid_name "$session" && printf '%s\t%s\n' "$session" "$file"
+    done
+  } | awk -F '\t' '{ if (seen[$1]++) { printf "  [warn] Session %s has two lists. hopen uses %s.\n", $1, first[$1] > "/dev/stderr" } else { first[$1] = $2; print } }'
 }
 
 find_list_for() {
   find_lists | awk -F '\t' -v n="$1" '$1 == n {print $2}'
-}
-
-# list_folders prints one "label<TAB>path<TAB>template" line for the folder of
-# the list file, and then one line for each folder in the list. VS Code accepts
-# comment lines and trailing commas, so this removes them before it parses.
-list_folders() {
-  python3 -I - "$LIST_FILE" "$SESSION" "$TEMPLATE_FLAG" <<'PY'
-import json, os, re, sys
-
-path, session, forced = sys.argv[1:4]
-base = os.path.dirname(os.path.abspath(path))
-with open(path, encoding="utf-8") as handle:
-    text = handle.read()
-text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
-text = re.sub(r",(\s*[\]}])", r"\1", text)
-data = json.loads(text)
-settings = data.get("settings", {}) or {}
-default = settings.get("hopen.template", "plain")
-per_folder = settings.get("hopen.templates", {}) or {}
-
-def template(label):
-    return forced or per_folder.get(label) or default
-
-print(session, base, template(session), sep="\t")
-for folder in data.get("folders", []):
-    full = os.path.normpath(os.path.join(base, os.path.expanduser(folder["path"])))
-    label = folder.get("name") or os.path.basename(full)
-    print(label, full, template(label), sep="\t")
-PY
 }
 
 # ---------- sessions
@@ -285,7 +412,8 @@ restart_programs() {
   all="$(workspaces)"
   while IFS=$'\t' read -r label template saved; do
     template_exists "$template" && [ "$template" != plain ] || continue
-    id="$(awk -F '\t' -v l="$label" '$1 == l {print $2}' <<<"$all")"
+    # A tab of a workspace has the state label "workspace/tab".
+    id="$(awk -F '\t' -v l="${label%%/*}" '$1 == l {print $2}' <<<"$all")"
     [ -n "$id" ] || continue
     panes="$(panes_of "$id")"
     while read -r pane from direction size command; do
@@ -306,16 +434,57 @@ restart_programs() {
   [ "$restarted" -eq 0 ] || printf '  [info] Session %s: %s programs started again.\n' "$SESSION" "$restarted"
 }
 
+# open_template TEMPLATE PANE STATE_LABEL splits PANE with TEMPLATE, starts its
+# programs, and remembers the panes under STATE_LABEL.
+open_template() {
+  local template="$1" root="$2" state_label="$3" before
+  [ "$template" != plain ] || return 0
+  before="$GUARD_PAIRS"
+  HERDR_SESSION="$SESSION" apply_template "$template" "$root"
+  remember_template "$state_label" "$template" "$(printf '%s' "${GUARD_PAIRS#"$before"}" | tr '\t' '=' | tr '\n' ' ' | sed 's/ $//')"
+}
+
 # prepare_session starts SESSION and adds each folder that has no workspace.
+# A new workspace gets its template, its on-open command, and its extra tabs.
 prepare_session() {
-  local folders existing added=0 label folder template output root before
+  local items existing added=0 kind label folder template extra envs output root workspace_id item
+  local current="" current_folder="" current_id=""
   STARTED=0
   session_answers || start_session
   [ "$STARTED" -eq 0 ] || restart_programs
-  folders="$(list_folders)"
+  items="$(read_list "$LIST_FILE" items)" || die "Could not read ${LIST_FILE}."
   existing="$(workspaces | cut -f1)"
-  while IFS=$'\t' read -r label folder template; do
-    [ -n "$label" ] || continue
+  while IFS=$'\t' read -r kind label folder template extra envs; do
+    [ "$extra" != "-" ] || extra=""
+    [ "$envs" != "-" ] || envs=""
+    case "$kind" in
+      W) warn "$label"; continue ;;
+      T)
+        # A tab line: label, tab name (in "folder"), template, command.
+        [ "$label" = "$current" ] && [ -n "$current_id" ] || continue
+        if ! template_exists "$template"; then
+          warn "${label}/${folder}: no template named ${template}. The tab opens with one pane."
+          template="plain"
+        fi
+        output="$(HERDR_SESSION="$SESSION" herdr tab create --workspace "$current_id" --cwd "$current_folder" --label "$folder" --no-focus ${ENV_ARGS[@]+"${ENV_ARGS[@]}"})"
+        root="$(json_get "d['result']['root_pane']['pane_id']" <<<"$output")"
+        open_template "$template" "$root" "${label}/${folder}"
+        [ -z "$extra" ] || HERDR_SESSION="$SESSION" herdr pane run "$root" "$extra" >/dev/null
+        continue
+        ;;
+      R) label="$SESSION" ;;
+      P) ;;
+      *) continue ;;
+    esac
+    current="$label"
+    current_folder="$folder"
+    current_id=""
+    ENV_ARGS=()
+    if [ -n "$envs" ]; then
+      while IFS= read -r -d $'\x1f' item; do
+        [ -z "$item" ] || ENV_ARGS+=(--env "$item")
+      done <<<"${envs}"$'\x1f'
+    fi
     if grep -Fxq -- "$label" <<<"$existing"; then
       continue
     fi
@@ -327,15 +496,15 @@ prepare_session() {
       warn "${label}: no template named ${template}. It opens with one pane."
       template="plain"
     fi
-    output="$(HERDR_SESSION="$SESSION" herdr workspace create --cwd "$folder" --label "$label" --no-focus)"
-    if [ "$template" != plain ]; then
-      root="$(json_get "d['result']['root_pane']['pane_id']" <<<"$output")"
-      before="$GUARD_PAIRS"
-      HERDR_SESSION="$SESSION" apply_template "$template" "$root"
-      remember_template "$label" "$template" "$(printf '%s' "${GUARD_PAIRS#"$before"}" | tr '\t' '=' | tr '\n' ' ' | sed 's/ $//')"
-    fi
+    output="$(HERDR_SESSION="$SESSION" herdr workspace create --cwd "$folder" --label "$label" --no-focus ${ENV_ARGS[@]+"${ENV_ARGS[@]}"})"
+    root="$(json_get "d['result']['root_pane']['pane_id']" <<<"$output")"
+    workspace_id="$(json_get "d['result']['workspace']['workspace_id']" <<<"$output")"
+    current_id="$workspace_id"
+    # The on-open command runs first. The shell then starts the template program.
+    [ -z "$extra" ] || HERDR_SESSION="$SESSION" herdr pane run "$root" "$extra" >/dev/null
+    open_template "$template" "$root" "$label"
     added=$((added + 1))
-  done <<<"$folders"
+  done <<<"$items"
   printf '  [info] Session %s: %s workspaces added.\n' "$SESSION" "$added"
   HERDR_SESSION="$SESSION" guard_names
 }
@@ -350,7 +519,7 @@ attach_session() {
 show_lists() {
   local lists name state count
   lists="$(find_lists)"
-  [ -n "$lists" ] || die "No project lists. Create ~/work.code-workspace."
+  [ -n "$lists" ] || die "No project lists. Create ~/work.code-workspace or ~/work/herdspace.toml."
   printf '%-22s %-9s %-11s %s\n' SESSION STATE WORKSPACES LIST
   while IFS=$'\t' read -r name LIST_FILE; do
     SESSION="$name"
@@ -368,7 +537,7 @@ show_lists() {
 open_all() {
   local lists wanted="$SESSION" name
   lists="$(find_lists)"
-  [ -n "$lists" ] || die "No project lists. Create ~/work.code-workspace."
+  [ -n "$lists" ] || die "No project lists. Create ~/work.code-workspace or ~/work/herdspace.toml."
   if [ -n "$wanted" ] && ! grep -q "^${wanted}"$'\t' <<<"$lists"; then
     die "No project list for ${wanted}."
   fi
@@ -402,8 +571,94 @@ print(len([p for p in json.load(sys.stdin)["result"]["panes"] if p["tab_id"] == 
   guard_names
 }
 
+# convert_list writes ~/SESSION/herdspace.toml from the VS Code list of SESSION.
+# It never replaces a file.
+convert_list() {
+  local source target items
+  target="${HOME}/${SESSION}/herdspace.toml"
+  [ ! -e "$target" ] || die "${target} exists. Move it, and run --convert again."
+  source="$(find_list_for "$SESSION")"
+  case "$source" in
+    *.code-workspace) ;;
+    *) die "No VS Code list for ${SESSION}." ;;
+  esac
+  mkdir -p "${HOME}/${SESSION}"
+  items="$(mktemp)"
+  read_list "$source" items >"$items" || { rm -f "$items"; die "Could not read ${source}."; }
+  python3 -I - "$source" "$target" "$HOME" "$items" <<'PY'
+import os, sys
+
+source, target, home, items = sys.argv[1:5]
+target_dir = os.path.dirname(target)
+
+def quote(text):
+    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+def where(path):
+    relative = os.path.relpath(path, target_dir)
+    if not relative.startswith(".."):
+        return relative
+    if path.startswith(home + os.sep):
+        return "~/" + os.path.relpath(path, home)
+    return path
+
+def env_table(pairs):
+    return "{ " + ", ".join(key + " = " + quote(value) for key, value in pairs) + " }"
+
+parent = None
+projects = []
+for raw in open(items, encoding="utf-8").read().splitlines():
+    kind, *fields = raw.split("\t")
+    fields = ["" if value == "-" else value for value in fields] + [""] * 5
+    if kind in ("R", "P"):
+        entry = {"label": fields[0], "path": fields[1], "template": fields[2], "on_open": fields[3], "tabs": [],
+                 "env": [item.split("=", 1) for item in fields[4].split("\x1f") if "=" in item]}
+        if kind == "R":
+            parent = entry
+        else:
+            projects.append(entry)
+    elif kind == "T" and projects and projects[-1]["label"] == fields[0]:
+        projects[-1]["tabs"].append({"name": fields[1], "template": fields[2], "run": fields[3]})
+
+lines = ["# Written by hopen --convert from " + source.replace(home, "~", 1) + ".", ""]
+if parent is None:
+    lines += ["parent_workspace = false", ""]
+else:
+    if parent["template"] != "plain":
+        lines.append("parent_template = " + quote(parent["template"]))
+    if parent["on_open"]:
+        lines.append("on_open = " + quote(parent["on_open"]))
+    if parent["env"]:
+        lines.append("env = " + env_table(parent["env"]))
+    if len(lines) > 2:
+        lines.append("")
+for project in projects:
+    lines += ["[[project]]", "name = " + quote(project["label"]), "path = " + quote(where(project["path"]))]
+    if project["template"] != "plain":
+        lines.append("template = " + quote(project["template"]))
+    if project["on_open"]:
+        lines.append("on_open = " + quote(project["on_open"]))
+    if project["env"]:
+        lines.append("env = " + env_table(project["env"]))
+    if project["tabs"]:
+        tabs = []
+        for tab in project["tabs"]:
+            text = "{ name = " + quote(tab["name"]) + ", template = " + quote(tab["template"])
+            if tab["run"]:
+                text += ", run = " + quote(tab["run"])
+            tabs.append(text + " }")
+        lines.append("tabs = [" + ", ".join(tabs) + "]")
+    lines.append("")
+with open(target, "w", encoding="utf-8") as handle:
+    handle.write("\n".join(lines).rstrip() + "\n")
+PY
+  rm -f "$items"
+  printf '  [info] Wrote %s. hopen now uses it in place of %s.\n' "${target/#$HOME/~}" "${source/#$HOME/~}"
+}
+
 case "$ACTION" in
   list) show_lists; exit 0 ;;
+  convert) convert_list; exit 0 ;;
   templates) show_templates; exit 0 ;;
   apply) apply_here; exit 0 ;;
 esac
@@ -430,7 +685,7 @@ if [ -z "$LIST_FILE" ]; then
 fi
 
 if [ -z "$LIST_FILE" ] || [ ! -f "$LIST_FILE" ]; then
-  die "No list of projects for ${SESSION}. Create ~/${SESSION}.code-workspace."
+  die "No list of projects for ${SESSION}. Create ~/${SESSION}.code-workspace or ~/${SESSION}/herdspace.toml."
 fi
 
 prepare_session

@@ -120,7 +120,7 @@ hopen work
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
 
-Run `hopen` again at any time. It starts a stopped session and adds only the new folders. It never closes anything. The [hopen guide](docs/hopen.md) has every command and more about the list file.
+Run `hopen` again at any time. It starts a stopped session and adds only the new folders. It never closes anything. A list can also be a `herdspace.toml` file, and a list can set a start command, environment values, and extra tabs for each project. The [hopen guide](docs/hopen.md) has every command and more about the list file.
 
 ## Templates
 

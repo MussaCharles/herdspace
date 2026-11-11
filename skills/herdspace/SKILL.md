@@ -32,9 +32,9 @@ hopen work
 
 ## Add a project to a list
 
-1. Find the list file with `hopen --list`. A list is at `~/<name>.code-workspace` or `~/<name>/<name>.code-workspace`.
+1. Find the list file with `hopen --list`. A list is at `~/<name>.code-workspace`, `~/<name>/<name>.code-workspace`, or `~/<name>/herdspace.toml`.
 2. Before you change the file, ask the person.
-3. Add one entry to `folders`, for example `{ "name": "api", "path": "./code/api" }`. The path is relative to the folder of the list file. Keep the comments and the other entries.
+3. In a VS Code list, add one entry to `folders`, for example `{ "name": "api", "path": "./code/api" }`. In a `herdspace.toml` list, add a `[[project]]` table with `name` and `path`. A path is relative to the folder of the list file. Keep the comments and the other entries. The settings for a start command, environment values, and extra tabs are in the hopen guide: `https://github.com/MussaCharles/herdspace/blob/main/docs/hopen.md`.
 4. Run `hopen <name> --no-attach`. It adds a workspace only for the new folder.
 
 ## Split a tab with a template
