@@ -1232,7 +1232,10 @@ show_ports() {
 import os, subprocess, sys
 
 home = os.path.expanduser("~")
-projects = [line.split("\t", 1) for line in sys.stdin.read().split("\n") if "\t" in line]
+# The real paths, because a folder can have two names, for example /var and
+# /private/var on macOS.
+projects = [(os.path.realpath(path), label) for path, label in
+            (line.split("\t", 1) for line in sys.stdin.read().split("\n") if "\t" in line)]
 
 def run(*args):
     try:
@@ -1241,6 +1244,7 @@ def run(*args):
         return ""
 
 def project_of(folder):
+    folder = os.path.realpath(folder) if folder else folder
     best = ("", "-")
     for path, label in projects:
         if (folder == path or folder.startswith(path + "/")) and len(path) > len(best[0]):
