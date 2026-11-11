@@ -1,0 +1,10 @@
+# Dependabot updates the pinned commit SHA of each action in .github/workflows,
+# once a week. docs/repository-settings.md explains it.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "Update"
