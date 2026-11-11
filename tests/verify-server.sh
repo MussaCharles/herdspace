@@ -146,6 +146,9 @@ printf '[[project]]\nname = "app"\npath = "app"\n' >"$work/hb-listed/herdspace.t
 hopen "$work/hb-listed" --no-attach >/dev/null 2>&1
 contains "$(labels_of hb-listed)" 'hb-listed,app' 'hopen <folder> uses the list in the folder'
 contains "$(hopen "$work/no-such-folder" 2>&1)" 'No folder' 'hopen <folder> rejects a missing folder'
+mkdir -p "$work/hb-claim"
+printf 'session = "hb-all-one"\n' >"$work/hb-claim/herdspace.toml"
+contains "$(hopen "$work/hb-claim" --no-attach 2>&1)" 'which' 'a list in a folder cannot take the session of another list'
 for name in hb-folder hb-listed; do
   herdr session stop "$name" >/dev/null 2>&1
 done

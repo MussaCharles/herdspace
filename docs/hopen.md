@@ -73,7 +73,7 @@ To open one folder with no list, as `code .` does in VS Code, run this command i
 hopen .
 ```
 
-`hopen` opens the folder as one workspace, in a session with the name of the folder. A path also works, for example `hopen ~/code/api`. A path must have a `/`, or `hopen` reads it as the name of a list. If the folder has a `herdspace.toml` file or a `<folder>.code-workspace` file, `hopen` opens that list. In a session name, each character that is not a letter, a number, `.`, `-`, or `_` becomes `-`.
+`hopen` opens the folder as one workspace, in a session with the name of the folder. A path also works, for example `hopen ~/code/api`. A path must have a `/`, or `hopen` reads it as the name of a list. If the folder has a `herdspace.toml` file or a `<folder>.code-workspace` file, `hopen` opens that list. `hopen` asks before it uses the commands and values of that list, as for each list. If the list names a session that another list has, `hopen` stops. In a session name, each character that is not a letter, a number, `.`, `-`, or `_` becomes `-`.
 
 ## Commands
 
