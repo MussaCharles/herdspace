@@ -24,6 +24,10 @@ The [CI guide](../../../docs/ci.md) lists the workflows and the jobs. The [repos
 
 For a pull request that changes only Markdown files, `docs/`, or `LICENSE`, `tools/ci-changes.sh` gives `code=false`. Each step of the long jobs has `if: needs.changes.outputs.code == 'true'`. If you add a step to a long job, add that `if:` too. Do not skip a whole job with `if:`: a skipped matrix job reports its name with the expression unresolved, and the required check never matches. If a new kind of file can change only docs, add it to the pattern in `tools/ci-changes.sh` and to `tests/test-ci-changes.sh`.
 
+## A workflow that writes
+
+Only `pins.yml` has a write permission: `issues: write`, to open or update its issue. It runs on a schedule and by hand, never for a pull request, so code from a fork never runs with that token. Keep it that way.
+
 ## Read a failed job
 
 `gh run view --log-failed` answers only after the whole run ends. To read one job while the others still run:

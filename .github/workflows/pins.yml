@@ -1,0 +1,29 @@
+# Once a week, compares the pinned downloads with the latest releases, and opens
+# an issue (or updates the open one) when a pin is old. It changes no code and
+# opens no pull request. docs/ci.md explains it.
+name: Pinned tools
+
+on:
+  schedule:
+    - cron: "41 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    name: Check the pins
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare the pins with the latest releases
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: tools/check-pins.sh --issue

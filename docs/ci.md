@@ -16,6 +16,7 @@ No free service can start a macOS VM in its runner. For that reason, the macOS j
 |----------|------|--------------|
 | CI | `.github/workflows/ci.yml` | For each pull request, once a week on Monday, and by hand. |
 | Release check | `.github/workflows/release.yml` | When a release is published, and by hand. A pre-release does not start it. |
+| Pinned tools | `.github/workflows/pins.yml` | Once a week on Monday, and by hand. |
 
 Each trigger finds a different kind of problem:
 
@@ -31,11 +32,17 @@ The first job, "Changes", runs `tools/ci-changes.sh`. If a pull request changes 
 
 The long jobs do not skip as a whole. GitHub reports a skipped matrix job with its name unresolved, for example "Linux server (${{ matrix.runner }}, ${{ matrix.image }})". That name does not match the required check, so the pull request cannot merge.
 
+## Pinned tools
+
+The workflow "Pinned tools" runs `tools/check-pins.sh --issue`. The script runs `tools/update-versions.sh` on a copy, and compares the result with `tools/versions.tsv` and `tools/versions.env`. For a newer release, or a newer commit of the Auto Title plugin, it opens the issue "Pinned tools have newer releases". If that issue is open, it updates it. It changes no code. The workflow has `issues: write` for the issue, and only `contents: read` for the code.
+
+The git pins of Oh My Zsh and its plugins follow a branch that changes almost each day. The report lists them for information, but they do not open an issue. To see the report on your own machine, run `tools/check-pins.sh`.
+
 ## The jobs of CI
 
 | Job | Runner | Tests |
 |-----|--------|-------|
-| Fast checks | `ubuntu-24.04` | `shellcheck`, `tests/test-skills.sh`, `tests/test-hopen-list.sh`, `tests/test-install.sh`, `tests/test-nvim-plugins.sh` |
+| Fast checks | `ubuntu-24.04` | `shellcheck`, `tests/test-skills.sh`, `tests/test-hopen-list.sh`, `tests/test-install.sh`, `tests/test-nvim-plugins.sh`, `tests/test-links.sh`, `tests/test-ci-changes.sh` |
 | Linux server | `ubuntu-24.04` and `ubuntu-24.04-arm`, each with the image `ubuntu:24.04` and `debian:12`: four jobs | `tests/run-linux.sh` for the image, and `tests/run-prereqs.sh` in the Ubuntu job of each runner |
 | Linux login service and client keys | `ubuntu-24.04` | `tests/run-systemd.sh`, `tests/run-client-linux.sh` |
 | macOS server | `macos-26` | A real `bootstrap.sh server --yes` on the runner, then `bootstrap.sh server --check`, then `tests/run-macos.sh` |
