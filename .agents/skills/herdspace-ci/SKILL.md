@@ -20,6 +20,10 @@ The [CI guide](../../../docs/ci.md) lists the workflows and the jobs. The [repos
 3. If you rename a job of `ci.yml`, or change its matrix, change the names in `CHECKS` in `tools/repo-settings.sh` in the same pull request. A matrix job has the values in its name, for example "Linux server (ubuntu-24.04, debian:12)". Merge the other open pull requests first. Then run `tools/repo-settings.sh --apply` from the branch, before the merge. A required check with an old name never passes, and a pull request that waits for it cannot merge.
 4. A workflow file must be on `main` before `gh workflow run` can start it. After that, `--ref <branch>` runs the version of a branch.
 
+## A workflow that writes
+
+Only `pins.yml` has a write permission: `issues: write`, to open or update its issue. It runs on a schedule and by hand, never for a pull request, so code from a fork never runs with that token. Keep it that way.
+
 ## Read a failed job
 
 `gh run view --log-failed` answers only after the whole run ends. To read one job while the others still run:

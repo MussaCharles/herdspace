@@ -35,6 +35,8 @@ jobs:
         run: tests/test-install.sh
       - name: Neovim plugin step
         run: tests/test-nvim-plugins.sh
+      - name: Links in the Markdown files
+        run: tests/test-links.sh
 
   linux:
     # One job for each runner and image, so that they run at the same time.

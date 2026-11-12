@@ -85,6 +85,10 @@ tests/test-skills.sh
 ```
 
 ```bash
+tests/test-links.sh
+```
+
+```bash
 tests/run-prereqs.sh
 ```
 

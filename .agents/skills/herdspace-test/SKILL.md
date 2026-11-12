@@ -17,7 +17,7 @@ Run each check. Do not install a missing tool without the agreement of the perso
 | Ghostty in a container | Docker answers, and the machine can build `tests/Dockerfile.client` | `tests/run-client-linux.sh` (real key presses) |
 | macOS stubs | `uname -s` is `Darwin`, and Homebrew has the server tools (Herdr, Neovim, and the others) and Python 3.11 or later. The test uses the real tools, with a temporary home folder. Only commands that change the system are stubs. | `tests/run-macos.sh` |
 | macOS VM | `uname -m` is `arm64` on a Mac, `tart` is installed, and `tart list --quiet` shows the base image (`tahoe-base`) | the macOS part of `tests/run-release-check.sh` |
-| Any machine | bash, git, and Python 3.11 or later | `tests/test-hopen-list.sh`, `tests/test-skills.sh`, `tests/test-install.sh`, `tests/test-nvim-plugins.sh`, `shellcheck` |
+| Any machine | bash, git, and Python 3.11 or later | `tests/test-hopen-list.sh`, `tests/test-skills.sh`, `tests/test-install.sh`, `tests/test-nvim-plugins.sh`, `tests/test-links.sh`, `shellcheck` |
 
 ## 2. Run the tests that the change touches
 
@@ -29,6 +29,7 @@ Run each check. Do not install a missing tool without the agreement of the perso
 | The login service | `tests/run-systemd.sh` too |
 | The prerequisites step | `tests/run-prereqs.sh` |
 | A skill or `AGENTS.md` | `tests/test-skills.sh` |
+| A Markdown file | `tests/test-links.sh` |
 | A release, before you publish it | every test above |
 | A release, after you publish it | `tests/run-release-check.sh` |
 
