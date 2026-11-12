@@ -47,7 +47,7 @@ The git pins of Oh My Zsh and its plugins follow a branch that changes almost ea
 | Linux login service and client keys | `ubuntu-24.04` | `tests/run-systemd.sh`, `tests/run-client-linux.sh` |
 | macOS server | `macos-26` | A real `bootstrap.sh server --yes` on the runner, then `bootstrap.sh server --check`, then `tests/run-macos.sh` |
 
-The Linux tests start their own containers on the runner, as on a machine of a contributor. The jobs run at the same time. A pull request gets its result in about 8 minutes.
+The Linux tests start their own containers on the runner, as on a machine of a contributor. The jobs run at the same time. A pull request that changes code gets its result in about 6 minutes. The longest jobs are the client keys and the macOS server. A pull request that changes only docs gets its result in less than a minute.
 
 ## The jobs of the release check
 

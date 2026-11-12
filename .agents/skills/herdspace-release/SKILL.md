@@ -33,7 +33,7 @@ Follow these steps only when the person asks for a release.
    tools/release.sh 0.1.2 --publish
    ```
 
-If the folder has a change or an untracked file, `--publish` stops. If `CHANGELOG.md` has no section for the tag, it stops too.
+The ruleset "release tags" lets only the admin role create a tag, so run `--publish` with the account of the owner. If the folder has a change or an untracked file, `--publish` stops. If `CHANGELOG.md` has no section for the tag, it stops too.
 
 ## What a release holds
 

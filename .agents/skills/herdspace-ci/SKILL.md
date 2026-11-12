@@ -63,6 +63,10 @@ Each of these made a job fail one time:
 
 Do not change a setting only in the web page of GitHub. The next `--apply` puts the value of the script back.
 
+## Update the branch of a pull request
+
+If `main` changed and the branch has a conflict, merge `main` into the branch, fix the conflict, and push. Do not rebase a pushed branch and push it with `--force`: the history of the pull request changes, and an agent can be refused the force push. Two pull requests that change the same file, for example `ci.yml`, merge one after the other, with `main` merged into the second.
+
 ## Merge a pull request
 
 Only the repository admin role can merge, through the bypass of "main: who can merge". Wait until every CI job passes, then merge with `--admin`:
