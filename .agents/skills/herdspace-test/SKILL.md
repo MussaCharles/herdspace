@@ -69,7 +69,8 @@ If you add a feature that a person can see, add a step for it to `tests/tour-rel
 - In a Tart VM, host names can fail because the DNS proxy of the host refuses the VM. Set a public DNS server in the VM. Do not start the base image. Clone it.
 - Apple allows two macOS VMs at a time on one Mac.
 - Herdr stops in a terminal with no size. `tests/pty_run.py` gives its terminal a size. A test window must have a size before Herdr starts in it.
-- If the Ghostty window of a client test does not open, the test must stop with the Ghostty log. A test that waits for a window can wait forever.
+- If the Ghostty window of a client test does not open, the test must stop with the Ghostty log. A test that waits for a window can wait forever. A window can also close after the test found it, so `open_ghostty` checks it again after its wait.
+- Each command that `tests/lib-pair.sh` runs in a container has a time limit, `STEP_LIMIT` (15 minutes by default). Keep a time limit on each new helper, so that one stuck command fails the test.
 - A slow or broken package mirror looks like a stuck test. Set `APT_MIRROR_UBUNTU` or `APT_MIRROR_DEBIAN`. See the testing guide.
 - Find the real cause of a failed test before you add code. Code that answers the terminal queries of fzf did not fix a fzf test, because the cause was a race. The code was removed again.
 

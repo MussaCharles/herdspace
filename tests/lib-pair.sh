@@ -32,8 +32,10 @@ docker run -d --name "$srv" --network "$net" --network-alias my-server --user ro
 apt_cache_args "${CLIENT_BASE:-ubuntu:26.04}"
 docker run -d --name "$cli" --network "$net" ${APT_CACHE[@]+"${APT_CACHE[@]}"} hb-test-cli sleep 7200 >/dev/null || exit 1
 
-# docker exec can start with no file mask, so set the usual one.
-in_mask=(sh -c 'umask 022; exec "$@"' sh)
+# docker exec can start with no file mask, so set the usual one. Each command
+# also gets a time limit, STEP_LIMIT seconds (15 minutes by default), so that a
+# stuck command fails the test and does not block it.
+in_mask=(timeout "${STEP_LIMIT:-900}" sh -c 'umask 022; exec "$@"' sh)
 srv_root() { docker exec "$srv" "${in_mask[@]}" "$@"; }
 srv_user() { docker exec -u tester -e LANG=C.UTF-8 -e PATH=/home/tester/.local/bin:/usr/local/bin:/usr/bin:/bin -w /home/tester/repo "$srv" "${in_mask[@]}" "$@"; }
 cli_user() { docker exec -e LANG=C.UTF-8 -e DISPLAY=:9 -e LIBGL_ALWAYS_SOFTWARE=1 -e PATH=/home/tester/.local/bin:/usr/local/bin:/usr/bin:/bin -w /home/tester/repo "$cli" "${in_mask[@]}" "$@"; }
@@ -75,7 +77,14 @@ open_ghostty() {
     echo "RESULT exit=1"
     exit 1
   fi
-  cli_user xdotool windowactivate --sync "$win" >/dev/null 2>&1
+  # A window can close during the wait, for example when Ghostty stops.
+  if ! cli_user xdotool getwindowname "$win" >/dev/null 2>&1; then
+    fail 'ghostty window closed'
+    cli_user tail -n 20 /tmp/ghostty.log
+    echo "RESULT exit=1"
+    exit 1
+  fi
+  cli_user timeout 20 xdotool windowactivate --sync "$win" >/dev/null 2>&1
 }
 
 key() { cli_user xdotool key --clearmodifiers "$@"; sleep "${WAIT:-2}"; }
