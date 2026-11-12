@@ -51,7 +51,7 @@ out="$(run_script --check "$@")"; rc=$?
 contains "$out" 'differs from this repository' 'edited check: reports the file'
 if [ "$rc" -eq 0 ]; then pass 'edited check: exit 0'; else fail "edited check: exit ${rc}"; fi
 out="$(run_script "$@")"
-contains "$out" 'Kept 1 files' 'edited: keeps with no terminal'
+contains "$out" 'Kept 1 file that' 'edited: keeps with no terminal'
 contains "$(tail -n 1 "$SAMPLE")" 'a person added' 'edited: the file is unchanged'
 out="$(run_script --keep-existing "$@")"
 contains "$(tail -n 1 "$SAMPLE")" 'a person added' 'keep-existing: the file is unchanged'
@@ -59,7 +59,7 @@ contains "$(tail -n 1 "$SAMPLE")" 'a person added' 'keep-existing: the file is u
 
 # A person answers the question.
 out="$(python3 "${ROOT}/tests/pty_run.py" 16 'k\n' "$SCRIPT" "$@" 2>&1)"
-contains "$out" 'differs from this repository' 'ask: asks about the file'
+contains "$out" 'differs from the herdspace version' 'ask: asks about the file'
 contains "$(tail -n 1 "$SAMPLE")" 'a person added' 'ask: keep leaves the file'
 out="$(python3 "${ROOT}/tests/pty_run.py" 16 'r\n' "$SCRIPT" "$@" 2>&1)"
 if cmp -s "$SAMPLE" "${SAMPLE}.saved"; then pass 'ask: replace uses the repository file'; else fail 'ask: replace uses the repository file'; fi

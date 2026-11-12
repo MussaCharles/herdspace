@@ -61,6 +61,8 @@ jobs:
         run: tests/test-ci-changes.sh
       - name: Links in the Markdown files
         run: tests/test-links.sh
+      - name: Setup output and questions
+        run: tests/test-ui.sh
 
   linux:
     # One job for each runner and image, so that they run at the same time.

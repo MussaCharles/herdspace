@@ -44,7 +44,7 @@ ask_yes() {
   local answer
   [ "${ASSUME_YES:-0}" = "1" ] && return 0
   [ -t 0 ] || return 0
-  printf '  %s [Y/n] ' "$1"
+  printf '  %s [Y/n] (Enter = yes) ' "$1"
   IFS= read -r answer || answer=""
   case "$answer" in
     n | N | no | No) return 1 ;;
@@ -62,7 +62,10 @@ run_prereqs() {
   step "Prerequisites"
   for i in "${!PREREQ_LABELS[@]}"; do
     if "${PREREQ_READY[$i]}"; then
-      ok "${PREREQ_LABELS[$i]}"
+      if [ "$UI_COLOR" -eq 1 ]; then ui_item $((i + 1)) "${PREREQ_LABELS[$i]}" ok; else ok "${PREREQ_LABELS[$i]}"; fi
+    elif [ "$UI_COLOR" -eq 1 ] && [ "$MODE" != "check" ]; then
+      missing+=("$i")
+      ui_item $((i + 1)) "${PREREQ_LABELS[$i]}" "$([ "${PREREQ_KINDS[$i]}" = necessary ] && echo missing || echo optional)"
     else
       missing+=("$i")
       if [ "$MODE" = "check" ]; then

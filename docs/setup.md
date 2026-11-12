@@ -246,9 +246,43 @@ flowchart TD
 | `./bootstrap.sh server` | Do what is missing, and ask about each file that you changed. |
 | `./bootstrap.sh server --check` | Report what is done, missing, or different. Change nothing. |
 | `./bootstrap.sh server --keep-existing` | Add what is missing, and change no existing file. |
-| `./bootstrap.sh server --replace-all` | Use the repository version of every file. Each replaced file gets a backup. |
+| `./bootstrap.sh server --replace-all` | Use the repository version of every file, with no question. Each replaced file gets a backup. Use it with care: a file that you changed can have more than the herdspace version. |
 
-These options work for a server and for a client. For each changed file, the question offers keep, replace, show the difference, keep all, and replace all. With no terminal, for example when an agent runs the script, the script keeps your files and lists them.
+These options work for a server and for a client. With no terminal, for example in a run by an agent, the script keeps your files and lists them.
+
+### The question about a changed file
+
+Before the first question, the script lists all the files that differ from the herdspace version. Then it asks about one file at a time:
+
+```text
+  File 1 of 3: ~/.zshrc differs from the herdspace version.
+
+    k  Keep your file                                             (Enter)
+    r  Replace it with the herdspace version (backup first)
+    d  Show the difference
+    e  Keep your file, and add the herdspace shell extras
+    m  Replace it, and copy your own lines to ~/.zshrc.local
+    K  Keep this file and the 2 files after it
+    R  Replace this file and the 2 files after it (backups first)
+```
+
+| Answer | Effect |
+|--------|--------|
+| `k`, or Enter | Keep your file. The end of the run lists it. |
+| `r` | Replace your file with the herdspace version. The script saves your file first, as `<file>.bak-<time>`. |
+| `d` | Show how many lines differ, your own lines that the herdspace version does not have, and the difference. For the difference, the script uses `delta`, `git diff`, or `diff`, the first one that it finds. Then it asks again. |
+| `e` | Only for `~/.zshrc`. Keep your file, and add a short marked block that loads the herdspace shell extras: `ff`, `fif`, the completion of `hopen`, the `fzf` keys, `zoxide`, and `eza` and `bat` for `ls` and `cat`. A later run updates only the block. |
+| `m` | Only for `~/.zshrc`. Replace your file, and copy your own lines to `~/.zshrc.local`, each one behind `# `. Remove the `# ` of each line that you want, and keep `if` and `fi` blocks complete. |
+| `K` | Keep this file and each changed file after it, with no more questions. |
+| `R` | Replace this file and each changed file after it. The script lists those files and asks one more time. |
+
+### Put a file back
+
+The end of a run lists each backup of the run, with the command that puts the file back, for example:
+
+```bash
+mv ~/.p10k.zsh.bak-20261113-054849 ~/.p10k.zsh
+```
 
 `--check` exits with status 0 if nothing is missing, and with status 1 if something needs work. A file that you changed does not change the status.
 

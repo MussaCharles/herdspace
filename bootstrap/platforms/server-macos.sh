@@ -64,4 +64,4 @@ setup_zprofile server
 setup_server_files "${HOME}/Library/Application Support/lazygit"
 setup_server_common
 run_part "Herdr LaunchAgent" macos_service_ready install_macos_service
-finish_run "Connect with SSH and run: herdr"
+finish_run "$([ "${HS_ROLE:-}" = both ] && echo none || echo server)"

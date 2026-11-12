@@ -73,4 +73,4 @@ setup_server_files "${HOME}/.config/lazygit"
 setup_server_common
 run_part "Herdr service at boot" linux_service_ready install_linux_service
 run_part "Login shell" login_shell_ready set_login_shell_zsh
-finish_run "Connect with SSH and run: herdr"
+finish_run "$([ "${HS_ROLE:-}" = both ] && echo none || echo server)"

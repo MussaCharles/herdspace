@@ -45,7 +45,10 @@ TAG=""
 PASS=()
 
 die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
-info() { printf '  [info] %s\n' "$*"; }
+# At a terminal, the lines of this script have no [info] word, as in the setup scripts.
+info() {
+  if [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-dumb}" != "dumb" ]; then printf '  %s\n' "$*"; else printf '  [info] %s\n' "$*"; fi
+}
 usage() { sed -n '2,37p' "${BASH_SOURCE[0]}" 2>/dev/null | sed 's/^# \{0,1\}//' || echo "Usage: bootstrap.sh server|client|both [options]"; }
 
 ARGS=("$@")
@@ -159,6 +162,12 @@ case "$RELEASE" in
   @*@) script_version="from the repository" ;;
   *) script_version="$RELEASE" ;;
 esac
+# The links at the end of a run point at the docs of this release.
+case "${RELEASE}${REPO}" in
+  *@*) HS_DOC_BASE="https://github.com/MussaCharles/herdspace/blob/main" ;;
+  *) HS_DOC_BASE="https://github.com/${REPO}/blob/${RELEASE}" ;;
+esac
+export HS_DOC_BASE
 case "$OS" in
   macos) os_name="macOS" ;;
   linux) os_name="Linux" ;;

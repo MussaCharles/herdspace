@@ -4,7 +4,19 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- At a terminal, the setup shows a box for each step, numbered items with marks, and colors. It shows a progress bar for the Neovim plugins and language tools, and a summary table at the end. With no terminal, or with `NO_COLOR`, the output stays plain text.
+- The end of a run shows the next steps for the role, with links to the docs of the release. It lists each backup with the command that puts the file back.
+- For a changed `~/.zshrc`, two more answers: keep your file and add the herdspace shell extras, or replace it and copy your own lines to `~/.zshrc.local`.
+- The shell extras are in their own file, `~/.config/herdspace/extras.zsh`: `ff`, `fif`, the completion of `hopen`, the `fzf` keys, `zoxide`, `eza`, and `bat`.
+
 ### Changed
+
+- The question about a changed file lists the changed files first. Each answer is on its own line, and the default has a mark. `K` and `R` say how many files they affect, and `R` asks once more before it replaces the other files.
+- Show the difference uses `delta` or `git diff` with colors, and first shows the own lines of the person.
+- Each yes question names its default: `[Y/n] (Enter = yes)`. Homebrew no longer asks a second time before an install.
+- The end of a run no longer advises `--replace-all`, and it says `1 file`, not `1 files`.
 
 - The README starts with the setup. It names the setup script `bootstrap.sh` and the project opener `hopen`, and shows what each option installs.
 - The first line of a setup run names the script and its release, for example `herdspace setup (bootstrap.sh 0.5.1): a server on macOS.`
