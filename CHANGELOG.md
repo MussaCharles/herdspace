@@ -4,13 +4,17 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-12
+
 ### Fixed
 
 - After a failed download of the Neovim plugins, the setup still reported the step as done. The step now tries again, warns, and tries again on the next run.
+- The links of the contributing guide gave a 404 on the Contributing tab of the repository. They now start at the root of the repository.
 
 ### Changed
 
 - The herdspace agent skill knows the tasks, `hopen --ports`, and the commands that only a person runs: `ff`, `fif`, and the command palette.
+- The community files `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, and `SECURITY.md` are in the `.github` folder.
 
 ## [0.5.0] - 2026-11-12
 
@@ -87,7 +91,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/MussaCharles/herdspace/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/MussaCharles/herdspace/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/MussaCharles/herdspace/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/MussaCharles/herdspace/compare/0.2.0...0.3.0
