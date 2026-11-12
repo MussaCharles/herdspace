@@ -25,6 +25,12 @@ Each trigger finds a different kind of problem:
 
 `tools/release.sh` publishes with the GitHub account of the person. For that reason, the release starts the release check. An event from the `GITHUB_TOKEN` of a workflow does not start a new workflow.
 
+## A pull request that changes only docs
+
+The first job, "Changes", runs `tools/ci-changes.sh`. If a pull request changes only Markdown files, files in `docs/`, or `LICENSE`, the steps of the long jobs skip. Each long job still starts and ends with success in a few seconds. The fast checks always run, so the skills and the links are still tested. A weekly run, a run by hand, and each other change run every step.
+
+The long jobs do not skip as a whole. GitHub reports a skipped matrix job with its name unresolved, for example "Linux server (${{ matrix.runner }}, ${{ matrix.image }})". That name does not match the required check, so the pull request cannot merge.
+
 ## The jobs of CI
 
 | Job | Runner | Tests |

@@ -17,6 +17,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    # Finds out if a pull request changes only docs. Then the steps of the long
+    # jobs skip. The jobs still start, so that each required check reports its
+    # name. A skipped matrix job reports a name with the expression unresolved.
+    name: Changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Find the changed files
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: tools/ci-changes.sh
+
   checks:
     name: Fast checks
     runs-on: ubuntu-24.04
@@ -35,6 +57,8 @@ jobs:
         run: tests/test-install.sh
       - name: Neovim plugin step
         run: tests/test-nvim-plugins.sh
+      - name: Docs-only detection
+        run: tests/test-ci-changes.sh
 
   linux:
     # One job for each runner and image, so that they run at the same time.
@@ -44,13 +68,16 @@ jobs:
       matrix:
         runner: [ubuntu-24.04, ubuntu-24.04-arm]
         image: ["ubuntu:24.04", "debian:12"]
+    needs: changes
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.code == 'true'
         with:
           persist-credentials: false
       - name: Server setup in a container
+        if: needs.changes.outputs.code == 'true'
         env:
           IMAGE: ${{ matrix.image }}
           # The weekly run also installs the Neovim language tools.
@@ -58,7 +85,7 @@ jobs:
         run: tests/run-linux.sh "$IMAGE"
       - name: Prerequisites step
         # The test makes its own containers, so one image of each runner is enough.
-        if: matrix.image == 'ubuntu:24.04'
+        if: needs.changes.outputs.code == 'true' && matrix.image == 'ubuntu:24.04'
         run: tests/run-prereqs.sh
       - name: Show the logs
         if: failure()
@@ -66,15 +93,19 @@ jobs:
 
   linux-services:
     name: Linux login service and client keys
+    needs: changes
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.code == 'true'
         with:
           persist-credentials: false
       - name: Login service with systemd
+        if: needs.changes.outputs.code == 'true'
         run: tests/run-systemd.sh
       - name: Client with real Ghostty keys
+        if: needs.changes.outputs.code == 'true'
         run: tests/run-client-linux.sh
       - name: Show the logs
         if: failure()
@@ -82,18 +113,23 @@ jobs:
 
   macos:
     name: macOS server
+    needs: changes
     runs-on: macos-26
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.code == 'true'
         with:
           persist-credentials: false
       # The runner is a throwaway Mac, so the real setup runs on it.
       - name: Real server setup
+        if: needs.changes.outputs.code == 'true'
         run: ./bootstrap.sh server --yes --skip-nvim-tools </dev/null
       - name: Server check
+        if: needs.changes.outputs.code == 'true'
         run: ./bootstrap.sh server --check --skip-nvim-tools </dev/null
       - name: macOS scripts with stubs
+        if: needs.changes.outputs.code == 'true'
         run: tests/run-macos.sh
       - name: Show the logs
         if: failure()
