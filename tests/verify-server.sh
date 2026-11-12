@@ -67,6 +67,11 @@ local result = {
 }
 preview.pin()
 result.pinned = preview.current() == nil
+result.confirm = vim.o.confirm
+result.netrw_off = vim.g.loaded_netrw == 1
+result.flush = vim.api.nvim_get_hl(0, { name = "Normal" }).bg == nil
+result.rust = require("lazy.core.config").plugins["rustaceanvim"] ~= nil
+result.venv = require("lazy.core.config").plugins["venv-selector.nvim"] ~= nil
 vim.fn.writefile({ vim.json.encode(result) }, vim.env.RESULT)
 vim.cmd("qa!")
 LUA
@@ -76,6 +81,29 @@ contains "$nv" '"colors":"onedark"' 'neovim theme'
 contains "$nv" '"ok":true' 'neo-tree loads'
 contains "$nv" '"replaced":true' 'preview replaces the old buffer'
 contains "$nv" '"pinned":true' 'pin keeps the buffer'
+contains "$nv" '"confirm":true' 'neovim asks before it quits with unsaved changes'
+contains "$nv" '"netrw_off":true' 'netrw shows no folder listing in the editor'
+contains "$nv" '"flush":true' 'the editor has the background of the terminal'
+contains "$nv" '"rust":true' 'the Rust extra is set up'
+contains "$nv" '"venv":true' 'the Python venv selector is set up'
+
+# `nvim .` opens the file tree and an empty editor, with no folder buffer.
+cat >"$work/tree.lua" <<'LUA'
+vim.defer_fn(function()
+  local tree, folder = false, false
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.bo[buf].filetype == "neo-tree" then tree = true end
+    local name = vim.api.nvim_buf_get_name(buf)
+    if name ~= "" and vim.fn.isdirectory(name) == 1 then folder = true end
+  end
+  vim.fn.writefile({ vim.json.encode({ tree = tree, folder = folder }) }, vim.env.RESULT)
+  vim.cmd("qa!")
+end, 3000)
+LUA
+tree_out="$(cd "$work" && RESULT="$work/tree.json" python3 "$ROOT/tests/pty_run.py" 12 '' nvim . "+luafile $work/tree.lua" >/dev/null 2>&1; cat "$work/tree.json" 2>/dev/null)"
+contains "$tree_out" '"tree":true' 'nvim . opens the file tree'
+contains "$tree_out" '"folder":false' 'nvim . keeps no folder buffer in the editor'
 
 # Herdr itself. This server is throwaway, so a stop is safe.
 server_up() { case "$(herdr workspace list 2>/dev/null)" in *workspace_list*) return 0 ;; *) return 1 ;; esac; }

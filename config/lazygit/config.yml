@@ -1,21 +1,63 @@
 # lazygit configuration from herdspace.
 gui:
-  nerdFontsVersion: "3"
-  showFileTree: true
-  showRandomTip: false
+  # Less noise: no command log, bottom line, panel numbers, tips, or list footer.
   showCommandLog: false
+  showBottomLine: false
+  showPanelJumps: false
+  showRandomTip: false
+  showListFooter: false
+  # The count of added and removed lines of each file.
+  showNumstatInFilesView: true
+  showFileTree: true
   sidePanelWidth: 0.3
+  # The side panels take only the room that they need, and the focused one grows.
+  shrinkSidePanelsToContent: true
+  expandFocusedSidePanel: true
+  expandedSidePanelWeight: 8
+  splitDiff: auto
+  nerdFontsVersion: "3"
+  tabWidth: 4
+  # Narrow panes, such as a pane of Herdr: the file list on top, the diff full width.
   portraitMode: auto
+  portraitModeAutoMaxWidth: 110
+  portraitModeAutoMinHeight: 30
+  # Status, files, and stash. Branches and commits are tabs beside stash.
+  sidePanels:
+    - [status]
+    - [files]
+    - [stash, branches, commits]
+  theme:
+    # A color for each kind of branch. Coding agents work on their own prefix,
+    # so that their branches stand out.
+    branchColorPatterns:
+      "^main$": "#98c379"
+      "^feat/": "#98c379"
+      "^fix/": "#e06c75"
+      "^claude/": "#e5c07b"
+      "^codex/": "#c678dd"
+      "^cursor/": "#61afef"
+      "^grok/": "#00e5a8"
 git:
+  log:
+    showGraph: never
   autoFetch: true
   autoRefresh: true
+  diffContextSize: 3
   diffRenderers:
-    - colorArg: always
-      command: delta --dark --paging=never --line-numbers --syntax-theme=TwoDark
+    # A unified diff with the colors of One Dark and line numbers. Press | to switch.
+    - name: delta
+      command: >-
+        delta --dark --paging=never --true-color=always --syntax-theme=TwoDark --tabs=4 --relative-paths --file-style="bold #abb2bf" --file-decoration-style="#3e4452 ul" --hunk-header-style="line-number syntax" --hunk-header-decoration-style="#3e4452 ul" --hunk-header-line-number-style="#61afef" --line-numbers --line-numbers-left-format="{nm:>3} " --line-numbers-right-format="{np:>3} │ " --line-numbers-left-style="#5c6370" --line-numbers-right-style="#5c6370" --line-numbers-zero-style="#5c6370" --line-numbers-minus-style="#e06c75" --line-numbers-plus-style="#98c379" --minus-style="syntax #49282e" --minus-emph-style="syntax #753235" --plus-style="syntax #243d2f" --plus-emph-style="syntax #2b5c37"
+    # Plain git with colors for each changed word, for prose and Markdown.
+    - type: rawGit
+      args: [--color-words]
+      name: color-words
+# Check out a branch by name from the files, status, or stash panel.
 customCommands:
   - key: b
-    context: "files, status"
+    context: "files, status, stash"
     description: "Check out a branch by name"
+    loadingText: "Checking out"
     prompts:
       - type: input
         title: "Branch:"
@@ -23,6 +65,7 @@ customCommands:
         suggestions:
           preset: branches
     command: git checkout {{.Form.Branch | quote}}
+# Esc goes back in nested views. At the top level it quits, which closes the Herdr popup.
 quitOnTopLevelReturn: true
 disableStartupPopups: true
 update:

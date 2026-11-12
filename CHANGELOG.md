@@ -4,6 +4,12 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- lazygit: a clearer layout with less noise, and the count of changed lines of each file. A richer delta view has line numbers, and a second view shows the changed words. A narrow pane uses portrait mode, and the branches of coding agents have their own colors.
+- Neovim: `nvim .` opens the file tree and an empty editor. Folder icons have colors by folder name, and the arrow keys preview a file as `j` and `k` do. The editor has the background of the terminal.
+- Neovim: a question before quitting with unsaved changes, and wrapped lines with their indent. A Python project uses its own `.venv`, and Rust has a language extra. A failed download of `lazy.nvim` gives a clear message, and the start is faster.
+
 ### Changed
 
 - For a name with no list, `hopen` shows the lists that exist, suggests the closest one, and shows how to create the list.

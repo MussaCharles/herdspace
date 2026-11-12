@@ -269,13 +269,13 @@ zoxide knows only the folders that you visited. Use `cd` with the full path the 
 
 ## Neovim
 
-Run `nvim .` in a project. Neovim is a viewer in this setup, because the agents write the code.
+Run `nvim .` in a project. Neovim opens the file tree on the left and an empty editor on the right. Neovim is a viewer in this setup, because the agents write the code. Its colors are One Dark, on the background of Ghostty. Folder icons have colors by folder name, for example `src`, `tests`, and `docs`.
 
 ![Neovim with a file tree and a file preview](media/neovim.png)
 
 | Action | Keys |
 |--------|------|
-| Preview a file | Click it, or move over it with `j` and `k` |
+| Preview a file | Click it, or move over it with `j` and `k`, or the arrow keys |
 | Keep a file open | Double-click it, or press `Enter` |
 | Find a file | `Ctrl+P` |
 | Search the project | `/` or `Ctrl+Shift+F` |
@@ -286,12 +286,14 @@ Run `nvim .` in a project. Neovim is a viewer in this setup, because the agents 
 | Switch the git branch | `Space`, `g`, `c` |
 | Show the keys after the leader | `Space` |
 | Save | `:w` |
-| Quit | `:q` |
+| Quit | `:q`. With unsaved changes, Neovim asks first. |
 | Update the plugins | `:Lazy update` |
+
+In a Python project, Neovim uses the `.venv` or `venv` folder of the project, so that the language server finds its packages. Rust has a language extra too.
 
 ## lazygit
 
-Press `Cmd+Shift+G` in a Herdr pane, or `Ctrl+Shift+G` on Linux. You can also run `lazygit` in a project.
+Press `Cmd+Shift+G` in a Herdr pane, or `Ctrl+Shift+G` on Linux. You can also run `lazygit` in a project. The branches of coding agents have their own colors, for example `claude/` and `codex/`. In a narrow pane, the file list is on top and the diff below it.
 
 ![lazygit in a popup over Herdr](media/lazygit.png)
 
@@ -305,7 +307,7 @@ Press `Cmd+Shift+G` in a Herdr pane, or `Ctrl+Shift+G` on Linux. You can also ru
 | Push | `P` |
 | Undo | `z` |
 | Check out a branch by name | `b` |
-| Switch the diff view | `\|` |
+| Switch the diff view: delta with line numbers, or the changed words | `\|` |
 | Go back, or close at the top level | `Esc` |
 | Close | `q` |
 
