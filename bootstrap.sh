@@ -154,8 +154,20 @@ case "${ROLE}-${OS}" in
   both-linux) script="client-linux.sh" ;;
 esac
 
+# The first line of a run names the script, its release, the role, and the system.
+case "$RELEASE" in
+  @*@) script_version="from the repository" ;;
+  *) script_version="$RELEASE" ;;
+esac
+case "$OS" in
+  macos) os_name="macOS" ;;
+  linux) os_name="Linux" ;;
+  wsl) os_name="Windows with WSL" ;;
+  *) os_name="$OS" ;;
+esac
+
 if [ "$ROLE" != "both" ]; then
-  info "Setting up a ${ROLE} on ${OS}."
+  info "herdspace setup (bootstrap.sh ${script_version}): a ${ROLE} on ${os_name}."
   if [ -n "${HS_DRY_RUN:-}" ]; then
     echo "bootstrap/platforms/${script} ${PASS[*]:-}"
     exit 0
@@ -191,7 +203,7 @@ while [ "$j" -lt "${#PASS[@]}" ]; do
   j=$((j + 1))
 done
 
-info "Setting up a server and a client on ${OS}, on this one machine."
+info "herdspace setup (bootstrap.sh ${script_version}): a server and a client on ${os_name}, on this one machine."
 if [ -n "${HS_DRY_RUN:-}" ]; then
   echo "bootstrap/platforms/${server_script} ${PASS_SERVER[*]:-}"
   echo "bootstrap/platforms/${script} ${PASS_CLIENT[*]:-}"

@@ -16,11 +16,11 @@ If `hopen --version` fails, herdspace is not installed. Follow the agent install
 
 | The person wants to | Run |
 |---------------------|-----|
-| Open the projects of the list `work` | `hopen work --no-attach` |
+| Open the projects of the list `my-projects` | `hopen my-projects --no-attach` |
 | Open one folder, with no list | `hopen ~/code/api --no-attach` |
 | Open every list | `hopen --all` |
 | See every list and its state | `hopen --list` |
-| Open new projects with a template | `hopen work --template code --no-attach` |
+| Open new projects with a template | `hopen my-projects --template code --no-attach` |
 | See every template | `hopen --templates` |
 | See the tasks of the project of the current folder | `hopen --task </dev/null` |
 | Run a task of the project | `hopen --task test`. In a Herdr pane, the task opens a new pane. Outside Herdr, it runs in the current terminal. |
@@ -39,7 +39,7 @@ These commands are for the person, in their own terminal. They open a menu or an
 When you run `hopen` yourself, add `--no-attach`. You cannot use the session. Tell the person to attach in their own terminal:
 
 ```bash
-hopen work
+hopen my-projects
 ```
 
 `hopen` is safe to run again. It starts a stopped session, adds only the folders that have no workspace, and closes nothing.

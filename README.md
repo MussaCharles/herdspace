@@ -1,6 +1,13 @@
 # herdspace
 
-herdspace is a workspace and session manager for [Herdr](https://herdr.dev). Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running after you disconnect.
+herdspace sets up [Herdr](https://herdr.dev) and its tools on your machines, and then opens your projects in Herdr with one command. Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running after you disconnect.
+
+herdspace has two parts:
+
+| Part | What it does | Where it runs |
+|------|--------------|---------------|
+| `bootstrap.sh`, the setup | Sets up a machine: Herdr, the editor and its tools, the shell, and the keys. Run it one time for each machine, and again to update. | Each machine: the server machine, the client machine, or one machine as both |
+| [`hopen`](docs/hopen.md), the project opener | Opens each project of a list in one Herdr session, split into named panes from a template. | The server machine. The server setup installs it. |
 
 herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. One machine can also be both.
 
@@ -8,27 +15,25 @@ herdspace uses two machines. The server machine runs Herdr, your projects, and y
 
 With herdspace, you can:
 
+- Set up Herdr and its tools on a new server machine and client machine with one command, on macOS, Linux, or Windows with WSL.
 - Open every project of a list in one Herdr session, with one command. The list is a `herdspace.toml` file, or a VS Code workspace file.
 - Split each project into named panes from a template, for example an editor, an agent, and lazygit.
 - Start the template programs again after a restart.
-- Set up Herdr and its tools on a new server machine and client machine with one command, on macOS, Linux, or Windows with WSL.
-
-herdspace has two parts. [`hopen`](docs/hopen.md) opens your projects in Herdr. [`bootstrap.sh`](docs/setup.md) sets up a machine, and the server setup includes `hopen`.
 
 ## Quick start
 
-Choose the option that matches how you plan to use herdspace. Each option is one command, and you can run it again at any time. Read [Before you start](docs/setup.md#before-you-start) for the few items that you do yourself.
+Each option is one command. Three of them run the setup script `bootstrap.sh`: for a server machine, a client machine, and one machine as both. The command downloads the script from the newest release, compares its checksum, and runs it with a role: `server`, `client`, or `both`. The script does only what is missing, and it asks before it replaces a file that you changed. Run it again at any time to update. Read [Before you start](docs/setup.md#before-you-start) for the few items that you do yourself.
 
-| You want to | Use |
-|-------------|-----|
-| Run Herdr on a server, and connect to it from the machine that you use | [Server machine](#server-machine), then [Client machine](#client-machine) |
-| Run Herdr on the machine that you use, with no server | [One machine as both](#one-machine-as-both) |
-| Add `hopen` to a machine that has Herdr already | [Only hopen](#only-hopen) |
-| Let a coding agent do the setup for you | [Ask an agent](#ask-an-agent) |
+| You want to | Use | It runs | It installs |
+|-------------|-----|---------|-------------|
+| Run Herdr on a server, and connect to it from the machine that you use | [Server machine](#server-machine), then [Client machine](#client-machine) | `bootstrap.sh server` on the server, then `bootstrap.sh client` on the client | On the server: Herdr, `hopen`, the editor and its tools, and the shell. On the client: Ghostty, its keys, and the shell. The client gets no `hopen`, because `hopen` runs on the server. |
+| Run Herdr on the machine that you use, with no server | [One machine as both](#one-machine-as-both) | `bootstrap.sh both` | All of the above, on one machine |
+| Add `hopen` to a machine that has Herdr already | [Only hopen](#only-hopen) | `install.sh` | Only `hopen` and its templates |
+| Let a coding agent do the setup for you | [Ask an agent](#ask-an-agent) | The agent runs one of the above | The same |
 
 ### Server machine
 
-Run this command on the server machine. It installs Herdr, its tools, and `hopen`:
+Run this command on the server machine. It downloads the setup script `bootstrap.sh`, and runs it with the role `server`. It installs Herdr, its tools, and `hopen`:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
@@ -36,7 +41,7 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 ### Client machine
 
-Set up the server machine first. Then run this command on the client machine. It sets up Ghostty, the shell, and the [Herdr keys](docs/keyboard-shortcuts.md). Give the SSH name of the server in place of `my-server`:
+Set up the server machine first. Then run this command on the client machine. It runs `bootstrap.sh` with the role `client`, and it sets up Ghostty, the shell, and the [Herdr keys](docs/keyboard-shortcuts.md). Give the SSH name of the server in place of `my-server`:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- client --server my-server
@@ -46,7 +51,7 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 ### One machine as both
 
-Run this command on the machine that you use. It does the server setup and then the client setup on this machine:
+Run this command on the machine that you use. It runs `bootstrap.sh` with the role `both`: the server setup and then the client setup, on this machine:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- both
@@ -54,7 +59,7 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 ### Only hopen
 
-If a machine has Herdr already, you can install only `hopen` and its templates. You need curl and Python 3.11 or later:
+If a machine has Herdr already, you can install only `hopen` and its templates. This command runs `install.sh`, not `bootstrap.sh`, so it changes nothing else on the machine. You need curl and Python 3.11 or later:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/install.sh | bash
@@ -88,11 +93,11 @@ To teach your agent to use herdspace every day, install the herdspace skill. See
 
 ### How the commands work
 
-`bootstrap.sh` finds the system, downloads the newest release, and compares its checksum. Then it runs the setup for that system. It does only what is missing, and it asks before it replaces a file that you changed. To install a specific release, add `--version <tag>`. The [setup guide](docs/setup.md) has every option and the steps for each system.
+To install a specific release, add `--version <tag>`. The [setup guide](docs/setup.md) has every option of `bootstrap.sh`, and the steps for each system.
 
 ## Open your projects
 
-A list holds the projects of one Herdr session. `hopen` opens each project as a Herdr workspace. The list of the session `work` is `~/work/herdspace.toml`:
+A list holds the projects of one Herdr session. `hopen` opens each project as a Herdr workspace. The list of the session `my-projects` is `~/my-projects/herdspace.toml`:
 
 ```toml
 [[project]]
@@ -108,17 +113,17 @@ path = "~/code/api"
 Open it:
 
 ```bash
-hopen work
+hopen my-projects
 ```
 
 | Command | Effect |
 |---------|--------|
-| `hopen work` | Open the projects of one list, and attach to that session. |
+| `hopen my-projects` | Open the projects of one list, and attach to that session. |
 | `hopen` | Choose a list from a menu. |
 | `hopen .` | Open the current folder, with no list. |
 | `hopen --all` | Open every list. |
 | `hopen --list` | Show every list and its state. |
-| `hopen work --template code` | Split each new project with a template. |
+| `hopen my-projects --template code` | Split each new project with a template. |
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
 

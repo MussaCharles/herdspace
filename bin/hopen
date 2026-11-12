@@ -939,7 +939,7 @@ attach_session() {
 show_lists() {
   local lists name state count
   lists="$(find_lists)"
-  [ -n "$lists" ] || die "No project lists. Create ~/work.code-workspace or ~/work/herdspace.toml."
+  [ -n "$lists" ] || die "No project lists. Create ~/my-projects.code-workspace or ~/my-projects/herdspace.toml."
   printf '%-22s %-9s %-11s %s\n' SESSION STATE WORKSPACES LIST
   while IFS=$'\t' read -r name LIST_FILE; do
     SESSION="$name"
@@ -957,7 +957,7 @@ show_lists() {
 open_all() {
   local lists wanted="$SESSION" name
   lists="$(find_lists)"
-  [ -n "$lists" ] || die "No project lists. Create ~/work.code-workspace or ~/work/herdspace.toml."
+  [ -n "$lists" ] || die "No project lists. Create ~/my-projects.code-workspace or ~/my-projects/herdspace.toml."
   if [ -n "$wanted" ] && ! grep -q "^${wanted}"$'\t' <<<"$lists"; then
     die "No project list for ${wanted}."
   fi
@@ -1468,7 +1468,7 @@ fi
 pick_list() {
   local lists name file
   lists="$(find_lists)"
-  [ -n "$lists" ] || die "No project lists. Create ~/work/herdspace.toml, or run hopen . in a folder."
+  [ -n "$lists" ] || die "No project lists. Create ~/my-projects/herdspace.toml, or run hopen . in a folder."
   SESSION="$(while IFS=$'\t' read -r name file; do printf '%s\t%-22s %s\n' "$name" "$name" "$(short_path "$file")"; done <<<"$lists" | choose "Open which list")" || exit 1
   [ -n "$SESSION" ] || exit 0
 }

@@ -22,14 +22,14 @@ flowchart LR
   classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
   classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
   classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
-  file["~/work/herdspace.toml"]:::data --> hopen["hopen work"]:::cmd
-  hopen --> session["Herdr session<br/>work"]:::host
-  session --> root["Workspace: work<br/>the folder of the list"]:::data
+  file["~/my-projects/herdspace.toml"]:::data --> hopen["hopen my-projects"]:::cmd
+  hopen --> session["Herdr session<br/>my-projects"]:::host
+  session --> root["Workspace: my-projects<br/>the folder of the list"]:::data
   session --> w1["Workspace: website"]:::data
   session --> w2["Workspace: api"]:::data
 ```
 
-Create `~/work/herdspace.toml`:
+Create `~/my-projects/herdspace.toml`:
 
 ```toml
 [[project]]
@@ -44,10 +44,10 @@ path = "~/code/api"
 Open it:
 
 ```bash
-hopen work
+hopen my-projects
 ```
 
-The name of the folder, `work`, is the name of the session. The first workspace has the name of the session and opens the folder of the list. Run `hopen` again after you add a project. It adds only the new projects.
+The name of the folder, `my-projects`, is the name of the session. The first workspace has the name of the session and opens the folder of the list. Run `hopen` again after you add a project. It adds only the new projects.
 
 To choose a list from a menu, run `hopen` with no name. It uses [fzf](https://github.com/junegunn/fzf) if it is installed, and the server setup installs it. With no fzf, or in a terminal with no `TERM`, `hopen` shows a numbered menu. Type a number or a name.
 
@@ -60,7 +60,7 @@ hopen --all
 `hopen --all` starts one session for each list, and it adds the missing workspaces. A terminal can attach to one session at a time, so add a name to attach to that session:
 
 ```bash
-hopen --all work
+hopen --all my-projects
 ```
 
 `hopen` finds a list at `~/<name>/herdspace.toml`. A `herdspace.toml` file is in [TOML](https://toml.io), the format of the Herdr configuration. It needs Python 3.11 or later. On a Mac, the server setup installs it. To install it yourself, run `brew install python`.
@@ -81,18 +81,18 @@ hopen .
 
 | Command | Effect |
 |---------|--------|
-| `hopen work` | Open the projects of one list, and attach to that session. |
+| `hopen my-projects` | Open the projects of one list, and attach to that session. |
 | `hopen` | Choose a list from a menu. |
 | `hopen .` | Open the current folder, with no list. See [Open one folder](#open-one-folder). |
-| `hopen work --file <path>` | Read the list from another file. |
-| `hopen work --no-attach` | Open the projects, but do not attach. |
-| `hopen work --template code` | Split each new project with a template. A project that has a workspace already does not change. To split it, run `hopen --apply code` in its tab in Herdr. |
-| `hopen work --trust` | Use the commands and values of the list with no question. See [Commands and values from a list](#commands-and-values-from-a-list). |
+| `hopen my-projects --file <path>` | Read the list from another file. |
+| `hopen my-projects --no-attach` | Open the projects, but do not attach. |
+| `hopen my-projects --template code` | Split each new project with a template. A project that has a workspace already does not change. To split it, run `hopen --apply code` in its tab in Herdr. |
+| `hopen my-projects --trust` | Use the commands and values of the list with no question. See [Commands and values from a list](#commands-and-values-from-a-list). |
 | `hopen --all` | Open every list. |
 | `hopen --list` | Show every list and its state. |
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
-| `hopen --convert work` | Write `~/work/herdspace.toml` from the VS Code workspace file `work`. It never replaces a file. |
+| `hopen --convert my-projects` | Write `~/my-projects/herdspace.toml` from the VS Code workspace file `my-projects`. It never replaces a file. |
 | `hopen --completion zsh` | Print the shell completion script for zsh or bash. See [Shell completion](#shell-completion). |
 | `hopen --task test` | Run the task `test` of the project of the current folder. With no name, choose a task from a menu. See [Tasks](#tasks). |
 | `hopen --find` | Choose a file of the current folder with fzf, and open it in the editor. The shell command `ff` does the same. |
@@ -106,7 +106,7 @@ hopen .
 All settings are optional. This example opens `website` with the `code` template. It installs the packages one time, sets `PORT`, and adds a tab for the logs:
 
 ```toml
-# ~/work/herdspace.toml
+# ~/my-projects/herdspace.toml
 template = "agent"            # the template for each project with no template
 
 [[project]]
@@ -213,7 +213,7 @@ A setting for one folder uses the name of the folder. A setting for the parent w
 To change to a `herdspace.toml` list, run this command. `hopen` then uses the new file, and it prints a warning about the old one until you remove it:
 
 ```bash
-hopen --convert work
+hopen --convert my-projects
 ```
 
 ## Commands and values from a list
