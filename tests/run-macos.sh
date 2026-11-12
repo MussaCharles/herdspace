@@ -54,7 +54,7 @@ exit 0
 STUB
 cat >"${STUBS}/brew" <<STUB
 #!/bin/sh
-echo "brew \$*" >>"${CALLS}"
+echo "brew \$* NO_ASK=\${HOMEBREW_NO_ASK:-}" >>"${CALLS}"
 case "\$1" in
   shellenv) exit 0 ;;
   --prefix) echo "${TEST_HOME}/brew"; exit 0 ;;
@@ -99,6 +99,7 @@ for target in "$@"; do
       run "$ROOT/tests/verify-server.sh" macos || status=1
       "$ROOT/tests/test-install.sh" || status=1
       grep -q 'brew install herdr' "$CALLS" && echo 'PASS brew installs herdr' || { echo 'FAIL brew installs herdr'; status=1; }
+      grep -q 'brew install herdr.*NO_ASK=1' "$CALLS" && echo 'PASS brew does not ask again before an install' || { echo 'FAIL brew does not ask again before an install'; status=1; }
       grep -q 'launchctl bootstrap' "$CALLS" && echo 'PASS launch agent loads' || { echo 'FAIL launch agent loads'; status=1; }
       plutil -lint "${TEST_HOME}/home/Library/LaunchAgents/local.herdr.server.plist" >/dev/null && echo 'PASS plist is valid' || { echo 'FAIL plist is valid'; status=1; }
       run "$ROOT/tests/test-idempotent.sh" bootstrap.sh "${TEST_HOME}/home/.config/herdr/config.toml" server --skip-nvim-tools || status=1

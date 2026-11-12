@@ -35,6 +35,7 @@ setup_shell() {
   run_part "Oh My Zsh and Powerlevel10k" shell_pins_ready install_shell_pins
   install_file "${REPO_ROOT}/config/shell/zshrc.zsh" "${HOME}/.zshrc"
   install_file "${REPO_ROOT}/config/shell/p10k.zsh" "${HOME}/.p10k.zsh"
+  install_file "${REPO_ROOT}/config/shell/extras.zsh" "${HOME}/.config/herdspace/extras.zsh"
   tmp="$(mktemp)"
   printf 'export BOOTSTRAP_ROLE=%s\nexport BOOTSTRAP_PROMPT_COLOR=%s\n' "$role" "$color" >"$tmp"
   install_file "$tmp" "${HOME}/.config/herdspace/env.zsh"

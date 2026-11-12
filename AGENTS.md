@@ -89,6 +89,10 @@ tests/test-links.sh
 ```
 
 ```bash
+tests/test-ui.sh
+```
+
+```bash
 tests/run-prereqs.sh
 ```
 

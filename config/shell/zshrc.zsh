@@ -23,25 +23,10 @@ source "$ZSH/oh-my-zsh.sh"
 
 case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac
 
-# Only in a real terminal, so that agents and scripts keep ls and cat.
+# The fzf keys, zoxide, the completion of hopen, ff and fif, and eza and bat.
+[[ -r "$HOME/.config/herdspace/extras.zsh" ]] && source "$HOME/.config/herdspace/extras.zsh"
+# The prompt only in a real terminal.
 if (( bootstrap_has_tty )); then
-  export BAT_THEME="TwoDark"
-  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-  export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --cycle'
-  command -v fzf >/dev/null && source <(fzf --zsh)
-  command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
-  if command -v hopen >/dev/null; then
-    source <(hopen --completion zsh)
-    # Like Ctrl+P and Ctrl+Shift+F in VS Code: open a file, or a search result.
-    alias ff='hopen --find'
-    fif() { hopen --grep "$*"; }
-  fi
-  if command -v eza >/dev/null; then
-    alias ls="eza"
-    alias ll="eza -la"
-    alias tree="eza --tree"
-  fi
-  command -v bat >/dev/null && alias cat="bat"
   [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 fi
 
