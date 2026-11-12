@@ -198,6 +198,18 @@ if ! PATH=/usr/bin:/bin command -v rg >/dev/null; then
   contains "$(PATH="$fakebin:/usr/bin:/bin" bin_hopen --grep x </dev/null 2>&1)" 'needs rg' 'hopen --grep with no rg names the missing tool'
 fi
 
+# A name with no list shows the lists that exist, and the closest one.
+nhome="$tmp/nolist-home"
+mkdir -p "$nhome/website" "$nhome/api-team"
+printf '[[project]]\nname = "a"\npath = "."\n' >"$nhome/website/herdspace.toml"
+cp "$nhome/website/herdspace.toml" "$nhome/api-team/herdspace.toml"
+out="$(HOME="$nhome" bin_hopen websit --no-attach 2>&1)"
+contains "$out" 'Your lists: api-team, website' 'a missing list shows the lists that exist'
+contains "$out" 'Did you mean: website?' 'a missing list suggests the closest list'
+contains "$out" "write ~/websit/herdspace.toml" 'a missing list shows how to create it'
+out="$(HOME="$tmp/empty-home" bin_hopen work --no-attach 2>&1)"
+contains "$out" 'You have no list yet.' 'with no list, hopen says so'
+
 # Shell completion.
 complete_bash() {
   HOME="$home" HOPEN_TEMPLATES=config/templates PATH="$PWD/bin:$PATH" bash -c 'eval "$(hopen --completion bash)"; COMP_WORDS=("$@"); COMP_CWORD=$(($# - 1)); _hopen; echo "${COMPREPLY[*]}"' _ "$@"
