@@ -24,7 +24,7 @@ done
 
 # The names of the CI jobs that must pass before a merge. They must match the
 # job names in .github/workflows/ci.yml.
-CHECKS='["Fast checks", "Linux server (ubuntu-24.04)", "Linux server (ubuntu-24.04-arm)", "Linux login service and client keys", "macOS server"]'
+CHECKS='["Fast checks", "Linux server (ubuntu-24.04, ubuntu:24.04)", "Linux server (ubuntu-24.04, debian:12)", "Linux server (ubuntu-24.04-arm, ubuntu:24.04)", "Linux server (ubuntu-24.04-arm, debian:12)", "Linux login service and client keys", "macOS server"]'
 # The repository admin role. Today, only the owner has it.
 ADMIN='{"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}'
 

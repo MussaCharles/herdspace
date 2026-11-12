@@ -37,7 +37,7 @@ The git pins of Oh My Zsh and its plugins follow a branch that changes almost ea
 | Job | Runner | Tests |
 |-----|--------|-------|
 | Fast checks | `ubuntu-24.04` | `shellcheck`, `tests/test-skills.sh`, `tests/test-hopen-list.sh`, `tests/test-install.sh`, `tests/test-nvim-plugins.sh`, `tests/test-links.sh` |
-| Linux server | `ubuntu-24.04` and `ubuntu-24.04-arm` | `tests/run-linux.sh`, `tests/run-prereqs.sh` |
+| Linux server | `ubuntu-24.04` and `ubuntu-24.04-arm`, each with the image `ubuntu:24.04` and `debian:12`: four jobs | `tests/run-linux.sh` for the image, and `tests/run-prereqs.sh` in the Ubuntu job of each runner |
 | Linux login service and client keys | `ubuntu-24.04` | `tests/run-systemd.sh`, `tests/run-client-linux.sh` |
 | macOS server | `macos-26` | A real `bootstrap.sh server --yes` on the runner, then `bootstrap.sh server --check`, then `tests/run-macos.sh` |
 

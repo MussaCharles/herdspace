@@ -17,7 +17,7 @@ The [CI guide](../../../docs/ci.md) lists the workflows and the jobs. The [repos
    ```
 
    If the answer has the type `tag`, not `commit`, read that tag object for its commit.
-3. If you rename a job of `ci.yml`, change the name in `CHECKS` in `tools/repo-settings.sh` in the same pull request. After the merge, run `tools/repo-settings.sh --apply`. A required check with an old name never passes, and then no pull request can merge.
+3. If you rename a job of `ci.yml`, or change its matrix, change the names in `CHECKS` in `tools/repo-settings.sh` in the same pull request. A matrix job has the values in its name, for example "Linux server (ubuntu-24.04, debian:12)". Merge the other open pull requests first. Then run `tools/repo-settings.sh --apply` from the branch, before the merge. A required check with an old name never passes, and a pull request that waits for it cannot merge.
 4. A workflow file must be on `main` before `gh workflow run` can start it. After that, `--ref <branch>` runs the version of a branch.
 
 ## A workflow that writes

@@ -39,23 +39,28 @@ jobs:
         run: tests/test-links.sh
 
   linux:
-    name: Linux server (${{ matrix.runner }})
+    # One job for each runner and image, so that they run at the same time.
+    name: Linux server (${{ matrix.runner }}, ${{ matrix.image }})
     strategy:
       fail-fast: false
       matrix:
         runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        image: ["ubuntu:24.04", "debian:12"]
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Server setup in Ubuntu and Debian containers
+      - name: Server setup in a container
         env:
+          IMAGE: ${{ matrix.image }}
           # The weekly run also installs the Neovim language tools.
           FULL: ${{ github.event_name == 'schedule' && '1' || '0' }}
-        run: tests/run-linux.sh
+        run: tests/run-linux.sh "$IMAGE"
       - name: Prerequisites step
+        # The test makes its own containers, so one image of each runner is enough.
+        if: matrix.image == 'ubuntu:24.04'
         run: tests/run-prereqs.sh
       - name: Show the logs
         if: failure()

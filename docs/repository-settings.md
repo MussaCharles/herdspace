@@ -24,7 +24,7 @@ Two rulesets protect `main`. A ruleset is a named list of rules for branches or 
 
 | Ruleset | Rules | Who can skip it |
 |---------|-------|-----------------|
-| main: pull requests and CI | A pull request is necessary for each change. Each CI job must pass: "Fast checks", "Linux server (ubuntu-24.04)", "Linux server (ubuntu-24.04-arm)", "Linux login service and client keys", and "macOS server". Only merge commits are allowed. No force push, and no deletion. | Nobody, the owner too. |
+| main: pull requests and CI | A pull request is necessary for each change. Each CI job must pass. The jobs are "Fast checks", four "Linux server" jobs, "Linux login service and client keys", and "macOS server". Only merge commits are allowed. No force push, and no deletion. | Nobody, the owner too. |
 | main: who can merge | Only a person in the bypass list can push to `main` or merge into it. | The repository admin role. Today, only the owner has it. |
 
 To merge a pull request after every CI job passes, a person in the bypass list must say that they use the bypass. On the web page, tick the box that bypasses the rules. With the GitHub CLI:
@@ -37,7 +37,7 @@ gh pr merge <number> --merge --admin --delete-branch
 
 A pull request needs no approval. A person cannot approve their own pull request, so a required approval stops a project with one maintainer. The CI jobs do the check.
 
-If you rename a job in `.github/workflows/ci.yml`, change its name in `tools/repo-settings.sh` in the same pull request, and run `--apply` after the merge. A required check with an old name never passes, so no pull request can merge.
+If you rename a job in `.github/workflows/ci.yml`, change its name in `tools/repo-settings.sh` in the same pull request. Merge the other open pull requests first. Then run `--apply` from the branch of the pull request, before its merge. A required check with an old name never passes, so a pull request that waits for it cannot merge.
 
 ## Release tags
 
