@@ -47,6 +47,7 @@ Each of these made a job fail one time:
 - A test that passes on your machine and fails on a runner can depend on your machine. A test once needed `rg`, and another needed a Ghostty terminal description in `~/.terminfo`. Make the test create what it needs: a stub program, or a description made from `xterm-256color`.
 - systemd in a Docker container did not start on an Ubuntu runner with the cgroups of the host. Use `--cgroupns=private`, with no mount of `/sys/fs/cgroup`. Wait for `systemctl is-system-running` to answer `running` or `degraded`, and try `loginctl enable-linger` again until the login manager answers.
 - The pitfalls of the tests themselves are in the `herdspace-test` skill. Read them too.
+- A client test once lost its Ghostty window on a runner, and the next commands waited until the job stopped at 60 minutes. Give a step that can hang its own `timeout-minutes`, below the limit of the job, and give the test itself time limits.
 - A macOS runner has Homebrew and many tools already. It is not a clean Mac, and it has no screen. The real key test runs only in the Linux client test.
 
 ## Change a repository setting

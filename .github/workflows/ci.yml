@@ -108,6 +108,7 @@ jobs:
         run: tests/run-systemd.sh
       - name: Client with real Ghostty keys
         if: needs.changes.outputs.code == 'true'
+        timeout-minutes: 20
         run: tests/run-client-linux.sh
       - name: Show the logs
         if: failure()
