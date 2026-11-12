@@ -16,6 +16,7 @@ No free service can start a macOS VM in its runner. For that reason, the macOS j
 |----------|------|--------------|
 | CI | `.github/workflows/ci.yml` | For each pull request, once a week on Monday, and by hand. |
 | Release check | `.github/workflows/release.yml` | When a release is published, and by hand. A pre-release does not start it. |
+| Pinned tools | `.github/workflows/pins.yml` | Once a week on Monday, and by hand. |
 
 Each trigger finds a different kind of problem:
 
@@ -24,6 +25,12 @@ Each trigger finds a different kind of problem:
 - The weekly run finds a change outside the repository, with no change in the code. For example, Ubuntu, Debian, Homebrew, or the runner image can change. The weekly run also installs the Neovim language tools (`FULL=1`).
 
 `tools/release.sh` publishes with the GitHub account of the person. For that reason, the release starts the release check. An event from the `GITHUB_TOKEN` of a workflow does not start a new workflow.
+
+## Pinned tools
+
+The workflow "Pinned tools" runs `tools/check-pins.sh --issue`. The script runs `tools/update-versions.sh` on a copy, and compares the result with `tools/versions.tsv` and `tools/versions.env`. For a newer release, or a newer commit of the Auto Title plugin, it opens the issue "Pinned tools have newer releases". If that issue is open, it updates it. It changes no code. The workflow has `issues: write` for the issue, and only `contents: read` for the code.
+
+The git pins of Oh My Zsh and its plugins follow a branch that changes almost each day. The report lists them for information, but they do not open an issue. To see the report on your own machine, run `tools/check-pins.sh`.
 
 ## The jobs of CI
 
