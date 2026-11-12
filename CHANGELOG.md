@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- The command palette no longer offers "Find a file" with no `fzf` installed. That action needs `fzf`.
+
 ### Added
 
 - At a terminal, the setup shows a box for each step, numbered items with marks, and colors. It shows a progress bar for the Neovim plugins and language tools, and a summary table at the end. With no terminal, or with `NO_COLOR`, the output stays plain text.
@@ -13,6 +17,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- The README and `install.md` say which Herdr `hopen` needs: the terminal program `herdr`. The installer on the first page of herdr.dev installs the Herdr app, a different program.
+- The release check runs each option of the Quick start with the command of the README: a server, a client with SSH to a server, one machine as both, and only `hopen`.
 - The question about a changed file lists the changed files first. Each answer is on its own line, and the default has a mark. `K` and `R` say how many files they affect, and `R` asks once more before it replaces the other files.
 - Show the difference uses `delta` or `git diff` with colors, and first shows the own lines of the person.
 - Each yes question names its default: `[Y/n] (Enter = yes)`. Homebrew no longer asks a second time before an install.

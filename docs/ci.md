@@ -53,8 +53,8 @@ The Linux tests start their own containers on the runner, as on a machine of a c
 
 | Job | Runner | Tests |
 |-----|--------|-------|
-| Linux | `ubuntu-24.04` and `ubuntu-24.04-arm` | `tests/run-release-check.sh --only linux`: fresh Ubuntu and Debian containers |
-| macOS | `macos-26` | The install from the `latest` links on the runner, then `tests/tour-release.sh` |
+| Linux, one job for each option | `ubuntu-24.04` and `ubuntu-24.04-arm` | `tests/run-release-check.sh --only linux <option>`: `server`, `client`, `both`, and `hopen`, in fresh containers |
+| macOS, one job for each option | `macos-26` | `tests/run-release-check.sh --here <option>`: `server`, `both`, and `hopen`, on the runner itself |
 
 To check a release again, open the Actions tab, choose "Release check", and click "Run workflow". Type the tag, or leave it empty for the latest release. With the GitHub CLI:
 

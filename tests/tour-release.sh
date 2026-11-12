@@ -3,8 +3,20 @@
 # would. Run it in a throwaway container or VM after the setup, never on your
 # own machine: it starts a Herdr server and makes lists in the home folder.
 # tests/run-release-check.sh runs it. pty_run.py must be in the same folder.
-# Usage: tour-release.sh [expected-version]
+# Usage: tour-release.sh [expected-version] [--only-hopen]
+#   --only-hopen  The machine has only hopen from install.sh, with no setup. The
+#                 tour skips the features that need the tools of the setup (zsh,
+#                 fzf, rg, and the keys of Herdr), and checks that install.sh
+#                 changed nothing else.
 set -u
+want=""
+ONLY_HOPEN=0
+for arg in "$@"; do
+  case "$arg" in
+    --only-hopen) ONLY_HOPEN=1 ;;
+    *) want="$arg" ;;
+  esac
+done
 # The folder of this script, before the cd, so that a relative path works.
 HERE="$(cd "$(dirname "$0")" && pwd)"
 cd "$HOME" || exit 1
@@ -13,10 +25,10 @@ PTY="python3 ${HERE}/pty_run.py"
 ok=0; bad=0
 pass() { echo "PASS $1"; ok=$((ok+1)); }
 fail() { echo "FAIL $1"; bad=$((bad+1)); }
-has() { case "$1" in *"$2"*) pass "$3" ;; *) fail "$3 :: ${1:0:400}" ;; esac; }
+# has TEXT WANTED NAME: on a failure, show the start and the end of TEXT.
+has() { case "$1" in *"$2"*) pass "$3" ;; *) fail "$3 :: ${1:0:200} ... ${1: -300}" ;; esac; }
 J() { python3 -c "import json,sys; d=json.load(sys.stdin)['result']; print($1)"; }
 
-want="${1:-}"
 if [ -n "$want" ]; then has "$(hopen --version)" "$want" "hopen --version is $want"; else has "$(hopen --version)" 'hopen ' 'hopen --version answers'; fi
 case "$(herdr workspace list 2>/dev/null)" in *workspace_list*) ;; *) nohup herdr server >/dev/null 2>&1 & sleep 3 ;; esac
 has "$(herdr workspace list 2>&1)" workspace_list 'herdr server answers'
@@ -48,7 +60,9 @@ has "$(hopen work --no-attach --trust >/dev/null 2>&1; HERDR_SESSION=work herdr 
 # Completion
 has "$(hopen --complete lists)" 'work' 'completion lists the lists'
 has "$(cd ~/code/api && hopen --complete tasks)" 'show' 'completion lists the tasks of the project'
+if [ "$ONLY_HOPEN" -eq 0 ]; then
 has "$(zsh -c 'autoload -Uz compinit; compinit -u; source <(hopen --completion zsh) && echo ZOK' 2>&1)" ZOK 'the zsh completion loads'
+fi
 has "$(bash -c 'source <(hopen --completion bash) && complete -p hopen' 2>&1)" 'hopen' 'the bash completion loads'
 
 # Task in a Herdr pane
@@ -60,11 +74,13 @@ has "$(cat ~/code/api/task-out.txt 2>/dev/null)" 'dev tour-api' 'the task gets e
 has "$(HERDR_SESSION=work herdr pane list | J '",".join(p.get("label") or "" for p in d["panes"])')" 'show' 'the task pane has the task name'
 has "$(cd ~/code/api && $PTY 6 '\r' env TERM=dumb hopen --task 2>&1)" 'other' 'hopen --task with no name shows a menu'
 
-# Find and grep
+# Find and grep, which need fzf and rg from the setup.
+if [ "$ONLY_HOPEN" -eq 0 ]; then
 has "$(cd ~/code/api && $PTY 6 '\r' env TERM=xterm-256color EDITOR='echo OPENED' hopen --find 2>&1)" 'OPENED' 'hopen --find opens a file'
 has "$(cd ~/code/api && $PTY 6 '\r' env TERM=xterm-256color EDITOR='echo OPENED' hopen --grep needle-in-code 2>&1)" 'OPENED +2 src/app.py' 'hopen --grep opens the result at its line'
 # The shell commands load only in a terminal, so ask a zsh in a pseudo terminal.
 has "$($PTY 15 '' zsh -i -c 'whence -w ff fif; exit' 2>&1)" 'ff: alias' 'the ff and fif shell commands exist'
+fi
 
 # Ports
 port=$((20000 + RANDOM % 20000))
@@ -76,11 +92,18 @@ has "$(grep "^$port " <<<"$p")" 'work/web' 'hopen --ports shows the port and its
 # Palette
 pal="$(cd ~/code/api && $PTY 6 'ports\r' env TERM=dumb hopen --palette 2>&1)"
 has "$pal" 'Run the task' 'the palette offers the tasks'
-has "$pal" 'Find a file' 'the palette offers find'
+if [ "$ONLY_HOPEN" -eq 0 ]; then has "$pal" 'Find a file' 'the palette offers find'; else case "$pal" in *'Find a file'*) fail 'with no fzf, the palette offers no find' ;; *) pass 'with no fzf, the palette offers no find' ;; esac; fi
 has "$pal" "$port" 'the palette runs the chosen action (ports)'
 kill $sp 2>/dev/null
 has "$(cd ~/code/api && $PTY 4 '\r' env TERM=dumb HERDR_ACTIVE_PANE_ID="$pane" hopen --palette 2>&1)" 'template' 'in a popup, the palette offers templates'
-grep -qF 'hopen\" --palette' ~/.config/herdr/config.toml && pass 'Herdr has the palette key' || fail 'Herdr has the palette key'
+if [ "$ONLY_HOPEN" -eq 0 ]; then
+  grep -qF 'hopen\" --palette' ~/.config/herdr/config.toml && pass 'Herdr has the palette key' || fail 'Herdr has the palette key'
+else
+  # install.sh installs hopen and its templates, and nothing else.
+  for path in .oh-my-zsh .p10k.zsh .config/ghostty .config/nvim .config/herdspace .local/share/herdspace/manifest.tsv; do
+    [ ! -e "$HOME/$path" ] && pass "install.sh did not add ~/$path" || fail "install.sh did not add ~/$path"
+  done
+fi
 
 # Menu, folder, path, templates, convert, attach and detach
 has "$($PTY 6 'work\r' env TERM=dumb hopen --no-attach 2>&1)" 'Open which list' 'hopen with no name shows a menu'
@@ -91,6 +114,11 @@ mkdir -p ~/conv && cat >~/conv/conv.code-workspace <<'W'
 { "folders": [ { "path": "../code/api" } ] }
 W
 has "$(hopen --convert conv 2>&1; cat ~/conv/herdspace.toml 2>/dev/null)" '[[project]]' 'hopen --convert writes a herdspace.toml'
+# Herdr shows its onboarding at the first start, and a person who has Herdr
+# already has passed it. The full setup installs a config with onboarding = false.
+if [ "$ONLY_HOPEN" -eq 1 ] && [ ! -e "$HOME/.config/herdr/config.toml" ]; then
+  mkdir -p "$HOME/.config/herdr" && printf 'onboarding = false\n' >"$HOME/.config/herdr/config.toml"
+fi
 a="$($PTY 8 '\x02q' hopen work 2>&1; echo "status=$?")"
 has "$a" 'status=0' 'hopen work attaches, and the detach key exits'
 

@@ -23,7 +23,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-links.sh` | Each relative link of each Markdown file points at a file that exists, and each `#anchor` matches a heading. A link in a community file in `.github/` starts with `/`. It needs no network. |
 | `tests/test-ui.sh` | The output and the questions of the setup. It tests plain text with no terminal, and boxes and colors at a terminal. It tests the answers for a changed file, the own lines, the backups, and the next steps. It needs no network. |
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
-| `tests/run-release-check.sh` | A published release installs from the `latest` links in a fresh container and a fresh macOS VM, and each `hopen` feature works there. See [After a release](#after-a-release). |
+| `tests/run-release-check.sh` | Each option of the Quick start works from a published release, with the command of the README, in fresh containers and macOS VMs. See [After a release](#after-a-release). |
 
 A container cannot run macOS. For that reason, `tests/run-macos.sh` does not change macOS shortcuts or install Homebrew packages.
 
@@ -207,13 +207,24 @@ Run every test above. All tests must pass. Then follow [Make a release](updating
 
 ## After a release
 
-`tests/run-release-check.sh` installs the published release in the same way as a person. It uses a fresh container for each Linux image, and a fresh clone of the Tart image. In each one, `tests/tour-release.sh` tries each `hopen` feature: the menu, folders, approval, `env_file`, completion, tasks, find and search, ports, the palette, templates, `--convert`, and attach and detach.
+`tests/run-release-check.sh` runs each option of the Quick start of the README as a person does. It reads the command of each option from `README.md`, so the docs and the test cannot drift apart. It installs the published release in a fresh sandbox, checks the result, and runs `tests/tour-release.sh` where `hopen` is installed.
+
+| Option | Command of the README | Linux | macOS | After the install |
+|--------|-----------------------|-------|-------|-------------------|
+| `server` | `bootstrap.sh server` | A fresh container for each image | A fresh clone of the Tart image | `--check` finds nothing to do, and the tour |
+| `client` | `bootstrap.sh client --server my-server` | A server container with SSH, and a client container that connects to it | No: it needs a second machine | `--check`, SSH reaches `hopen` on the server, and the client has no `hopen` |
+| `both` | `bootstrap.sh both` | A fresh container | A fresh clone, with the Ghostty app | `--check`, and the tour |
+| `hopen` | `install.sh` | A fresh container with the terminal program `herdr` from its release | A fresh clone with `brew install herdr` | The tour with `--only-hopen`: no features of the setup, and nothing else installed |
 
 ```bash
 tests/run-release-check.sh --version 0.5.0
 ```
 
-The check runs only the sandboxes that the machine supports. It prints a `SKIP` line for each one that it cannot run. `--only linux` or `--only macos` runs one kind. The macOS part needs Tart and the `tahoe-base` image. See [macOS: a Tart VM](#macos-a-tart-vm). The VM and the containers are deleted at the end.
+To run some options only, name them, for example `tests/run-release-check.sh client hopen`. `--only linux` or `--only macos` runs one kind of sandbox. The check prints a `SKIP` line for each sandbox that the machine cannot run. The macOS part needs Tart and the `tahoe-base` image. See [macOS: a Tart VM](#macos-a-tart-vm). The VMs and the containers are deleted at the end.
+
+The test adds options for a sandbox after the command of the README: `--yes`, `--skip-nvim-tools`, and in a container `--skip-login-service`. A container has no display, so the client parts use `--no-ghostty`. The client test of CI presses the real keys of Ghostty.
+
+`--here OPTION` runs one option on the machine itself, with no sandbox. The workflow "Release check" uses it on a macOS runner. It refuses to run unless `CI=true` or `HS_THROWAWAY_MACHINE=1` is set, because it changes the machine.
 
 Do not run `tests/tour-release.sh` on your own machine. It starts a Herdr server and writes lists in the home folder.
 

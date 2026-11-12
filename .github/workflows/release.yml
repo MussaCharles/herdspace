@@ -1,5 +1,6 @@
-# Installs a published release from the latest links, as a person would, and
-# tries each hopen feature. docs/ci.md explains it.
+# Runs each option of the Quick start of README.md with the command of the
+# README, from a published release, as a person would, and tries each hopen
+# feature. tests/run-release-check.sh does the work. docs/ci.md explains it.
 name: Release check
 
 on:
@@ -16,39 +17,47 @@ permissions:
 
 jobs:
   linux:
-    name: Linux (${{ matrix.runner }})
+    name: Linux ${{ matrix.option }} (${{ matrix.runner }})
     if: ${{ !github.event.release.prerelease }}
     strategy:
       fail-fast: false
       matrix:
         runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        option: [server, client, both, hopen]
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install the release in fresh containers, and try each feature
+      - name: Run the Quick start option of the README in fresh containers
         env:
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
-        run: tests/run-release-check.sh --only linux ${TAG:+--version "$TAG"}
+          OPTION: ${{ matrix.option }}
+        run: tests/run-release-check.sh --only linux ${TAG:+--version "$TAG"} "$OPTION"
       - name: Show the logs
         if: failure()
         run: tail -n 80 tests/.work/release-check-*.log
 
   macos:
-    name: macOS
+    name: macOS ${{ matrix.option }}
     if: ${{ !github.event.release.prerelease }}
+    strategy:
+      fail-fast: false
+      matrix:
+        option: [server, both, hopen]
     runs-on: macos-26
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install the release from the latest links, and try each feature
+      # The runner is a throwaway Mac, so the option runs on it, with no VM.
+      - name: Run the Quick start option of the README on the runner
         env:
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
-        run: |
-          curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh \
-            | bash -s -- server --yes --skip-nvim-tools ${TAG:+--version "$TAG"}
-          zsh -lc "bash tests/tour-release.sh $TAG"
+          OPTION: ${{ matrix.option }}
+        run: tests/run-release-check.sh ${TAG:+--version "$TAG"} --here "$OPTION"
+      - name: Show the logs
+        if: failure()
+        run: tail -n 80 tests/.work/release-check-*.log
