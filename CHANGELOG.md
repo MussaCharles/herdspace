@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- For a name with no list, `hopen` shows the lists that exist, suggests the closest one, and shows how to create the list.
+
 ## [0.5.1] - 2026-11-12
 
 ### Fixed
