@@ -86,7 +86,7 @@ hopen .
 | `hopen .` | Open the current folder, with no list. See [Open one folder](#open-one-folder). |
 | `hopen work --file <path>` | Read the list from another file. |
 | `hopen work --no-attach` | Open the projects, but do not attach. |
-| `hopen work --template code` | Split each new project with a template. |
+| `hopen work --template code` | Split each new project with a template. A project that has a workspace already does not change. To split it, run `hopen --apply code` in its tab in Herdr. |
 | `hopen work --trust` | Use the commands and values of the list with no question. See [Commands and values from a list](#commands-and-values-from-a-list). |
 | `hopen --all` | Open every list. |
 | `hopen --list` | Show every list and its state. |

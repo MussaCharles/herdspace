@@ -7,6 +7,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 ### Changed
 
 - For a name with no list, `hopen` shows the lists that exist, suggests the closest one, and shows how to create the list.
+- If `--template` splits no project, because each project has a workspace already, `hopen` says so and names `hopen --apply`.
 
 ## [0.5.1] - 2026-11-12
 
