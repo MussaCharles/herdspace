@@ -20,6 +20,10 @@ The [CI guide](../../../docs/ci.md) lists the workflows and the jobs. The [repos
 3. If you rename a job of `ci.yml`, change the name in `CHECKS` in `tools/repo-settings.sh` in the same pull request. After the merge, run `tools/repo-settings.sh --apply`. A required check with an old name never passes, and then no pull request can merge.
 4. A workflow file must be on `main` before `gh workflow run` can start it. After that, `--ref <branch>` runs the version of a branch.
 
+## A workflow that writes
+
+Only `pins.yml` has a write permission: `issues: write`, to open or update its issue. It runs on a schedule and by hand, never for a pull request, so code from a fork never runs with that token. Keep it that way.
+
 ## Read a failed job
 
 `gh run view --log-failed` answers only after the whole run ends. To read one job while the others still run:
