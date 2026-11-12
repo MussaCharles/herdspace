@@ -883,7 +883,24 @@ prepare_session() {
     added=$((added + 1))
   done <<<"$items"
   printf '  [info] Session %s: %s workspaces added.\n' "$SESSION" "$added"
+  template_note "$items" "$added"
   HERDR_SESSION="$SESSION" guard_names
+}
+
+# template_note ITEMS ADDED explains --template when it did not split each
+# project: the template applies only to the workspaces that the run creates.
+template_note() {
+  [ -n "$TEMPLATE_FLAG" ] || return 0
+  local total existing
+  total="$(printf '%s\n' "$1" | awk -F '\036' '$1 == "R" || $1 == "P"' | wc -l | tr -d ' ')"
+  existing=$((total - $2))
+  [ "$existing" -gt 0 ] || return 0
+  if [ "$2" -eq 0 ]; then
+    printf '  [info] --template %s splits only new projects, and each project of %s has a workspace already.\n' "$TEMPLATE_FLAG" "$SESSION"
+  else
+    printf '  [info] --template %s split the %s new projects. %s projects existed already.\n' "$TEMPLATE_FLAG" "$2" "$existing"
+  fi
+  printf '         To split a project that exists, go to its tab in Herdr, and run: hopen --apply %s\n' "$TEMPLATE_FLAG"
 }
 
 attach_session() {

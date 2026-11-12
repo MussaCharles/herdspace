@@ -108,6 +108,9 @@ hopen hb-test --file "$work/list/t.code-workspace" --no-attach >/dev/null 2>&1
 one="$(labels)"
 hopen hb-test --file "$work/list/t.code-workspace" --no-attach >/dev/null 2>&1
 contains "$one" 'hb-test,first,two' 'hopen creates the projects'
+tpl_out="$(hopen hb-test --file "$work/list/t.code-workspace" --template code --no-attach 2>&1)"
+contains "$tpl_out" 'splits only new projects' 'hopen says why --template splits no project that exists'
+contains "$tpl_out" 'hopen --apply code' 'hopen names hopen --apply for a project that exists'
 contains "$(labels)" "$one" 'hopen adds nothing on a second run'
 if [ "$(labels)" = "$one" ]; then pass 'hopen list is unchanged'; else fail 'hopen list is unchanged'; fi
 attach="$(python3 "$ROOT/tests/pty_run.py" 8 '\x02q' hopen hb-test --file "$work/list/t.code-workspace" 2>&1; echo "status=$?")"

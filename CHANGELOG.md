@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- If `--template` splits no project, because each project has a workspace already, `hopen` says so and names `hopen --apply`.
+
 ## [0.5.1] - 2026-11-12
 
 ### Fixed
