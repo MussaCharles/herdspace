@@ -65,6 +65,7 @@ If you add a feature that a person can see, add a step for it to `tests/tour-rel
 - On macOS, `/var` is a link to `/private/var`, so compare folders by their real paths.
 - `curl ... | bash -s -- ARGS </dev/null` gives bash an empty script, because the redirect replaces the pipe. zsh joins both inputs (`MULTIOS`), so the same line works in zsh and fails in bash.
 - A script that changes its folder must find its own files first, with `HERE="$(cd "$(dirname "$0")" && pwd)"`. A relative path from `$0` breaks after a `cd`. The release check of a macOS runner found this in `tests/tour-release.sh`.
+- A test that makes a temporary git repository must keep its own output files outside that repository. Else the next commit of the test takes them as a change. Set `core.hooksPath` to `/dev/null` there too, so that the hooks of your machine do not run.
 - A small Linux image has no `ss`, `lsof`, `curl`, or `procps`. Do not let a test depend on a tool that the setup does not install.
 - In a Tart VM, host names can fail because the DNS proxy of the host refuses the VM. Set a public DNS server in the VM. Do not start the base image. Clone it.
 - Apple allows two macOS VMs at a time on one Mac.
