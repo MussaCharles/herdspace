@@ -6,6 +6,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- The README starts with the setup. It names the setup script `bootstrap.sh` and the project opener `hopen`, and shows what each option installs.
+- The first line of a setup run names the script and its release, for example `herdspace setup (bootstrap.sh 0.5.1): a server on macOS.`
+- The docs use `my-projects` as the example list, in place of `work`.
+
 - For a name with no list, `hopen` shows the lists that exist, suggests the closest one, and shows how to create the list.
 - If `--template` splits no project, because each project has a workspace already, `hopen` says so and names `hopen --apply`.
 

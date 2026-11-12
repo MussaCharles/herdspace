@@ -1,6 +1,8 @@
 # Setup
 
-Scope: set up a new server machine or client machine with `bootstrap.sh`, or install only `hopen`.
+Scope: set up a new server machine or client machine with the setup script `bootstrap.sh`, or install only the project opener `hopen`.
+
+herdspace has two parts. `bootstrap.sh` sets up a machine. `hopen` opens your projects in Herdr, and the server setup installs it. The first line of each run names the script and its release, for example `herdspace setup (bootstrap.sh 0.5.1): a server on macOS.`
 
 herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. Set up the server machine first. Use one section for each machine. If one machine is both, follow [One machine as server and client](#one-machine-as-server-and-client).
 

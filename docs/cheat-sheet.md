@@ -22,7 +22,7 @@ flowchart TD
   classDef host fill:#1a0f24,stroke:#bc8cff,stroke-width:2px,color:#d2a8ff
   classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
   classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
-  session["Session: work"]:::host --> w1["Workspace: website"]:::data
+  session["Session: my-projects"]:::host --> w1["Workspace: website"]:::data
   session --> w2["Workspace: api"]:::data
   w1 --> t1["Tab 1"]:::step
   w1 --> t2["Tab 2"]:::step
@@ -57,24 +57,24 @@ The prefix key is `ctrl+b`. A row such as `ctrl+b`, `c` means: press `ctrl+b`, r
 ## Daily flow
 
 1. Connect with `ssh my-server`.
-2. Run `hopen work`. All the projects appear in the sidebar.
+2. Run `hopen my-projects`. All the projects appear in the sidebar.
 3. Click a project in the sidebar, or press `Ctrl+Up` and `Ctrl+Down`.
 4. Start an agent in the pane, for example `claude`.
 5. Press `ctrl+b`, then `q` to leave. The agent keeps running.
 
 ## Open all projects at once
 
-A list is like a Herdr session, and each project in the list is like a Herdr workspace. The list of the session `work` is `~/work/herdspace.toml`.
+A list is like a Herdr session, and each project in the list is like a Herdr workspace. The list of the session `my-projects` is `~/my-projects/herdspace.toml`.
 
 | Task | Command |
 |------|---------|
-| Open all the projects of a list | `hopen work` |
+| Open all the projects of a list | `hopen my-projects` |
 | Choose a list from a menu | `hopen` |
 | Open the current folder, with no list | `hopen .` |
 | Open every list | `hopen --all` |
-| Open every list, and attach to one session | `hopen --all work` |
+| Open every list, and attach to one session | `hopen --all my-projects` |
 | Show every list and its state | `hopen --list` |
-| Split each new workspace with a template | `hopen work --template code` |
+| Split each new workspace with a template | `hopen my-projects --template code` |
 | Show every template | `hopen --templates` |
 | Split the current tab with a template | `hopen --apply grid` |
 | Add a project | Add a `[[project]]` to the list file, then run `hopen` again. |
@@ -115,8 +115,8 @@ In the Detached state, your programs keep running. In the Stopped state, your pr
 | Start or return to the default session | `herdr` |
 | Leave, and keep everything running | `ctrl+b`, `q` |
 | Leave by closing the terminal window | Close the window. Everything keeps running. |
-| Start or return to a named session | `herdr --session work` |
-| Return to a named session | `herdr session attach work` |
+| Start or return to a named session | `herdr --session my-projects` |
+| Return to a named session | `herdr session attach my-projects` |
 | List the sessions | `herdr session list` |
 | See the state of the server | `herdr status` |
 
@@ -129,8 +129,8 @@ Do not stop a session to leave it. A stop ends every program in that session. Us
 | Task | Command |
 |------|---------|
 | Stop the default session | `herdr server stop` |
-| Stop a named session | `herdr session stop work` |
-| Delete a stopped named session | `herdr session delete work` |
+| Stop a named session | `herdr session stop my-projects` |
+| Delete a stopped named session | `herdr session delete my-projects` |
 | Start the default session again | `herdr` |
 
 After a stop, the workspaces, tabs, panes, and folders return as new shells. Running programs do not return. An agent with an integration that reports its session resumes its conversation. To see the integrations, run `herdr integration status`.
