@@ -126,6 +126,32 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+# no_list_error NAME stops with a message for a name that has no list. It shows
+# the lists that exist, the closest one for a typo, and how to make the list.
+no_list_error() {
+  local name="$1" names close
+  names="$(find_lists 2>/dev/null | cut -f1 | sort -u)"
+  {
+    printf '  [err]  No list of projects named %s.\n' "$name"
+    if [ -n "$names" ]; then
+      printf '         Your lists: %s\n' "$(printf '%s\n' "$names" | paste -sd ',' - | sed 's/,/, /g')"
+      close="$(printf '%s\n' "$names" | python3 -I -c '
+import difflib, sys
+names = sys.stdin.read().split()
+match = difflib.get_close_matches(sys.argv[1], names, n=1, cutoff=0.6)
+print(match[0] if match else "")
+' "$name")"
+      [ -z "$close" ] || printf '         Did you mean: %s?\n' "$close"
+    else
+      printf '         You have no list yet.\n'
+    fi
+    printf '         To create the list %s, write ~/%s/herdspace.toml, for example:\n' "$name" "$name"
+    printf '           [[project]]\n           name = "api"\n           path = "~/code/api"\n'
+    printf '         To open one folder with no list, run: hopen ~/code/api\n'
+  } >&2
+  exit 1
+}
+
 valid_name() {
   case "$1" in
     "" | *[!A-Za-z0-9._-]*) return 1 ;;
@@ -1502,7 +1528,7 @@ if [ -z "$LIST_FILE" ] && [ -z "$FOLDER" ]; then
 fi
 
 if [ -z "$FOLDER" ] && { [ -z "$LIST_FILE" ] || [ ! -f "$LIST_FILE" ]; }; then
-  die "No list of projects for ${SESSION}. Create ~/${SESSION}.code-workspace or ~/${SESSION}/herdspace.toml."
+  no_list_error "$SESSION"
 fi
 
 prepare_session
