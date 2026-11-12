@@ -1390,7 +1390,7 @@ palette() {
       [ -n "$name" ] && items="${items}task:${name}"$'\t'"Run the task ${name}: ${text}"$'\n'
     done < <(read_list "$file" items 2>/dev/null | awk -F '\036' -v l="$label" '$1 == "K" && $2 == l { print $3 "\t" $4 }')
   fi
-  items="${items}find"$'\t'"Find a file, and open it (ff)"$'\n'
+  command -v fzf >/dev/null 2>&1 && items="${items}find"$'\t'"Find a file, and open it (ff)"$'\n'
   command -v rg >/dev/null 2>&1 && items="${items}grep"$'\t'"Search in the files, and open a result (fif)"$'\n'
   command -v lazygit >/dev/null 2>&1 && items="${items}git"$'\t'"Git status (lazygit)"$'\n'
   items="${items}ports"$'\t'"Show the ports that your programs listen on"$'\n'

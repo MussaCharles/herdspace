@@ -59,7 +59,11 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 ### Only hopen
 
-If a machine has Herdr already, you can install only `hopen` and its templates. This command runs `install.sh`, not `bootstrap.sh`, so it changes nothing else on the machine. You need curl and Python 3.11 or later:
+If a machine has Herdr already, you can install only `hopen` and its templates. This command runs `install.sh`, not `bootstrap.sh`, so it changes nothing else on the machine. You need curl and Python 3.11 or later.
+
+Herdr here is the terminal program `herdr`. To install it, run `curl -fsSL https://herdr.dev/install.sh | sh`, or `brew install herdr`. See [Install Herdr](https://github.com/herdrdev/herdr#install). The Herdr app, from the first page of herdr.dev, is a different program, with the commands `herdr-app` and `hc`. `hopen` does not work with it.
+
+Then install `hopen`:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/install.sh | bash

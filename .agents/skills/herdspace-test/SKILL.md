@@ -46,15 +46,16 @@ Copy the `FAIL` and `RESULT` lines into the pull request or the reply. Name each
 
 ## Check a release after the publish
 
-`tests/run-release-check.sh` installs the published release from the `latest` links in the same way as a person. It uses a fresh container for each Linux image, and a fresh clone of the Tart image. Then `tests/tour-release.sh` tries each `hopen` feature there. It tries the menu, folders, approval, `env_file`, completion, tasks, find and search, ports, the palette, templates, `--convert`, and attach and detach. The VM and the containers are deleted at the end.
+`tests/run-release-check.sh` runs each option of the Quick start of the README: `server`, `client`, `both`, and `hopen`. It reads each command from `README.md`, and installs the published release in fresh containers and fresh clones of the Tart image. Then it checks the result, and runs `tests/tour-release.sh` where `hopen` is installed. The testing guide has a table of what it does for each option.
 
 ```bash
 tests/run-release-check.sh --version 0.5.0
 ```
 
-`--only linux` or `--only macos` runs one kind. A sandbox that the machine does not support prints a `SKIP` line. The containers and the VM have no Ghostty window, so the check does not press the palette key. `tests/run-client-linux.sh` does that before the release.
-
-If you add a feature that a person can see, add a step for it to `tests/tour-release.sh`.
+- Name options to run only them, for example `client hopen`. `--only linux` or `--only macos` runs one kind of sandbox. A sandbox that the machine cannot run prints a `SKIP` line.
+- If you change a command in the Quick start, the check runs the new command. If you add an option to the Quick start, add it to the check.
+- If you add a feature that a person can see, add a step for it to `tests/tour-release.sh`. If the feature needs a tool of the setup, skip the step in `--only-hopen` mode.
+- The sandboxes have no Ghostty window, so the check does not press the keys. `tests/run-client-linux.sh` does that before the release.
 
 ## Pitfalls that broke tests before
 
@@ -67,6 +68,9 @@ If you add a feature that a person can see, add a step for it to `tests/tour-rel
 - `curl ... | bash -s -- ARGS </dev/null` gives bash an empty script, because the redirect replaces the pipe. zsh joins both inputs (`MULTIOS`), so the same line works in zsh and fails in bash.
 - A script that changes its folder must find its own files first, with `HERE="$(cd "$(dirname "$0")" && pwd)"`. A relative path from `$0` breaks after a `cd`. The release check of a macOS runner found this in `tests/tour-release.sh`.
 - A test that makes a temporary git repository must keep its own output files outside that repository. Else the next commit of the test takes them as a change. Set `core.hooksPath` to `/dev/null` there too, so that the hooks of your machine do not run.
+- Do not edit a script while it runs. bash reads a script while it runs it, so an edit can break the rest of the run, for example with "unexpected EOF".
+- `docker exec` starts with no file mask, so the files that it makes are world-writable. `sudo` then refuses `/etc/sudoers.d`, and `ssh` refuses `~/.ssh/config`. Start such a command with `umask 022`, or `umask 077` for `~/.ssh`.
+- At its first start, Herdr shows an onboarding flow that takes the keys. A Herdr config with `onboarding = false` skips it. The full setup installs one. A test of "Only hopen" writes one first.
 - A small Linux image has no `ss`, `lsof`, `curl`, or `procps`. Do not let a test depend on a tool that the setup does not install.
 - In a Tart VM, host names can fail because the DNS proxy of the host refuses the VM. Set a public DNS server in the VM. Do not start the base image. Clone it.
 - Apple allows two macOS VMs at a time on one Mac.
