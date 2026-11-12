@@ -2,7 +2,7 @@
 
 These instructions are for a coding agent that installs herdspace for a person. Follow the steps in order. Do not clone the repository. Every command downloads a release.
 
-herdspace is a workspace and session manager for Herdr. It uses two machines. The server machine runs Herdr, the projects, and the agents. The client machine is the machine that the person uses, and it connects to the server machine with SSH.
+herdspace sets up Herdr and its tools on a machine, and opens projects in Herdr. It has two parts: the setup script `bootstrap.sh`, and the project opener `hopen`, which the server setup installs. It uses two machines. The server machine runs Herdr, the projects, and the agents. The client machine is the machine that the person uses, and it connects to the server machine with SSH.
 
 All commands use the newest release, from this address:
 
@@ -16,12 +16,12 @@ If the person asks for a specific release, add `--version <tag>` to each `bootst
 
 If the person did not say it, ask which of these four tasks they want on this machine:
 
-| Task | Use when |
-|------|----------|
-| `server` | This machine is the server machine. It will run Herdr and the projects. |
-| `client` | This machine is the client machine. The person connects from it to a server machine. |
-| `both` | This one machine is the server machine and the client machine. The person uses Herdr on it, with no SSH. |
-| `hopen` | This machine has Herdr already. The person wants only the `hopen` command and its templates. |
+| Task | Use when | It runs |
+|------|----------|---------|
+| `server` | This machine is the server machine. It will run Herdr and the projects. | `bootstrap.sh server` |
+| `client` | This machine is the client machine. The person connects from it to a server machine. The client gets no `hopen`, because `hopen` runs on the server. | `bootstrap.sh client` |
+| `both` | This one machine is the server machine and the client machine. The person uses Herdr on it, with no SSH. | `bootstrap.sh both` |
+| `hopen` | This machine has Herdr already. The person wants only the `hopen` command and its templates. | `install.sh`, not `bootstrap.sh` |
 
 For `client`, ask for the SSH name of each server, for example `my-server`. An address such as `me@203.0.113.10` also works.
 

@@ -28,6 +28,18 @@ description: Change the herdspace setup scripts, add a tool or a configuration f
 
 The manifest at `~/.local/share/herdspace/manifest.tsv` keeps the checksum of each file that the script wrote. `install_file` uses it to know if a person changed a file.
 
+## Output and questions
+
+Each line of the setup goes through the functions of `bootstrap/lib/common.sh`: `info`, `ok`, `warn`, `die`, `note_todo`, `step`, `ui_item`, `ui_indent`, and `ui_wait`. Do not print a status line with `printf` or `echo` in a step.
+
+- With no terminal, or with `NO_COLOR`, the output stays plain, with the words `[ok]`, `[todo]`, `[warn]`, and `[err]`. The tests, `install.md`, and coding agents read them. At a terminal, the same functions draw boxes, marks, and colors.
+- `ui_count WORD N` writes `1 file` and `2 files`. Use it for each count.
+- A step that runs a long program in the background shows its progress with `ui_wait PID LABEL TOTAL COUNT_FN`. With no terminal, it prints a line every 30 seconds.
+- `brew_install` sets no question of its own: `HOMEBREW_NO_ASK=1` is set, because the person agreed to the setup.
+- `finish_run ROLE` prints the summary, the kept files, the backups with the command that puts each file back, and the next steps of ROLE: `server`, `client`, `both`, or `none` for the server part of a run of `both`. The links use `HS_DOC_BASE`, the docs of the release, which `bootstrap.sh` sets.
+- Name the default of each question, for example `[Y/n] (Enter = yes)`. The question about a changed file lists the changed files first, from a silent `--check` of the same script.
+- `tests/test-ui.sh` tests the output, with `tests/pty_run.py` for the terminal.
+
 ## Prerequisites
 
 Each platform script adds its prerequisites with `prereq_add LABEL KIND READY_FN APPLY_FN PASSWORD FIX`, and then calls `run_prereqs`. The functions are in `bootstrap/lib/prereqs.sh`. KIND is `necessary` or `optional`. APPLY_FN is `-` when the setup cannot install the item, and then FIX tells the person what to do. `--yes` installs with no question. With no terminal, the step installs only the items that need no password.

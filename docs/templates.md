@@ -60,7 +60,7 @@ In a VS Code workspace file, the same settings are `hopen.template` and `hopen.t
 To use one template for each new workspace of one run, use `--template`:
 
 ```bash
-hopen work --template code
+hopen my-projects --template code
 ```
 
 ```mermaid
@@ -144,7 +144,7 @@ flowchart LR
   classDef data fill:#082028,stroke:#39c5cf,stroke-width:1.5px,color:#a5f3fc
   classDef stop fill:#2a0f12,stroke:#ff7b72,stroke-width:2px,color:#ffa198
   stop["Server stops<br/>or the machine restarts"]:::stop --> back["Herdr restores the panes<br/>as plain shells"]:::host
-  back --> hopen["hopen work"]:::cmd
+  back --> hopen["hopen my-projects"]:::cmd
   hopen --> again["hopen starts the template<br/>programs in idle panes"]:::data
 ```
 
@@ -156,7 +156,7 @@ If you rename a template pane by hand in those 30 seconds, `hopen` puts the temp
 
 ## Open every project
 
-Run `hopen --all work` to open the projects of every list. Then press `Ctrl+Down` to go to the next project, and `Ctrl+Up` to go to the previous project.
+Run `hopen --all my-projects` to open the projects of every list. Then press `Ctrl+Down` to go to the next project, and `Ctrl+Up` to go to the previous project.
 
 ![Four projects open in Herdr, and Ctrl+Down moves to the next project](media/open-projects.gif)
 

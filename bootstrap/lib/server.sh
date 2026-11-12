@@ -33,10 +33,16 @@ nvim_plugins_ready() {
 # when a download fails, so the step looks for LazyVim, and tries one more
 # time. With LazyVim still missing, it writes no done mark, and the next run
 # tries again.
+# nvim_plugin_total and nvim_plugin_count give the progress of the plugin step:
+# the plugins in lazy-lock.json, and the plugin folders that exist.
+nvim_plugin_total() { grep -c '": {' "${HOME}/.config/nvim/lazy-lock.json" 2>/dev/null || echo 0; }
+nvim_plugin_count() { find "${HOME}/.local/share/nvim/lazy" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' '; }
+
 install_nvim_plugins() {
   local _try
   for _try in 1 2; do
-    nvim --headless "+Lazy! restore" +qa >/dev/null 2>&1 || true
+    nvim --headless "+Lazy! restore" +qa >/dev/null 2>&1 &
+    ui_wait $! "Neovim plugins" "$(nvim_plugin_total)" nvim_plugin_count || true
     [ -d "${HOME}/.local/share/nvim/lazy/LazyVim" ] && break
   done
   if [ ! -d "${HOME}/.local/share/nvim/lazy/LazyVim" ]; then
@@ -51,13 +57,25 @@ nvim_tools_ready() {
   have nvim && done_ready nvim-tools "$(nvim_lock_sha)"
 }
 
+# The language servers that tools/nvim-wait.lua installs, and the progress of the step.
+NVIM_SERVERS="vtsls json-lsp lua-language-server marksman pyright ruff taplo"
+nvim_tool_count() {
+  local name n=0
+  for name in $NVIM_SERVERS; do
+    [ ! -d "${HOME}/.local/share/nvim/mason/packages/${name}" ] || n=$((n + 1))
+  done
+  echo "$n"
+}
+
 install_nvim_tools() {
   info "This can take some minutes."
   # The first start installs the parser compiler. The second start builds the
   # parsers, and Neovim builds them only after it opens a file.
-  local _pass
+  local _pass total
+  total="$(echo $NVIM_SERVERS | wc -w | tr -d ' ')"
   for _pass in 1 2; do
-    nvim --headless "${REPO_ROOT}/README.md" "+luafile ${REPO_ROOT}/tools/nvim-wait.lua" >/dev/null 2>&1 || warn "Neovim did not finish all its language tools."
+    nvim --headless "${REPO_ROOT}/README.md" "+luafile ${REPO_ROOT}/tools/nvim-wait.lua" >/dev/null 2>&1 &
+    ui_wait $! "Neovim language tools" "$total" nvim_tool_count || warn "Neovim did not finish all its language tools."
   done
   done_mark nvim-tools "$(nvim_lock_sha)"
 }

@@ -121,4 +121,5 @@ if [ "${#SERVERS[@]}" -gt 0 ]; then
   done
 fi
 run_part "Mission Control shortcuts" mission_control_ready set_mission_control
-finish_run "Open a new Ghostty window. Press Cmd+Shift+, to reload the configuration."
+NEXT_SERVER="${SERVERS[0]:-}"
+finish_run "$([ "${HS_ROLE:-}" = both ] && echo both || echo client)"

@@ -8,7 +8,7 @@ herdspace is terminal first. Herdr holds the terminals, `hopen` opens your proje
 
 | In VS Code | In herdspace |
 |------------|--------------|
-| A multi-root workspace file | A `herdspace.toml` list, opened with `hopen work`. `hopen` also reads your `.code-workspace` file. See the [hopen guide](hopen.md). |
+| A multi-root workspace file | A `herdspace.toml` list, opened with `hopen my-projects`. `hopen` also reads your `.code-workspace` file. See the [hopen guide](hopen.md). |
 | Open a folder (`code .`) | `hopen .` |
 | Recent workspaces | `hopen` with no name shows a menu of your lists. `z` and `zi` jump to the folders that you used. |
 | Quick Open (`Cmd+P`) | `ff` in the shell, or `Ctrl+P` in Neovim |

@@ -6,11 +6,24 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Added
 
+- At a terminal, the setup shows a box for each step, numbered items with marks, and colors. It shows a progress bar for the Neovim plugins and language tools, and a summary table at the end. With no terminal, or with `NO_COLOR`, the output stays plain text.
+- The end of a run shows the next steps for the role, with links to the docs of the release. It lists each backup with the command that puts the file back.
+- For a changed `~/.zshrc`, two more answers: keep your file and add the herdspace shell extras, or replace it and copy your own lines to `~/.zshrc.local`.
+- The shell extras are in their own file, `~/.config/herdspace/extras.zsh`: `ff`, `fif`, the completion of `hopen`, the `fzf` keys, `zoxide`, `eza`, and `bat`.
 - lazygit: a clearer layout with less noise, and the count of changed lines of each file. A richer delta view has line numbers, and a second view shows the changed words. A narrow pane uses portrait mode, and the branches of coding agents have their own colors.
 - Neovim: `nvim .` opens the file tree and an empty editor. Folder icons have colors by folder name, and the arrow keys preview a file as `j` and `k` do. The editor has the background of the terminal.
 - Neovim: a question before quitting with unsaved changes, and wrapped lines with their indent. A Python project uses its own `.venv`, and Rust has a language extra. A failed download of `lazy.nvim` gives a clear message, and the start is faster.
 
 ### Changed
+
+- The question about a changed file lists the changed files first. Each answer is on its own line, and the default has a mark. `K` and `R` say how many files they affect, and `R` asks once more before it replaces the other files.
+- Show the difference uses `delta` or `git diff` with colors, and first shows the own lines of the person.
+- Each yes question names its default: `[Y/n] (Enter = yes)`. Homebrew no longer asks a second time before an install.
+- The end of a run no longer advises `--replace-all`, and it says `1 file`, not `1 files`.
+
+- The README starts with the setup. It names the setup script `bootstrap.sh` and the project opener `hopen`, and shows what each option installs.
+- The first line of a setup run names the script and its release, for example `herdspace setup (bootstrap.sh 0.5.1): a server on macOS.`
+- The docs use `my-projects` as the example list, in place of `work`.
 
 - For a name with no list, `hopen` shows the lists that exist, suggests the closest one, and shows how to create the list.
 - If `--template` splits no project, because each project has a workspace already, `hopen` says so and names `hopen --apply`.
