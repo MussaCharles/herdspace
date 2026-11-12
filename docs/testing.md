@@ -19,6 +19,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-hopen-list.sh` | `hopen` reads each list setting, refuses crafted lists, and keeps session names safe. It needs no Herdr, and it runs in a second. |
 | `tests/bench-hopen.sh` | Measures how long `hopen` takes with 20 projects. `tests/run-linux.sh` runs it after the server setup. See [Benchmark](#benchmark). |
 | `tests/test-nvim-plugins.sh` | After a failed plugin download, the Neovim plugin step warns, and the next run tries again. It uses a stub `nvim`, and it runs in a second. |
+| `tests/test-links.sh` | Each relative link of each Markdown file points at a file that exists, and each `#anchor` matches a heading. A link in a community file in `.github/` starts with `/`. It needs no network. |
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
 | `tests/run-release-check.sh` | A published release installs from the `latest` links in a fresh container and a fresh macOS VM, and each `hopen` feature works there. See [After a release](#after-a-release). |
 
@@ -58,6 +59,10 @@ tests/test-hopen-list.sh
 
 ```bash
 tests/test-skills.sh
+```
+
+```bash
+tests/test-links.sh
 ```
 
 Each test prints one `PASS` or `FAIL` line for each check, and a `RESULT` line at the end. The logs go to `tests/.work`.
