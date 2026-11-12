@@ -70,6 +70,6 @@ For a wording change that the maintainer asks for, show a preview of the new tex
 
 ## Make sure that it works
 
-1. Make sure that each relative link and anchor resolves.
+1. Run `tests/test-links.sh`. It checks each relative link and anchor, and the `/` rule of the community files.
 2. Make sure that each new external link opens.
 3. Make sure that a new `curl` command runs.
