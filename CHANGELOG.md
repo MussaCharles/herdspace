@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-13
+
 ### Fixed
 
 - The command palette no longer offers "Find a file" with no `fzf` installed. That action needs `fzf`.
@@ -15,7 +17,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - For a changed `~/.zshrc`, two more answers: keep your file and add the herdspace shell extras, or replace it and copy your own lines to `~/.zshrc.local`.
 - The shell extras are in their own file, `~/.config/herdspace/extras.zsh`: `ff`, `fif`, the completion of `hopen`, the `fzf` keys, `zoxide`, `eza`, and `bat`.
 - lazygit: a clearer layout with less noise, and the count of changed lines of each file. A richer delta view has line numbers, and a second view shows the changed words. A narrow pane uses portrait mode, and the branches of coding agents have their own colors.
-- Neovim: `nvim .` opens the file tree and an empty editor. Folder icons have colors by folder name, and the arrow keys preview a file as `j` and `k` do. The editor has the background of the terminal.
+- Neovim: `nvim .` opens the file tree with the cursor in it. Folder icons have colors by folder name, and the arrow keys preview a file as `j` and `k` do. The editor has the background of the terminal.
 - Neovim: a question before quitting with unsaved changes, and wrapped lines with their indent. A Python project uses its own `.venv`. A failed download of `lazy.nvim` gives a clear message, and the start is faster.
 
 ### Changed
@@ -26,11 +28,9 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - Show the difference uses `delta` or `git diff` with colors, and first shows the own lines of the person.
 - Each yes question names its default: `[Y/n] (Enter = yes)`. Homebrew no longer asks a second time before an install.
 - The end of a run no longer advises `--replace-all`, and it says `1 file`, not `1 files`.
-
 - The README starts with the setup. It names the setup script `bootstrap.sh` and the project opener `hopen`, and shows what each option installs.
 - The first line of a setup run names the script and its release, for example `herdspace setup (bootstrap.sh 0.5.1): a server on macOS.`
 - The docs use `my-projects` as the example list, in place of `work`.
-
 - For a name with no list, `hopen` shows the lists that exist, suggests the closest one, and shows how to create the list.
 - If `--template` splits no project, because each project has a workspace already, `hopen` says so and names `hopen --apply`.
 
@@ -121,7 +121,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/MussaCharles/herdspace/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/MussaCharles/herdspace/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/MussaCharles/herdspace/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/MussaCharles/herdspace/compare/0.3.0...0.4.0
