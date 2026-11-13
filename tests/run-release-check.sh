@@ -75,6 +75,7 @@ CMD_HOPEN_RUN="$CMD_HOPEN"
 [ -z "$TAG" ] || CMD_HOPEN_RUN="${CMD_HOPEN} -s -- --version ${TAG}"
 
 # HERDR_LINUX installs the terminal program herdr from its latest release.
+# shellcheck disable=SC2016 # The container expands these values.
 HERDR_LINUX='mkdir -p $HOME/.local/bin && curl -fsSL -o $HOME/.local/bin/herdr https://github.com/herdrdev/herdr/releases/latest/download/herdr-linux-$(uname -m | sed s/arm64/aarch64/) && chmod 755 $HOME/.local/bin/herdr'
 
 wanted() { local o; for o in "${OPTIONS[@]}"; do [ "$o" = "$1" ] && return 0; done; return 1; }
@@ -190,8 +191,8 @@ here_run() {
   local flags="$TEST_FLAGS" log="tests/.work/release-check-here-$1.log" rc=0
   [ "$(uname -s)" = Darwin ] || flags="$LINUX_FLAGS"
   case "$1" in
-    server) bash -c "${CMD_SERVER}${flags} </dev/null && ${CMD_SERVER}${flags} --check </dev/null && bash tests/tour-release.sh ${TAG}" >"$log" 2>&1 || rc=$? ;;
-    both) bash -c "${CMD_BOTH}${flags} </dev/null && ${CMD_BOTH}${flags} --check </dev/null && bash tests/tour-release.sh ${TAG}" >"$log" 2>&1 || rc=$? ;;
+    server) bash -c "${CMD_SERVER}${flags} && ${CMD_SERVER}${flags} --check && bash tests/tour-release.sh ${TAG}" >"$log" 2>&1 || rc=$? ;;
+    both) bash -c "${CMD_BOTH}${flags} && ${CMD_BOTH}${flags} --check && bash tests/tour-release.sh ${TAG}" >"$log" 2>&1 || rc=$? ;;
     hopen)
       if [ "$(uname -s)" = Darwin ]; then
         bash -c "brew install herdr && ${CMD_HOPEN_RUN} && bash tests/tour-release.sh ${TAG} --only-hopen" >"$log" 2>&1 || rc=$?
@@ -201,6 +202,11 @@ here_run() {
       ;;
     *) echo "--here takes server, both, or hopen." >&2; exit 2 ;;
   esac
+  # A setup that read no script exits 0 with no output, so look for its first line.
+  if [ "$1" != hopen ] && ! grep -q 'herdspace setup (bootstrap.sh' "$log"; then
+    echo "FAIL the setup ran" >>"$log"
+    rc=1
+  fi
   report "here $1" "$log" "$rc"
   exit "$status"
 }

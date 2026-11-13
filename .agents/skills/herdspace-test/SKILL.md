@@ -65,7 +65,7 @@ tests/run-release-check.sh --version 0.5.0
 - fzf draws nothing with no `TERM`. A test of the numbered menu sets `TERM=dumb`.
 - The zsh setup loads `ff`, `fif`, and the completion only in a terminal. `zsh -ic ... </dev/null` has no terminal. Use `tests/pty_run.py`.
 - On macOS, `/var` is a link to `/private/var`, so compare folders by their real paths.
-- `curl ... | bash -s -- ARGS </dev/null` gives bash an empty script, because the redirect replaces the pipe. zsh joins both inputs (`MULTIOS`), so the same line works in zsh and fails in bash.
+- `curl ... | bash -s -- ARGS </dev/null` gives bash an empty script, because the redirect replaces the pipe. zsh joins both inputs (`MULTIOS`), so the same line works in zsh and fails in bash. The release check fails a setup run whose log has no first line `herdspace setup (bootstrap.sh`, because such a run exits 0 with no output.
 - A script that changes its folder must find its own files first, with `HERE="$(cd "$(dirname "$0")" && pwd)"`. A relative path from `$0` breaks after a `cd`. The release check of a macOS runner found this in `tests/tour-release.sh`.
 - A test that makes a temporary git repository must keep its own output files outside that repository. Else the next commit of the test takes them as a change. Set `core.hooksPath` to `/dev/null` there too, so that the hooks of your machine do not run.
 - Do not edit a script while it runs. bash reads a script while it runs it, so an edit can break the rest of the run, for example with "unexpected EOF".
