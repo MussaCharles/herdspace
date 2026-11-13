@@ -17,7 +17,7 @@ mkdir -p "$out"
 
 docker exec -u root "$cli" sh -c 'apt-get update -qq >/dev/null; DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends ffmpeg screenkey >/dev/null 2>&1' || fail 'media tools'
 pair_setup
-srv_user bash -c 'cat >~/work.code-workspace <<JSON
+srv_user bash -c 'cat >~/my-projects.code-workspace <<JSON
 {
   "folders": [
     { "name": "website", "path": "./projects/website" },
@@ -92,7 +92,7 @@ PY2
 clear_idle() {
   srv_user python3 - <<'PY3'
 import json, os, subprocess, time
-env = dict(os.environ, HERDR_SESSION="work")
+env = dict(os.environ, HERDR_SESSION="my-projects")
 def call(*args):
     return json.loads(subprocess.run(["herdr", *args], env=env, capture_output=True, text=True).stdout)
 for pane in call("pane", "list")["result"]["panes"]:
@@ -104,13 +104,13 @@ PY3
   sleep 1
 }
 
-media_shot() { shot "$1"; mv "tests/.work/shots/$1.png" "$out/$1.png"; }
+media_shot() { shot "$1" && [ -f "tests/.work/shots/$1.png" ] && mv "tests/.work/shots/$1.png" "$out/$1.png"; }
 # shellcheck disable=SC2016 # These commands run on the server.
-focus_ws() { srv_user bash -c "HERDR_SESSION=work herdr workspace focus \$(HERDR_SESSION=work herdr workspace list | python3 -c \"import json,sys; print([w['workspace_id'] for w in json.load(sys.stdin)['result']['workspaces'] if w['label']=='$1'][0])\")" >/dev/null; sleep 3; }
+focus_ws() { srv_user bash -c "HERDR_SESSION=my-projects herdr workspace focus \$(HERDR_SESSION=my-projects herdr workspace list | python3 -c \"import json,sys; print([w['workspace_id'] for w in json.load(sys.stdin)['result']['workspaces'] if w['label']=='$1'][0])\")" >/dev/null; sleep 3; }
 
 # 1. Move between the projects. The video starts on a full screen, with every
 # project open, because the first frame is also the preview of the GIF.
-TYPE_DELAY=70 WAIT=16 type_text 'hopen --all work'
+TYPE_DELAY=70 WAIT=16 type_text 'hopen --all my-projects'
 clear_idle
 focus_ws website
 record_start open-projects
@@ -148,7 +148,7 @@ WAIT=2.5 key j
 record_stop move-panes
 
 # 3. Split a pane, and close it again.
-focus_ws work
+focus_ws my-projects
 clear_idle
 record_start split-panes
 WAIT=0.6 press ctrl+b 'ctrl+b, v: split right'

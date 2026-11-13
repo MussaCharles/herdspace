@@ -89,4 +89,14 @@ open_ghostty() {
 
 key() { cli_user xdotool key --clearmodifiers "$@"; sleep "${WAIT:-2}"; }
 type_text() { cli_user xdotool type --delay "${TYPE_DELAY:-40}" "$1"; sleep 0.5; cli_user xdotool key Return; sleep "${WAIT:-2}"; }
-shot() { cli_user import -window "$win" "/tmp/$1.png"; docker cp "$cli:/tmp/$1.png" "tests/.work/shots/$1.png" >/dev/null; }
+# shot NAME saves the Ghostty window as tests/.work/shots/NAME.png. If Ghostty
+# replaced its window, it finds the new one first. It fails if no picture is made.
+shot() {
+  if ! cli_user xdotool getwindowname "$win" >/dev/null 2>&1; then
+    win="$(cli_user xdotool search --onlyvisible --class ghostty 2>/dev/null | tail -n 1)"
+  fi
+  if ! cli_user import -window "$win" "/tmp/$1.png" ||
+    ! docker cp "$cli:/tmp/$1.png" "tests/.work/shots/$1.png" >/dev/null; then
+    fail "screenshot $1"
+  fi
+}
