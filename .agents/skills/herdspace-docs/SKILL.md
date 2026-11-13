@@ -67,7 +67,7 @@ For a wording change that the maintainer asks for, show a preview of the new tex
 
 ## Screenshots and videos
 
-`tests/capture-media.sh` records the images and videos in `docs/media` with real Ghostty and real key presses. The files go to `tests/.work/media`. Before you copy a file to `docs/media`, look at it. The GIF files play 3 times faster than the recording, and `SPEED` changes it.
+`tests/capture-media.sh` records the images and videos in `docs/media` with real Ghostty and real key presses. The screenshots of Neovim and lazygit come from `tests/run-client-linux.sh`, in `tests/.work/shots`. Run it with `FULL=1`, so that the language tools are installed first. Without them, Neovim installs them at the first start, and its notifications cover the editor in the screenshot. The files go to `tests/.work/media`. Before you copy a file to `docs/media`, look at it. The GIF files play 3 times faster than the recording, and `SPEED` changes it.
 
 ## Make sure that it works
 

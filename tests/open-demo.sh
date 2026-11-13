@@ -7,4 +7,4 @@ while [ "$(stty size 2>/dev/null)" = "0 0" ] && [ "$i" -lt 50 ]; do
   sleep 0.2
   i=$((i + 1))
 done
-exec ssh -tt my-server 'zsh -lc "hopen work"'
+exec ssh -tt my-server 'zsh -lc "hopen my-projects"'

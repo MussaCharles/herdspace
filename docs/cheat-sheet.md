@@ -289,7 +289,7 @@ Run `nvim .` in a project. Neovim opens the file tree on the left and an empty e
 | Quit | `:q`. With unsaved changes, Neovim asks first. |
 | Update the plugins | `:Lazy update` |
 
-In a Python project, Neovim uses the `.venv` or `venv` folder of the project, so that the language server finds its packages. Rust has a language extra too.
+In a Python project, Neovim uses the `.venv` or `venv` folder of the project, so that the language server finds its packages.
 
 ## lazygit
 

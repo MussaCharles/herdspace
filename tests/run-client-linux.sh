@@ -19,8 +19,8 @@ grep -E '^(FAIL|RESULT)' tests/.work/client-idem.log | cut -c1-170
 # Real Ghostty, real key presses, over SSH.
 open_ghostty
 # shellcheck disable=SC2016 # These commands run on the server.
-tabs() { srv_user bash -c 'HERDR_SESSION=work herdr tab list --workspace "$(HERDR_SESSION=work herdr workspace list | python3 -c "import json,sys; print([w for w in json.load(sys.stdin)[\"result\"][\"workspaces\"] if w[\"focused\"]][0][\"workspace_id\"])")" | python3 -c "import json,sys; print(len(json.load(sys.stdin)[\"result\"][\"tabs\"]))"'; }
-focused() { srv_user bash -c 'HERDR_SESSION=work herdr workspace list | python3 -c "import json,sys; print([w[\"label\"] for w in json.load(sys.stdin)[\"result\"][\"workspaces\"] if w[\"focused\"]][0])"'; }
+tabs() { srv_user bash -c 'HERDR_SESSION=my-projects herdr tab list --workspace "$(HERDR_SESSION=my-projects herdr workspace list | python3 -c "import json,sys; print([w for w in json.load(sys.stdin)[\"result\"][\"workspaces\"] if w[\"focused\"]][0][\"workspace_id\"])")" | python3 -c "import json,sys; print(len(json.load(sys.stdin)[\"result\"][\"tabs\"]))"'; }
+focused() { srv_user bash -c 'HERDR_SESSION=my-projects herdr workspace list | python3 -c "import json,sys; print([w[\"label\"] for w in json.load(sys.stdin)[\"result\"][\"workspaces\"] if w[\"focused\"]][0])"'; }
 shot sessions
 
 before="$(tabs)"

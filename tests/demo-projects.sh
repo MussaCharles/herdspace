@@ -21,7 +21,7 @@ cd "$HOME/projects/website"
 # shellcheck disable=SC2016
 printf 'export function greet(name) {\n  const text = `Hello, ${name}!`;\n  return text;\n}\n\nexport const version = "1.1.0";\n' >src/index.js
 printf 'body { margin: 0; }\n' >src/site.css
-cat >"$HOME/work.code-workspace" <<'JSON'
+cat >"$HOME/my-projects.code-workspace" <<'JSON'
 { "folders": [
   { "name": "website", "path": "./projects/website" },
   { "name": "api", "path": "./projects/api" },
