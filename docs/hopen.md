@@ -69,7 +69,7 @@ hopen --all
 hopen --all my-projects
 ```
 
-`hopen` finds a list at `~/<name>/herdspace.toml`. A `herdspace.toml` file is in [TOML](https://toml.io), the format of the Herdr configuration. It needs Python 3.11 or later. On a Mac, the server setup installs it. To install it yourself, run `brew install python`.
+`hopen` finds a list at `~/<name>/herdspace.toml`. A `herdspace.toml` file is in [TOML](https://toml.io), the format of the Herdr configuration. It needs Python 3.11 or later. The server setup installs it on a Mac, and on Debian or Ubuntu when the system has a `python3.11` package. To install it yourself, see [Python for herdspace.toml](#python-for-herdspacetoml).
 
 ![Herdr with one workspace for each project](media/herdr-sessions.png)
 
@@ -258,6 +258,31 @@ For bash, in `~/.bashrc`:
 
 ```bash
 source <(hopen --completion bash)
+```
+
+## Python for herdspace.toml
+
+`hopen` reads a `herdspace.toml` list with Python 3.11 or later. It uses `python3` if that is new enough, or else the newest of `python3.14`, `python3.13`, `python3.12`, and `python3.11` that it finds. A VS Code workspace file works with an older Python 3.
+
+| System | Command |
+|--------|---------|
+| macOS | `brew install python` |
+| Debian or Ubuntu, with `sudo` | `sudo apt-get install python3.11` |
+| Any Linux, for your account only, with no `sudo` | See the steps below. |
+
+On a shared server, you can install Python for your account only with [uv](https://docs.astral.sh/uv/). It writes only to your home folder, and it does not change the `python3` of the system or of other accounts:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv python install 3.12
+```
+
+uv puts `python3.12` in `~/.local/bin`, which the herdspace shell adds to the `PATH`, and `hopen` finds it. Open a new shell, and run `hopen --list` to make sure that `hopen` reads your list.
+
+A `hopen` of release 0.6.1 or earlier uses only `python3`. For such a release, also make `python3` and `python` in `~/.local/bin` point to the new Python, for your account only. `--default` is an experimental option of uv, see [Python versions](https://docs.astral.sh/uv/concepts/python-versions/) in the uv docs:
+
+```bash
+uv python install 3.12 --default
 ```
 
 ## Install only hopen
