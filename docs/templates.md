@@ -166,8 +166,8 @@ Run `hopen --all my-projects` to open the projects of every list. Then press `Ct
 
 | Action | Mac | Linux or Windows |
 |--------|-----|------------------|
-| Next pane | `Alt+Down`, or `ctrl+b`, `tab` | The same |
-| Previous pane | `Alt+Up`, or `ctrl+b`, `shift+tab` | The same |
+| Next pane | `Alt+Up`, or `ctrl+b`, `tab` | The same |
+| Previous pane | `Alt+Down`, or `ctrl+b`, `shift+tab` | The same |
 | Pane to the left, below, above, or right | `ctrl+b`, then `h`, `j`, `k`, or `l` | The same |
 | Zoom the pane, or return | `ctrl+b`, `z` | The same |
 | Focus a pane with the mouse | Click it | The same |

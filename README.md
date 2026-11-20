@@ -19,6 +19,7 @@ With herdspace, you can:
 - Open every project of a list in one Herdr session, with one command. The list is a `herdspace.toml` file, or a VS Code workspace file.
 - Split each project into named panes from a template, for example an editor, an agent, and lazygit.
 - Start the template programs again after a restart.
+- Run project tasks, find files, search text, see open ports, and use a command palette. See the [hopen guide](docs/hopen.md#commands).
 
 ## Quick start
 

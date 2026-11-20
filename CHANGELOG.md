@@ -7,6 +7,11 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 ### Changed
 
 - The setup guide shows the `curl` command in each section, and it moves the clone to one short note. It also says that a machine with no systemd user session skips the login service with no warning.
+- The update guide says that the same `curl` command installs the newest release. The cheat sheet lists the command palette key, `ff`, `fif`, `hopen --task`, and `hopen --ports`.
+
+### Fixed
+
+- The templates guide had the keys for the next pane and the previous pane the wrong way around.
 
 ## [0.6.0] - 2026-11-13
 
