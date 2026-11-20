@@ -11,6 +11,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- Newer pinned versions: delta 0.21.2 on Linux, and newer commits of the Auto Title plugin, Oh My Zsh, and Powerlevel10k.
 - The setup output links to the docs on GitHub in place of a path in the repository.
 - `hopen` reads `herdspace.toml` with the newest Python 3.11 or later that it finds, for example `python3.11` beside an older `python3`. The Linux server setup installs `python3.11` when `python3` is older, as on Ubuntu 22.04.
 - The README and the hopen guide say that you write the list file yourself, and where it goes.
