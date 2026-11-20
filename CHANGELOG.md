@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- The setup guide shows the `curl` command in each section, and it moves the clone to one short note. It also says that a machine with no systemd user session skips the login service with no warning.
+
 ## [0.6.0] - 2026-11-13
 
 ### Fixed

@@ -1,8 +1,8 @@
 # Setup
 
-Scope: set up a new server machine or client machine with the setup script `bootstrap.sh`, or install only the project opener `hopen`.
+Scope: set up a new server machine or client machine with the setup script `bootstrap.sh`. To install only the project opener `hopen`, follow [Install only hopen](hopen.md#install-only-hopen).
 
-herdspace has two parts. `bootstrap.sh` sets up a machine. `hopen` opens your projects in Herdr, and the server setup installs it. The first line of each run names the script and its release, for example `herdspace setup (bootstrap.sh 0.5.1): a server on macOS.`
+herdspace has two parts. `bootstrap.sh` sets up a machine. `hopen` opens your projects in Herdr, and the server setup installs it. The first line of each run names the script and its release, for example `herdspace setup (bootstrap.sh 0.6.0): a server on macOS.`
 
 herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. Set up the server machine first. Use one section for each machine. If one machine is both, follow [One machine as server and client](#one-machine-as-server-and-client).
 
@@ -106,35 +106,24 @@ Follow [Connect to the server with SSH](ssh.md). The steps are the same for an I
 
 ## Get the script
 
-You can run the script in two ways.
-
-To download a release and run it at once, use `curl`. The script saves the release in `~/.local/share/herdspace/<tag>`, compares its checksum, and runs it from there:
+Run the script with `curl`. The command downloads the newest release to `~/.local/share/herdspace/<tag>`, compares its checksum, and runs it from there. The word after `bash -s --` is the role, and the options follow it:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
 ```
 
-To read or change the files first, clone this repository, and run the script from the clone:
+Each section below shows this command. You do not need to clone the repository.
+
+To read or change the files first, clone the repository and run `./bootstrap.sh` from the clone, with the same role and options:
 
 ```bash
 git clone https://github.com/MussaCharles/herdspace.git ~/herdspace
-```
-
-If you use SSH keys with GitHub, clone with the SSH address instead:
-
-```bash
-git clone git@github.com:MussaCharles/herdspace.git ~/herdspace
-```
-
-Then run the script from the clone:
-
-```bash
 cd ~/herdspace && ./bootstrap.sh server
 ```
 
 ## Options
 
-The first word is `server`, `client`, or `both`. The script finds the system. Each option below works with `curl` too, after `bash -s --`.
+The first word is `server`, `client`, or `both`. The script finds the system. Put the options after the role.
 
 | Option | Use |
 |--------|-----|
@@ -190,6 +179,7 @@ flowchart LR
 | Free `Ctrl` arrow keys on a Mac | yes | |
 | zsh, Oh My Zsh, and Powerlevel10k, with a different color on each side | yes | yes |
 | fzf, zoxide, eza, bat, and fd | yes | yes |
+| ripgrep and Node.js, for Neovim and its language tools | | yes |
 | Herdr, with keys, colors, and sidebar | | yes |
 | Auto Title plugin | | yes |
 | Agent skill and integration for each agent program that it finds | | yes |
@@ -204,7 +194,7 @@ The scripts do not install the agent programs. Install them first, or run the se
 - A script does only the parts that are not done. [Run a script again](#run-a-script-again) lists the options.
 - A script asks before it replaces a file that you changed, and it makes a backup first.
 - A script never stops a Herdr server that was already running, because a stop closes every pane.
-- Tools from release pages have a pinned version and a checksum.
+- On Linux, tools from release pages have a pinned version and a checksum. On macOS, the tools come from Homebrew.
 - Herdr and Neovim do not contact their sites in the background. The update check asks the Homebrew API.
 
 ## Run a script again
@@ -241,12 +231,14 @@ flowchart TD
   ask -- " --replace-all " --> rep["Replace, with a backup"]:::stop
 ```
 
-| Command | Effect |
-|---------|--------|
-| `./bootstrap.sh server` | Do what is missing, and ask about each file that you changed. |
-| `./bootstrap.sh server --check` | Report what is done, missing, or different. Change nothing. |
-| `./bootstrap.sh server --keep-existing` | Add what is missing, and change no existing file. |
-| `./bootstrap.sh server --replace-all` | Use the repository version of every file, with no question. Each replaced file gets a backup. Use it with care: a file that you changed can have more than the herdspace version. |
+Put these options after the role in the `curl` command, for example `bash -s -- server --check`:
+
+| Role and option | Effect |
+|-----------------|--------|
+| `server` | Do what is missing, and ask about each file that you changed. |
+| `server --check` | Report what is done, missing, or different. Change nothing. |
+| `server --keep-existing` | Add what is missing, and change no existing file. |
+| `server --replace-all` | Use the repository version of every file, with no question. Each replaced file gets a backup. Use it with care: a file that you changed can have more than the herdspace version. |
 
 These options work for a server and for a client. With no terminal, for example in a run by an agent, the script keeps your files and lists them.
 
@@ -293,7 +285,7 @@ A script records the hash of each file that it installs, in `~/.local/share/herd
 The script needs `sudo` to install system packages and to change the login shell. If `sudo` asks for a password, type it. Run the script as the account that will use Herdr:
 
 ```bash
-./bootstrap.sh server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
 ```
 
 The script takes some minutes. These options make it shorter:
@@ -303,14 +295,14 @@ The script takes some minutes. These options make it shorter:
 | `--skip-nvim-tools` | Neovim installs its language tools at its first start. |
 | `--skip-login-service` | Herdr starts at your next `herdr` command. |
 
-A systemd user service starts Herdr at boot. A machine with no systemd has no service, and the script shows a warning.
+A systemd user service starts Herdr at boot. On a machine with no systemd user session, the script skips the service. If the script cannot turn on linger, it shows a warning, and Herdr starts at your first login.
 
 ## macOS server
 
 Homebrew must be able to write to its folder from this account. If Homebrew is not installed, the script installs it. Then the script asks for your password, so a person must be at the keyboard. Run the script:
 
 ```bash
-./bootstrap.sh server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
 ```
 
 A LaunchAgent starts Herdr at login. If a Herdr server is already running, the LaunchAgent starts at the next login.
@@ -322,7 +314,7 @@ To start Herdr after a reboot with no person present, turn on automatic login fo
 Give the name of each server:
 
 ```bash
-./bootstrap.sh client --server my-server --server my-other-server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- client --server my-server --server my-other-server
 ```
 
 ```mermaid
@@ -355,7 +347,7 @@ Press `Cmd+Shift+,` in Ghostty to reload the configuration. After a change to `b
 The script needs `sudo`. Give the name of each server:
 
 ```bash
-./bootstrap.sh client --server my-server
+curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- client --server my-server
 ```
 
 Ubuntu 26.04 and later have a Ghostty package. Debian 13 uses a community package with a pinned checksum. For another system, install Ghostty from the [Ghostty install page](https://ghostty.org/docs/install/binary) first. Add `--no-ghostty` to set up only the shell.
@@ -369,12 +361,6 @@ Follow the [Windows with WSL guide](windows-wsl.md).
 ## One machine as server and client
 
 If Herdr runs on the machine that you use, and you do not connect to another machine with SSH, use this section. `both` runs the server setup and then the client setup on this machine. It takes the options of both setups. `--server` is not necessary.
-
-```bash
-./bootstrap.sh both
-```
-
-With `curl`:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- both
