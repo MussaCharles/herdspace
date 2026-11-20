@@ -8,10 +8,13 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 - The setup guide shows the `curl` command in each section, and it moves the clone to one short note. It also says that a machine with no systemd user session skips the login service with no warning.
 - The update guide says that the same `curl` command installs the newest release. The cheat sheet lists the command palette key, `ff`, `fif`, `hopen --task`, and `hopen --ports`.
+- The setup shows a line before each long action: the package lists, each package that apt sets up, and each download.
+- The Linux setup installs only the system packages that are missing, with `--no-upgrade`. It no longer upgrades a package that another account of a shared server can use.
 
 ### Fixed
 
 - The templates guide had the keys for the next pane and the previous pane the wrong way around.
+- The Linux setup no longer stops with no message when `apt-get update` fails for a package source of the machine that herdspace does not use, for example a local driver repository with no signature. It shows the error, and it goes on. If the install then fails, it says what to do.
 
 ## [0.6.0] - 2026-11-13
 

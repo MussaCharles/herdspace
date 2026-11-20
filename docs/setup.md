@@ -282,7 +282,7 @@ A script records the hash of each file that it installs, in `~/.local/share/herd
 
 ## Debian or Ubuntu server
 
-The script needs `sudo` to install system packages and to change the login shell. If `sudo` asks for a password, type it. Run the script as the account that will use Herdr:
+The script needs `sudo` to install system packages and to change the login shell. If `sudo` asks for a password, type it. The script installs only the system packages that are missing, and it does not upgrade a package that is already installed, so other accounts on a shared server keep their versions. If `apt-get update` fails for a package source that herdspace does not use, the script shows the error and goes on. Run the script as the account that will use Herdr:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
