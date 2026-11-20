@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-20
+
 ### Changed
 
 - The setup guide shows the `curl` command in each section, and it moves the clone to one short note. It also says that a machine with no systemd user session skips the login service with no warning.
@@ -133,7 +135,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/MussaCharles/herdspace/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/MussaCharles/herdspace/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/MussaCharles/herdspace/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/MussaCharles/herdspace/compare/0.4.0...0.5.0
