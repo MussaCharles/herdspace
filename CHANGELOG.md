@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-11-21
+
 ### Security
 
 - Each release is checked for changes after the build. The "Release check" workflow builds the release again from its tag on a clean runner, and fails if a published file differs from that build. When all files match, it signs each file with a GitHub artifact attestation.
@@ -165,7 +167,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.2...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.3...HEAD
+[0.6.3]: https://github.com/MussaCharles/herdspace/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/MussaCharles/herdspace/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/MussaCharles/herdspace/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/MussaCharles/herdspace/compare/0.5.1...0.6.0
