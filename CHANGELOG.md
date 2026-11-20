@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- Newer pinned versions: delta 0.21.2 on Linux, and newer commits of the Auto Title plugin, Oh My Zsh, and Powerlevel10k.
+
 ## [0.6.1] - 2026-11-20
 
 ### Changed
