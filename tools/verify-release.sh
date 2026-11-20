@@ -11,7 +11,9 @@
 #   checks. The tests use it.
 # The downloaded files stay in dist/<tag>-published, for the attestation step
 # of .github/workflows/release.yml. It exits 1 when a file differs.
-# Run it in the clone of the tag: it builds the commit of the current folder.
+# Run it in a clone of the tag: it builds the commit of the current folder with
+# the tools/release.sh of that commit. The script itself can come from another
+# clone, for example from main.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 

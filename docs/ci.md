@@ -55,7 +55,7 @@ The Linux tests start their own containers on the runner, as on a machine of a c
 
 | Job | Runner | Tests |
 |-----|--------|-------|
-| Release files match the tag | `ubuntu-24.04` | `tools/verify-release.sh <tag>`: builds the release again from the tag, and compares each published file with the build. When all files match, it signs them with an attestation. It also runs for a pre-release. |
+| Release files match the tag | `ubuntu-24.04` | `tools/verify-release.sh <tag>` from main, in a clone of the tag: builds the release again from the tag, and compares each published file with the build. When all files match, it signs them with an attestation. It also runs for a pre-release. |
 | Linux, one job for each option | `ubuntu-24.04` and `ubuntu-24.04-arm` | `tests/run-release-check.sh --only linux <option>`: `server`, `client`, `both`, and `hopen`, in fresh containers |
 | macOS, one job for each option | `macos-26` | `tests/run-release-check.sh --here <option>`: `server`, `both`, and `hopen`, on the runner itself |
 
