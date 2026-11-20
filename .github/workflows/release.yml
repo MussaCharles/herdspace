@@ -16,6 +16,42 @@ permissions:
   contents: read
 
 jobs:
+  verify:
+    # Builds the release again from its tag, compares each published file with
+    # the build, and signs the files with an attestation when they match.
+    # It runs for a pre-release too.
+    name: Release files match the tag
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Find the tag
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          [ -n "$TAG" ] || TAG="$(gh release view --json tagName -q .tagName)"
+          echo "tag=${TAG}" >>"$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ steps.tag.outputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Compare the release files with a build of the tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: tools/verify-release.sh "$TAG" --repo "${{ github.repository }}"
+      - name: Sign the release files with an attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/${{ steps.tag.outputs.tag }}-published/*
+
   linux:
     name: Linux ${{ matrix.option }} (${{ matrix.runner }})
     if: ${{ !github.event.release.prerelease }}

@@ -114,8 +114,9 @@ for entry in "${SETTINGS[@]}"; do
   fi
 done
 
-# Dependabot alerts and security updates answer 204 when they are on.
-for feature in vulnerability-alerts automated-security-fixes; do
+# Dependabot alerts answer 204 when they are on. Security updates and
+# immutable releases answer with "enabled".
+for feature in vulnerability-alerts automated-security-fixes immutable-releases; do
   if gh api "repos/${REPO}/${feature}" >/dev/null 2>&1 && { [ "$feature" = vulnerability-alerts ] || gh api "repos/${REPO}/${feature}" -q .enabled | grep -qx true; }; then
     report "$feature" ok
   elif [ "$MODE" = apply ]; then
