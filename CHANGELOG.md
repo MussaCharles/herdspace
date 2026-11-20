@@ -9,6 +9,9 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - Each release is checked for changes after the build. The "Release check" workflow builds the release again from its tag on a clean runner, and fails if a published file differs from that build. When all files match, it signs each file with a GitHub artifact attestation.
 - `tools/release.sh --publish` stops when the commit is not the head of main, when a CI check of its pull request did not pass, or when the tag already has a release. `--preflight` runs only these checks.
 - `tools/repo-settings.sh` turns on immutable releases, so that nobody can change the files of a published release.
+- `tools/update-versions.sh` takes a release or a commit only when it is at least 7 days old, and it never moves a pin back. `PIN_MIN_AGE_DAYS` changes the wait.
+- The weekly pin check also compares the Neovim plugins of `config/nvim/lazy-lock.json` with GitHub. A locked commit that is less than 7 days old opens the issue.
+- The setup guide shows how to make sure that a release is genuine, in a browser or with `gh attestation verify`. This step is optional.
 
 ## [0.6.2] - 2026-11-20
 

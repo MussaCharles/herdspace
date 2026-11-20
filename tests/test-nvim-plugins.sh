@@ -38,5 +38,16 @@ out="$(run_step ok)"
 case "$out" in *NOT_READY*) fail "a good download writes the done mark: $out" ;; *READY*) pass "a good download writes the done mark" ;; *) fail "a good download writes the done mark: $out" ;; esac
 case "$out" in *warn*) fail "a good download gives no warning: $out" ;; *) pass "a good download gives no warning" ;; esac
 [ "$(wc -l <"${tmp}/ok/runs" | tr -d ' ')" = 1 ] && pass "a good download runs one time" || fail "a good download runs one time"
+# Each plugin of the lock file needs its repository in tools/nvim-plugins.tsv,
+# for tools/check-pins.sh.
+missing="$(python3 -I - "$(dirname "$0")/.." <<'PY'
+import json, sys
+root = sys.argv[1]
+lock = json.load(open(f"{root}/config/nvim/lazy-lock.json", encoding="utf-8"))
+known = {line.split("\t")[0] for line in open(f"{root}/tools/nvim-plugins.tsv", encoding="utf-8") if line.strip() and not line.startswith("#")}
+print(" ".join(sorted(set(lock) - known)))
+PY
+)"
+[ -z "$missing" ] && pass "each locked plugin has a repository in tools/nvim-plugins.tsv" || fail "add these plugins to tools/nvim-plugins.tsv: ${missing}"
 echo "RESULT failures=${failures}"
 exit $((failures > 0))

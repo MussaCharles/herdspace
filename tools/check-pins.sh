@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # check-pins.sh compares the pinned downloads in tools/versions.tsv and
 # tools/versions.env with the latest releases. It runs tools/update-versions.sh
-# on a copy, so the files of the repository do not change.
+# on a copy, so the files of the repository do not change. It also compares
+# each Neovim plugin of config/nvim/lazy-lock.json with its branch on GitHub:
+# a locked commit that is less than PIN_MIN_AGE_DAYS days old (7 by default)
+# counts as a problem, and a newer commit is listed for information.
 #
 # Usage: tools/check-pins.sh [--issue]
 #   With no option, it prints a report, and it exits 1 if a pin is old.
@@ -16,7 +19,7 @@ TITLE="Pinned tools have newer releases"
 
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
-cp tools/update-versions.sh "$work/"
+cp tools/update-versions.sh tools/versions.tsv tools/versions.env "$work/"
 "$work/update-versions.sh" >/dev/null
 
 report="$(python3 -I - tools "$work" <<'PY'
@@ -64,8 +67,65 @@ if rows:
 PY
 )"
 
+plugins="$(python3 -I - <<'PY'
+import datetime, json, os, urllib.request
+
+MIN_AGE = datetime.timedelta(days=int(os.environ.get("PIN_MIN_AGE_DAYS", "7")))
+NOW = datetime.datetime.now(datetime.timezone.utc)
+UNTIL = (NOW - MIN_AGE).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def api(path):
+    request = urllib.request.Request("https://api.github.com/" + path)
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        request.add_header("Authorization", "Bearer " + token)
+    with urllib.request.urlopen(request, timeout=30) as response:
+        return json.load(response)
+
+lock = json.load(open("config/nvim/lazy-lock.json", encoding="utf-8"))
+repos = dict(line.split("\t") for line in open("tools/nvim-plugins.tsv", encoding="utf-8").read().splitlines()
+             if line and not line.startswith("#"))
+young, newer = [], []
+for name in sorted(lock, key=str.lower):
+    repo, pin = repos[name], lock[name]
+    settled = api(f"repos/{repo}/commits?sha={pin['branch']}&until={UNTIL}&per_page=1")
+    if settled and settled[0]["sha"] == pin["commit"]:
+        continue
+    row = f"| {name} | {pin['commit'][:12]} | {settled[0]['sha'][:12] if settled else '-'} |"
+    # A plugin with a version, for example blink.cmp, can lock a commit of a
+    # release tag that is not on its branch. Only the age of the commit counts.
+    locked = api(f"repos/{repo}/commits/{pin['commit']}")["commit"]["committer"]["date"]
+    if datetime.datetime.fromisoformat(locked.replace("Z", "+00:00")) > NOW - MIN_AGE:
+        young.append(row)
+    elif settled and api(f"repos/{repo}/compare/{settled[0]['sha']}...{pin['commit']}")["status"] == "behind":
+        newer.append(row)
+if young:
+    print("These Neovim plugins are locked to a commit that is less than 7 days old. Check the commit, or lock an older one:\n")
+    print("| Plugin | Locked | Newest commit that is old enough |\n|--------|--------|------|")
+    print("\n".join(young))
+if newer:
+    print(("\n" if young else "") + "These Neovim plugins have newer commits. They are here for information. To update, run `:Lazy update` in Neovim, and commit `config/nvim/lazy-lock.json`:\n")
+    print("| Plugin | Locked | Newest commit that is old enough |\n|--------|--------|------|")
+    print("\n".join(newer))
+if young:
+    print("\nYOUNG")
+PY
+)"
+if [ -n "$plugins" ]; then
+  plugins_young=0
+  case "$plugins" in *YOUNG) plugins_young=1; plugins="${plugins%$'\n'YOUNG}" ;; esac
+  if [ -z "$report" ] && [ "$plugins_young" -eq 0 ]; then
+    echo "Each pin is the latest release that is at least ${PIN_MIN_AGE_DAYS:-7} days old."
+    printf '\n%s\n' "$plugins"
+    exit 0
+  fi
+  report="${report:+${report}
+
+}${plugins}"
+fi
+
 if [ -z "$report" ]; then
-  echo "Each pin is the latest release."
+  echo "Each pin is the latest release that is at least ${PIN_MIN_AGE_DAYS:-7} days old."
   exit 0
 fi
 printf '%s\n' "$report"

@@ -38,6 +38,8 @@ The workflow "Pinned tools" runs `tools/check-pins.sh --issue`. The script runs 
 
 The git pins of Oh My Zsh and its plugins follow a branch that changes almost each day. The report lists them for information, but they do not open an issue. To see the report on your own machine, run `tools/check-pins.sh`.
 
+The report compares only with releases and commits that are at least 7 days old. It also compares each Neovim plugin of `config/nvim/lazy-lock.json` with its branch on GitHub. `tools/nvim-plugins.tsv` gives the repository of each plugin. A plugin with a locked commit that is less than 7 days old opens the issue. A plugin with a newer commit is listed for information.
+
 ## The jobs of CI
 
 | Job | Runner | Tests |
@@ -53,7 +55,7 @@ The Linux tests start their own containers on the runner, as on a machine of a c
 
 | Job | Runner | Tests |
 |-----|--------|-------|
-| Release files match the tag | `ubuntu-24.04` | `tools/verify-release.sh <tag>`: builds the release again from the tag, and compares each published file with the build. When all files match, it signs them with an attestation. It also runs for a pre-release. |
+| Release files match the tag | `ubuntu-24.04` | `tools/verify-release.sh <tag>` from main, in a clone of the tag: builds the release again from the tag, and compares each published file with the build. When all files match, it signs them with an attestation. It also runs for a pre-release. |
 | Linux, one job for each option | `ubuntu-24.04` and `ubuntu-24.04-arm` | `tests/run-release-check.sh --only linux <option>`: `server`, `client`, `both`, and `hopen`, in fresh containers |
 | macOS, one job for each option | `macos-26` | `tests/run-release-check.sh --here <option>`: `server`, `both`, and `hopen`, on the runner itself |
 
