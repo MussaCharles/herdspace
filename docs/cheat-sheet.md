@@ -238,6 +238,8 @@ An ordinary pane closes with no question, and its program stops.
 
 ## Agents in panes
 
+To run two agents side by side in one tab, for example two Claude Code sessions that work together, see [Run agents side by side](tmux.md#run-agents-side-by-side).
+
 | State | Meaning |
 |-------|---------|
 | `blocked` | The agent waits for you. |
