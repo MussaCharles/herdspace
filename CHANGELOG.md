@@ -6,6 +6,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Added
 
+- A "From tmux" guide, `docs/tmux.md`: the Herdr key or command for each tmux action, and how to run agents side by side in panes.
 - `hopen project-name.code-workspace` opens a list file by its path. `hopen .` uses the only VS Code workspace file of a folder, also when its name is not the name of the folder.
 - The cheat sheet starts with a table of daily Herdr commands: start, attach, leave, stop, and delete a session. It links to the official Herdr docs.
 
