@@ -26,7 +26,7 @@ for base in "$@"; do
     echo 'deb file:/var/unsigned-repo stable main' | sudo tee /etc/apt/sources.list.d/unsigned.list >/dev/null
     start=\$(date +%s)
     ./bootstrap.sh server ${flags} 2>&1 | tee /tmp/setup.log
-    grep -q 'apt-get update failed for a package source' /tmp/setup.log
+    grep -q 'apt-get update failed' /tmp/setup.log
     echo RESULT unsigned-source-warned
     echo \"RESULT bench setup=\$((\$(date +%s) - start))s\"
     tests/verify-server.sh linux

@@ -11,6 +11,12 @@ run_root() {
   fi
 }
 
+# apt_errors LOG shows the error lines of an apt log, or its last lines if it has
+# none, for example after a wrong sudo password.
+apt_errors() {
+  { grep '^E:' "$1" || tail -n 5 "$1"; } | head -n 5 | ui_indent >&2 || true
+}
+
 # apt_install NAME... installs the packages that are missing, and shows each
 # package as apt sets it up. It never upgrades a package that is already
 # installed, because on a shared server other accounts can use it.
@@ -27,13 +33,13 @@ apt_install() {
   log="$(mktemp)"
   info "Updating the package lists (apt-get update)."
   if ! run_root env DEBIAN_FRONTEND=noninteractive apt-get update -q >"$log" 2>&1; then
-    warn "apt-get update failed for a package source of this machine. herdspace does not use it, so the setup goes on:"
-    grep '^E:' "$log" | head -n 5 | ui_indent >&2
+    warn "apt-get update failed, for example for a package source that herdspace does not use. The setup goes on with the package lists that it has:"
+    apt_errors "$log"
   fi
   info "Installing: $*"
   if ! run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends --no-upgrade "$@" 2>&1 |
     tee "$log" | awk '/^Setting up / { print "Set up " $3; fflush() }' | ui_indent; then
-    grep '^E:' "$log" | ui_indent >&2
+    apt_errors "$log"
     rm -f "$log"
     die "apt-get could not install the packages. Fix or turn off the package source in the errors above, and run the setup again."
   fi
