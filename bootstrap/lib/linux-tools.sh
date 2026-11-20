@@ -11,9 +11,33 @@ run_root() {
   fi
 }
 
+# apt_install NAME... installs the packages that are missing, and shows each
+# package as apt sets it up. It never upgrades a package that is already
+# installed, because on a shared server other accounts can use it.
+# apt-get update reads every package source of the machine, also the sources
+# that herdspace does not use. If one of them fails, the lists of the others
+# are still new, so the step warns and goes on.
 apt_install() {
-  run_root env DEBIAN_FRONTEND=noninteractive apt-get update -qq
-  run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "$@" >/dev/null
+  local log name missing=()
+  for name in "$@"; do
+    apt_ready "$name" || missing+=("$name")
+  done
+  [ "${#missing[@]}" -gt 0 ] || return 0
+  set -- "${missing[@]}"
+  log="$(mktemp)"
+  info "Updating the package lists (apt-get update)."
+  if ! run_root env DEBIAN_FRONTEND=noninteractive apt-get update -q >"$log" 2>&1; then
+    warn "apt-get update failed for a package source of this machine. herdspace does not use it, so the setup goes on:"
+    grep '^E:' "$log" | head -n 5 | ui_indent >&2
+  fi
+  info "Installing: $*"
+  if ! run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends --no-upgrade "$@" 2>&1 |
+    tee "$log" | awk '/^Setting up / { print "Set up " $3; fflush() }' | ui_indent; then
+    grep '^E:' "$log" | ui_indent >&2
+    rm -f "$log"
+    die "apt-get could not install the packages. Fix or turn off the package source in the errors above, and run the setup again."
+  fi
+  rm -f "$log"
 }
 
 # link_debian_tools adds the usual names of two tools. Debian names them batcat and fdfind.
@@ -81,6 +105,7 @@ install_release_tool() {
   marker="${STATE_DIR}/installed/${name}"
   tmp="$(mktemp -d)"
   file="${tmp}/$(basename "$url")"
+  info "Downloading ${name} ${version}."
   curl -fsSL --retry 2 --connect-timeout 15 -o "$file" "$url"
   printf '%s  %s\n' "$sha" "$file" | sha256sum -c --status - || die "The checksum of ${name} does not match."
   mkdir -p "${HOME}/.local/bin"

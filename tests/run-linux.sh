@@ -18,9 +18,16 @@ for base in "$@"; do
   docker build -q $(build_flags) --build-arg "BASE=${base}" -f tests/Dockerfile.linux -t "$tag" . >"$log" 2>&1 || { echo "FAIL build ${base}"; tail -n 20 "$log"; status=1; continue; }
   apt_cache_args "$base"
   docker run --rm --name "${tag}-$$" ${APT_CACHE[@]+"${APT_CACHE[@]}"} "$tag" bash -c "
-    set -e
+    set -eo pipefail
+    # A package source with no signature makes apt-get update fail, as a local
+    # driver repository can on a real server. The setup must warn and go on.
+    for arch in amd64 arm64; do sudo mkdir -p /var/unsigned-repo/dists/stable/main/binary-\$arch; sudo touch /var/unsigned-repo/dists/stable/main/binary-\$arch/Packages; done
+    printf 'Suite: stable\\nCodename: stable\\nComponents: main\\nArchitectures: amd64 arm64\\n' | sudo tee /var/unsigned-repo/dists/stable/Release >/dev/null
+    echo 'deb file:/var/unsigned-repo stable main' | sudo tee /etc/apt/sources.list.d/unsigned.list >/dev/null
     start=\$(date +%s)
-    ./bootstrap.sh server ${flags}
+    ./bootstrap.sh server ${flags} 2>&1 | tee /tmp/setup.log
+    grep -q 'apt-get update failed for a package source' /tmp/setup.log
+    echo RESULT unsigned-source-warned
     echo \"RESULT bench setup=\$((\$(date +%s) - start))s\"
     tests/verify-server.sh linux
     tests/bench-hopen.sh
