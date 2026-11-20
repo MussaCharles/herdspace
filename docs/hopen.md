@@ -29,7 +29,13 @@ flowchart LR
   session --> w2["Workspace: api"]:::data
 ```
 
-Create `~/my-projects/herdspace.toml`:
+A list is a file that you write yourself. It names the projects of one Herdr session, and `hopen` opens each project as a workspace. The setup does not create a list. Create the folder of the session, and in it the file `herdspace.toml`:
+
+```bash
+mkdir -p ~/my-projects
+```
+
+Then write `~/my-projects/herdspace.toml`:
 
 ```toml
 [[project]]
@@ -209,6 +215,14 @@ If you use VS Code, you can keep one list for VS Code and Herdr. `hopen` reads a
 | `hopen.tabs` | `tabs` |
 
 A setting for one folder uses the name of the folder. A setting for the parent workspace uses the name of the session. A VS Code workspace file also works with a Python 3 that is older than 3.11.
+
+A workspace file in another place, or with a name that is not the name of its folder, opens with its path:
+
+```bash
+hopen project-name.code-workspace
+```
+
+`hopen .` also uses the workspace file of the current folder, if the folder has only one. With more than one, give the file name.
 
 To change to a `herdspace.toml` list, run this command. `hopen` then uses the new file, and it prints a warning about the old one until you remove it:
 
