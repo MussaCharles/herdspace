@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-11-20
+
 ### Added
 
 - A "From tmux" guide, `docs/tmux.md`: the Herdr key or command for each tmux action, and how to run agents side by side in panes.
@@ -154,7 +156,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.2...HEAD
+[0.6.2]: https://github.com/MussaCharles/herdspace/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/MussaCharles/herdspace/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/MussaCharles/herdspace/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/MussaCharles/herdspace/compare/0.5.0...0.5.1
