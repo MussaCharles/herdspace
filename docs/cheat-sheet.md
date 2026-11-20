@@ -78,6 +78,8 @@ A list is like a Herdr session, and each project in the list is like a Herdr wor
 | Show every template | `hopen --templates` |
 | Split the current tab with a template | `hopen --apply grid` |
 | Add a project | Add a `[[project]]` to the list file, then run `hopen` again. |
+| Run a task of the project, for example `test` | `hopen --task test` |
+| Show the open ports of the projects | `hopen --ports` |
 | Remove a project | Remove the project from the list file, then close its workspace with `ctrl+b`, `shift+d`. |
 
 The list for a session is `~/<session>/herdspace.toml`. A VS Code workspace file, `~/<session>.code-workspace`, also works. `hopen` also adds a workspace with the name of the session, for the folder that holds the list file. Use it to start an agent at the parent level. `hopen` starts a stopped session, adds only the missing projects, and never closes anything. To use a new session, create a list file with the name of the session.
@@ -148,6 +150,7 @@ These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and
 | Previous or next workspace | `Ctrl+Up`, `Ctrl+Down` | The same |
 | Next or previous pane in the tab | `Alt+Up`, `Alt+Down` | The same |
 | Open lazygit over the pane | `Cmd+Shift+G` | `Ctrl+Shift+G` |
+| Open the command palette (`hopen --palette`) | `Cmd+Shift+P` | `Ctrl+Shift+P` |
 
 ## Workspaces
 
@@ -266,6 +269,8 @@ zoxide knows only the folders that you visited. Use `cd` with the full path the 
 | Go to a folder from a list | `Alt+C` |
 | List files with `eza` | `ls`, `ll`, `tree` |
 | Show a file with `bat` | `cat file` |
+| Find a file by name (`hopen --find`) | `ff` |
+| Search the files for text (`hopen --grep`) | `fif TEXT` |
 
 ## Neovim
 
@@ -327,13 +332,13 @@ herdr server reload-config
 | Start the Auto Title plugin | `herdr plugin action invoke restart --plugin herdr.auto-title` |
 | Show the state of the integrations | `herdr integration status` |
 
-To update the tools, follow the [updating guide](updating.md). To see what a machine still needs, run its script with `--check`.
+To update the tools, follow the [updating guide](updating.md). To see what a machine still needs, run its setup command again with `--check` after the role, for example `bash -s -- server --check`.
 
 ## Problems
 
 | Problem | Action |
 |---------|--------|
-| `Cmd+T`, `Cmd+W`, or `Cmd+K` does nothing | Herdr is not open. Run `herdr`. If Herdr is open, run `./bootstrap.sh client` again. |
+| `Cmd+T`, `Cmd+W`, or `Cmd+K` does nothing | Herdr is not open. Run `herdr`. If Herdr is open, run the client setup command again, with the same `--server` names. See [setup](setup.md#macos-client). |
 | The `Ctrl` arrow keys change the macOS space | Log out and log in. Then look in System Settings, Keyboard, Keyboard Shortcuts, Mission Control. |
 | `Ctrl+Shift+F` or `Cmd+E` does nothing in Neovim | Press `/` to search, or click the file tree. |
 | A new tab shows only a number | Start the Auto Title plugin. |

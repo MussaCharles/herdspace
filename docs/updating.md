@@ -28,15 +28,11 @@ flowchart LR
 
 ## Apply the newest version of this repository
 
-If you used `curl`, run the same command with the new tag. The script downloads the new release and runs it.
+Run the same `curl` command again, with the same role and options. It downloads the newest release and runs it. To install another release, add `--version <tag>` after the role.
 
-If you use a clone, run this command in the clone:
+If you use a clone, run `git pull` in the clone. Then run `./bootstrap.sh` with the same role and options as before.
 
-```bash
-git pull
-```
-
-Then run `./bootstrap.sh server` or `./bootstrap.sh client` again. The script changes only what is different. It updates a file that you did not change, and it asks about a file that you changed. It keeps a backup of each replaced file.
+The script changes only what is different. It updates a file that you did not change, and it asks about a file that you changed. It keeps a backup of each replaced file.
 
 ## Update the tool versions
 
@@ -44,7 +40,7 @@ Then run `./bootstrap.sh server` or `./bootstrap.sh client` again. The script ch
 |------|-------|---------------|
 | Linux release files and their checksums | `tools/versions.tsv` | `tools/update-versions.sh` |
 | Shell plugins and Auto Title commits | `tools/versions.env` | `tools/update-versions.sh` |
-| macOS tools | Homebrew | `brew upgrade`, and then run the server script |
+| macOS tools | Homebrew | `brew upgrade`, and then run the server setup again |
 | Neovim plugins | `config/nvim/lazy-lock.json` | `:Lazy update`, and then copy the file from `~/.config/nvim/` |
 
 Update the versions:
@@ -53,7 +49,7 @@ Update the versions:
 tools/update-versions.sh
 ```
 
-Test a change before you use it. the [testing guide](testing.md) lists every test:
+Test a change before you use it. The [testing guide](testing.md) lists every test:
 
 ```bash
 tests/run-linux.sh

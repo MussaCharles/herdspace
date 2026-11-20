@@ -81,7 +81,7 @@ Each test prints one `PASS` or `FAIL` line for each check, and a `RESULT` line a
 | `APT_MIRROR_UBUNTU=<address>` | Try this Ubuntu mirror before the default one. On an ARM machine, use a mirror with `ubuntu-ports`, for example `http://<mirror>/ubuntu-ports`. |
 | `APT_MIRROR_DEBIAN=<address>` | Try this Debian mirror before the default one, for example `http://<mirror>/debian`. |
 | `CLIENT_BASE=<image>` | `run-client-linux.sh`: test another client image. |
-| `tests/run-macos.sh server` | Test only the server, or only the `client`. |
+| `tests/run-macos.sh server` | Test only some parts: `server`, `client`, `prereqs`, `keys`, or `both`. |
 
 ## Benchmark
 

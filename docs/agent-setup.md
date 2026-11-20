@@ -66,7 +66,7 @@ The herdspace skill teaches a coding agent to use `hopen` and the setup on any m
 npx skills add MussaCharles/herdspace --skill herdspace -g
 ```
 
-Then ask the agent, for example: "Open my work projects in Herdr with the code template."
+Then ask the agent, for example: "Open my-projects in Herdr with the code template."
 
 ## Work in a clone of this repository
 
@@ -76,8 +76,10 @@ A clone has skills for a person who changes herdspace. They are in `.agents/skil
 |-------|-----------------|
 | `herdspace-hopen` | Change `hopen` or a template. |
 | `herdspace-bootstrap` | Change a setup script, a configuration file, or a pinned version. |
+| `herdspace-ci` | Change a workflow, a repository setting, or find the cause of a failed CI job. |
 | `herdspace-docs` | Write or change a doc. |
 | `herdspace-release` | Update the changelog, or make a release. |
+| `herdspace-test` | Run the tests on the sandboxes of this machine, or check a published release. |
 | `simple-english` | Write any text that a person reads. |
 
 To add a tool, start the agent in the clone, and replace the last sentence:
