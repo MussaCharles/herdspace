@@ -38,6 +38,8 @@ The workflow "Pinned tools" runs `tools/check-pins.sh --issue`. The script runs 
 
 The git pins of Oh My Zsh and its plugins follow a branch that changes almost each day. The report lists them for information, but they do not open an issue. To see the report on your own machine, run `tools/check-pins.sh`.
 
+The report compares only with releases and commits that are at least 7 days old. It also compares each Neovim plugin of `config/nvim/lazy-lock.json` with its branch on GitHub. `tools/nvim-plugins.tsv` gives the repository of each plugin. A plugin with a locked commit that is less than 7 days old opens the issue. A plugin with a newer commit is listed for information.
+
 ## The jobs of CI
 
 | Job | Runner | Tests |

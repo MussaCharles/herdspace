@@ -4,6 +4,12 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Security
+
+- `tools/update-versions.sh` takes a release or a commit only when it is at least 7 days old, and it never moves a pin back. `PIN_MIN_AGE_DAYS` changes the wait.
+- The weekly pin check also compares the Neovim plugins of `config/nvim/lazy-lock.json` with GitHub. A locked commit that is less than 7 days old opens the issue.
+- The setup guide shows how to make sure that a release is genuine, in a browser or with `gh attestation verify`. This step is optional.
+
 ## [0.6.2] - 2026-11-20
 
 ### Added

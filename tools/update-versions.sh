@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 # update-versions.sh writes tools/versions.tsv and tools/versions.env with the
 # latest releases and their checksums. Review the result, test it, and commit it.
+# It takes a release or a commit only when it is at least PIN_MIN_AGE_DAYS days
+# old (7 by default). Most bad upstream releases are found in the first days.
+# For a git pin, the age is the date of the commit. It never moves a pin back
+# to an older release or commit.
 # Set GITHUB_TOKEN if GitHub limits the number of requests.
 set -euo pipefail
 cd "$(dirname "$0")"
 python3 -I - <<'PY'
-import json, os, re, urllib.request
+import datetime, json, os, re, urllib.error, urllib.request
+
+MIN_AGE = datetime.timedelta(days=int(os.environ.get("PIN_MIN_AGE_DAYS", "7")))
+CUTOFF = datetime.datetime.now(datetime.timezone.utc) - MIN_AGE
 
 def api(path):
     request = urllib.request.Request("https://api.github.com/" + path)
@@ -14,6 +21,26 @@ def api(path):
         request.add_header("Authorization", "Bearer " + token)
     with urllib.request.urlopen(request, timeout=30) as response:
         return json.load(response)
+
+def when(text):
+    return datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
+
+def settled_release(repo):
+    """The newest release that is at least MIN_AGE old, with no pre-release."""
+    found = [r for r in api(f"repos/{repo}/releases?per_page=50")
+             if not r["draft"] and not r["prerelease"] and r.get("published_at")
+             and when(r["published_at"]) <= CUTOFF]
+    if not found:
+        raise SystemExit(f"No release of {repo} is old enough.")
+    return max(found, key=lambda r: when(r["published_at"]))
+
+def settled_commit(repo, branch):
+    """The newest commit of the branch that is at least MIN_AGE old."""
+    until = CUTOFF.strftime("%Y-%m-%dT%H:%M:%SZ")
+    found = api(f"repos/{repo}/commits?sha={branch}&until={until}&per_page=1")
+    if not found:
+        raise SystemExit(f"No commit of {repo} {branch} is old enough.")
+    return found[0]["sha"]
 
 TOOLS = [
     ("herdr", "herdrdev/herdr", {"x86_64": r"^herdr-linux-x86_64$", "aarch64": r"^herdr-linux-aarch64$"}),
@@ -28,9 +55,34 @@ TOOLS = [
     ("ghostty-forky", "mkasberg/ghostty-ubuntu", {"x86_64": r"_amd64_forky\.deb$", "aarch64": r"_arm64_forky\.deb$"}),
 ]
 
+def current(path):
+    try:
+        return open(path, encoding="utf-8").read().splitlines()
+    except FileNotFoundError:
+        return []
+
+pinned_lines = {}
+for line in current("versions.tsv"):
+    pinned_lines.setdefault(line.split("\t")[0], []).append(line)
+pinned_refs = dict(l.split("=", 1) for l in current("versions.env") if "=" in l and not l.startswith("#"))
+
+def release_date(repo, version):
+    for tag in (version, "v" + version):
+        try:
+            return when(api(f"repos/{repo}/releases/tags/{tag}")["published_at"])
+        except urllib.error.HTTPError:
+            pass
+    return None
+
 lines = []
 for name, repo, patterns in TOOLS:
-    release = api(f"repos/{repo}/releases/latest")
+    release = settled_release(repo)
+    old = pinned_lines.get(name)
+    if old:
+        old_date = release_date(repo, old[0].split("\t")[1])
+        if old_date and old_date > when(release["published_at"]):
+            lines.extend(old)
+            continue
     for arch, pattern in patterns.items():
         match = [a for a in release["assets"] if re.search(pattern, a["name"])]
         if len(match) != 1 or not (match[0].get("digest") or "").startswith("sha256:"):
@@ -51,5 +103,10 @@ GIT = [
 with open("versions.env", "w", encoding="utf-8") as handle:
     handle.write("# Written by tools/update-versions.sh. Each value is one commit.\n")
     for key, repo, branch in GIT:
-        handle.write(f"{key}={api(f'repos/{repo}/commits/{branch}')['sha']}\n")
+        sha = settled_commit(repo, branch)
+        old = pinned_refs.get(key)
+        # Keep a pinned commit that comes after the settled one.
+        if old and old != sha and api(f"repos/{repo}/compare/{sha}...{old}")["status"] == "ahead":
+            sha = old
+        handle.write(f"{key}={sha}\n")
 PY

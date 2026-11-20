@@ -121,6 +121,30 @@ git clone https://github.com/MussaCharles/herdspace.git ~/herdspace
 cd ~/herdspace && ./bootstrap.sh server
 ```
 
+### Make sure that a release is genuine
+
+This step is optional. The setup needs no new tool for it.
+
+Each release file has a GitHub artifact attestation. An attestation is a signed record of the workflow, the commit, and the checksum of a file. The release workflow makes it only when the published files match a new build of the tag.
+
+To compare in a browser, open the [attestations](https://github.com/MussaCharles/herdspace/attestations) of the repository, and open the one of the release. Make sure that the SHA256 value of `bootstrap.sh` is the same as its line in `SHA256SUMS` of the release.
+
+If you have the GitHub CLI, download the script, and make sure that its attestation is correct:
+
+```bash
+curl -fsSLO https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh
+```
+
+```bash
+gh attestation verify bootstrap.sh --repo MussaCharles/herdspace
+```
+
+Then run the downloaded script, in a folder that is not a clone of the repository:
+
+```bash
+bash bootstrap.sh server
+```
+
 ## Options
 
 The first word is `server`, `client`, or `both`. The script finds the system. Put the options after the role.

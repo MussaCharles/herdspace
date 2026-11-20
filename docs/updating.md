@@ -49,6 +49,8 @@ Update the versions:
 tools/update-versions.sh
 ```
 
+The script takes a release or a commit only when it is at least 7 days old. Most bad upstream releases are found in the first days. For a git pin, the age is the date of the commit. The script never moves a pin back to an older release or commit. To change the wait, set `PIN_MIN_AGE_DAYS`, for example `PIN_MIN_AGE_DAYS=14`.
+
 Test a change before you use it. The [testing guide](testing.md) lists every test:
 
 ```bash
