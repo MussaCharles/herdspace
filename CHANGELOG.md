@@ -15,6 +15,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - The setup output links to the docs on GitHub in place of a path in the repository.
 - `hopen` reads `herdspace.toml` with the newest Python 3.11 or later that it finds, for example `python3.11` beside an older `python3`. The Linux server setup installs `python3.11` when `python3` is older, as on Ubuntu 22.04.
 - The README and the hopen guide say that you write the list file yourself, and where it goes.
+- The hopen guide shows how to install Python 3.11 or later on each system, also for one account with no `sudo`, with uv. The Python hint of `hopen` names uv too.
 
 ### Fixed
 

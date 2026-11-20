@@ -413,7 +413,7 @@ def list_path(raw):
 
 if os.path.basename(path) == "herdspace.toml":
     if sys.version_info < (3, 11):
-        how = "brew install python" if sys.platform == "darwin" else "sudo apt-get install python3.11"
+        how = "brew install python" if sys.platform == "darwin" else "sudo apt-get install python3.11, or with no sudo, uv python install 3.12"
         sys.exit("herdspace.toml needs Python 3.11 or later. Install one, for example with: " + how + ". A VS Code workspace file works with an older Python.")
     import tomllib
     with open(path, "rb") as handle:
