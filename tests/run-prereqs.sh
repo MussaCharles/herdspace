@@ -42,7 +42,7 @@ contains "$out" "rc=0" 'root: the prerequisites step ends'
 
 out="$(box tester './bootstrap.sh client --server nowhere.invalid --yes </dev/null; echo "rc=$?"')"
 contains "$out" "SSH connection to each server (optional)" 'client reports a server with no SSH'
-contains "$out" "See docs/ssh.md" 'client points to the SSH guide'
+contains "$out" "/docs/ssh.md" 'client points to the SSH guide'
 contains "$out" "rc=0" 'a server with no SSH does not stop the client'
 
 remove_images "$tag"

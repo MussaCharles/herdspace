@@ -337,8 +337,22 @@ while (pairs or tabs) and time.time() < end:
 #            W RS message                                       (a warning)
 #            env is KEY=VALUE items, separated by the byte 0x1f. An empty
 #            field is "-". No field holds a control character.
+# list_python FILE prints the Python that reads FILE. A herdspace.toml list
+# needs tomllib, which is in Python 3.11 and later. Some systems have an older
+# python3 and a newer python3.N beside it, for example Ubuntu 22.04.
+list_python() {
+  local py
+  if [ "$(basename "$1")" = herdspace.toml ]; then
+    for py in python3 python3.14 python3.13 python3.12 python3.11; do
+      command -v "$py" >/dev/null 2>&1 || continue
+      "$py" -I -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null && { echo "$py"; return 0; }
+    done
+  fi
+  echo python3
+}
+
 read_list() {
-  python3 -I - "$1" "$2" "${TEMPLATE_FLAG:-}" <<'PY'
+  "$(list_python "$1")" -I - "$1" "$2" "${TEMPLATE_FLAG:-}" <<'PY'
 import json, os, re, sys, unicodedata
 
 path, what, forced = sys.argv[1:4]
@@ -399,7 +413,8 @@ def list_path(raw):
 
 if os.path.basename(path) == "herdspace.toml":
     if sys.version_info < (3, 11):
-        sys.exit("herdspace.toml needs Python 3.11 or later. Install a newer Python, for example with: brew install python")
+        how = "brew install python" if sys.platform == "darwin" else "sudo apt-get install python3.11"
+        sys.exit("herdspace.toml needs Python 3.11 or later. Install one, for example with: " + how + ". A VS Code workspace file works with an older Python.")
     import tomllib
     with open(path, "rb") as handle:
         try:
@@ -1175,6 +1190,20 @@ env_for() {
 
 # run_task runs a task of the project of the current folder. In Herdr, it runs
 # in a new pane below the current pane. A popup of Herdr has no pane of its
+# keep_pane_name PANE NAME sets the name again if a plugin changed it. The Auto
+# Title plugin can name a new pane when it first sees it, also a pane that has a
+# name already. It keeps a name that changes after that first sighting.
+keep_pane_name() {
+  local pane="$1" name="$2" _try label
+  for _try in 1 2; do
+    sleep 1
+    label="$(herdr pane list 2>/dev/null | python3 -I -c 'import json,sys
+for p in json.load(sys.stdin)["result"]["panes"]:
+    if p["pane_id"] == sys.argv[1]: print(p.get("label") or "")' "$pane" 2>/dev/null)" || return 0
+    [ "$label" = "$name" ] || herdr pane rename "$pane" "$name" >/dev/null 2>&1 || return 0
+  done
+}
+
 # own, so there it splits the active pane. Outside Herdr, it runs here.
 run_task() {
   local dir="${HERDR_ACTIVE_PANE_CWD:-$PWD}" match file label items tasks command actions output pane item
@@ -1183,7 +1212,7 @@ run_task() {
   label="${match#*$'\t'}"
   items="$(read_list "$file" items)" || die "Could not read ${file}."
   tasks="$(awk -F '\036' -v l="$label" '$1 == "K" && $2 == l { print $3 "\t" $4 }' <<<"$items")"
-  [ -n "$tasks" ] || die "The project ${label} has no tasks. Add tasks to $(short_path "$file"). See docs/hopen.md."
+  [ -n "$tasks" ] || die "The project ${label} has no tasks. Add tasks to $(short_path "$file"). See https://github.com/MussaCharles/herdspace/blob/main/docs/hopen.md#tasks"
   if [ -z "$TASK_NAME" ]; then
     if [ -t 0 ] && [ -t 1 ]; then
       TASK_NAME="$(while IFS=$'\t' read -r item command; do printf '%s\t%-14s %s\n' "$item" "$item" "$command"; done <<<"$tasks" | choose "Run which task")" || exit 1
@@ -1206,6 +1235,7 @@ run_task() {
     herdr pane rename "$pane" "$TASK_NAME" >/dev/null
     herdr pane run "$pane" "cd $(printf '%q' "$dir") && ${command}" >/dev/null
     printf '  [info] Task %s runs in a new pane: %s\n' "$TASK_NAME" "$command"
+    keep_pane_name "$pane" "$TASK_NAME"
   else
     printf '  [info] Task %s: %s\n' "$TASK_NAME" "$command"
     for item in ${ENV_ARGS[@]+"${ENV_ARGS[@]}"}; do
@@ -1482,26 +1512,43 @@ fi
 
 [ -n "$SESSION" ] || { usage >&2; exit 2; }
 
+# use_list_file FILE opens the list in FILE. The same rule as find_lists: a list
+# outside the usual places cannot take the session of another list. Its
+# commands and values still need approval.
+use_list_file() {
+  local list="$1" owner
+  LIST_FILE="$list"
+  SESSION="$(read_list "$list" session)" || die "Could not read ${list}."
+  owner="$(find_list_for "$SESSION" 2>/dev/null)"
+  if [ -n "$owner" ] && [ "$owner" != "$list" ]; then
+    die "$(short_path "$list") uses the session ${SESSION}, which $(short_path "$owner") has. Give the list another session name."
+  fi
+}
+
 # open_folder handles "hopen <folder>". It uses the list in the folder, if the
-# folder has one. Else the session and its one workspace get the folder name.
+# folder has one: herdspace.toml, <folder>.code-workspace, or the only
+# .code-workspace file. Else the session and its one workspace get the folder name.
 open_folder() {
-  local path name list owner
+  local path name list others=()
   path="$(cd "$SESSION" 2>/dev/null && pwd -P)" || die "No folder ${SESSION}."
   [[ "$path" != *[[:cntrl:]]* ]] || die "The folder name has a control character."
   name="$(basename "$path")"
   for list in "${path}/herdspace.toml" "${path}/${name}.code-workspace"; do
     if [ -f "$list" ]; then
-      LIST_FILE="$list"
-      SESSION="$(read_list "$list" session)" || die "Could not read ${list}."
-      # The same rule as find_lists: a list in a folder cannot take the
-      # session of another list. Its commands and values still need approval.
-      owner="$(find_list_for "$SESSION" 2>/dev/null)"
-      if [ -n "$owner" ] && [ "$owner" != "$list" ]; then
-        die "$(short_path "$list") uses the session ${SESSION}, which $(short_path "$owner") has. Give the list another session name."
-      fi
+      use_list_file "$list"
       return 0
     fi
   done
+  for list in "$path"/*.code-workspace; do
+    [ -f "$list" ] && others+=("$list")
+  done
+  if [ "${#others[@]}" -eq 1 ]; then
+    use_list_file "${others[0]}"
+    return 0
+  fi
+  if [ "${#others[@]}" -gt 1 ]; then
+    die "The folder has more than one VS Code workspace file. Open one of them, for example: hopen $(basename "${others[0]}")"
+  fi
   FOLDER="$path"
   # A session name uses letters, numbers, dots, dashes, and underscores only.
   SESSION="$(printf '%s' "$name" | tr -c 'A-Za-z0-9._-' '-')"
@@ -1509,6 +1556,18 @@ open_folder() {
   list="$(find_list_for "$SESSION" 2>/dev/null)"
   [ -z "$list" ] || warn "The list $(short_path "$list") uses the session ${SESSION}. hopen adds the folder to that session."
 }
+
+# "hopen <file>" opens a list file by its path, for example a VS Code workspace
+# file whose name is not the name of its folder.
+if [ -f "$SESSION" ]; then
+  case "$SESSION" in
+    *.code-workspace | *herdspace.toml)
+      [ -z "$LIST_FILE" ] || die "Give the list file once: as the argument or with --file."
+      [[ "$SESSION" != *[[:cntrl:]]* ]] || die "The file name has a control character."
+      use_list_file "$(cd "$(dirname "$SESSION")" && pwd -P)/$(basename "$SESSION")"
+      ;;
+  esac
+fi
 
 case "$SESSION" in
   . | .. | */*)

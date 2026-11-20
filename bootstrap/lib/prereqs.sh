@@ -156,7 +156,7 @@ servers_ready() {
     ssh -o BatchMode=yes -o ConnectTimeout=5 -- "$server" true 2>/dev/null || return 1
   done
 }
-ssh_fix() { printf 'The server must accept SSH, and %s needs an SSH name and key. See docs/ssh.md.' "$1"; }
+ssh_fix() { printf 'The server must accept SSH, and %s needs an SSH name and key. See %s/docs/ssh.md' "$1" "$HS_DOC_BASE"; }
 
 # ---------- macOS items
 
