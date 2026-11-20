@@ -49,6 +49,18 @@ have apt-get || die "This script needs apt-get, so it works only on Debian and U
 
 export PATH="${HOME}/.local/bin:${PATH}"
 
+# hopen reads herdspace.toml with Python 3.11 or later. If python3 is older and
+# the system has a python3.11 package, for example Ubuntu 22.04, add it.
+python3_new_enough() { python3 -I -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; }
+if have python3 && ! python3_new_enough; then
+  candidate="$(apt-cache policy python3.11 2>/dev/null | awk '/Candidate:/ {print $2}')"
+  if [ -n "$candidate" ] && [ "$candidate" != "(none)" ]; then
+    PACKAGES="${PACKAGES} python3.11"
+  else
+    warn "python3 is older than 3.11, and this system has no python3.11 package. hopen reads a VS Code workspace file, but not herdspace.toml."
+  fi
+fi
+
 packages_ready() {
   # shellcheck disable=SC2086 # The list must split into words.
   apt_ready $PACKAGES && have bat && have fd

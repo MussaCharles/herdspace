@@ -48,7 +48,7 @@ load_keys() {
     mkdir -p "$(dirname "$KEYS_FILE")"
     printf '%s\n' "$KEYS" >"$KEYS_FILE"
   fi
-  info "Keys: ${KEYS}. See docs/keyboard-shortcuts.md."
+  info "Keys: ${KEYS}. See ${HS_DOC_BASE}/docs/keyboard-shortcuts.md"
 }
 
 # install_ghostty_config SRC installs the Ghostty configuration for KEYS.

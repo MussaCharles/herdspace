@@ -102,7 +102,9 @@ To install a specific release, add `--version <tag>`. The [setup guide](docs/set
 
 ## Open your projects
 
-A list holds the projects of one Herdr session. `hopen` opens each project as a Herdr workspace. The list of the session `my-projects` is `~/my-projects/herdspace.toml`:
+A list is a file that you write yourself, and the setup does not create it. It holds the projects of one Herdr session, and `hopen` opens each project as a Herdr workspace. The list is `~/<session>/herdspace.toml`, so the list of the session `my-projects` is `~/my-projects/herdspace.toml`. [Write a list](docs/hopen.md#write-a-list) in the hopen guide has every key.
+
+Create the folder and the file, with one `[[project]]` block for each project:
 
 ```toml
 [[project]]
@@ -192,7 +194,7 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 - [Templates and panes](docs/templates.md): each template, how to add your own, and videos of the pane keys.
 - [From VS Code](docs/vscode.md): the herdspace command or key for each VS Code action.
 - [Keyboard shortcuts](docs/keyboard-shortcuts.md): the keys that the setup changes, and how to keep the keys of your terminal.
-- [Cheat sheet](docs/cheat-sheet.md): keys and commands for daily use.
+- [Cheat sheet](docs/cheat-sheet.md): keys and commands for daily use, with a [table of daily commands](docs/cheat-sheet.md#daily-commands) and links to the official Herdr docs.
 - [Connect to the server with SSH](docs/ssh.md): what `my-server` means, and how to set up the SSH name and key.
 - [Windows with WSL](docs/windows-wsl.md): use a Windows machine as a client.
 - [Ask an agent to do the setup](docs/agent-setup.md): what to say to a coding agent.

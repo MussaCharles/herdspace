@@ -2,6 +2,23 @@
 
 Scope: the commands and keys for daily use of Herdr, with the tools around it. The install steps are in the [setup guide](setup.md). The [keyboard shortcuts guide](keyboard-shortcuts.md) explains which keys the setup changes.
 
+## Daily commands
+
+| Task | Command or key |
+|------|----------------|
+| Start or attach to the default session | `herdr` |
+| Open the projects of a list, and attach | `hopen my-projects` |
+| Start or attach to a named session | `herdr --session my-projects` |
+| Show the sessions | `herdr session list` |
+| Leave the session, and keep every program running | `ctrl+b`, then `q` |
+| Stop a named session, and end every program in it | `herdr session stop my-projects` |
+| Stop the default session | `herdr server stop` |
+| Delete a stopped session | `herdr session delete my-projects` |
+| New tab, close tab, go to anything | `Cmd+T`, `Cmd+W`, `Cmd+K`. On Linux: `Ctrl+Shift+T`, `W`, `K` |
+| Show the state of the server | `herdr status` |
+
+The official Herdr docs have every command and key: [documentation](https://herdr.dev/tui/docs/), [CLI reference](https://herdr.dev/tui/docs/cli-reference/), [keyboard](https://herdr.dev/tui/docs/keyboard/), and [session state](https://herdr.dev/tui/docs/session-state/). [Stop and delete](#stop-and-delete) explains what a stop ends.
+
 ## Words
 
 A session holds workspaces, a workspace holds tabs, and a tab holds panes.

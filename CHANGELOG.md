@@ -4,6 +4,22 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- `hopen project-name.code-workspace` opens a list file by its path. `hopen .` uses the only VS Code workspace file of a folder, also when its name is not the name of the folder.
+- The cheat sheet starts with a table of daily Herdr commands: start, attach, leave, stop, and delete a session. It links to the official Herdr docs.
+
+### Changed
+
+- The setup output links to the docs on GitHub in place of a path in the repository.
+- `hopen` reads `herdspace.toml` with the newest Python 3.11 or later that it finds, for example `python3.11` beside an older `python3`. The Linux server setup installs `python3.11` when `python3` is older, as on Ubuntu 22.04.
+- The README and the hopen guide say that you write the list file yourself, and where it goes.
+
+### Fixed
+
+- The Python hint of `hopen` names `apt-get` on Linux, not `brew`.
+- `hopen --task` keeps the name of the task pane when the Auto Title plugin renames the new pane.
+
 ## [0.6.1] - 2026-11-20
 
 ### Changed
