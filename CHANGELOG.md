@@ -4,6 +4,12 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Security
+
+- Each release is checked for changes after the build. The "Release check" workflow builds the release again from its tag on a clean runner, and fails if a published file differs from that build. When all files match, it signs each file with a GitHub artifact attestation.
+- `tools/release.sh --publish` stops when the commit is not the head of main, when a CI check of its pull request did not pass, or when the tag already has a release. `--preflight` runs only these checks.
+- `tools/repo-settings.sh` turns on immutable releases, so that nobody can change the files of a published release.
+
 ## [0.6.2] - 2026-11-20
 
 ### Added

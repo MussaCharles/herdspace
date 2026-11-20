@@ -27,13 +27,19 @@ Follow these steps only when the person asks for a release.
    ```
 
 5. Show `dist/0.1.2.notes.md` to the person. It is the changelog section of the tag, with a link to the install steps at the top.
-6. When the person agrees, publish:
+6. Run the checks of `--publish` with no publish. They make sure that the commit is the head of `origin/main`, that each CI check of its pull request passed, and that the tag has no release:
+
+   ```bash
+   tools/release.sh 0.1.2 --preflight
+   ```
+
+7. When the person agrees, publish:
 
    ```bash
    tools/release.sh 0.1.2 --publish
    ```
 
-The ruleset "release tags" lets only the admin role create a tag, so run `--publish` with the account of the owner. If the folder has a change or an untracked file, `--publish` stops. If `CHANGELOG.md` has no section for the tag, it stops too.
+The ruleset "release tags" lets only the admin role create a tag, so run `--publish` with the account of the owner. `--publish` runs the checks of `--preflight` first. It also stops if the folder has a change or an untracked file, or if `CHANGELOG.md` has no section for the tag.
 
 ## What a release holds
 
@@ -51,7 +57,7 @@ The `hopen` in both archives has the tag in `HOPEN_VERSION`. In an early pre-rel
 1. Make sure that `https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh` and `install.sh` return 200.
 2. Install `hopen` with `install.sh`, and make sure that `hopen --version` shows the new tag.
 3. Run `bootstrap.sh server --check` from `curl`. It changes nothing in the setup. It only downloads the release files.
-4. The workflow "Release check" starts by itself for a published release, but not for a pre-release. It installs the release on Linux and macOS runners and tries each feature. Wait for its result:
+4. The workflow "Release check" starts by itself for a published release. Its job "Release files match the tag" builds the release again from the tag, compares each published file with the build, and signs the files with an attestation. If this job fails, a release file differs from its tag: tell the person at once, and do not use the release. The other jobs install the release on Linux and macOS runners and try each feature. They do not run for a pre-release. Wait for the result:
 
    ```bash
    gh run list --workflow release.yml --limit 1
@@ -61,5 +67,5 @@ The `hopen` in both archives has the tag in `HOPEN_VERSION`. In an early pre-rel
 
 ## Rules
 
-- Do not change a published tag. If a release is wrong, publish a new one. If the tag exists, `--publish` replaces its files and its notes with no question. Run `gh release view <tag>` before `--publish`.
+- Do not change a published tag. If a release is wrong, publish a new one. `--publish` stops when the tag already has a release.
 - Do not put install commands in the release notes. The notes link to the install steps.
