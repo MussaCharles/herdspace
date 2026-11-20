@@ -47,7 +47,7 @@ The ruleset "release tags" covers all tags. Only the repository admin role can c
 
 | Setting | Value | Reason |
 |---------|-------|--------|
-| Allowed actions | Only the actions that GitHub made | The workflows use only `actions/checkout`. An action from another source can run any code. |
+| Allowed actions | Only the actions that GitHub made | The workflows use only `actions/checkout` and `actions/attest-build-provenance`. An action from another source can run any code. |
 | Pinned actions | Each action must use a full commit SHA | A tag can move to other code. A SHA cannot. |
 | Workflows from forks | Approval for all external contributors | A pull request from a fork runs only after the owner reads it. |
 | `GITHUB_TOKEN` | Read-only, and it cannot approve pull requests | A workflow gets more rights only from its own file. |
@@ -62,6 +62,7 @@ Dependabot updates the SHA of each action once a week, from `.github/dependabot.
 | Secret scanning and push protection | On. A push with a known secret, for example a token, stops before it reaches GitHub. |
 | Code scanning | CodeQL default setup, for the workflows and the Python files. CodeQL has no support for shell scripts, so `shellcheck` in CI checks them. |
 | Private vulnerability reporting | On. The security policy is `.github/SECURITY.md`. |
+| [Immutable releases](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases) | On. Nobody can change or replace the files of a published release, or move its tag. |
 
 ## General
 

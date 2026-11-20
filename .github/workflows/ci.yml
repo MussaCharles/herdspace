@@ -55,6 +55,8 @@ jobs:
         run: tests/test-hopen-list.sh
       - name: Release build and install
         run: tests/test-install.sh
+      - name: Release file comparison
+        run: tests/test-verify-release.sh
       - name: Neovim plugin step
         run: tests/test-nvim-plugins.sh
       - name: Docs-only detection

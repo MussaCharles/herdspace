@@ -44,7 +44,7 @@ The report compares only with releases and commits that are at least 7 days old.
 
 | Job | Runner | Tests |
 |-----|--------|-------|
-| Fast checks | `ubuntu-24.04` | `shellcheck`, `tests/test-skills.sh`, `tests/test-hopen-list.sh`, `tests/test-install.sh`, `tests/test-nvim-plugins.sh`, `tests/test-links.sh`, `tests/test-ci-changes.sh`, `tests/test-ui.sh` |
+| Fast checks | `ubuntu-24.04` | `shellcheck`, `tests/test-skills.sh`, `tests/test-hopen-list.sh`, `tests/test-install.sh`, `tests/test-verify-release.sh`, `tests/test-nvim-plugins.sh`, `tests/test-links.sh`, `tests/test-ci-changes.sh`, `tests/test-ui.sh` |
 | Linux server | `ubuntu-24.04` and `ubuntu-24.04-arm`, each with the image `ubuntu:24.04` and `debian:12`: four jobs | `tests/run-linux.sh` for the image, and `tests/run-prereqs.sh` in the Ubuntu job of each runner |
 | Linux login service and client keys | `ubuntu-24.04` | `tests/run-systemd.sh`, `tests/run-client-linux.sh` |
 | macOS server | `macos-26` | A real `bootstrap.sh server --yes` on the runner, then `bootstrap.sh server --check`, then `tests/run-macos.sh` |
@@ -55,6 +55,7 @@ The Linux tests start their own containers on the runner, as on a machine of a c
 
 | Job | Runner | Tests |
 |-----|--------|-------|
+| Release files match the tag | `ubuntu-24.04` | `tools/verify-release.sh <tag>`: builds the release again from the tag, and compares each published file with the build. When all files match, it signs them with an attestation. It also runs for a pre-release. |
 | Linux, one job for each option | `ubuntu-24.04` and `ubuntu-24.04-arm` | `tests/run-release-check.sh --only linux <option>`: `server`, `client`, `both`, and `hopen`, in fresh containers |
 | macOS, one job for each option | `macos-26` | `tests/run-release-check.sh --here <option>`: `server`, `both`, and `hopen`, on the runner itself |
 

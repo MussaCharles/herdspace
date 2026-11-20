@@ -90,6 +90,16 @@ The script reads the repository name from `gh`, and it writes the name into `boo
 
 `--publish` stops if `git status` shows a change or an untracked file, so that a release holds only committed files. It also stops if `CHANGELOG.md` has no section for the tag.
 
+`--publish` also stops in these cases:
+
+- The commit is not the head of `origin/main`.
+- A CI check of the pull request of the commit did not pass.
+- The tag already has a release. A published release does not change. If a release is wrong, publish a new tag.
+
+To run only these checks, and publish nothing, use `tools/release.sh <tag> --preflight`.
+
+After the publish, the job "Release files match the tag" of the workflow "Release check" builds the release again from the tag on a clean runner. It compares each published file with that build. If a file differs, is missing, or is extra, the job fails. Do not use the release then, and publish a new tag. If all files match, the job signs each file with a [GitHub artifact attestation](https://docs.github.com/en/actions/concepts/security/artifact-attestations). An attestation is a signed record of the workflow, the commit, and the checksum of a file.
+
 ## Add something new
 
 1. Put a configuration file in `config/`.
