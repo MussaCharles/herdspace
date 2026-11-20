@@ -630,7 +630,9 @@ git_pin() {
   if [ -d "${dest}/.git" ] && [ "$(git -C "$dest" rev-parse HEAD)" = "$ref" ]; then
     return 0
   fi
-  info "Downloading $(basename "$dest")."
+  local plugin
+  plugin="$(basename "$dest")"
+  info "Downloading ${plugin#.}."
   if [ ! -d "${dest}/.git" ]; then
     rm -rf "$dest"
     mkdir -p "$dest"
