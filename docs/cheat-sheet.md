@@ -156,7 +156,7 @@ After a stop, the workspaces, tabs, panes, and folders return as new shells. Run
 
 ## Direct keys
 
-These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and the `Ctrl+Shift` keys in this table do nothing.
+These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and the `Ctrl+Shift` keys in this table do nothing, so use the [replacement keys](keyboard-shortcuts.md#replacement-keys-for-ghostty) there, for example `Cmd+Option+T` for a new Ghostty tab and `Cmd+Option+W` to close it.
 
 | Action | Mac | Linux or Windows |
 |--------|-----|------------------|
@@ -357,9 +357,9 @@ To update the tools, follow the [updating guide](updating.md). To see what a mac
 
 | Problem | Action |
 |---------|--------|
-| `Cmd+T`, `Cmd+W`, or `Cmd+K` does nothing | Herdr is not open. Run `herdr`. If Herdr is open, run the client setup command again, with the same `--server` names. See [setup](setup.md#macos-client). |
+| `Cmd+T`, `Cmd+W`, or `Cmd+K` does nothing | Herdr is not open. Run `herdr`, or use the [replacement keys](keyboard-shortcuts.md#replacement-keys-for-ghostty) of Ghostty. If Herdr is open, run the client setup command again, with the same `--server` names. See [setup](setup.md#macos-client). |
 | The `Ctrl` arrow keys change the macOS space | Log out and log in. Then look in System Settings, Keyboard, Keyboard Shortcuts, Mission Control. |
-| `Ctrl+Shift+F` or `Cmd+E` does nothing in Neovim | Press `/` to search, or click the file tree. |
+| `Ctrl+Shift+F` or `Cmd+E` does nothing in Neovim | If text is selected in Ghostty, `Cmd+E` searches for it in Ghostty. Click once to clear the selection. Otherwise, press `/` to search, or click the file tree. |
 | A new tab shows only a number | Start the Auto Title plugin. |
 | An agent shows the wrong state | Run `herdr agent explain <pane>`. |
 | `herdr` refuses to start | You are already in a Herdr pane. Herdr blocks a nested start. |

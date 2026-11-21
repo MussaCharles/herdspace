@@ -461,11 +461,12 @@ To start Herdr in a terminal on this machine, open Ghostty and run `herdr`. You 
 
 ## Make sure that it works
 
-1. Open a new Ghostty window on the client.
+1. On the client, quit Ghostty and start it again, so that the new keys and look load.
 2. Connect with `ssh my-server`.
 3. Run `herdr`.
 4. Press `Cmd+T` to open a tab. On Linux, press `Ctrl+Shift+T`.
 5. Press `Ctrl+Left` to go back.
+6. In a Ghostty window with no Herdr, press `Cmd+Option+T` to open a Ghostty tab. On Linux, press `Ctrl+Alt+Shift+T`.
 
 If a key does nothing, Ghostty or the desktop still uses that key. Run the client script again, and then log out and log in.
 
