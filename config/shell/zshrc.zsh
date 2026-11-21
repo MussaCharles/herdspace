@@ -1,5 +1,6 @@
-# Managed by herdspace. A new run replaces this file.
-# Put your own lines in ~/.zshrc.local.
+# The herdspace shell: the prompt, Oh My Zsh, and the shell extras. herdspace
+# owns this file, and a new run replaces it. Your ~/.zshrc loads it from a
+# marked block. Put your own lines in ~/.zshrc, below that block.
 
 # This line must stay above the instant prompt, which redirects the terminal.
 [[ -t 0 && -t 1 ]] && bootstrap_has_tty=1 || bootstrap_has_tty=0
@@ -24,12 +25,15 @@ source "$ZSH/oh-my-zsh.sh"
 case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac
 
 # The fzf keys, zoxide, the completion of hopen, ff and fif, and eza and bat.
+# In this shell, the extras replace the ls and ll aliases of Oh My Zsh.
+HERDSPACE_SHELL=1
 [[ -r "$HOME/.config/herdspace/extras.zsh" ]] && source "$HOME/.config/herdspace/extras.zsh"
 # The prompt only in a real terminal.
 if (( bootstrap_has_tty )); then
   [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 fi
 
+# An older herdspace put your own lines in ~/.zshrc.local.
 if [[ -f "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
 fi
