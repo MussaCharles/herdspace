@@ -1,58 +1,32 @@
 # herdspace
 
-herdspace sets up [Herdr](https://herdr.dev) and its tools on your machines, and then opens your projects in Herdr with one command. Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running after you disconnect.
-
-herdspace has two parts:
-
-| Part | What it does | Where it runs |
-|------|--------------|---------------|
-| `bootstrap.sh`, the setup | Sets up a machine: Herdr, the editor and its tools, the shell, and the keys. Run it one time for each machine, and again to update. | Each machine: the server machine, the client machine, or one machine as both |
-| [`hopen`](docs/hopen.md), the project opener | Opens each project of a list in one Herdr session, split into named panes from a template. | The server machine. The server setup installs it. |
-
-herdspace uses two machines. The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server machine with SSH. One machine can also be both.
+herdspace sets up [Herdr](https://herdr.dev) and its tools on your machines, and opens your projects in Herdr with one command. Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running after you disconnect.
 
 ![Four projects open in Herdr, and Ctrl+Down moves to the next project](docs/media/open-projects.gif)
 
-With herdspace, you can:
-
-- Set up Herdr and its tools on a new server machine and client machine with one command, on macOS, Linux, or Windows with WSL.
-- Open every project of a list in one Herdr session, with one command. The list is a `herdspace.toml` file, or a VS Code workspace file.
-- Split each project into named panes from a template, for example an editor, an agent, and lazygit.
-- Start the template programs again after a restart.
-- Run project tasks, find files, search text, see open ports, and use a command palette. See the [hopen guide](docs/hopen.md#commands).
-
 ## Quick start
 
-Each option is one command. Three of them run the setup script `bootstrap.sh`: for a server machine, a client machine, and one machine as both. The command downloads the script from the newest release, compares its checksum, and runs it with a role: `server`, `client`, or `both`. The script does only what is missing, and it asks before it replaces a file that you changed. Run it again at any time to update. Read [Before you start](docs/setup.md#before-you-start) for the few items that you do yourself.
-
-| You want to | Use | It runs | It installs |
-|-------------|-----|---------|-------------|
-| Run Herdr on a server, and connect to it from the machine that you use | [Server machine](#server-machine), then [Client machine](#client-machine) | `bootstrap.sh server` on the server, then `bootstrap.sh client` on the client | On the server: Herdr, `hopen`, the editor and its tools, and the shell. On the client: Ghostty, its keys, and the shell. The client gets no `hopen`, because `hopen` runs on the server. |
-| Run Herdr on the machine that you use, with no server | [One machine as both](#one-machine-as-both) | `bootstrap.sh both` | All of the above, on one machine |
-| Add `hopen` to a machine that has Herdr already | [Only hopen](#only-hopen) | `install.sh` | Only `hopen` and its templates |
-| Let a coding agent do the setup for you | [Ask an agent](#ask-an-agent) | The agent runs one of the above | The same |
+The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server with SSH. One machine can also be both. Each command below downloads the setup script `bootstrap.sh` from the newest release, compares its checksum, and runs it. Run it again at any time to update. Read [Before you start](docs/setup.md#before-you-start) first.
 
 ### Server machine
-
-Run this command on the server machine. It downloads the setup script `bootstrap.sh`, and runs it with the role `server`. It installs Herdr, its tools, and `hopen`:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
 ```
 
+It installs Herdr, `hopen`, Neovim and its tools, and the shell.
+
 ### Client machine
 
-Set up the server machine first. Then run this command on the client machine. It runs `bootstrap.sh` with the role `client`, and it sets up Ghostty, the shell, and the [Herdr keys](docs/keyboard-shortcuts.md). Give the SSH name of the server in place of `my-server`:
+Set up the server first. Replace `my-server` with the SSH name of the server:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- client --server my-server
 ```
 
-`my-server` is an example of an SSH name, a short name for the server in `~/.ssh/config`. If you do not have one, or you connect with an IP address, follow [Connect to the server with SSH](docs/ssh.md) first.
+It installs Ghostty, the [Herdr keys](docs/keyboard-shortcuts.md), and the shell. If you have no SSH name for the server, follow [Connect to the server with SSH](docs/ssh.md) first.
 
 ### One machine as both
-
-Run this command on the machine that you use. It runs `bootstrap.sh` with the role `both`: the server setup and then the client setup, on this machine:
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- both
@@ -60,51 +34,17 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 ### Only hopen
 
-If a machine has Herdr already, you can install only `hopen` and its templates. This command runs `install.sh`, not `bootstrap.sh`, so it changes nothing else on the machine. You need curl and Python 3.11 or later.
-
-Herdr here is the terminal program `herdr`. To install it, run `curl -fsSL https://herdr.dev/install.sh | sh`, or `brew install herdr`. See [Install Herdr](https://github.com/herdrdev/herdr#install). The Herdr app, from the first page of herdr.dev, is a different program, with the commands `herdr-app` and `hc`. `hopen` does not work with it.
-
-Then install `hopen`:
+If a machine has the Herdr terminal program `herdr` already, this command installs only `hopen` and its templates, and changes nothing else. It needs curl and Python 3.11 or later. To install `herdr`, see [Install Herdr](https://github.com/herdrdev/herdr#install). The Herdr app (`herdr-app`, `hc`) is a different program, and `hopen` does not work with it.
 
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/install.sh | bash
 ```
 
-### Ask an agent
-
-Start a coding agent, for example Claude Code or Codex, on the machine that you want to set up. Paste the prompt for your option. The agent reads the [agent install steps](install.md) and runs the same commands as above.
-
-On the server machine:
-
-```text
-Set up herdspace on this machine as the server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md
-```
-
-On the client machine. Replace `my-server` with the SSH name or the address of your server:
-
-```text
-Set up herdspace on this machine as the client for my-server. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md
-```
-
-On one machine that is both:
-
-```text
-Set up herdspace on this machine as both the server and the client. Fetch and follow the instructions in https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md
-```
-
-The agent shows you what will change before it changes anything, and it gives you each command that needs your password.
-
-To teach your agent to use herdspace every day, install the herdspace skill. See [Teach your agent to use herdspace](docs/agent-setup.md#teach-your-agent-to-use-herdspace).
-
-### How the commands work
-
-To install a specific release, add `--version <tag>`. The [setup guide](docs/setup.md) has every option of `bootstrap.sh`, and the steps for each system.
+To let a coding agent do the setup, paste a prompt from [Ask an agent to do the setup](docs/agent-setup.md#install-with-an-agent). The [setup guide](docs/setup.md) has every option, for example `--version <tag>`.
 
 ## Open your projects
 
-A list is a file that you write yourself, and the setup does not create it. It holds the projects of one Herdr session, and `hopen` opens each project as a Herdr workspace. The list is `~/<session>/herdspace.toml`, so the list of the session `my-projects` is `~/my-projects/herdspace.toml`. [Write a list](docs/hopen.md#write-a-list) in the hopen guide has every key.
-
-Create the folder and the file, with one `[[project]]` block for each project:
+A list is a file that you write yourself. It holds the projects of one Herdr session, and `hopen` opens each project as a Herdr workspace. The list of the session `my-projects` is `~/my-projects/herdspace.toml`:
 
 ```toml
 [[project]]
@@ -115,12 +55,6 @@ template = "code"
 [[project]]
 name = "api"
 path = "~/code/api"
-```
-
-Open it:
-
-```bash
-hopen my-projects
 ```
 
 | Command | Effect |
@@ -134,9 +68,7 @@ hopen my-projects
 | `hopen --templates` | Show every template. |
 | `hopen --apply grid` | Split the current tab with a template. |
 
-Run `hopen` again at any time. It starts a stopped session and adds only the new projects. It never closes anything. A list can also set a start command, environment values, and extra tabs for each project. The [hopen guide](docs/hopen.md) has every command and setting.
-
-If you come from VS Code, `hopen` also reads a VS Code workspace file, so that VS Code and Herdr share one list. See [Use a VS Code workspace file](docs/hopen.md#use-a-vs-code-workspace-file). The [From VS Code](docs/vscode.md) guide has the herdspace match for each VS Code action. If you come from tmux, the [From tmux](docs/tmux.md) guide has the Herdr match for each tmux key and command.
+Run `hopen` again at any time. It starts a stopped session and adds only the new projects. It never closes anything. The [hopen guide](docs/hopen.md) has every command and setting, and how to use a VS Code workspace file as the list.
 
 ## Templates
 
@@ -146,13 +78,16 @@ A template splits a project into named panes, and it starts a program in each pa
 |:------:|:-------:|
 | ![The code template: Neovim, an agent, and lazygit](docs/media/template-code.png) | ![The agent template: an agent and a shell](docs/media/template-agent.png) |
 | Neovim, an agent, and lazygit | An agent and a shell |
-| **`grid`** | **`review`** |
+| `grid` | `review` |
 | ![The grid template: four panes](docs/media/template-grid.png) | ![The review template: lazygit and Neovim](docs/media/template-review.png) |
 | Two agents, tests, and a shell | lazygit and Neovim, to read what an agent changed |
 
-The default is `plain`, one pane with a shell. You can add your own template as a small text file. The [templates guide](docs/templates.md) shows how, and it has videos of the keys that move between panes.
+The default is `plain`, one pane with a shell. The [templates guide](docs/templates.md) shows how to add your own template.
 
 ## How the parts fit
+
+<details>
+<summary>The client connects to the Herdr server with SSH.</summary>
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -185,7 +120,9 @@ flowchart LR
   style server fill:#0b0f14,stroke:#bc8cff,color:#d2a8ff
 ```
 
-Your terminals run on the server. Herdr keeps them running after you close Ghostty or lose the connection.
+</details>
+
+Your terminals run on the server. Herdr keeps them running after you close Ghostty or lose the connection. If you come from VS Code or tmux, the [From VS Code](docs/vscode.md) and [From tmux](docs/tmux.md) guides have the match for each action.
 
 ## Documentation
 
