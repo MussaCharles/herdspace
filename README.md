@@ -126,32 +126,7 @@ Your terminals run on the server. Herdr keeps them running after you close Ghost
 
 ## Documentation
 
-- [hopen guide](docs/hopen.md): write a list, its settings, the commands, and how to install, update, or remove `hopen`.
-- [Setup guide](docs/setup.md): set up a server and a client, every option, and what the setup installs.
-- [Templates and panes](docs/templates.md): each template, how to add your own, and videos of the pane keys.
-- [From VS Code](docs/vscode.md): the herdspace command or key for each VS Code action.
-- [From tmux](docs/tmux.md): the Herdr command or key for each tmux action, and how to run agents side by side.
-- [Keyboard shortcuts](docs/keyboard-shortcuts.md): the keys that the setup changes, and how to keep the keys of your terminal.
-- [Cheat sheet](docs/cheat-sheet.md): keys and commands for daily use, with a [table of daily commands](docs/cheat-sheet.md#daily-commands) and links to the official Herdr docs.
-- [Connect to the server with SSH](docs/ssh.md): what `my-server` means, and how to set up the SSH name and key.
-- [Windows with WSL](docs/windows-wsl.md): use a Windows machine as a client.
-- [Ask an agent to do the setup](docs/agent-setup.md): what to say to a coding agent.
-- [Updating](docs/updating.md): update the tools, add something new, and make a release.
-- [Testing](docs/testing.md): the tests, and how to run them.
-- [CI](docs/ci.md): the tests that GitHub Actions runs for each pull request and each release.
-- [Repository settings](docs/repository-settings.md): the GitHub settings of this repository, and the reason for each one.
-
-## Credits
-
-herdspace builds on [Herdr](https://github.com/herdrdev/herdr), and we thank its authors for a great tool. herdspace is inspired by the guide [Herdr setup](https://learn.datalumina.com/docs/herdr) by Dave Ebbelaar.
-
-The setup installs these tools. Thanks to their authors:
-
-- Herdr plugin: [Auto Title](https://github.com/kryptamine/herdr-auto-title)
-- Terminal: [Ghostty](https://github.com/ghostty-org/ghostty)
-- Shell: [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh), [Powerlevel10k](https://github.com/romkatv/powerlevel10k), [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions), and [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
-- Command-line tools: [fzf](https://github.com/junegunn/fzf), [zoxide](https://github.com/ajeetdsouza/zoxide), [eza](https://github.com/eza-community/eza), [bat](https://github.com/sharkdp/bat), and [fd](https://github.com/sharkdp/fd)
-- Editor and Git: [Neovim](https://github.com/neovim/neovim), [lazygit](https://github.com/jesseduffield/lazygit), and [delta](https://github.com/dandavison/delta)
+The [documentation index](docs/README.md) lists each guide. herdspace builds on [Herdr](https://github.com/herdrdev/herdr). The [credits](docs/credits.md) name each tool that the setup installs.
 
 ## License
 

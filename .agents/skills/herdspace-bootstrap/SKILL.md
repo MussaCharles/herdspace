@@ -75,7 +75,7 @@ Before you add a Herdr key, compare it with the default keys of Herdr. For examp
 4. Use `install_file` for a file that herdspace owns, and `ensure_block` for lines in a file that the person owns.
 5. Pin each download. On macOS, Homebrew installs the tools, and their versions are not pinned. For an old pin, the weekly workflow "Pinned tools" opens an issue. `tools/check-pins.sh` shows the same report on your machine. If you add a tool to `tools/update-versions.sh`, the report covers it. `tools/update-versions.sh` writes the release files and their checksums to `tools/versions.tsv`, and the Git commits to `tools/versions.env`. It takes only a release or a commit that is at least 7 days old, and it never moves a pin back. Review its output before you commit it. If you add a Neovim plugin, add its repository to `tools/nvim-plugins.tsv`. If the person did not agree, do not run `curl | sh` from a new source.
 6. Add a check to `tests/verify-server.sh`, or to the test of the client.
-7. Add the tool to "What the setup installs" in `docs/setup.md`, and to the credits in `README.md`.
+7. Add the tool to "What the setup installs" in `docs/setup.md`, and to `docs/credits.md`.
 8. Add a line to `CHANGELOG.md`.
 
 ## Pitfalls
