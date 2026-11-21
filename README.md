@@ -6,7 +6,7 @@ herdspace sets up [Herdr](https://herdr.dev) and its tools on your machines, and
 
 ## Quick start
 
-The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server with SSH. One machine can also be both. Each command below downloads the setup script `bootstrap.sh` from the newest release, compares its checksum, and runs it. Run it again at any time to update. Read [Before you start](docs/setup.md#before-you-start) first.
+The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server with SSH. One machine can also be both. Each command below downloads the [setup](docs/setup.md) of the newest release, makes sure that its checksum is correct, and runs it. Run the same command again to update. Read [Before you start](docs/setup.md#before-you-start) first.
 
 ### Server machine
 
