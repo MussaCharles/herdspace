@@ -32,6 +32,21 @@ Run the same `curl` command again, with the same role and options. It downloads 
 
 If you use a clone, run `git pull` in the clone. Then run `./bootstrap.sh` with the same role and options as before.
 
+### Running sessions
+
+You do not have to stop your Herdr sessions before an update. The setup never stops a running server, so the programs in your panes keep running.
+
+- If the update changes `config.toml`, the setup runs `herdr server reload-config` for each running session. Herdr applies the new settings and keeps the panes. A few settings apply only after a restart. The [Herdr configuration reference](https://herdr.dev/tui/docs/config-reference/) names them.
+- If the update installs a new Herdr version, each running session keeps the old version. The new Herdr attaches to it. The setup names each session with an older version.
+
+To use the new Herdr version in a session, stop it and open it again:
+
+```bash
+herdr session stop my-projects
+```
+
+A stop ends the programs in the panes of the session. When you open the session again, the layout comes back, the shells start again, and an agent with an integration resumes its conversation.
+
 The script changes only what is different. It updates a file that you did not change, and it asks about a file that you changed. It keeps a backup of each replaced file.
 
 ## Update the tool versions

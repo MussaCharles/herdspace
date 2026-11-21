@@ -43,6 +43,8 @@ for base in "$@"; do
     if [ \"${FULL:-0}\" = 1 ]; then [ \"\$(ls \$HOME/.local/share/nvim/site/parser | wc -l)\" -gt 0 ]; fi
     echo \"RESULT mason=\$(ls \$HOME/.local/share/nvim/mason/packages 2>/dev/null | tr '\\n' ' ')\"
     if [ \"${FULL:-0}\" = 1 ]; then ls \$HOME/.local/share/nvim/mason/packages | grep -q pyright; fi
+    echo '== update with a live session'
+    tests/test-live-update.sh ${flags}
     echo '== both on one machine'
     ./bootstrap.sh both --no-ghostty ${flags}
     grep -q 'BOOTSTRAP_ROLE=both' \$HOME/.config/herdspace/env.zsh

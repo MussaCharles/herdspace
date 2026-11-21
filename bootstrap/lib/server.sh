@@ -4,8 +4,11 @@
 STARTED_SERVER=0
 AGENTS="claude codex pi opencode hermes copilot cursor grok"
 
+HERDR_CONFIG_BEFORE=""
+
 setup_server_files() {
   local lazygit_dir="$1"
+  HERDR_CONFIG_BEFORE="$(file_sha "${HOME}/.config/herdr/config.toml" 2>/dev/null || true)"
   install_file "${REPO_ROOT}/config/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
   install_file "${REPO_ROOT}/config/lazygit/config.yml" "${lazygit_dir}/config.yml"
   # Neovim owns lazy-lock.json after the first start. :Lazy update changes it.
@@ -195,10 +198,52 @@ install_agents() {
   rm -f "$skill"
 }
 
+# running_sessions prints the name of each Herdr session with a running server.
+running_sessions() {
+  herdr session list --json 2>/dev/null | python3 -I -c '
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except ValueError:
+    sys.exit(0)
+for session in data.get("sessions", []):
+    if session.get("running"):
+        print(session["name"])
+' 2>/dev/null || true
+}
+
+# update_running_sessions changes nothing in the panes of a running session.
+# A changed config.toml reaches each running server with reload-config, which
+# keeps the panes. A server that runs an older Herdr than the one installed
+# keeps running, and a note says how to restart it.
+update_running_sessions() {
+  [ "$MODE" != "check" ] && have herdr || return 0
+  local name out installed version old=""
+  installed="$(herdr --version 2>/dev/null | awk '{print $2}')"
+  local changed=0
+  [ "$(file_sha "${HOME}/.config/herdr/config.toml" 2>/dev/null || true)" = "$HERDR_CONFIG_BEFORE" ] || changed=1
+  while IFS= read -r name; do
+    [ -n "$name" ] || continue
+    if [ "$changed" -eq 1 ]; then
+      out="$(herdr --session "$name" server reload-config 2>&1)" || true
+      case "$out" in
+        *'"diagnostics":[]'*) ok "Session ${name}: the new Herdr configuration is active" ;;
+        *) warn "Session ${name}: Herdr did not apply all of the new configuration. Run: herdr --session ${name} server reload-config" ;;
+      esac
+    fi
+    version="$(herdr --session "$name" status server 2>/dev/null | awk '$1 == "version:" {print $2}')"
+    [ -z "$version" ] || [ -z "$installed" ] || [ "$version" = "$installed" ] || old="${old} ${name}"
+  done < <(running_sessions)
+  [ -n "$old" ] || return 0
+  info "These sessions still run an older Herdr than ${installed}:${old}. Their programs keep running, and Herdr ${installed} attaches to them."
+  info "To use Herdr ${installed} in a session, run: herdr session stop <name>, and open the session again. A stop ends the programs in its panes. The layout comes back."
+}
+
 setup_server_common() {
   run_part "Neovim plugins" nvim_plugins_ready install_nvim_plugins
   run_part "Neovim language tools" nvim_tools_ready install_nvim_tools
   run_part "Auto Title plugin" auto_title_ready install_auto_title
   run_part "Agent integrations and skill" agents_ready install_agents
   stop_setup_server
+  update_running_sessions
 }
