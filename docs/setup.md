@@ -164,6 +164,8 @@ The first word is `server`, `client`, or `both`. The script finds the system. Pu
 | `--skip-mission-control` | macOS client: keep the Mission Control shortcuts. |
 | `--keep-terminal-keys` | Client: keep the keys of Ghostty and macOS. The setup saves the choice. See the [keyboard shortcuts guide](keyboard-shortcuts.md). |
 | `--use-herdspace-keys` | Client: use the editor keys of herdspace again. This is the default. |
+| `--keep-terminal-look` | Client: keep the look of Ghostty, with no herdspace colors or window size. The setup saves the choice. |
+| `--use-herdspace-look` | Client: use the herdspace look of Ghostty again. This is the default. |
 | `-h`, `--help` | Show every option. |
 
 `bootstrap.sh` runs one script from the folder `bootstrap/platforms/`, one for each role and system.
@@ -418,7 +420,7 @@ flowchart LR
 
 Without the terminal description, programs on the server can show errors. Herdr uses the `Ctrl` arrow keys, so the script turns off those Mission Control shortcuts. To keep the macOS shortcuts, add `--skip-mission-control`. To keep every key of Ghostty and macOS, add `--keep-terminal-keys`. The [keyboard shortcuts guide](keyboard-shortcuts.md) lists each key that changes.
 
-Press `Cmd+Shift+,` in Ghostty to reload the configuration. After a change to `background-opacity`, quit Ghostty and open it again.
+Press `Cmd+Shift+,` in Ghostty to reload the configuration. After a change to `background-opacity` or `macos-titlebar-style`, quit Ghostty and open it again.
 
 ## Debian or Ubuntu client
 
@@ -451,7 +453,8 @@ To start Herdr in a terminal on this machine, open Ghostty and run `herdr`. You 
 ## Effects to know about
 
 - The client setup changes some keys of Ghostty and macOS, so that Herdr and Neovim use the keys of a code editor. The [keyboard shortcuts guide](keyboard-shortcuts.md) lists each key, and it explains `--keep-terminal-keys`, which keeps your keys.
-- Ghostty cannot limit a key to one program. The keys that Herdr uses do nothing in a Ghostty window that has no Herdr.
+- Ghostty cannot limit a key to one program. The keys that Herdr uses do nothing in a Ghostty window that has no Herdr. Ghostty gets [replacement keys](keyboard-shortcuts.md#replacement-keys-for-ghostty).
+- The setup never replaces your Ghostty file. It writes marked blocks at its top. See [Your Ghostty file](keyboard-shortcuts.md#your-ghostty-file).
 - On a Mac, the Option key sends Alt in Ghostty, so it does not type special characters there.
 - The script never replaces your `~/.zshrc`. It adds a marked block that loads the herdspace shell. See [Your ~/.zshrc](#your-zshrc).
 - In a shell with no terminal, `ls` and `cat` stay plain, so agents and scripts get the output that they expect.

@@ -1,23 +1,31 @@
-# Ghostty configuration from herdspace.
+# Ghostty configuration from herdspace, for a Mac. The setup copies each section
+# into a marked block at the top of ~/.config/ghostty/config.ghostty, and keeps
+# the other lines of that file.
 
+# herdspace appearance: start. --keep-terminal-look leaves this section out.
 # Tell me about a new version. Do not download it.
 auto-update = check
-
 background = #1b1313
 background-opacity = 0.905
 background-blur = true
 macos-titlebar-style = tabs
 window-width = 80
 window-height = 25
+# herdspace appearance: end
 
-# herdspace keys: start. --keep-terminal-keys removes the lines up to the end mark.
-# Let these Cmd keys reach Herdr and Neovim. Ghostty cannot limit a key to one
-# program, so these keys do nothing in a Ghostty window with no Herdr.
+# herdspace keys: start. --keep-terminal-keys leaves this section out.
+# These Cmd keys reach Herdr. Ghostty cannot limit a key to one program, so
+# outside Herdr they do nothing. Use the replacement keys below there.
 keybind = super+t=unbind
 keybind = super+w=unbind
 keybind = super+k=unbind
-keybind = super+e=unbind
-keybind = super+shift+g=unbind
 keybind = super+shift+p=unbind
+# The replacement keys. Cmd+Option+W closes a tab already. Cmd+E and
+# Cmd+Shift+G keep their Ghostty action, which works only with a selection or
+# an open search, and reach Herdr and Neovim otherwise.
+keybind = super+alt+t=new_tab
+keybind = super+alt+k=clear_screen
+keybind = super+alt+shift+p=toggle_command_palette
+# Option sends Alt, for the Alt keys of Herdr and Neovim.
 macos-option-as-alt = true
 # herdspace keys: end

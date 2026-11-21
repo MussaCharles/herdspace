@@ -29,6 +29,8 @@
 #   --skip-mission-control  macOS: keep the Mission Control shortcuts.
 #   --keep-terminal-keys  Keep the keys of Ghostty and macOS. The choice stays.
 #   --use-herdspace-keys  Use the editor keys of herdspace again (the default).
+#   --keep-terminal-look  Keep the look of Ghostty: no herdspace colors or size.
+#   --use-herdspace-look  Use the herdspace look of Ghostty again (the default).
 #
 # both runs the server setup and then the client setup on this machine. It
 # takes the options of both, and --server is not necessary.
@@ -198,7 +200,7 @@ while [ "$j" -lt "${#PASS[@]}" ]; do
   arg="${PASS[$j]}"
   case "$arg" in
     --skip-nvim-tools | --skip-login-service) PASS_SERVER+=("$arg") ;;
-    --no-ghostty | --skip-mission-control | --keep-terminal-keys | --use-herdspace-keys) PASS_CLIENT+=("$arg") ;;
+    --no-ghostty | --skip-mission-control | --keep-terminal-keys | --use-herdspace-keys | --keep-terminal-look | --use-herdspace-look) PASS_CLIENT+=("$arg") ;;
     --server)
       j=$((j + 1))
       PASS_CLIENT+=("$arg" "${PASS[$j]}")

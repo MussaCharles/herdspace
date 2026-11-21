@@ -545,7 +545,7 @@ next_steps() {
       printf '    3. To check this machine later, run the setup with --check.\n'
       ;;
     client)
-      printf '    1. Open a new Ghostty window, so that the new keys and colors load.\n'
+      ghostty_step
       printf '    2. Connect to your server:\n'
       printf '       ssh %s\n' "$server"
       printf '       If the server has no herdspace yet: %s/README.md#server-machine\n' "$HS_DOC_BASE"
@@ -556,13 +556,24 @@ next_steps() {
       printf '    If a Ctrl arrow key does not work on macOS, log out and log in again.\n'
       ;;
     both)
-      printf '    1. Open a new Ghostty window, so that the new keys and colors load.\n'
+      ghostty_step
       printf '    2. Open your projects:\n'
       printf '       hopen .          the current folder\n'
       printf '       hopen <list>     the projects of a list: %s/docs/hopen.md\n' "$HS_DOC_BASE"
       printf '    3. Learn the keys: %s/docs/keyboard-shortcuts.md\n' "$HS_DOC_BASE"
       ;;
   esac
+}
+
+# ghostty_step prints the first next step of a client. A change of the opacity
+# or the title bar style loads only after a full restart of Ghostty.
+ghostty_step() {
+  if [ "${GHOSTTY_CHANGED:-0}" -eq 1 ]; then
+    printf '    1. Quit Ghostty and start it again, so that the new keys and look load.\n'
+    printf '       A new window does not load the opacity or the title bar style.\n'
+  else
+    printf '    1. Open a new Ghostty window, so that the new keys load.\n'
+  fi
 }
 
 # finish_run ROLE prints the result: the summary, the kept files, the backups,

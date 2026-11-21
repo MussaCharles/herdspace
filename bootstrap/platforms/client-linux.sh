@@ -7,6 +7,7 @@
 #
 # Usage: ./bootstrap.sh client [options] [--server HOST]... [--no-ghostty]
 #        [--keep-terminal-keys | --use-herdspace-keys]
+#        [--keep-terminal-look | --use-herdspace-look]
 #
 # With no option, the script asks about each file that you changed.
 #   --check          Report what is done, missing, or different. Change nothing.
@@ -15,6 +16,8 @@
 #   --yes            Install the missing prerequisites with no question.
 #   --keep-terminal-keys  Keep the keys of Ghostty. The choice stays.
 #   --use-herdspace-keys  Use the editor keys of herdspace again (the default).
+#   --keep-terminal-look  Keep the look of Ghostty: no herdspace colors or size.
+#   --use-herdspace-look  Use the herdspace look of Ghostty again (the default).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"

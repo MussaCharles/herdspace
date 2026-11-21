@@ -15,8 +15,9 @@ fail() { printf 'FAIL %s\n' "$1"; failures=$((failures + 1)); }
 contains() { case "$1" in *"$2"*) pass "$3" ;; *) fail "$3: wanted [$2] in [${1: -300}]" ;; esac; }
 lacks() { case "$1" in *"$2"*) fail "$3: found [$2]" ;; *) pass "$3" ;; esac; }
 run_script() { "$SCRIPT" "$@" 2>&1 </dev/null; }
-backups() { find "$(dirname "$SAMPLE")" -maxdepth 1 -name '*.bak-*' | wc -l | tr -d ' '; }
-clear_backups() { find "$(dirname "$SAMPLE")" -maxdepth 1 -name '*.bak-*' -delete; }
+# The backups of the sample file only. Another file of the folder can have one.
+backups() { find "$(dirname "$SAMPLE")" -maxdepth 1 -name "$(basename "$SAMPLE").bak-*" | wc -l | tr -d ' '; }
+clear_backups() { find "$(dirname "$SAMPLE")" -maxdepth 1 -name "$(basename "$SAMPLE").bak-*" -delete; }
 
 # A complete machine.
 start="$(date +%s)"
