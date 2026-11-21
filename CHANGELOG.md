@@ -4,6 +4,12 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- When the setup changes `config.toml`, it applies the new configuration to each running Herdr session with `herdr server reload-config`. The panes keep running.
+- When a running session uses an older Herdr than the installed one, the setup names it, and says how to restart it with the new version.
+- The update guide explains what an update does to running sessions.
+
 ## [0.6.3] - 2026-11-21
 
 ### Security

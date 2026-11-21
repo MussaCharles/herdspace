@@ -59,6 +59,8 @@ jobs:
         run: tests/test-verify-release.sh
       - name: Neovim plugin step
         run: tests/test-nvim-plugins.sh
+      - name: Running sessions during the setup
+        run: tests/test-running-sessions.sh
       - name: Docs-only detection
         run: tests/test-ci-changes.sh
       - name: Links in the Markdown files

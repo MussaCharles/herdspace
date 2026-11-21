@@ -15,6 +15,8 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/run-client-linux.sh` | A Linux client connects to a server in a second container. Real Ghostty key presses reach Herdr over SSH. |
 | `tests/run-macos.sh` | The macOS scripts work with a temporary home folder and stub commands. It needs Python 3.11 or later from Homebrew. |
 | `tests/test-install.sh` | A release builds, `install.sh` installs `hopen`, and `bootstrap.sh` from `curl` picks the right script. |
+| `tests/test-running-sessions.sh` | With a stub `herdr`, the setup reloads the configuration of each running session after a change, names a session with an older Herdr, and stops no session. It runs in a second. |
+| `tests/test-live-update.sh` | In a test container, `tests/run-linux.sh` installs the latest release, starts a session with a running program, and updates to this folder with a changed `config.toml`. The server, the program, and the panes stay, and the session gets the new configuration. |
 | `tests/test-verify-release.sh` | `tools/verify-release.sh` accepts release files that match the build, and finds a changed script, a changed or new file in an archive, an extra file, and a file that does not match `SHA256SUMS`. It needs no network. |
 | `tests/run-prereqs.sh` | The prerequisites step finds and installs a missing locale, stops with a fix when `sudo` is missing, works as root, and reports a server with no SSH. |
 | `tests/test-hopen-list.sh` | `hopen` reads each list setting, refuses crafted lists, and keeps session names safe. It needs no Herdr, and it runs in a second. |
