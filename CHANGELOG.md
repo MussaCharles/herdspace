@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-11-21
+
 ### Changed
 
 - When the setup changes `config.toml`, it applies the new configuration to each running Herdr session with `herdr server reload-config`. The panes keep running.
@@ -173,7 +175,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.3...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.4...HEAD
+[0.6.4]: https://github.com/MussaCharles/herdspace/compare/0.6.3...0.6.4
 [0.6.3]: https://github.com/MussaCharles/herdspace/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/MussaCharles/herdspace/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/MussaCharles/herdspace/compare/0.6.0...0.6.1
