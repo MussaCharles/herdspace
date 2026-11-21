@@ -110,12 +110,12 @@ for target in "$@"; do
     client)
       rm -f "${TEST_HOME}/home/.zshrc"
       run "$ROOT/bootstrap.sh" client --server example-server || status=1
-      cmp -s "$ROOT/config/ghostty/config.ghostty" "${TEST_HOME}/home/.config/ghostty/config.ghostty" && echo 'PASS ghostty configuration' || { echo 'FAIL ghostty configuration'; status=1; }
+      grep -q 'keybind = super+alt+t=new_tab' "${TEST_HOME}/home/.config/ghostty/config.ghostty" && grep -q 'background-opacity' "${TEST_HOME}/home/.config/ghostty/config.ghostty" && echo 'PASS ghostty configuration' || { echo 'FAIL ghostty configuration'; status=1; }
       grep -q 'BOOTSTRAP_PROMPT_COLOR=166' "${TEST_HOME}/home/.config/herdspace/env.zsh" && echo 'PASS client prompt color' || { echo 'FAIL client prompt color'; status=1; }
       grep -q 'ssh -- example-server tic -x -' "$CALLS" && echo 'PASS terminal description sent' || { echo 'FAIL terminal description sent'; status=1; }
       [ "$(grep -c 'defaults write com.apple.symbolichotkeys' "$CALLS")" = 4 ] && echo 'PASS four shortcuts released' || { echo 'FAIL four shortcuts released'; status=1; }
       grep -q 'activate-stub -u' "$CALLS" && echo 'PASS shortcuts applied' || { echo 'FAIL shortcuts applied'; status=1; }
-      run "$ROOT/tests/test-idempotent.sh" bootstrap.sh "${TEST_HOME}/home/.config/ghostty/config.ghostty" client --server example-server || status=1
+      run "$ROOT/tests/test-idempotent.sh" bootstrap.sh "${TEST_HOME}/home/.config/herdspace/extras.zsh" client --server example-server || status=1
       out="$(run zsh -i -c 'print -r -- CLIENT_OK' </dev/null 2>&1)"
       case "$out" in *CLIENT_OK*) echo 'PASS client shell starts' ;; *) echo "FAIL client shell starts: ${out:0:200}"; status=1 ;; esac
       ;;
@@ -141,7 +141,7 @@ for target in "$@"; do
       [ "$(grep -c 'symbolichotkeys.*<true/>' "$CALLS")" = 4 ] && echo 'PASS keys: Mission Control gets its keys back' || { echo 'FAIL keys: Mission Control gets its keys back'; status=1; }
       if run "$ROOT/bootstrap.sh" client --check --server example-server >/dev/null && ! grep -q unbind "$cfg"; then echo 'PASS keys: a later run keeps the choice'; else echo 'FAIL keys: a later run keeps the choice'; status=1; fi
       run "$ROOT/bootstrap.sh" client --use-herdspace-keys --server example-server >/dev/null || status=1
-      cmp -s "$ROOT/config/ghostty/config.ghostty" "$cfg" && echo 'PASS keys: herdspace keys again' || { echo 'FAIL keys: herdspace keys again'; status=1; }
+      grep -q 'keybind = super+t=unbind' "$cfg" && echo 'PASS keys: herdspace keys again' || { echo 'FAIL keys: herdspace keys again'; status=1; }
       [ "$(grep -c 'symbolichotkeys.*<false/>' "$CALLS")" = 4 ] && echo 'PASS keys: Mission Control releases the keys again' || { echo 'FAIL keys: Mission Control releases the keys again'; status=1; }
       ;;
     both)
@@ -150,7 +150,7 @@ for target in "$@"; do
       run "$ROOT/bootstrap.sh" both --skip-nvim-tools || status=1
       grep -q 'BOOTSTRAP_ROLE=both' "${TEST_HOME}/home/.config/herdspace/env.zsh" && echo 'PASS both: one role' || { echo 'FAIL both: one role'; status=1; }
       grep -q 'herdr-update-check' "${TEST_HOME}/home/.zprofile" && echo 'PASS both: server login block' || { echo 'FAIL both: server login block'; status=1; }
-      cmp -s "$ROOT/config/ghostty/config.ghostty" "${TEST_HOME}/home/.config/ghostty/config.ghostty" && echo 'PASS both: ghostty configuration' || { echo 'FAIL both: ghostty configuration'; status=1; }
+      grep -q 'keybind = super+alt+t=new_tab' "${TEST_HOME}/home/.config/ghostty/config.ghostty" && echo 'PASS both: ghostty configuration' || { echo 'FAIL both: ghostty configuration'; status=1; }
       if out="$(run "$ROOT/bootstrap.sh" both --check --skip-nvim-tools 2>&1)"; then echo 'PASS both: a check finds nothing to do'; else echo 'FAIL both: a check finds nothing to do'; printf '%s\n' "$out" | grep -E '\[(todo|diff)\]'; status=1; fi
       ;;
     *) echo "Unknown target: ${target}"; status=1 ;;

@@ -10,10 +10,10 @@ source "$(dirname "$0")/lib-pair.sh"
 
 pair_setup
 grep -E '\[(warn|err)\]' tests/.work/client.log | cut -c1-160
-if cli_user cmp -s config/ghostty/config-linux.ghostty /home/tester/.config/ghostty/config.ghostty; then pass 'ghostty configuration'; else fail 'ghostty configuration'; fi
+if cli_user grep -q 'ctrl+alt+shift+t=new_tab' /home/tester/.config/ghostty/config.ghostty; then pass 'ghostty configuration'; else fail 'ghostty configuration'; fi
 if srv_user infocmp -x xterm-ghostty >/dev/null 2>&1; then pass 'terminal description on the server'; else fail 'terminal description on the server'; fi
 if cli_user grep -q 'BOOTSTRAP_PROMPT_COLOR=166' /home/tester/.config/herdspace/env.zsh; then pass 'client prompt color'; else fail 'client prompt color'; fi
-if cli_user tests/test-idempotent.sh bootstrap.sh /home/tester/.config/ghostty/config.ghostty client --server my-server >tests/.work/client-idem.log 2>&1; then pass 'idempotent client'; else fail 'idempotent client'; fi
+if cli_user tests/test-idempotent.sh bootstrap.sh /home/tester/.config/herdspace/extras.zsh client --server my-server >tests/.work/client-idem.log 2>&1; then pass 'idempotent client'; else fail 'idempotent client'; fi
 grep -E '^(FAIL|RESULT)' tests/.work/client-idem.log | cut -c1-170
 
 # Real Ghostty, real key presses, over SSH.
@@ -68,6 +68,6 @@ cli_user ./bootstrap.sh client --keep-terminal-keys --server my-server >/dev/nul
 if cli_user grep -q unbind "$cfg"; then fail 'keys: terminal keys in Ghostty'; else pass 'keys: terminal keys in Ghostty'; fi
 if cli_user ./bootstrap.sh client --check --server my-server >/dev/null 2>&1; then pass 'keys: a later check keeps the choice'; else fail 'keys: a later check keeps the choice'; fi
 cli_user ./bootstrap.sh client --use-herdspace-keys --server my-server >/dev/null 2>&1 || fail 'keys: herdspace run'
-if cli_user cmp -s config/ghostty/config-linux.ghostty "$cfg"; then pass 'keys: herdspace keys again'; else fail 'keys: herdspace keys again'; fi
+if cli_user grep -q 'ctrl+shift+t=unbind' "$cfg"; then pass 'keys: herdspace keys again'; else fail 'keys: herdspace keys again'; fi
 echo "RESULT exit=${status}"
 exit "$status"

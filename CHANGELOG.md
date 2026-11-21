@@ -12,6 +12,12 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - When more than one file differs from the herdspace version, the setup first lists them all, and asks once: review one file at a time, keep all, or replace all. In the review, `d` shows the difference of that file only, and says that `q` comes back to the question.
 - Before the setup changes the login shell from bash to zsh, it names your bash files that zsh does not read. The setup guide shows how to share aliases between bash and zsh.
 
+- herdspace never replaces your Ghostty file. It writes two marked blocks at its top, `herdspace appearance` and `herdspace keys`, and your own lines below them win. The Ghostty file of an older herdspace gets this layout after a backup, and its own lines stay.
+- `--keep-terminal-look` leaves out the herdspace colors and window size of Ghostty. On Linux, the setup writes no macOS-only Ghostty setting.
+- The first client run explains the herdspace keys and asks which keys to use, before it changes any key.
+- Ghostty gets replacement keys for the actions that lose their keys, for example `Cmd+Option+T` for a new tab. On a Mac, `Cmd+E` and `Cmd+Shift+G` keep their Ghostty action for a selection or an open search.
+- The end of a client run says when Ghostty needs a full restart.
+
 ### Fixed
 
 - The setup asks about each changed file of a folder too, for example the Neovim files. Before, it kept them with no question and listed them as kept.

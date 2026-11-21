@@ -67,6 +67,8 @@ jobs:
         run: tests/test-links.sh
       - name: Setup output and questions
         run: tests/test-ui.sh
+      - name: Ghostty file of the client
+        run: tests/test-ghostty.sh
 
   linux:
     # One job for each runner and image, so that they run at the same time.

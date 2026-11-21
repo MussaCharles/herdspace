@@ -24,6 +24,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-nvim-plugins.sh` | After a failed plugin download, the Neovim plugin step warns, and the next run tries again. It uses a stub `nvim`, and it runs in a second. |
 | `tests/test-ci-changes.sh` | `tools/ci-changes.sh` finds a pull request that changes only docs, in a temporary git repository. |
 | `tests/test-links.sh` | Each relative link of each Markdown file points at a file that exists, and each `#anchor` matches a heading. A link in a community file in `.github/` starts with `/`. It needs no network. |
+| `tests/test-ghostty.sh` | How the client setup writes the Ghostty file: the marked blocks at the top, your own lines below them, the file of an older herdspace, the key and look choices, and the key question. It needs no network. |
 | `tests/test-ui.sh` | The output and the questions of the setup. It tests plain text with no terminal, and boxes and colors at a terminal. It tests the answers for a changed file, the own lines, the backups, and the next steps. It needs no network. |
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
 | `tests/run-release-check.sh` | Each option of the Quick start works from a published release, with the command of the README, in fresh containers and macOS VMs. See [After a release](#after-a-release). |
@@ -76,6 +77,10 @@ tests/test-links.sh
 
 ```bash
 tests/test-ui.sh
+```
+
+```bash
+tests/test-ghostty.sh
 ```
 
 Each test prints one `PASS` or `FAIL` line for each check, and a `RESULT` line at the end. The logs go to `tests/.work`.
