@@ -24,7 +24,8 @@ same 'herdr configuration' "$ROOT/config/herdr/config.toml" "$HOME/.config/herdr
 if [ "$PLATFORM" = linux ]; then lg="$HOME/.config/lazygit"; else lg="$HOME/Library/Application Support/lazygit"; fi
 same 'lazygit configuration' "$ROOT/config/lazygit/config.yml" "$lg/config.yml"
 same 'neovim keys' "$ROOT/config/nvim/lua/config/keymaps.lua" "$HOME/.config/nvim/lua/config/keymaps.lua"
-same 'zshrc' "$ROOT/config/shell/zshrc.zsh" "$HOME/.zshrc"
+same 'herdspace shell' "$ROOT/config/shell/zshrc.zsh" "$HOME/.config/herdspace/zshrc.zsh"
+contains "$(cat "$HOME/.zshrc")" '# >>> herdspace >>>' 'zshrc loads the herdspace shell from a block'
 same 'p10k' "$ROOT/config/shell/p10k.zsh" "$HOME/.p10k.zsh"
 contains "$(cat "$HOME/.config/herdspace/env.zsh")" 'BOOTSTRAP_PROMPT_COLOR=30' 'server prompt color'
 contains "$(cat "$HOME/.zprofile")" 'herdr-update-check' 'zprofile block'

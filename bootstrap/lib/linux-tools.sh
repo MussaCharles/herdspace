@@ -59,8 +59,18 @@ login_shell_ready() {
 }
 
 set_login_shell_zsh() {
-  local zsh_path
+  local zsh_path old files="" f
   zsh_path="$(command -v zsh)"
+  old="$(getent passwd "$(id -un)" | cut -d: -f7)"
+  case "$old" in
+    */bash)
+      for f in .bashrc .bash_profile .bash_aliases .profile; do
+        [ ! -f "${HOME}/${f}" ] || files="${files} ~/${f}"
+      done
+      warn "The login shell changes from bash to zsh. zsh does not read your bash files:${files:- none}."
+      info "To use your bash aliases in zsh, see ${HS_DOC_BASE}/docs/setup.md#bash-aliases-in-zsh"
+      ;;
+  esac
   run_root chsh -s "$zsh_path" "$(id -un)" || warn "Could not change the login shell. Run: chsh -s ${zsh_path}"
 }
 

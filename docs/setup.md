@@ -262,35 +262,89 @@ Put these options after the role in the `curl` command, for example `bash -s -- 
 | `server` | Do what is missing, and ask about each file that you changed. |
 | `server --check` | Report what is done, missing, or different. Change nothing. |
 | `server --keep-existing` | Add what is missing, and change no existing file. |
-| `server --replace-all` | Use the repository version of every file, with no question. Each replaced file gets a backup. Use it with care: a file that you changed can have more than the herdspace version. |
+| `server --replace-all` | Use the repository version of every file, with no question. Each replaced file gets a backup. Your `~/.zshrc` only gets a block that loads the shell extras. Use it with care: a file that you changed can have more than the herdspace version. |
 
 These options work for a server and for a client. With no terminal, for example in a run by an agent, the script keeps your files and lists them.
 
-### The question about a changed file
+### The questions about changed files
 
-Before the first question, the script lists all the files that differ from the herdspace version. Then it asks about one file at a time:
+If more than one file differs from the herdspace version, the script first lists them all, and asks one question for all of them:
 
 ```text
-  File 1 of 3: ~/.zshrc differs from the herdspace version.
+  3 files differ from the herdspace version:
+    1. ~/.p10k.zsh
+    2. ~/.config/herdr/config.toml
+    3. ~/.config/nvim/lua/config/keymaps.lua
+
+    v  Review one file at a time, with its difference             (Enter)
+    K  Keep all 3 files
+    R  Replace all 3 files with the herdspace version (backups first)
+```
+
+| Answer | Effect |
+|--------|--------|
+| `v`, or Enter | Ask about each file, one at a time. |
+| `K` | Keep all the files. The end of the run lists them. |
+| `R` | Replace all the files. The script saves each file first, as `<file>.bak-<time>`. |
+
+In the review, the script asks about one file at a time:
+
+```text
+  File 1 of 3: ~/.p10k.zsh
 
     k  Keep your file                                             (Enter)
     r  Replace it with the herdspace version (backup first)
-    d  Show the difference
-    e  Keep your file, and add the herdspace shell extras
-    m  Replace it, and copy your own lines to ~/.zshrc.local
-    K  Keep this file and the 2 files after it
-    R  Replace this file and the 2 files after it (backups first)
+    d  Show the difference of this file                           (q comes back)
 ```
 
 | Answer | Effect |
 |--------|--------|
 | `k`, or Enter | Keep your file. The end of the run lists it. |
 | `r` | Replace your file with the herdspace version. The script saves your file first, as `<file>.bak-<time>`. |
-| `d` | Show how many lines differ, your own lines that the herdspace version does not have, and the difference. For the difference, the script uses `delta`, `git diff`, or `diff`, the first one that it finds. Then it asks again. |
-| `e` | Only for `~/.zshrc`. Keep your file, and add a short marked block that loads the herdspace shell extras: `ff`, `fif`, the completion of `hopen`, the `fzf` keys, `zoxide`, and `eza` and `bat` for `ls` and `cat`. A later run updates only the block. |
-| `m` | Only for `~/.zshrc`. Replace your file, and copy your own lines to `~/.zshrc.local`, each one behind `# `. Remove the `# ` of each line that you want, and keep `if` and `fi` blocks complete. |
-| `K` | Keep this file and each changed file after it, with no more questions. |
-| `R` | Replace this file and each changed file after it. The script lists those files and asks one more time. |
+| `d` | Show how many lines differ, your own lines that the herdspace version does not have, and the difference of this file only. The difference opens in a pager: press `q` to come back to the question. The script uses `delta`, `git diff`, or `diff`, the first one that it finds. |
+
+These questions never include `~/.zshrc`. The next section explains why.
+
+### Your ~/.zshrc
+
+herdspace never replaces a `~/.zshrc` of yours. It owns only its own files in `~/.config/herdspace/`:
+
+| File | What it holds |
+|------|---------------|
+| `zshrc.zsh` | The herdspace shell: the prompt, Oh My Zsh, and the shell extras. |
+| `extras.zsh` | The shell extras: the `fzf` keys, `zoxide`, `ff`, `fif`, the completion of `hopen`, and `eza` and `bat` for `ls` and `cat`. |
+
+Your `~/.zshrc` loads one of them from a marked block, between `# >>> herdspace >>>` and `# <<< herdspace <<<`. A later run changes only the text of the block. The script does this with your `~/.zshrc`:
+
+- If you have no `~/.zshrc`, the script writes a short one with the block. Put your own lines below the block. They load after herdspace, so they can change what it sets.
+- If your `~/.zshrc` is the file of an older herdspace, which owned the whole file, the script saves it as `~/.zshrc.bak-<time>` and writes the short file. It copies your own lines from the old file to the end of the new one, each behind `# `. Remove the `# ` of each line that you want, and keep `if` and `fi` blocks complete.
+- If your `~/.zshrc` is your own file, the script asks:
+
+```text
+  ~/.zshrc is your own file. herdspace never replaces it.
+  It can add a marked block. Your own lines stay as they are.
+
+    f  Add a block at the top that loads the full herdspace shell (Enter)
+    e  Add a block at the end that loads only the shell extras
+    k  Keep your file with no change
+    d  Show what each block does
+```
+
+If your file loads Oh My Zsh already, the default is `e`, so that Oh My Zsh does not load two times. With `--replace-all`, the script adds the `e` block. With `--keep-existing`, or with no terminal, it keeps your file with no change.
+
+The extras add and never replace. If you set an alias, a function, a variable, or a key before the extras load, yours stays. For example, your own `ls` alias stays, and a tool of yours on `Ctrl+R` keeps that key. To see what the extras skipped, run `print -l $HERDSPACE_EXTRAS_SKIPPED` in a terminal.
+
+An older herdspace put your own lines in `~/.zshrc.local`. The herdspace shell still loads that file if it exists. You can move its lines into `~/.zshrc`, below the block.
+
+### Bash aliases in zsh
+
+On Linux, the setup changes your login shell from bash to zsh. Before it does, it names your bash files, because zsh does not read them. Do not load all of `~/.bashrc` from zsh: lines such as `shopt`, `complete`, and the bash `PS1` give errors in zsh.
+
+To use the same aliases in both shells, keep them in `~/.bash_aliases`. The default `~/.bashrc` of Debian and Ubuntu loads that file. Put only `alias` and `export` lines in it. Then add this line to your `~/.zshrc`, below the herdspace block:
+
+```bash
+[[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
+```
 
 ### Put a file back
 
@@ -399,7 +453,7 @@ To start Herdr in a terminal on this machine, open Ghostty and run `herdr`. You 
 - The client setup changes some keys of Ghostty and macOS, so that Herdr and Neovim use the keys of a code editor. The [keyboard shortcuts guide](keyboard-shortcuts.md) lists each key, and it explains `--keep-terminal-keys`, which keeps your keys.
 - Ghostty cannot limit a key to one program. The keys that Herdr uses do nothing in a Ghostty window that has no Herdr.
 - On a Mac, the Option key sends Alt in Ghostty, so it does not type special characters there.
-- The script manages `~/.zshrc`. Put your own lines in `~/.zshrc.local`, so that they stay when `~/.zshrc` changes.
+- The script never replaces your `~/.zshrc`. It adds a marked block that loads the herdspace shell. See [Your ~/.zshrc](#your-zshrc).
 - In a shell with no terminal, `ls` and `cat` stay plain, so agents and scripts get the output that they expect.
 
 ## Make sure that it works

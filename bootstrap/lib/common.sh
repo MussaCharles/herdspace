@@ -158,9 +158,7 @@ SUMMARY=""
 # The changed files of this run, from a silent --check, for "File 1 of 6".
 CHANGED_FILES=""
 CHANGED_FILES_READY=0
-# Extras: answers for ~/.zshrc. EXTRAS=1 adds the block, MOVE_LINES=1 copies the lines.
-EXTRAS=0
-MOVE_LINES=0
+# 1 when a run kept ~/.zshrc with no block that loads herdspace.
 ZSHRC_KEPT_NO_EXTRAS=0
 # shellcheck disable=SC2034 # prereqs.sh reads ASSUME_YES.
 ASSUME_YES=0
@@ -286,6 +284,10 @@ show_diff() {
     printf '%s\n' "$own" | sed 's/^/    /'
   fi
   printf '\n'
+  if have delta || have git; then
+    printf '  The difference of %s opens in a pager. Press q to come back to the question.\n' "$(short_home "$dest")"
+    sleep 1
+  fi
   if have delta; then
     delta --paging=always "$dest" "$src" || true
   elif have git; then
@@ -300,17 +302,41 @@ ui_key() {
   printf '    %s%s%s  %-58s %s%s%s\n' "$C_BOLD$C_CYAN" "$1" "$C_RESET" "$2" "$C_DIM" "${3:-}" "$C_RESET"
 }
 
+# ask_all_files TOTAL asks one question for all the changed files of the run:
+# review one at a time, keep all, or replace all. It sets ASK_ALL.
+ask_all_files() {
+  local total="$1" answer i=0 f
+  printf '\n  %s%s differ from the herdspace version:%s\n' "$C_BOLD" "$(ui_count file "$total")" "$C_RESET"
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    i=$((i + 1))
+    printf '    %s. %s\n' "$i" "$(short_home "$f")"
+  done <<<"$CHANGED_FILES"
+  printf '\n'
+  while true; do
+    ui_key v "Review one file at a time, with its difference" "(Enter)"
+    ui_key K "Keep all ${total} files"
+    ui_key R "Replace all ${total} files with the herdspace version (backups first)"
+    printf '\n  Your choice: '
+    IFS= read -r answer || answer="K"
+    case "$answer" in
+      v | "") ASK_ALL="review"; return 0 ;;
+      K) ASK_ALL="keep"; return 0 ;;
+      R) ASK_ALL="replace"; return 0 ;;
+    esac
+    printf '\n'
+  done
+}
+
 # decide_edit SRC DEST sets DECISION to keep or replace for a file that a person
-# changed. For ~/.zshrc, it can also set EXTRAS or MOVE_LINES.
+# changed. With more than one changed file, it first asks about all of them.
 decide_edit() {
-  local src="$1" dest="$2" answer total=0 index=0 after=0 rest="" f i=0 is_zshrc=0
-  EXTRAS=0
-  MOVE_LINES=0
+  local src="$1" dest="$2" answer total=0 index=0 f i=0
   case "$MODE" in
     replace) DECISION="replace"; return 0 ;;
     keep) DECISION="keep"; return 0 ;;
   esac
-  if [ -n "$ASK_ALL" ]; then
+  if [ "$ASK_ALL" = "keep" ] || [ "$ASK_ALL" = "replace" ]; then
     DECISION="$ASK_ALL"
     return 0
   fi
@@ -318,65 +344,35 @@ decide_edit() {
     DECISION="keep"
     return 0
   fi
-  [ "$dest" != "${HOME}/.zshrc" ] || is_zshrc=1
   scan_changed_files
   while IFS= read -r f; do
     [ -n "$f" ] || continue
     i=$((i + 1))
     [ "$f" != "$dest" ] || index="$i"
-    if [ "$index" -gt 0 ] && [ "$i" -gt "$index" ]; then rest="${rest}${f}
-"; fi
   done <<<"$CHANGED_FILES"
   total="$i"
-  [ "$index" -gt 0 ] || { total=0; rest=""; }
-  [ -z "$rest" ] || after="$(printf '%s' "$rest" | grep -c .)"
-  if [ "$index" -eq 1 ] && [ "$total" -gt 1 ]; then
-    printf '\n  %s differ from the herdspace version:\n' "$(ui_count file "$total")"
-    i=0
-    while IFS= read -r f; do
-      [ -n "$f" ] || continue
-      i=$((i + 1))
-      printf '    %s. %s\n' "$i" "$(short_home "$f")"
-    done <<<"$CHANGED_FILES"
+  [ "$index" -gt 0 ] || total=0
+  if [ -z "$ASK_ALL" ] && [ "$total" -gt 1 ]; then
+    ask_all_files "$total"
+    if [ "$ASK_ALL" != "review" ]; then
+      DECISION="$ASK_ALL"
+      return 0
+    fi
   fi
   while true; do
-    if [ "$total" -gt 0 ]; then
-      printf '\n  %sFile %s of %s: %s%s differs from the herdspace version.\n\n' "$C_BOLD" "$index" "$total" "$(short_home "$dest")" "$C_RESET"
+    if [ "$total" -gt 1 ]; then
+      printf '\n  %s%sFile %s of %s: %s%s\n\n' "$C_BOLD" "$C_CYAN" "$index" "$total" "$(short_home "$dest")" "$C_RESET"
     else
-      printf '\n  %s%s%s differs from the herdspace version.\n\n' "$C_BOLD" "$(short_home "$dest")" "$C_RESET"
+      printf '\n  %s%s%s differs from the herdspace version.%s\n\n' "$C_BOLD" "$C_CYAN" "$(short_home "$dest")" "$C_RESET"
     fi
     ui_key k "Keep your file" "(Enter)"
     ui_key r "Replace it with the herdspace version (backup first)"
-    ui_key d "Show the difference"
-    if [ "$is_zshrc" -eq 1 ]; then
-      ui_key e "Keep your file, and add the herdspace shell extras"
-      ui_key m "Replace it, and copy your own lines to ~/.zshrc.local"
-    fi
-    if [ "$after" -gt 0 ]; then
-      ui_key K "Keep this file and the $(ui_count file "$after") after it"
-      ui_key R "Replace this file and the $(ui_count file "$after") after it (backups first)"
-    fi
+    ui_key d "Show the difference of this file" "(q comes back)"
     printf '\n  Your choice: '
     IFS= read -r answer || answer="k"
     case "$answer" in
       r | replace) DECISION="replace"; return 0 ;;
       d | diff) show_diff "$src" "$dest" ;;
-      e) [ "$is_zshrc" -eq 1 ] || continue; DECISION="keep"; EXTRAS=1; return 0 ;;
-      m) [ "$is_zshrc" -eq 1 ] || continue; DECISION="replace"; MOVE_LINES=1; return 0 ;;
-      K) [ "$after" -gt 0 ] || continue; ASK_ALL="keep"; DECISION="keep"; return 0 ;;
-      R)
-        [ "$after" -gt 0 ] || continue
-        printf '\n  These files also get the herdspace version, each with a backup:\n'
-        printf '%s' "$rest" | while IFS= read -r f; do printf '    %s\n' "$(short_home "$f")"; done
-        printf '  Replace these %s too? [y/N] (Enter = no) ' "$(ui_count file "$after")"
-        IFS= read -r answer || answer=""
-        case "$answer" in
-          y | Y | yes | Yes) ASK_ALL="replace" ;;
-          *) printf '  Only %s gets the herdspace version.\n' "$(short_home "$dest")" ;;
-        esac
-        DECISION="replace"
-        return 0
-        ;;
       k | keep | "") DECISION="keep"; return 0 ;;
     esac
   done
@@ -385,23 +381,9 @@ decide_edit() {
 # extras_block DEST adds the marked block that loads the herdspace shell extras.
 extras_block() {
   # shellcheck disable=SC2016 # The line is text for zsh.
-  ensure_block "$1" "herdspace extras" '[[ -r "$HOME/.config/herdspace/extras.zsh" ]] && source "$HOME/.config/herdspace/extras.zsh"'
-}
-
-# move_own_lines SRC DEST copies the own lines of DEST to ~/.zshrc.local, each
-# one behind "# ", so that nothing runs before the person reviews it.
-move_own_lines() {
-  local own local_file="${HOME}/.zshrc.local"
-  own="$(own_lines "$1" "$2")"
-  [ -n "$own" ] || return 0
-  {
-    printf '\n# Lines from your old %s, copied by the herdspace setup on %s.\n' "$(short_home "$2")" "$(date +%Y-%m-%d)"
-    printf '# The full old file is %s.bak-%s.\n' "$(short_home "$2")" "$STAMP"
-    printf '# Each line starts with "# ". Remove it from each line that you want, and keep\n'
-    printf '# if/fi and other blocks complete.\n'
-    printf '%s\n' "$own" | sed 's/^/# /'
-  } >>"$local_file"
-  info "Copied $(ui_count line "$(printf '%s\n' "$own" | grep -c .)") to $(short_home "$local_file"). Review them there."
+  ensure_block "$1" "herdspace extras" 'if [[ -r "$HOME/.config/herdspace/extras.zsh" ]]; then
+  source "$HOME/.config/herdspace/extras.zsh"
+fi'
 }
 
 # install_file makes DEST match SRC. A file that a script wrote and no person
@@ -436,20 +418,11 @@ install_file() {
       fi
       decide_edit "$src" "$dest"
       if [ "$DECISION" = "replace" ]; then
-        [ "$MOVE_LINES" -ne 1 ] || move_own_lines "$src" "$dest"
         write_file "$src" "$dest" "$mode"
       else
         EDITED=$((EDITED + 1))
         KEPT_LIST="${KEPT_LIST}${dest}
 "
-        if [ "$dest" = "${HOME}/.zshrc" ]; then
-          if [ "$EXTRAS" -eq 1 ]; then
-            extras_block "$dest"
-            ok "Added the herdspace shell extras to your ~/.zshrc."
-          elif ! grep -q '>>> herdspace extras >>>' "$dest" 2>/dev/null; then
-            ZSHRC_KEPT_NO_EXTRAS=1
-          fi
-        fi
       fi
       ;;
   esac
@@ -460,13 +433,14 @@ install_file() {
 # program changes them after the first start.
 install_tree() {
   local src_dir="$1" dest_dir="$2" file
-  while IFS= read -r file; do
+  # The list comes on fd 3, so that a question about a file still reads the terminal.
+  while IFS= read -r file <&3; do
     if [ -n "${SEED_ONLY:-}" ] && grep -Fxq -- "$file" <<<"$SEED_ONLY"; then
       seed_file "${src_dir}/${file}" "${dest_dir}/${file}"
     else
       install_file "${src_dir}/${file}" "${dest_dir}/${file}"
     fi
-  done < <(cd "$src_dir" && find . -type f | sed 's|^\./||')
+  done 3< <(cd "$src_dir" && find . -type f | sed 's|^\./||')
 }
 
 # seed_file copies SRC to DEST only if DEST is missing.
@@ -481,20 +455,26 @@ seed_file() {
   fi
 }
 
-# ensure_block puts TEXT between two marker lines in FILE. It replaces the old
-# text between the markers and leaves the rest of the file as it is.
+# ensure_block FILE NAME TEXT [top] puts TEXT between two marker lines in FILE.
+# It replaces the old text between the markers where it is, and leaves the rest
+# of the file as it is. A new block goes at the end, or at the top with "top".
 ensure_block() {
-  local file="$1" name="$2" text="$3"
-  local begin="# >>> ${name} >>>" end="# <<< ${name} <<<" tmp
+  local file="$1" name="$2" text="$3" where="${4:-end}"
+  local begin="# >>> ${name} >>>" end="# <<< ${name} <<<" tmp block
   tmp="$(mktemp)"
-  if [ -f "$file" ]; then
-    awk -v begin="$begin" -v end="$end" '
-      $0 == begin { skip = 1; next }
-      $0 == end { skip = 0; next }
+  block="$(printf '%s\n%s\n%s' "$begin" "$text" "$end")"
+  if [ -f "$file" ] && grep -qxF -- "$begin" "$file"; then
+    # Replace the block where it is, so that the lines around it keep their order.
+    HS_BLOCK="$block" awk -v begin="$begin" -v end="$end" '
+      $0 == begin { print ENVIRON["HS_BLOCK"]; skip = 1; next }
+      skip && $0 == end { skip = 0; next }
       !skip { print }
     ' "$file" >"$tmp"
+  elif [ "$where" = "top" ]; then
+    { printf '%s\n' "$block"; [ ! -f "$file" ] || { printf '\n'; cat "$file"; }; } >"$tmp"
+  else
+    { [ ! -f "$file" ] || cat "$file"; printf '%s\n' "$block"; } >"$tmp"
   fi
-  printf '%s\n%s\n%s\n' "$begin" "$text" "$end" >>"$tmp"
   if [ -f "$file" ] && cmp -s "$tmp" "$file"; then
     rm -f "$tmp"
     return 0
@@ -609,8 +589,8 @@ finish_run() {
     info "To decide again for a kept file, run the setup again. It asks about each file."
   fi
   if [ "$ZSHRC_KEPT_NO_EXTRAS" -eq 1 ]; then
-    info "Your ~/.zshrc does not load the herdspace shell extras: ff, fif, the completion of hopen, and the fzf keys."
-    info "To add them, run the setup again and answer e for ~/.zshrc."
+    info "Your ~/.zshrc does not load the herdspace shell: the prompt, ff, fif, the completion of hopen, and the fzf keys."
+    info "To add a block that loads it, run the setup again and answer f or e for ~/.zshrc."
   fi
   if [ -n "$BACKUP_LIST" ]; then
     info "Saved $(ui_count backup "$(printf '%s' "$BACKUP_LIST" | grep -c .)"). To put a file back, run its command:"

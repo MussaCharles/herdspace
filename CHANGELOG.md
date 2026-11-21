@@ -4,6 +4,18 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- herdspace never replaces your `~/.zshrc`. It adds a marked block that loads the herdspace shell from `~/.config/herdspace/zshrc.zsh`. With no `~/.zshrc`, the setup writes a short one with the block, and your own lines go below it. The `~/.zshrc` of an older herdspace gets this layout, after a backup, and your own lines from it stay at its end, each behind `# `.
+- For your own `~/.zshrc`, the setup asks whether to add a block that loads the full herdspace shell, a block that loads only the shell extras, or nothing.
+- The shell extras add and never replace: an alias, a function, a variable, or a key that you set before them stays yours. `$HERDSPACE_EXTRAS_SKIPPED` lists what they skipped.
+- When more than one file differs from the herdspace version, the setup first lists them all, and asks once: review one file at a time, keep all, or replace all. In the review, `d` shows the difference of that file only, and says that `q` comes back to the question.
+- Before the setup changes the login shell from bash to zsh, it names your bash files that zsh does not read. The setup guide shows how to share aliases between bash and zsh.
+
+### Fixed
+
+- The setup asks about each changed file of a folder too, for example the Neovim files. Before, it kept them with no question and listed them as kept.
+
 ## [0.6.4] - 2026-11-21
 
 ### Changed

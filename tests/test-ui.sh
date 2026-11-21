@@ -46,7 +46,7 @@ contains "$out" '✓' 'at a terminal, ok shows a check mark'
 out="$(python3 "$ROOT/tests/pty_run.py" 5 '' env NO_COLOR=1 TERM=xterm-256color "$tmp/run.sh" 'ok Homebrew' 2>&1)"
 contains "$out" '[ok]   Homebrew' 'with NO_COLOR at a terminal, the output stays plain'
 
-# The own lines of a file, and their copy to ~/.zshrc.local.
+# The own lines of a file.
 mkdir -p "$tmp/files"
 printf 'export ZSH="$HOME/.oh-my-zsh"\nsource $ZSH/oh-my-zsh.sh\nalias ls=eza\n' >"$tmp/files/new"
 printf '# my comment\nexport ZSH="$HOME/.oh-my-zsh"\nalias ll="ls -la"\nexport PATH="$HOME/tools:$PATH"\n\nsource $ZSH/oh-my-zsh.sh\n' >"$tmp/files/old"
@@ -55,42 +55,89 @@ contains "$out" 'alias ll="ls -la"' 'an own alias is an own line'
 contains "$out" 'export PATH="$HOME/tools:$PATH"' 'an own PATH line is an own line'
 lacks "$out" 'my comment' 'a comment is not an own line'
 lacks "$out" 'oh-my-zsh.sh' 'a line that herdspace takes care of is not an own line'
-out="$(run "move_own_lines $tmp/files/new $tmp/files/old; cat \$HOME/.zshrc.local")"
-contains "$out" '# alias ll="ls -la"' 'the copied lines start with # in ~/.zshrc.local'
-contains "$out" 'Copied 2 lines' 'the setup says how many lines it copied'
 
 # The extras block for a kept ~/.zshrc, and a second run adds no second block.
 out="$(run "printf 'alias x=y\n' >\$HOME/.zshrc; extras_block \$HOME/.zshrc; extras_block \$HOME/.zshrc; cat \$HOME/.zshrc")"
 contains "$out" '>>> herdspace extras >>>' 'the extras block has its markers'
 contains "$out" 'alias x=y' 'the extras block keeps the lines of the person'
-[ "$(printf '%s\n' "$out" | grep -c 'extras.zsh')" = 1 ] && pass 'a second run adds no second block' || fail 'a second run adds no second block'
+[ "$(printf '%s\n' "$out" | grep -c '>>> herdspace extras >>>')" = 1 ] && pass 'a second run adds no second block' || fail 'a second run adds no second block'
 
-# The questions about a changed file, at a terminal.
-question() {
-  # question KEYS: a changed ~/.zshrc, answered with KEYS. It prints the result.
+# A block keeps its place: the lines after it stay after it.
+out="$(run "printf 'a\n# >>> b >>>\nold\n# <<< b <<<\nz\n' >\$HOME/f; ensure_block \$HOME/f b new; cat \$HOME/f")"
+[ "$out" = "$(printf 'a\n# >>> b >>>\nnew\n# <<< b <<<\nz')" ] && pass 'a changed block keeps its place in the file' || fail "a changed block keeps its place in the file: [$out]"
+out="$(run "printf 'mine\n' >\$HOME/f; ensure_block \$HOME/f b new top; cat \$HOME/f")"
+[ "$(printf '%s\n' "$out" | head -n 1)" = '# >>> b >>>' ] && pass 'a new block can go at the top' || fail "a new block can go at the top: [$out]"
+
+# ~/.zshrc: herdspace never replaces a file of the person.
+zrun() { run "rm -f \$HOME/.zshrc \$HOME/.zshrc.bak-*; source $ROOT/bootstrap/lib/shell.sh; MODE=\${ZMODE:-ask}; $1"; }
+out="$(zrun 'setup_zshrc; cat $HOME/.zshrc')"
+contains "$out" '>>> herdspace >>>' 'a new ~/.zshrc has the herdspace block'
+contains "$out" 'Put your own lines below' 'a new ~/.zshrc says where your own lines go'
+out="$(zrun 'setup_zshrc; printf "alias mine=1\n" >>$HOME/.zshrc; setup_zshrc; cat $HOME/.zshrc')"
+[ "$(printf '%s\n' "$out" | tail -n 1)" = 'alias mine=1' ] && pass 'a second run keeps your lines below the block' || fail "a second run keeps your lines below the block: [$out]"
+out="$(zrun 'printf "# Managed by herdspace. A new run replaces this file.\nexport ZSH=\"\$HOME/.oh-my-zsh\"\nalias mine=1\n" >$HOME/.zshrc; setup_zshrc; cat $HOME/.zshrc; ls $HOME')"
+contains "$out" 'was the file of an older herdspace' 'the file of an older herdspace gets the new layout'
+contains "$out" '# alias mine=1' 'your own lines of the old file stay, each behind #'
+contains "$out" '.zshrc.bak-' 'the old file gets a backup'
+out="$(zrun 'printf "alias mine=1\n" >$HOME/.zshrc; setup_zshrc </dev/null; cat $HOME/.zshrc')"
+lacks "$out" 'herdspace' 'with no terminal, your own ~/.zshrc stays as it is'
+out="$(ZMODE=replace zrun 'printf "alias mine=1\n" >$HOME/.zshrc; setup_zshrc; cat $HOME/.zshrc')"
+contains "$out" '>>> herdspace extras >>>' '--replace-all only adds the extras block to your own ~/.zshrc'
+contains "$out" 'alias mine=1' '--replace-all keeps your own ~/.zshrc'
+
+# The question about your own ~/.zshrc, at a terminal.
+zask() {
   python3 "$ROOT/tests/pty_run.py" 6 "$1" env TERM=xterm-256color "$tmp/run.sh" "
-    printf 'alias mine=1\n' >\$HOME/.zshrc
-    MODE=ask CHANGED_FILES_READY=1 CHANGED_FILES=\"\$HOME/.zshrc
-\$HOME/.p10k.zsh\"
-    install_file $tmp/files/new \$HOME/.zshrc
-    echo DECISION=\$DECISION EXTRAS=\$EXTRAS
-    grep -c 'herdspace extras' \$HOME/.zshrc || true
-    ls \$HOME/.zshrc.local 2>/dev/null || true" 2>&1
+    source $ROOT/bootstrap/lib/shell.sh; MODE=ask
+    printf '$2' >\$HOME/.zshrc
+    setup_zshrc; echo ANSWER=\$ZSHRC_ANSWER; head -n 1 \$HOME/.zshrc; tail -n 1 \$HOME/.zshrc" 2>&1
 }
-out="$(question '\r')"
-contains "$out" 'File 1 of 2' 'the question says which file of how many'
-contains "$out" 'Keep your file' 'the question names each answer'
-contains "$out" '(Enter)' 'the question marks the default'
-contains "$out" 'Keep this file and the 1 file after it' 'an answer for more files says how many'
-contains "$out" 'DECISION=keep' 'Enter keeps the file'
-out="$(question 'e\r')"
-contains "$out" 'EXTRAS=1' 'e keeps the file and adds the extras'
-contains "$out" 'Added the herdspace shell extras' 'the setup says that it added the extras'
-out="$(question 'm\r')"
-contains "$out" 'DECISION=replace' 'm replaces the file'
-contains "$out" '.zshrc.local' 'm copies the own lines to ~/.zshrc.local'
+out="$(zask '\r' 'alias mine=1\n')"
+contains "$out" 'herdspace never replaces it' 'the question says that herdspace never replaces your ~/.zshrc'
+contains "$out" 'ANSWER=full' 'Enter adds the full herdspace shell to a file with no Oh My Zsh'
+contains "$out" '# >>> herdspace >>>' 'the full block goes at the top'
+out="$(zask '\r' 'source $ZSH/oh-my-zsh.sh\n')"
+contains "$out" 'ANSWER=extras' 'Enter adds only the extras to a file that loads Oh My Zsh'
+contains "$out" '# <<< herdspace extras <<<' 'the extras block goes at the end'
+out="$(zask 'k\r' 'alias mine=1\n')"
+contains "$out" 'ANSWER=keep' 'k keeps your ~/.zshrc with no change'
+
+# The questions about changed files, at a terminal.
+question() {
+  # question KEYS [FILES]: a changed ~/.p10k.zsh, answered with KEYS.
+  python3 "$ROOT/tests/pty_run.py" 6 "$1" env TERM=xterm-256color "$tmp/run.sh" "
+    printf 'mine\n' >\$HOME/.p10k.zsh
+    MODE=ask CHANGED_FILES_READY=1 CHANGED_FILES=\"\$HOME/.p10k.zsh${2-
+\$HOME/.config/a}\"
+    install_file $tmp/files/new \$HOME/.p10k.zsh
+    echo DECISION=\$DECISION ASK_ALL=\$ASK_ALL" 2>&1
+}
+out="$(question '\r\r')"
+contains "$out" '2 files differ from the herdspace version' 'the first question lists all the changed files'
+contains "$out" 'Review one file at a time' 'the first question offers a review of each file'
+contains "$out" 'Keep all 2 files' 'the first question offers to keep all files'
+contains "$out" 'Replace all 2 files' 'the first question offers to replace all files'
+contains "$out" 'File 1 of 2: ~/.p10k.zsh' 'the review names the file and its place'
+contains "$out" 'Show the difference of this file' 'd says that it shows only this file'
+contains "$out" 'DECISION=keep' 'Enter in the review keeps the file'
+out="$(question 'K\r')"
+contains "$out" 'DECISION=keep ASK_ALL=keep' 'K keeps all files'
+lacks "$out" 'File 1 of 2' 'K asks about no single file'
 out="$(question 'R\r')"
-contains "$out" 'Replace these 1 file too?' 'R asks before it replaces the files after this one'
+contains "$out" 'DECISION=replace ASK_ALL=replace' 'R replaces all files'
+out="$(question 'v\rr\r')"
+contains "$out" 'DECISION=replace ASK_ALL=review' 'r in the review replaces the file'
+out="$(question '\r' '')"
+lacks "$out" 'Review one file at a time' 'one changed file gets no question about all files'
+contains "$out" 'differs from the herdspace version' 'one changed file gets its own question'
+
+# A changed file of a folder, for example the Neovim files, gets its question too.
+out="$(python3 "$ROOT/tests/pty_run.py" 6 'r\r' env TERM=xterm-256color "$tmp/run.sh" "
+  mkdir -p $tmp/tree \$HOME/tree; printf 'new\n' >$tmp/tree/a.lua; printf 'mine\n' >\$HOME/tree/a.lua
+  MODE=ask CHANGED_FILES_READY=1 CHANGED_FILES=\"\$HOME/tree/a.lua\"
+  install_tree $tmp/tree \$HOME/tree; cat \$HOME/tree/a.lua" 2>&1)"
+contains "$out" 'a.lua differs from the herdspace version' 'a file of a folder gets a question'
+contains "$out" 'Saved a backup' 'the answer of a file of a folder counts'
 
 # The prerequisites question names the default.
 contains "$(python3 "$ROOT/tests/pty_run.py" 4 '\r' env TERM=xterm-256color "$tmp/run.sh" "source $ROOT/bootstrap/lib/prereqs.sh; ask_yes 'Install it?' && echo YES" 2>&1)" '[Y/n] (Enter = yes)' 'the yes question names its default'
@@ -100,7 +147,7 @@ out="$(run "printf 'a\n' >\$HOME/.p10k.zsh; write_file $tmp/files/new \$HOME/.p1
 \"; EDITED=1; ZSHRC_KEPT_NO_EXTRAS=1; HS_DOC_BASE=https://example.test/blob/1.0; NEXT_SERVER=box; finish_run client")"
 contains "$out" 'Kept 1 file that differ' 'the kept line uses one file'
 lacks "$out" 'replace-all' 'the end of a run does not advise --replace-all'
-contains "$out" 'answer e for ~/.zshrc' 'the end of a run names the missing extras'
+contains "$out" 'answer f or e for ~/.zshrc' 'the end of a run names the missing block'
 contains "$out" 'mv ~/.p10k.zsh.bak-' 'the end of a run shows the command to put a backup back'
 contains "$out" 'ssh box' 'the next steps of a client name the server'
 contains "$out" 'https://example.test/blob/1.0/docs/keyboard-shortcuts.md' 'the next steps link to the docs of the release'
