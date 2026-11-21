@@ -101,9 +101,10 @@ When you run the setup, it cannot ask questions. For that reason, one of these o
 
 Tell the person what changed, and where the backups are. You cannot press keys in the terminal of the person. For a client or `both`, ask the person to do these steps:
 
-1. Open a new Ghostty window.
+1. Quit Ghostty and start it again, so that the new keys and look load.
 2. For a client, connect with `ssh my-server`. Then run `herdr`.
 3. Press `Cmd+T` on a Mac, or `Ctrl+Shift+T` on Linux, to open a tab.
+4. In a Ghostty window with no Herdr, press `Cmd+Option+T` on a Mac, or `Ctrl+Alt+Shift+T` on Linux, to open a Ghostty tab.
 
 ## Rules
 
