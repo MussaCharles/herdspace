@@ -6,6 +6,9 @@
 # Usage: tests/test-hopen-list.sh
 cd "$(dirname "$0")/.." || exit 1
 ROOT="$PWD"
+# In a Herdr pane, hopen acts on that session. The test must not open panes in
+# the session of the person who runs it.
+unset HERDR_ENV HERDR_SESSION HERDR_SOCKET_PATH HERDR_PANE_ID HERDR_TAB_ID HERDR_WORKSPACE_ID
 bin_hopen() { "$ROOT/bin/hopen" "$@"; }
 failures=0
 pass() { echo "PASS $1"; }

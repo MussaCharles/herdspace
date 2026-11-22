@@ -360,6 +360,8 @@ mv ~/.p10k.zsh.bak-20261113-054849 ~/.p10k.zsh
 
 A script records the hash of each file that it installs, in `~/.local/share/herdspace/manifest.tsv`. A file with the same hash is a file that you did not change.
 
+An install from before the manifest has no hash for its files. The setup then compares each file with the list of older herdspace versions in `bootstrap/known-hashes.tsv`. If the file matches an older version, you did not change it, and the setup updates it with no question. If it matches no version, the setup asks.
+
 ## Debian or Ubuntu server
 
 The script needs `sudo` to install system packages and to change the login shell. If `sudo` asks for a password, type it. `hopen` reads `herdspace.toml` with Python 3.11 or later. If `python3` is older, for example on Ubuntu 22.04, the script also installs `python3.11`, and `hopen` uses it. With no `sudo`, see [Python for herdspace.toml](hopen.md#python-for-herdspacetoml). The script installs only the system packages that are missing, and it does not upgrade a package that is already installed, so other accounts on a shared server keep their versions. If `apt-get update` fails for a package source that herdspace does not use, the script shows the error and goes on. Run the script as the account that will use Herdr:

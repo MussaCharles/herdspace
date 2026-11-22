@@ -16,7 +16,9 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/run-macos.sh` | The macOS scripts work with a temporary home folder and stub commands. It needs Python 3.11 or later from Homebrew. |
 | `tests/test-install.sh` | A release builds, `install.sh` installs `hopen`, and `bootstrap.sh` from `curl` picks the right script. |
 | `tests/test-running-sessions.sh` | With a stub `herdr`, the setup reloads the configuration of each running session after a change, names a session with an older Herdr, and stops no session. It runs in a second. |
-| `tests/test-live-update.sh` | In a test container, `tests/run-linux.sh` installs the latest release, starts a session with a running program, and updates to this folder with a changed `config.toml`. The server, the program, and the panes stay, and the session gets the new configuration. |
+| `tests/test-live-update.sh` | In a test container, `tests/run-linux.sh` installs the latest release, starts a session with a running program, and updates to this folder with a changed `config.toml`. The server, the program, and the panes stay, and the session gets the new configuration. The update asks about no file. |
+| `tests/run-upgrade.sh` | For each of the last 3 releases, a fresh container installs the release and updates to this folder. The update asks about no file, also when the manifest is missing, as in an install from before the manifest. A file that the test changed stays, and only that file differs. A second update changes nothing. |
+| `tools/known-hashes.sh --check` | `bootstrap/known-hashes.tsv` lists each older version of each installed file. CI runs it in the fast checks. |
 | `tests/test-verify-release.sh` | `tools/verify-release.sh` accepts release files that match the build, and finds a changed script, a changed or new file in an archive, an extra file, and a file that does not match `SHA256SUMS`. It needs no network. |
 | `tests/run-prereqs.sh` | The prerequisites step finds and installs a missing locale, stops with a fix when `sudo` is missing, works as root, and reports a server with no SSH. |
 | `tests/test-hopen-list.sh` | `hopen` reads each list setting, refuses crafted lists, and keeps session names safe. It needs no Herdr, and it runs in a second. |
@@ -49,6 +51,10 @@ tests/run-client-linux.sh
 
 ```bash
 tests/run-macos.sh
+```
+
+```bash
+tests/run-upgrade.sh
 ```
 
 ```bash
@@ -215,7 +221,9 @@ The GIF files play 3 times faster than the recording. To change the speed, set `
 
 ## Before a release
 
-Run every test above. All tests must pass. Then follow [Make a release](updating.md#make-a-release).
+Run every test above. All tests must pass. `tests/run-upgrade.sh` proves that an update from an older release asks about no file that the person did not change.
+
+Then follow [Make a release](updating.md#make-a-release).
 
 ## After a release
 

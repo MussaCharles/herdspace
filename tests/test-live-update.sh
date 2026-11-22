@@ -61,6 +61,7 @@ panes_after="$(herdr --session "$SESSION" pane list 2>/dev/null | python3 -I -c 
 [ -n "$panes_before" ] && [ "$panes_before" = "$panes_after" ] && pass "the session keeps its ${panes_after} panes" || fail "the session keeps its panes: ${panes_before} ${panes_after}"
 grep -q "Session ${SESSION}: the new Herdr configuration is active" /tmp/live-new.log && pass "the session gets the new configuration" || { grep -i 'session' /tmp/live-new.log | tail -n 5; fail "the session gets the new configuration"; }
 grep -q 'A new line of the next release' "${HOME}/.config/herdr/config.toml" && pass "the new config.toml is installed" || fail "the new config.toml is installed"
+grep -q 'differs from' /tmp/live-new.log && { grep 'differs from' /tmp/live-new.log; fail "the update asks about no file"; } || pass "the update asks about no file"
 
 herdr session stop "$SESSION" >/dev/null 2>&1 || true
 echo "RESULT live-update failures=${failures}"

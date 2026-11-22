@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- An update asks no question about a file that herdspace wrote and you did not change, also for an install from before the manifest. The setup knows the hash of each older herdspace version of each file.
+
 ## [0.7.0] - 2026-11-22
 
 ### Changed

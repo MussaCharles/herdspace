@@ -213,16 +213,32 @@ manifest_set() {
   rm -f "$tmp"
 }
 
-# file_status prints missing, current, outdated, or edited.
+# known_old SRC SHA succeeds if SHA is the hash of an older herdspace version
+# of SRC. tools/known-hashes.sh writes the list from the git history.
+known_old() {
+  local list="${REPO_ROOT:-}/bootstrap/known-hashes.tsv" rel
+  [ -n "${REPO_ROOT:-}" ] && [ -f "$list" ] || return 1
+  rel="${1#"${REPO_ROOT}"/}"
+  grep -Fxq -- "${rel}"$'\t'"${2}" "$list"
+}
+
+# file_status prints missing, current, outdated, or edited. A file is outdated
+# if a script wrote it and no person changed it: its hash is the one in the
+# manifest, or, with no manifest entry, the hash of an older herdspace version.
 file_status() {
-  local src="$1" dest="$2" recorded
+  local src="$1" dest="$2" recorded sha
   if [ ! -e "$dest" ] && [ ! -L "$dest" ]; then
     echo missing
   elif [ -f "$dest" ] && cmp -s "$src" "$dest"; then
     echo current
+  elif [ ! -f "$dest" ]; then
+    echo edited
   else
     recorded="$(manifest_get "$dest")"
-    if [ -f "$dest" ] && [ -n "$recorded" ] && [ "$recorded" = "$(file_sha "$dest")" ]; then
+    sha="$(file_sha "$dest")"
+    if [ -n "$recorded" ] && [ "$recorded" = "$sha" ]; then
+      echo outdated
+    elif [ -z "$recorded" ] && known_old "$src" "$sha"; then
       echo outdated
     else
       echo edited
