@@ -11,11 +11,61 @@ setup_server_files() {
   HERDR_CONFIG_BEFORE="$(file_sha "${HOME}/.config/herdr/config.toml" 2>/dev/null || true)"
   install_file "${REPO_ROOT}/config/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
   install_file "${REPO_ROOT}/config/lazygit/config.yml" "${lazygit_dir}/config.yml"
+  move_old_nvim
   # Neovim owns lazy-lock.json after the first start. :Lazy update changes it.
-  SEED_ONLY="lazy-lock.json" install_tree "${REPO_ROOT}/config/nvim" "${HOME}/.config/nvim"
+  SEED_ONLY="lazy-lock.json" install_tree "${REPO_ROOT}/config/nvim" "$NVIM_DIR"
   install_file "${REPO_ROOT}/bin/hopen" "${HOME}/.local/bin/hopen" 755
   install_file "${REPO_ROOT}/bin/herdr-update-check" "${HOME}/.local/bin/herdr-update-check" 755
   install_tree "${REPO_ROOT}/config/templates" "${HOME}/.config/hopen/templates"
+}
+
+# The herdspace editor is Neovim with NVIM_APPNAME=herdspace-nvim: its files are
+# in ~/.config/herdspace-nvim, and its plugins in ~/.local/share/herdspace-nvim.
+# ~/.config/nvim stays the folder of the person.
+export HS_NVIM_APPNAME="herdspace-nvim"
+NVIM_DIR="${HOME}/.config/${HS_NVIM_APPNAME}"
+NVIM_DATA="${HOME}/.local/share/${HS_NVIM_APPNAME}"
+OLD_NVIM_DIR="${HOME}/.config/nvim"
+
+# hs_nvim runs the herdspace editor.
+hs_nvim() { NVIM_APPNAME="$HS_NVIM_APPNAME" nvim "$@"; }
+
+# old_nvim_is_herdspace succeeds if ~/.config/nvim holds only files that an
+# older herdspace wrote and no person changed, the files that Neovim writes
+# itself, and the backups of the setup.
+old_nvim_is_herdspace() {
+  local file src sha status
+  [ -d "$OLD_NVIM_DIR" ] && [ ! -L "$OLD_NVIM_DIR" ] || return 1
+  while IFS= read -r file <&3; do
+    case "$file" in lazy-lock.json | lazyvim.json | *.bak-*) continue ;; esac
+    src="${REPO_ROOT}/config/nvim/${file}"
+    [ -f "${OLD_NVIM_DIR}/${file}" ] && [ ! -L "${OLD_NVIM_DIR}/${file}" ] || return 1
+    if [ -f "$src" ]; then
+      status="$(file_status "$src" "${OLD_NVIM_DIR}/${file}")"
+      case "$status" in current | outdated) ;; *) return 1 ;; esac
+    else
+      # A file that herdspace no longer ships, from an older version.
+      sha="$(file_sha "${OLD_NVIM_DIR}/${file}")"
+      known_old "$src" "$sha" || return 1
+    fi
+  done 3< <(cd "$OLD_NVIM_DIR" && find . \( -type f -o -type l \) | sed 's|^\./||')
+}
+
+# move_old_nvim moves the Neovim files of an older herdspace out of
+# ~/.config/nvim, to a backup folder. A folder with a file of the person stays.
+move_old_nvim() {
+  old_nvim_is_herdspace || return 0
+  if [ "$MODE" = "check" ]; then
+    note_todo "${OLD_NVIM_DIR} holds the Neovim files of an older herdspace"
+    return 0
+  fi
+  local backup="${OLD_NVIM_DIR}.bak-${STAMP}"
+  mv "$OLD_NVIM_DIR" "$backup"
+  BACKUP_LIST="${BACKUP_LIST}${OLD_NVIM_DIR}
+"
+  info "The herdspace Neovim files are now in $(short_home "$NVIM_DIR"). The old $(short_home "$OLD_NVIM_DIR") is in $(short_home "$backup")."
+  info "The old plugins in $(short_home "${HOME}/.local/share/nvim") stay. You can remove them."
+  CHANGED=$((CHANGED + 1))
 }
 
 # done_ready and done_mark use small files to record finished long steps.
@@ -29,7 +79,7 @@ done_mark() {
 nvim_lock_sha() { file_sha "${REPO_ROOT}/config/nvim/lazy-lock.json"; }
 
 nvim_plugins_ready() {
-  have nvim && [ -d "${HOME}/.local/share/nvim/lazy/LazyVim" ] && done_ready nvim-plugins "$(nvim_lock_sha)"
+  have nvim && [ -d "${NVIM_DATA}/lazy/LazyVim" ] && done_ready herdspace-nvim-plugins "$(nvim_lock_sha)"
 }
 
 # install_nvim_plugins restores the plugins of lazy-lock.json. Lazy can exit 0
@@ -38,26 +88,26 @@ nvim_plugins_ready() {
 # tries again.
 # nvim_plugin_total and nvim_plugin_count give the progress of the plugin step:
 # the plugins in lazy-lock.json, and the plugin folders that exist.
-nvim_plugin_total() { grep -c '": {' "${HOME}/.config/nvim/lazy-lock.json" 2>/dev/null || echo 0; }
-nvim_plugin_count() { find "${HOME}/.local/share/nvim/lazy" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' '; }
+nvim_plugin_total() { grep -c '": {' "${NVIM_DIR}/lazy-lock.json" 2>/dev/null || echo 0; }
+nvim_plugin_count() { find "${NVIM_DATA}/lazy" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' '; }
 
 install_nvim_plugins() {
   local _try
   for _try in 1 2; do
-    nvim --headless "+Lazy! restore" +qa >/dev/null 2>&1 &
+    hs_nvim --headless "+Lazy! restore" +qa >/dev/null 2>&1 &
     ui_wait $! "Neovim plugins" "$(nvim_plugin_total)" nvim_plugin_count || true
-    [ -d "${HOME}/.local/share/nvim/lazy/LazyVim" ] && break
+    [ -d "${NVIM_DATA}/lazy/LazyVim" ] && break
   done
-  if [ ! -d "${HOME}/.local/share/nvim/lazy/LazyVim" ]; then
+  if [ ! -d "${NVIM_DATA}/lazy/LazyVim" ]; then
     warn "Neovim could not download its plugins. Check the network, and run the setup again."
     return 0
   fi
-  done_mark nvim-plugins "$(nvim_lock_sha)"
+  done_mark herdspace-nvim-plugins "$(nvim_lock_sha)"
 }
 
 nvim_tools_ready() {
   [ "${SKIP_NVIM_TOOLS:-0}" = "1" ] && return 0
-  have nvim && done_ready nvim-tools "$(nvim_lock_sha)"
+  have nvim && done_ready herdspace-nvim-tools "$(nvim_lock_sha)"
 }
 
 # The language servers that tools/nvim-wait.lua installs, and the progress of the step.
@@ -65,7 +115,7 @@ NVIM_SERVERS="vtsls json-lsp lua-language-server marksman pyright ruff taplo"
 nvim_tool_count() {
   local name n=0
   for name in $NVIM_SERVERS; do
-    [ ! -d "${HOME}/.local/share/nvim/mason/packages/${name}" ] || n=$((n + 1))
+    [ ! -d "${NVIM_DATA}/mason/packages/${name}" ] || n=$((n + 1))
   done
   echo "$n"
 }
@@ -77,10 +127,10 @@ install_nvim_tools() {
   local _pass total
   total="$(echo $NVIM_SERVERS | wc -w | tr -d ' ')"
   for _pass in 1 2; do
-    nvim --headless "${REPO_ROOT}/README.md" "+luafile ${REPO_ROOT}/tools/nvim-wait.lua" >/dev/null 2>&1 &
+    hs_nvim --headless "${REPO_ROOT}/README.md" "+luafile ${REPO_ROOT}/tools/nvim-wait.lua" >/dev/null 2>&1 &
     ui_wait $! "Neovim language tools" "$total" nvim_tool_count || warn "Neovim did not finish all its language tools."
   done
-  done_mark nvim-tools "$(nvim_lock_sha)"
+  done_mark herdspace-nvim-tools "$(nvim_lock_sha)"
 }
 
 server_answers() {

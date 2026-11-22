@@ -17,7 +17,7 @@ run_step() {
   local home="${tmp}/$1"
   mkdir -p "${home}/bin"
   if [ "$1" = ok ]; then
-    printf '#!/bin/sh\nmkdir -p "$HOME/.local/share/nvim/lazy/LazyVim"\necho run >>"$HOME/runs"\n' >"${home}/bin/nvim"
+    printf '#!/bin/sh\nmkdir -p "$HOME/.local/share/herdspace-nvim/lazy/LazyVim"\necho run >>"$HOME/runs"\n' >"${home}/bin/nvim"
   else
     printf '#!/bin/sh\necho run >>"$HOME/runs"\nexit 0\n' >"${home}/bin/nvim"
   fi

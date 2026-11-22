@@ -100,7 +100,7 @@ if [ "$ONLY_HOPEN" -eq 0 ]; then
   grep -qF 'hopen\" --palette' ~/.config/herdr/config.toml && pass 'Herdr has the palette key' || fail 'Herdr has the palette key'
 else
   # install.sh installs hopen and its templates, and nothing else.
-  for path in .oh-my-zsh .p10k.zsh .config/ghostty .config/nvim .config/herdspace .local/share/herdspace/manifest.tsv; do
+  for path in .oh-my-zsh .p10k.zsh .config/ghostty .config/nvim .config/herdspace-nvim .config/herdspace .local/share/herdspace/manifest.tsv; do
     [ ! -e "$HOME/$path" ] && pass "install.sh did not add ~/$path" || fail "install.sh did not add ~/$path"
   done
 fi

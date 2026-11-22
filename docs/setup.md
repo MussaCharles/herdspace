@@ -338,6 +338,28 @@ The extras add and never replace. If you set an alias, a function, a variable, o
 
 An older herdspace put your own lines in `~/.zshrc.local`. The herdspace shell still loads that file if it exists. You can move its lines into `~/.zshrc`, below the block.
 
+### Your Neovim files
+
+herdspace keeps its Neovim files in `~/.config/herdspace-nvim`, and its plugins in `~/.local/share/herdspace-nvim`. Your `~/.config/nvim` stays yours, and the setup writes nothing in it. Neovim reads the herdspace folder when `NVIM_APPNAME=herdspace-nvim` is set.
+
+The herdspace shell sets `NVIM_APPNAME=herdspace-nvim` only if you have no `~/.config/nvim`. Then `nvim`, and the layouts of `hopen`, start the herdspace editor. If you have your own `~/.config/nvim`, `nvim` starts your own Neovim.
+
+To try the herdspace editor one time:
+
+```bash
+NVIM_APPNAME=herdspace-nvim nvim .
+```
+
+To use the herdspace editor always, add this line to your `~/.zshrc`, below the herdspace block:
+
+```bash
+export NVIM_APPNAME=herdspace-nvim
+```
+
+To change the herdspace editor, put your own plugin settings in `~/.config/herdspace-nvim/lua/plugins/local.lua`. LazyVim loads each file in `lua/plugins/`, and the setup never writes that file.
+
+An older herdspace put its Neovim files in `~/.config/nvim`. If that folder holds only those files, the setup moves it to a backup folder, `~/.config/nvim.bak-<date>`, and says so. If the folder holds a file that you changed or added, the setup leaves the folder where it is. The old plugins in `~/.local/share/nvim` stay. You can remove them.
+
 ### Bash aliases in zsh
 
 On Linux, the setup changes your login shell from bash to zsh. Before it does, it names your bash files, because zsh does not read them. Do not load all of `~/.bashrc` from zsh: lines such as `shopt`, `complete`, and the bash `PS1` give errors in zsh.

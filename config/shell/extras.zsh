@@ -40,6 +40,11 @@ if [[ -t 0 && -t 1 ]]; then
   _hs_export BAT_THEME "TwoDark"
   _hs_export FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
   _hs_export FZF_DEFAULT_OPTS '--height 40% --layout=reverse --border --cycle'
+  # nvim starts the herdspace editor, from ~/.config/herdspace-nvim, unless you
+  # have your own ~/.config/nvim. Then nvim stays yours.
+  if [[ ! -e "${XDG_CONFIG_HOME:-$HOME/.config}/nvim" ]]; then
+    _hs_export NVIM_APPNAME herdspace-nvim
+  fi
 
   if command -v fzf >/dev/null; then
     if (( ${+functions[fzf-history-widget]} )); then
