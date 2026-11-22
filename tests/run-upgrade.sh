@@ -2,7 +2,8 @@
 # run-upgrade.sh runs tests/test-upgrade.sh in a fresh container for each
 # older release: it installs the release, and updates to this folder.
 # Usage: tests/run-upgrade.sh [tag ...]   Default: the last 3 releases in CHANGELOG.md.
-# Set IMAGE to change the base image. Default: ubuntu:24.04.
+# Set IMAGE to change the base image. Default: ubuntu:24.04. Do not run it at
+# the same time as tests/run-linux.sh: both use the same apt download cache.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 # shellcheck source=tests/lib-docker.sh
