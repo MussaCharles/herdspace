@@ -50,7 +50,7 @@ jobs:
           # The list of older file versions needs the full history and the tags.
           fetch-depth: 0
       - name: shellcheck
-        run: shellcheck -S warning bin/hopen bin/herdr-update-check bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
+        run: shellcheck -S warning bin/hopen bin/herdr-update-check bin/herdspace bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
       - name: Skills
         run: tests/test-skills.sh
       - name: hopen list reader
@@ -73,6 +73,8 @@ jobs:
         run: tests/test-ghostty.sh
       - name: List of older file versions
         run: tools/known-hashes.sh --check
+      - name: The herdspace command
+        run: tests/test-herdspace-cmd.sh
       - name: Exports from the bash files
         run: |
           command -v zsh >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq zsh >/dev/null; }

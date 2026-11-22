@@ -6,6 +6,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Added
 
+- `herdspace update` updates to the latest release with the role and the options of your last setup, after a checksum test. `herdspace --version` and `herdspace version` show the installed and the latest version. When a new release exists, the herdspace shell prints one line, at most once a day. It asks GitHub in the background, and `HERDSPACE_UPDATE_CHECK=0` turns it off.
+
 - On Linux, when zsh is your login shell, the setup finds the plain `export` lines that are only in `~/.bashrc` or `~/.bash_profile`. At a terminal, it asks whether to move them to a marked block in `~/.zshenv`, so that zsh, the Herdr panes, and the agents have the variables. It never shows a value, backs up each file with mode 600 first, and puts the files back if a test after the move fails.
 
 ### Changed

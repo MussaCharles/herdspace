@@ -223,6 +223,30 @@ The scripts do not install the agent programs. Install them first, or run the se
 - On Linux, tools from release pages have a pinned version and a checksum. On macOS, the tools come from Homebrew.
 - Herdr and Neovim do not contact their sites in the background. The update check asks the Homebrew API.
 
+## Update herdspace
+
+To update to the latest release, run:
+
+```bash
+herdspace update
+```
+
+The command downloads `bootstrap.sh` and `SHA256SUMS` of the latest release, and makes sure that the checksum of `bootstrap.sh` is correct. Then it runs the setup with the role and the options of your last setup. The setup saves them in `~/.local/share/herdspace/last-setup` after each run that passes, except for `--check`. It leaves out the options for one run: `--replace-all`, `--keep-existing`, and `--yes`. To add an option, give it after `update`, for example `herdspace update --replace-all`. After the update, the command also says if a new Herdr exists.
+
+To see the installed version and the latest release, run `herdspace --version`. `herdspace version` prints the same text.
+
+When a new release exists, the herdspace shell prints one line before the prompt, at most once a day:
+
+```text
+  herdspace 0.7.1 is available (you have 0.7.0). Run: herdspace update
+```
+
+The shell asks GitHub in the background, at most once a day, so it does not wait for the network. The request goes to the link of the latest release, and it sends nothing about your machine. A pre-release is never the latest release. The result is in `~/.cache/herdspace`. To turn the check off, add this line to your `~/.zshrc`:
+
+```bash
+export HERDSPACE_UPDATE_CHECK=0
+```
+
 ## Run a script again
 
 You can run a script at any time. It finds what is done, and it does only the rest. On a finished machine, it prints `Everything is already set up` in a few seconds.

@@ -87,5 +87,19 @@ if [[ -t 0 && -t 1 ]]; then
     _hs_alias tree "eza --tree"
   fi
   command -v bat >/dev/null && _hs_alias cat "bat"
+  # One line when a new herdspace release exists, at most once a day. The
+  # check runs in the background. HERDSPACE_UPDATE_CHECK=0 turns it off. The
+  # line comes before the first prompt, after the shell start, so that the
+  # instant prompt of Powerlevel10k does not warn about output.
+  if [[ "${HERDSPACE_UPDATE_CHECK:-1}" != 0 ]] && (( ${+commands[herdspace]} )); then
+    _hs_update_notice() {
+      add-zsh-hook -d precmd _hs_update_notice
+      unfunction _hs_update_notice
+      herdspace notice
+    }
+    autoload -Uz add-zsh-hook
+    add-zsh-hook precmd _hs_update_notice
+  fi
+
   unfunction _hs_free _hs_alias _hs_export
 fi

@@ -43,6 +43,7 @@ RELEASE="@VERSION@"
 REPO="${HS_REPO:-@REPO@}"
 ROLE=""
 OS=""
+OS_GIVEN=""
 TAG=""
 PASS=()
 
@@ -66,8 +67,9 @@ while [ "$i" -lt "${#ARGS[@]}" ]; do
       i=$((i + 1))
       [ "$i" -lt "${#ARGS[@]}" ] || die "--os needs macos, linux, or wsl."
       OS="${ARGS[$i]}"
+      OS_GIVEN="$OS"
       ;;
-    --os=*) OS="${arg#--os=}" ;;
+    --os=*) OS="${arg#--os=}"; OS_GIVEN="$OS" ;;
     --version)
       i=$((i + 1))
       [ "$i" -lt "${#ARGS[@]}" ] || die "--version needs a release tag."
@@ -177,13 +179,33 @@ case "$OS" in
   *) os_name="$OS" ;;
 esac
 
+# save_setup records the release and the options of a setup that passed, for
+# "herdspace update". It leaves out the options that are for one run only.
+save_setup() {
+  local state="${HOME}/.local/share/herdspace" a
+  case " ${PASS[*]:-} " in *" --check "*) return 0 ;; esac
+  mkdir -p "$state"
+  case "$RELEASE" in @*@) ;; *) printf '%s\n' "$RELEASE" >"${state}/version" ;; esac
+  {
+    printf 'role=%s\n' "$ROLE"
+    [ -z "$OS_GIVEN" ] || printf 'os=%s\n' "$OS_GIVEN"
+    for a in ${PASS[@]+"${PASS[@]}"}; do
+      case "$a" in --replace-all | --keep-existing | --yes) continue ;; esac
+      printf 'arg=%s\n' "$a"
+    done
+  } >"${state}/last-setup"
+}
+
 if [ "$ROLE" != "both" ]; then
   info "herdspace setup (bootstrap.sh ${script_version}): a ${ROLE} on ${os_name}."
   if [ -n "${HS_DRY_RUN:-}" ]; then
     echo "bootstrap/platforms/${script} ${PASS[*]:-}"
     exit 0
   fi
-  exec "${HERE}/bootstrap/platforms/${script}" ${PASS[@]+"${PASS[@]}"}
+  rc=0
+  "${HERE}/bootstrap/platforms/${script}" ${PASS[@]+"${PASS[@]}"} || rc=$?
+  [ "$rc" -ne 0 ] || save_setup
+  exit "$rc"
 fi
 
 # both: give each script only its own options. The shell files get the role
@@ -230,4 +252,5 @@ if [ "$rc" -ne 0 ] && [ "$check" -eq 0 ]; then
 fi
 info "Part 2 of 2: the client setup."
 "${HERE}/bootstrap/platforms/${script}" ${PASS_CLIENT[@]+"${PASS_CLIENT[@]}"} || rc=$?
+[ "$rc" -ne 0 ] || save_setup
 exit "$rc"

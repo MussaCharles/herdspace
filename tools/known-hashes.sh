@@ -17,7 +17,7 @@ import hashlib, re, subprocess
 def git(*args):
     return subprocess.run(["git", *args], check=True, capture_output=True).stdout
 
-roots = ["config", "bin/hopen", "bin/herdr-update-check"]
+roots = ["config", "bin/hopen", "bin/herdr-update-check", "bin/herdspace"]
 current = {}
 for line in git("ls-tree", "-r", "HEAD", "--", *roots).decode().splitlines():
     meta, path = line.split("\t", 1)
