@@ -104,5 +104,6 @@ if [ "$USE_GHOSTTY" -eq 1 ]; then
 fi
 
 run_part "Login shell" login_shell_ready set_login_shell_zsh
+move_bash_exports
 NEXT_SERVER="${SERVERS[0]:-}"
 finish_run "$([ "${HS_ROLE:-}" = both ] && echo both || echo client)"
