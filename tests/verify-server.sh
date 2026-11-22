@@ -23,7 +23,10 @@ check 'eza runs' eza --version
 same 'herdr configuration' "$ROOT/config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 if [ "$PLATFORM" = linux ]; then lg="$HOME/.config/lazygit"; else lg="$HOME/Library/Application Support/lazygit"; fi
 same 'lazygit configuration' "$ROOT/config/lazygit/config.yml" "$lg/config.yml"
-same 'neovim keys' "$ROOT/config/nvim/lua/config/keymaps.lua" "$HOME/.config/nvim/lua/config/keymaps.lua"
+same 'neovim keys' "$ROOT/config/nvim/lua/config/keymaps.lua" "$HOME/.config/herdspace-nvim/lua/config/keymaps.lua"
+[ ! -e "$HOME/.config/nvim" ] && pass 'the setup writes nothing in ~/.config/nvim' || fail 'the setup writes nothing in ~/.config/nvim'
+# The herdspace editor runs with NVIM_APPNAME, as the herdspace shell sets it.
+export NVIM_APPNAME=herdspace-nvim
 same 'herdspace shell' "$ROOT/config/shell/zshrc.zsh" "$HOME/.config/herdspace/zshrc.zsh"
 contains "$(cat "$HOME/.zshrc")" '# >>> herdspace >>>' 'zshrc loads the herdspace shell from a block'
 same 'p10k' "$ROOT/config/shell/p10k.zsh" "$HOME/.p10k.zsh"

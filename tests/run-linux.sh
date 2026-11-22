@@ -39,10 +39,10 @@ for base in "$@"; do
     [ \"\$backups\" -eq 0 ]
     getent passwd tester | grep -q zsh
     echo RESULT login-shell-zsh
-    echo \"RESULT parsers=\$(ls \$HOME/.local/share/nvim/site/parser 2>/dev/null | wc -l)\"
-    if [ \"${FULL:-0}\" = 1 ]; then [ \"\$(ls \$HOME/.local/share/nvim/site/parser | wc -l)\" -gt 0 ]; fi
-    echo \"RESULT mason=\$(ls \$HOME/.local/share/nvim/mason/packages 2>/dev/null | tr '\\n' ' ')\"
-    if [ \"${FULL:-0}\" = 1 ]; then ls \$HOME/.local/share/nvim/mason/packages | grep -q pyright; fi
+    echo \"RESULT parsers=\$(ls \$HOME/.local/share/herdspace-nvim/site/parser 2>/dev/null | wc -l)\"
+    if [ \"${FULL:-0}\" = 1 ]; then [ \"\$(ls \$HOME/.local/share/herdspace-nvim/site/parser | wc -l)\" -gt 0 ]; fi
+    echo \"RESULT mason=\$(ls \$HOME/.local/share/herdspace-nvim/mason/packages 2>/dev/null | tr '\\n' ' ')\"
+    if [ \"${FULL:-0}\" = 1 ]; then ls \$HOME/.local/share/herdspace-nvim/mason/packages | grep -q pyright; fi
     echo '== update with a live session'
     tests/test-live-update.sh ${flags}
     echo '== both on one machine'

@@ -293,7 +293,7 @@ zoxide knows only the folders that you visited. Use `cd` with the full path the 
 
 ## Neovim
 
-Run `nvim .` in a project. Neovim opens the file tree on the left, with the cursor in it. Move with `j` and `k`, or the arrow keys, to see each file on the right. Neovim is a viewer in this setup, because the agents write the code. Its colors are One Dark, on the background of Ghostty. Folder icons have colors by folder name, for example `src`, `tests`, and `docs`.
+Run `nvim .` in a project. If you have your own `~/.config/nvim`, run `NVIM_APPNAME=herdspace-nvim nvim .` for the herdspace editor. See [Your Neovim files](setup.md#your-neovim-files). Neovim opens the file tree on the left, with the cursor in it. Move with `j` and `k`, or the arrow keys, to see each file on the right. Neovim is a viewer in this setup, because the agents write the code. Its colors are One Dark, on the background of Ghostty. Folder icons have colors by folder name, for example `src`, `tests`, and `docs`.
 
 ![Neovim with a file tree and a file preview](media/neovim.png)
 

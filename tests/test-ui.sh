@@ -176,5 +176,20 @@ out="$(run "REPO_ROOT=$tmp/repo; MODE=apply; rm -f \$STATE_DIR/manifest.tsv; pri
 contains "$out" 'new = true' 'the setup updates a file from an older herdspace'
 lacks "$out" 'differs' 'the setup asks nothing about a file from an older herdspace'
 
+# The Neovim files of an older herdspace move out of ~/.config/nvim. A folder
+# with a file of the person stays.
+nv() { run "source $ROOT/bootstrap/lib/server.sh; MODE=apply; rm -rf \$HOME/.config/nvim* \$STATE_DIR/manifest.tsv; mkdir -p \$HOME/.config/nvim/lua/config; cp $ROOT/config/nvim/init.lua \$HOME/.config/nvim/; cp $ROOT/config/nvim/lua/config/keymaps.lua \$HOME/.config/nvim/lua/config/; echo '{}' >\$HOME/.config/nvim/lazy-lock.json; $1; move_old_nvim; ls -d \$HOME/.config/nvim* 2>/dev/null | sed 's|.*/||'"; }
+out="$(nv true)"
+contains "$out" 'nvim.bak-' 'the Neovim files of an older herdspace move to a backup folder'
+lacks "$(printf '%s\n' "$out" | grep -x nvim)" 'nvim' 'no ~/.config/nvim is left after the move'
+contains "$out" 'herdspace-nvim' 'the move says where the herdspace Neovim files are'
+out="$(nv 'echo "-- mine" >>$HOME/.config/nvim/init.lua')"
+contains "$(printf '%s\n' "$out" | grep -x nvim)" 'nvim' 'a changed Neovim file keeps ~/.config/nvim where it is'
+lacks "$out" 'nvim.bak-' 'a changed Neovim file makes no backup folder'
+out="$(nv 'echo x >$HOME/.config/nvim/lua/plugins.lua')"
+contains "$(printf '%s\n' "$out" | grep -x nvim)" 'nvim' 'a Neovim file of the person keeps ~/.config/nvim where it is'
+out="$(nv 'rm -rf $HOME/.config/nvim')"
+lacks "$out" 'nvim' 'with no ~/.config/nvim, nothing moves'
+
 echo "RESULT failures=${failures}"
 exit $((failures > 0))

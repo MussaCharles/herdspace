@@ -68,5 +68,5 @@ To learn more:
 | In VS Code | In herdspace |
 |------------|--------------|
 | Keyboard shortcuts | The [keyboard shortcuts guide](keyboard-shortcuts.md), and the [cheat sheet](cheat-sheet.md) |
-| Settings | The configuration of Herdr is `~/.config/herdr/config.toml`. The configuration of Neovim is in `~/.config/nvim`. |
+| Settings | The configuration of Herdr is `~/.config/herdr/config.toml`. The configuration of the herdspace Neovim is in `~/.config/herdspace-nvim`. |
 | Settings Sync | Run the setup on each machine. It writes the same configuration on each machine. |

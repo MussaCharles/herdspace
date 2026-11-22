@@ -56,7 +56,7 @@ The script changes only what is different. It updates a file that you did not ch
 | Linux release files and their checksums | `tools/versions.tsv` | `tools/update-versions.sh` |
 | Shell plugins and Auto Title commits | `tools/versions.env` | `tools/update-versions.sh` |
 | macOS tools | Homebrew | `brew upgrade`, and then run the server setup again |
-| Neovim plugins | `config/nvim/lazy-lock.json` | `:Lazy update`, and then copy the file from `~/.config/nvim/` |
+| Neovim plugins | `config/nvim/lazy-lock.json` | `:Lazy update`, and then copy the file from `~/.config/herdspace-nvim/` |
 
 Update the versions:
 
