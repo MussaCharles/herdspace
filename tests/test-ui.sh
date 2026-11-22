@@ -161,5 +161,20 @@ lua_list="$(sed -n 's/^local servers = { \(.*\) }$/\1/p' "$ROOT/tools/nvim-wait.
 sh_list="$(sed -n 's/^NVIM_SERVERS="\(.*\)"$/\1/p' "$ROOT/bootstrap/lib/server.sh")"
 [ -n "$sh_list" ] && [ "$lua_list" = "$sh_list" ] && pass 'the progress bar counts the same servers that Neovim installs' || fail "the progress bar counts the same servers that Neovim installs: [$lua_list] [$sh_list]"
 
+# A file with no manifest entry, from an install before the manifest existed.
+# If it matches an older herdspace version, the setup updates it with no
+# question. If a person changed it, the setup asks.
+mkdir -p "$tmp/repo/bootstrap" "$tmp/repo/config"
+echo 'new = true' >"$tmp/repo/config/app.toml"
+old_sha="$(printf 'old = true\n' | { sha256sum 2>/dev/null || shasum -a 256; } | awk '{print $1}')"
+printf '# list\nconfig/app.toml\t%s\n' "$old_sha" >"$tmp/repo/bootstrap/known-hashes.tsv"
+known() { run "REPO_ROOT=$tmp/repo; rm -f \$STATE_DIR/manifest.tsv; printf '$1' >\$HOME/app.toml; file_status $tmp/repo/config/app.toml \$HOME/app.toml"; }
+contains "$(known 'old = true\n')" 'outdated' 'a file from an older herdspace, with no manifest entry, is outdated'
+contains "$(known 'old = true\nmine = 1\n')" 'edited' 'a changed file with no manifest entry is edited'
+contains "$(run "REPO_ROOT=$tmp/repo; manifest_set \$HOME/app.toml 0000; printf 'old = true\n' >\$HOME/app.toml; file_status $tmp/repo/config/app.toml \$HOME/app.toml")" 'edited' 'a file whose manifest entry differs stays edited, even if it matches an older version'
+out="$(run "REPO_ROOT=$tmp/repo; MODE=apply; rm -f \$STATE_DIR/manifest.tsv; printf 'old = true\n' >\$HOME/app.toml; install_file $tmp/repo/config/app.toml \$HOME/app.toml </dev/null; cat \$HOME/app.toml")"
+contains "$out" 'new = true' 'the setup updates a file from an older herdspace'
+lacks "$out" 'differs' 'the setup asks nothing about a file from an older herdspace'
+
 echo "RESULT failures=${failures}"
 exit $((failures > 0))

@@ -26,7 +26,7 @@ description: Change the herdspace setup scripts, add a tool or a configuration f
 | `setup_shell ROLE` | `shell.sh` | The shell files and the prompt color. |
 | `finish_run NEXT_STEP` | `common.sh` | Print the result. With `--check`, exit 1 if a step is not done. |
 
-The manifest at `~/.local/share/herdspace/manifest.tsv` keeps the checksum of each file that the script wrote. `install_file` uses it to know if a person changed a file.
+The manifest at `~/.local/share/herdspace/manifest.tsv` keeps the checksum of each file that the script wrote. `install_file` uses it to know if a person changed a file. A file with no manifest entry is compared with `bootstrap/known-hashes.tsv`, the hashes of the older versions of each file from `config/` and `bin/`. If you change such a file, run `tools/known-hashes.sh` and commit the list. CI runs `tools/known-hashes.sh --check`.
 
 ## Output and questions
 

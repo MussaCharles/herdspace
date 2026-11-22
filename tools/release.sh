@@ -62,6 +62,12 @@ if [ "$PUBLISH" -eq 1 ] || [ "$PREFLIGHT" -eq 1 ]; then
     echo "The tag ${TAG} exists and points to ${tagged}, not to ${head}." >&2
     exit 1
   fi
+  # The setup must know each older version of an installed file, the hopen of
+  # this tag included.
+  if ! grep -q "^## \[${TAG}\]" CHANGELOG.md || ! tools/known-hashes.sh --check >/dev/null; then
+    echo "bootstrap/known-hashes.tsv does not list the files of ${TAG}. Add the CHANGELOG.md section, run tools/known-hashes.sh, and merge the change." >&2
+    exit 1
+  fi
   # Main gets each change from a pull request, and CI runs on the pull request.
   # Each check run of its last commit must pass.
   pr_head="$(gh api "repos/${REPO}/commits/${head}/pulls" -q '[.[] | select(.merged_at != null)][0].head.sha' 2>/dev/null)" || pr_head=""

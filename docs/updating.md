@@ -80,7 +80,7 @@ tests/run-macos.sh
 
 A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag is a version with no v in front, for example `0.1.2`. A tag with a dash, for example `0.2.0-alpha.1`, becomes a pre-release.
 
-1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Change the links at the end of the file to the new tag. Merge the change, and run the tests.
+1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Change the links at the end of the file to the new tag. Run `tools/known-hashes.sh`, so that the list of older file versions holds the `hopen` of the new tag. Merge the change, and run the tests.
 2. Build the files and look at them. The script writes the release notes to `dist/<tag>.notes.md`: the section of the tag from `CHANGELOG.md`, with a link to the install steps at the top.
 
    ```bash
@@ -110,6 +110,7 @@ The script reads the repository name from `gh`, and it writes the name into `boo
 - The commit is not the head of `origin/main`.
 - A CI check of the pull request of the commit did not pass.
 - The tag already has a release. A published release does not change. If a release is wrong, publish a new tag.
+- `bootstrap/known-hashes.tsv` is not up to date.
 
 To run only these checks, and publish nothing, use `tools/release.sh <tag> --preflight`.
 
@@ -121,7 +122,8 @@ After the publish, the job "Release files match the tag" of the workflow "Releas
 2. Add an install step to `bootstrap/lib/server.sh` for all servers, or to one script in `bootstrap/platforms/` for one system. Use `run_part` with a check function, so that a new run skips the step when it is done.
 3. Add a line to `tests/verify-server.sh` that proves the step works.
 4. Add the step to the [setup guide](setup.md) and to the cheat sheet.
-5. Add a line under `## [Unreleased]` in the [changelog](../CHANGELOG.md). See [Update the changelog](../.github/CONTRIBUTING.md#update-the-changelog).
-6. Run the tests.
+5. If you change a file that the setup installs from `config/` or `bin/`, run `tools/known-hashes.sh`, and commit `bootstrap/known-hashes.tsv`. The list holds the hash of each older version of the file. With it, an update replaces the older version with no question, also for an install from before the manifest. CI fails if the list is not up to date.
+6. Add a line under `## [Unreleased]` in the [changelog](../CHANGELOG.md). See [Update the changelog](../.github/CONTRIBUTING.md#update-the-changelog).
+7. Run the tests. If the change affects an update, run `tests/run-upgrade.sh`.
 
 Do not put names, host names, or private project names in this repository.

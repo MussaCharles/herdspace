@@ -47,6 +47,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # The list of older file versions needs the full history and the tags.
+          fetch-depth: 0
       - name: shellcheck
         run: shellcheck -S warning bin/hopen bin/herdr-update-check bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
       - name: Skills
@@ -69,6 +71,8 @@ jobs:
         run: tests/test-ui.sh
       - name: Ghostty file of the client
         run: tests/test-ghostty.sh
+      - name: List of older file versions
+        run: tools/known-hashes.sh --check
 
   linux:
     # One job for each runner and image, so that they run at the same time.
