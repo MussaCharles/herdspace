@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-22
+
 ### Changed
 
 - herdspace never replaces your `~/.zshrc`. It adds a marked block that loads the herdspace shell from `~/.config/herdspace/zshrc.zsh`. With no `~/.zshrc`, the setup writes a short one with the block, and your own lines go below it. The `~/.zshrc` of an older herdspace gets this layout, after a backup, and your own lines from it stay at its end, each behind `# `.
@@ -11,7 +13,6 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - The shell extras add and never replace: an alias, a function, a variable, or a key that you set before them stays yours. `$HERDSPACE_EXTRAS_SKIPPED` lists what they skipped.
 - When more than one file differs from the herdspace version, the setup first lists them all, and asks once: review one file at a time, keep all, or replace all. In the review, `d` shows the difference of that file only, and says that `q` comes back to the question.
 - Before the setup changes the login shell from bash to zsh, it names your bash files that zsh does not read. The setup guide shows how to share aliases between bash and zsh.
-
 - herdspace never replaces your Ghostty file. It writes two marked blocks at its top, `herdspace appearance` and `herdspace keys`, and your own lines below them win. The Ghostty file of an older herdspace gets this layout after a backup, and its own lines stay.
 - `--keep-terminal-look` leaves out the herdspace colors and window size of Ghostty. On Linux, the setup writes no macOS-only Ghostty setting.
 - The first client run explains the herdspace keys and asks which keys to use, before it changes any key.
@@ -193,7 +194,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.6.4...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/MussaCharles/herdspace/compare/0.6.4...0.7.0
 [0.6.4]: https://github.com/MussaCharles/herdspace/compare/0.6.3...0.6.4
 [0.6.3]: https://github.com/MussaCharles/herdspace/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/MussaCharles/herdspace/compare/0.6.1...0.6.2
