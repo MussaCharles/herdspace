@@ -60,7 +60,7 @@ alias ll='ls -l'
 RC
 }
 
-run_move() { "$tmp/run.sh" "MODE=${2:-ask}; move_bash_exports; echo BACKUPS=\$BACKUP_LIST" </dev/null 2>&1; }
+run_move() { "$tmp/run.sh" "MODE=ask; move_bash_exports; echo BACKUPS=\$BACKUP_LIST" </dev/null 2>&1; }
 
 # The scan.
 bashrc
