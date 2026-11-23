@@ -2,7 +2,19 @@
 
 herdspace sets up [Herdr](https://herdr.dev) and its tools on your machines, and opens your projects in Herdr with one command. Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running after you disconnect.
 
-![Four projects open in Herdr, and Ctrl+Down moves to the next project](docs/media/open-projects.gif)
+## Templates
+
+A template splits a project into named panes, and it starts a program in each pane.
+
+| `code` | `agent` |
+|:------:|:-------:|
+| ![The code template: Neovim, an agent, and lazygit](docs/media/template-code.png) | ![The agent template: an agent and a shell](docs/media/template-agent.png) |
+| Neovim, an agent, and lazygit | An agent and a shell |
+| `grid` | `review` |
+| ![The grid template: four panes](docs/media/template-grid.png) | ![The review template: lazygit and Neovim](docs/media/template-review.png) |
+| Two agents, tests, and a shell | lazygit and Neovim, to read what an agent changed |
+
+The default is `plain`, one pane with a shell. The [templates guide](docs/templates.md) shows how to add your own template. To see four projects open in Herdr, each in its own workspace, watch the [demo](docs/templates.md#open-every-project).
 
 ## Quick start
 
@@ -69,20 +81,6 @@ path = "~/code/api"
 | `hopen --apply grid` | Split the current tab with a template. |
 
 Run `hopen` again at any time. It starts a stopped session and adds only the new projects. It never closes anything. The [hopen guide](docs/hopen.md) has every command and setting, and how to use a VS Code workspace file as the list.
-
-## Templates
-
-A template splits a project into named panes, and it starts a program in each pane.
-
-| `code` | `agent` |
-|:------:|:-------:|
-| ![The code template: Neovim, an agent, and lazygit](docs/media/template-code.png) | ![The agent template: an agent and a shell](docs/media/template-agent.png) |
-| Neovim, an agent, and lazygit | An agent and a shell |
-| `grid` | `review` |
-| ![The grid template: four panes](docs/media/template-grid.png) | ![The review template: lazygit and Neovim](docs/media/template-review.png) |
-| Two agents, tests, and a shell | lazygit and Neovim, to read what an agent changed |
-
-The default is `plain`, one pane with a shell. The [templates guide](docs/templates.md) shows how to add your own template.
 
 ## Update
 
