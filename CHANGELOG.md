@@ -4,6 +4,11 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- The move of the bash exports to `~/.zshenv` no longer fails its test when other lines of `~/.zshenv` also change a variable, for example `PATH`. The test now compares only the moved lines in bash and in zsh.
+- After an export with a quoted value over more than one line, the scan of the bash files finds the later exports again. Before, it kept each later export as a line to move by hand.
+
 ## [0.8.0] - 2026-11-23
 
 ### Added
