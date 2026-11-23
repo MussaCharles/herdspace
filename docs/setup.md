@@ -231,7 +231,18 @@ To update to the latest release, run:
 herdspace update
 ```
 
-The command downloads `bootstrap.sh` and `SHA256SUMS` of the latest release, and makes sure that the checksum of `bootstrap.sh` is correct. Then it runs the setup with the role and the options of your last setup. The setup saves them in `~/.local/share/herdspace/last-setup` after each run that passes, except for `--check`. It leaves out the options for one run: `--replace-all`, `--keep-existing`, and `--yes`. To add an option, give it after `update`, for example `herdspace update --replace-all`. After the update, the command also says if a new Herdr exists.
+The command does these steps:
+
+1. It downloads `bootstrap.sh` and `SHA256SUMS` of the latest release.
+2. It makes sure that the checksum of `bootstrap.sh` is correct.
+3. It runs the setup with the role and the options of your last setup.
+4. It says if a new Herdr exists.
+
+Each setup that passes saves its role and options in `~/.local/share/herdspace/last-setup`. A `--check` run saves nothing. The options for one run are not saved: `--replace-all`, `--keep-existing`, and `--yes`. To add an option, give it after `update`:
+
+```bash
+herdspace update --replace-all
+```
 
 To see the installed version and the latest release, run `herdspace --version`. `herdspace version` prints the same text.
 
@@ -241,7 +252,7 @@ When a new release exists, the herdspace shell prints one line before the prompt
   herdspace 0.7.1 is available (you have 0.7.0). Run: herdspace update
 ```
 
-The shell asks GitHub in the background, at most once a day, so it does not wait for the network. The request goes to the link of the latest release, and it sends nothing about your machine. A pre-release is never the latest release. The result is in `~/.cache/herdspace`. To turn the check off, add this line to your `~/.zshrc`:
+The shell asks GitHub in the background, so the prompt does not wait for the network. The request goes to the link of the latest release, and it sends nothing about your machine. A pre-release never counts as the latest release. The result is in `~/.cache/herdspace`. To turn the check off, add this line to your `~/.zshrc`:
 
 ```bash
 export HERDSPACE_UPDATE_CHECK=0

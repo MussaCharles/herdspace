@@ -90,7 +90,7 @@ The default is `plain`, one pane with a shell. The [templates guide](docs/templa
 herdspace update
 ```
 
-The command runs the setup of the latest release with the role and the options of your last setup. `herdspace --version` shows the installed and the latest version. When a new release exists, the shell prints one line, at most once a day. See [Update herdspace](docs/setup.md#update-herdspace).
+The command runs the setup of the latest release, with the role and the options of your last setup. `herdspace --version` shows the installed and the latest version. When a new release exists, the shell prints one line, at most once a day. See [Update herdspace](docs/setup.md#update-herdspace).
 
 An update changes only the files of herdspace. Your own files stay yours:
 
