@@ -15,7 +15,7 @@ REPO="${HS_REPO:-MussaCharles/herdspace}"
 STATE="${HOME}/.local/share/herdspace"
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/herdspace"
 
-usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,/^[^#]/{/^#/p;}' "$0" | sed 's/^# \{0,1\}//'; }
 die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
 
 installed() { cat "${STATE}/version" 2>/dev/null || echo unknown; }
@@ -119,5 +119,13 @@ case "${1:-help}" in
   notice) cmd_notice ;;
   refresh) cmd_refresh ;;
   help | --help | -h) usage ;;
-  *) usage >&2; exit 2 ;;
+  *)
+    # As git and GNU tools do: the error, a suggestion, and where the help is.
+    printf "herdspace: '%s' is not a herdspace command.\n" "$1" >&2
+    case "${1#"${1%%[!-]*}"}" in
+      update | version | help) printf "Did you mean 'herdspace %s'?\n" "${1#"${1%%[!-]*}"}" >&2 ;;
+    esac
+    printf "Run 'herdspace help' for the usage.\n" >&2
+    exit 2
+    ;;
 esac

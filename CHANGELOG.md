@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- `herdspace help` no longer prints a line of the script. An unknown command, for example `herdspace --update`, prints one error line, suggests `herdspace update`, and says where the help is, as git and the GNU tools do.
+
 ## [0.8.0] - 2026-11-23
 
 ### Added

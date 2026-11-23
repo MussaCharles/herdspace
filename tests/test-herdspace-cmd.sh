@@ -45,6 +45,18 @@ contains "$out" 'The latest release: 0.7.1. Run: herdspace update' '--version sh
 contains "$(LATEST=0.7.0 hs --version)" 'This is the latest version' '--version says when the version is the latest'
 contains "$(LATEST='' hs --version)" 'GitHub did not answer' '--version says when GitHub does not answer'
 contains "$(LATEST=0.10.0 hs --version)" 'Run: herdspace update' '0.10.0 is newer than 0.7.0'
+
+# The help, and an unknown command.
+out="$(hs help)"
+contains "$out" 'Usage: herdspace update' 'help shows the usage'
+lacks "$out" 'set -' 'help shows no line of the script'
+out="$(hs --update)"; rc=$?
+contains "$out" "herdspace: '--update' is not a herdspace command." 'an unknown command says that it is unknown'
+contains "$out" "Did you mean 'herdspace update'?" '--update suggests herdspace update'
+contains "$out" "Run 'herdspace help' for the usage." 'an unknown command says where the help is'
+lacks "$out" 'Usage: herdspace update' 'an unknown command does not print the whole help'
+[ "$rc" -eq 2 ] && pass "an unknown command exits 2" || fail "an unknown command exits 2: ${rc}"
+lacks "$(hs foo)" 'Did you mean' 'an unknown word gets no suggestion'
 lacks "$(LATEST=0.6.9 hs --version)" 'Run: herdspace update' '0.6.9 is not newer than 0.7.0'
 
 # The notice: the first shell starts the check in the background, a later
