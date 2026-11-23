@@ -32,6 +32,11 @@ for base in "$@"; do
     grep -q '^export HS_TEST_TOKEN=test-value' \$HOME/.bashrc
     ! grep -q 'test-value' /tmp/setup.log
     echo RESULT bash-export-named
+    # herdspace update reads the role and the options of the last setup.
+    grep -qx 'role=server' \$HOME/.local/share/herdspace/last-setup || { cat \$HOME/.local/share/herdspace/last-setup; exit 1; }
+    grep -qx 'arg=--skip-login-service' \$HOME/.local/share/herdspace/last-setup
+    \$HOME/.local/bin/herdspace help | grep -q 'herdspace update'
+    echo RESULT setup-saved
     grep -q 'apt-get update failed' /tmp/setup.log
     echo RESULT unsigned-source-warned
     echo \"RESULT bench setup=\$((\$(date +%s) - start))s\"

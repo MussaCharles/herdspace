@@ -8,6 +8,7 @@ cd "$(dirname "$0")/.." || exit 1
 failures=0
 pass() { printf 'PASS %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1"; failures=$((failures + 1)); }
+lacks() { case "$1" in *"$2"*) fail "$3: found [$2]" ;; *) pass "$3" ;; esac; }
 contains() { case "$1" in *"$2"*) pass "$3" ;; *) fail "$3: ${1:0:300}" ;; esac; }
 
 tmp="$(mktemp -d)"
@@ -92,6 +93,19 @@ if [ -x "${home}/.local/share/herdspace/${tag}/bootstrap/platforms/server-linux.
 if [ ! -d "${home}/.local/share/herdspace/${tag}/tests" ]; then pass 'the release has no tests folder'; else fail 'the release has no tests folder'; fi
 out="$(piped "$dist" --check server --os linux)"
 contains "$out" 'bootstrap/platforms/server-linux.sh --check' 'piped bootstrap.sh passes the options'
+# A setup that passes saves its release and options, for herdspace update. A
+# stub platform script stands in for the setup.
+rel="${home}/.local/share/herdspace/${tag}"
+printf '#!/bin/sh\nexit 0\n' >"${rel}/bootstrap/platforms/server-linux.sh"
+HOME="$home" bash "${rel}/bootstrap.sh" server --os linux --skip-login-service --replace-all >/dev/null 2>&1
+contains "$(cat "${home}/.local/share/herdspace/version" 2>/dev/null)" "$tag" 'a setup saves its release'
+saved="$(cat "${home}/.local/share/herdspace/last-setup" 2>/dev/null)"
+contains "$saved" 'role=server' 'a setup saves its role'
+contains "$saved" 'os=linux' 'a setup saves the system that was given'
+contains "$saved" 'arg=--skip-login-service' 'a setup saves its options'
+lacks "$saved" 'replace-all' 'a setup does not save an option for one run'
+HOME="$home" bash "${rel}/bootstrap.sh" client --os linux --server x --check >/dev/null 2>&1
+contains "$(cat "${home}/.local/share/herdspace/last-setup" 2>/dev/null)" 'role=server' 'a --check saves nothing'
 printf 'x' >>"${bad}/herdspace-${tag}.tar.gz"
 out="$(piped "$bad" server)"
 contains "$out" 'checksum' 'piped bootstrap.sh stops on a wrong checksum'

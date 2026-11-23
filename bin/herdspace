@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# herdspace shows the installed version, says when a new release exists, and
+# updates the setup with the role and the options of the last setup.
+#
+# Usage: herdspace update [setup options]  Update to the latest release.
+#        herdspace --version               The installed and the latest version.
+#        herdspace version                 The same as --version.
+#        herdspace help                    This help.
+#
+# The herdspace shell runs "herdspace notice" when it starts: at most once a
+# day, it prints one line when a new release exists. It asks GitHub in the
+# background, so the shell does not wait. HERDSPACE_UPDATE_CHECK=0 turns it off.
+set -uo pipefail
+REPO="${HS_REPO:-MussaCharles/herdspace}"
+STATE="${HOME}/.local/share/herdspace"
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/herdspace"
+
+usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; }
+die() { printf '  [err]  %s\n' "$*" >&2; exit 1; }
+
+installed() { cat "${STATE}/version" 2>/dev/null || echo unknown; }
+
+# latest_now asks GitHub for the tag of the latest release. The latest release
+# is never a pre-release. It sends no data about this machine.
+latest_now() {
+  curl -fsSI --connect-timeout 3 --max-time 6 "https://github.com/${REPO}/releases/latest" 2>/dev/null |
+    tr -d '\r' | awk 'tolower($1) == "location:" {print $2}' | tail -n 1 | sed -n 's|.*/releases/tag/\([0-9][^/]*\)$|\1|p'
+}
+
+# newer A B succeeds if version A is newer than version B.
+newer() {
+  case "$1$2" in *[!0-9.]*) return 1 ;; esac
+  [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | sort -t . -k 1,1n -k 2,2n -k 3,3n | tail -n 1)" = "$1" ]
+}
+
+sha_of() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d ' ' -f 1; else shasum -a 256 "$1" | cut -d ' ' -f 1; fi; }
+
+# fresh FILE MINUTES succeeds if FILE changed in the last MINUTES.
+fresh() { [ -n "$(find "$1" -mmin "-$2" 2>/dev/null)" ]; }
+
+cmd_version() {
+  local have latest
+  have="$(installed)"
+  printf 'herdspace %s\n' "$have"
+  latest="$(latest_now)"
+  if [ -z "$latest" ]; then
+    printf 'The latest release: unknown. GitHub did not answer.\n'
+  elif newer "$latest" "$have"; then
+    printf 'The latest release: %s. Run: herdspace update\n' "$latest"
+  else
+    printf 'The latest release: %s. This is the latest version.\n' "$latest"
+  fi
+}
+
+cmd_refresh() {
+  local latest
+  mkdir -p "$CACHE"
+  latest="$(latest_now)"
+  [ -n "$latest" ] && printf '%s\n' "$latest" >"${CACHE}/latest"
+  touch "${CACHE}/latest-checked"
+}
+
+cmd_notice() {
+  local latest have
+  [ "${HERDSPACE_UPDATE_CHECK:-1}" != 0 ] || return 0
+  mkdir -p "$CACHE" 2>/dev/null || return 0
+  if ! fresh "${CACHE}/latest-checked" 1440; then
+    touch "${CACHE}/latest-checked"
+    nohup "$0" refresh >/dev/null 2>&1 </dev/null &
+  fi
+  latest="$(cat "${CACHE}/latest" 2>/dev/null)"
+  have="$(installed)"
+  [ -n "$latest" ] && newer "$latest" "$have" || return 0
+  fresh "${CACHE}/notice-shown" 1440 && return 0
+  touch "${CACHE}/notice-shown"
+  printf '  herdspace %s is available (you have %s). Run: herdspace update\n' "$latest" "$have"
+  printf '  What changed: https://github.com/%s/releases/tag/%s\n' "$REPO" "$latest"
+}
+
+cmd_update() {
+  local latest have role="" os="" line work args=() want
+  [ -f "${STATE}/last-setup" ] || die "No setup is saved on this machine. Run the setup once, as the Quick start shows: https://github.com/${REPO}#quick-start"
+  while IFS= read -r line; do
+    case "$line" in
+      role=*) role="${line#role=}" ;;
+      os=*) os="${line#os=}" ;;
+      arg=*) args+=("${line#arg=}") ;;
+    esac
+  done <"${STATE}/last-setup"
+  case "$role" in server | client | both) ;; *) die "The saved setup has no role. Run the setup once again." ;; esac
+  [ -z "$os" ] || args=(--os "$os" ${args[@]+"${args[@]}"})
+  latest="$(latest_now)"
+  [ -n "$latest" ] || die "GitHub did not answer, so the latest release is unknown. Try again later."
+  have="$(installed)"
+  if [ "$latest" = "$have" ]; then
+    printf '  herdspace %s is the latest release. The setup runs again to make sure that nothing is missing.\n' "$have"
+  else
+    printf '  Updating herdspace from %s to %s.\n' "$have" "$latest"
+    printf '  What changed: https://github.com/%s/releases/tag/%s\n' "$REPO" "$latest"
+  fi
+  work="$(mktemp -d)"
+  trap 'rm -rf "$work"' EXIT
+  for f in bootstrap.sh SHA256SUMS; do
+    curl -fsSL "https://github.com/${REPO}/releases/download/${latest}/${f}" -o "${work}/${f}" || die "Could not download ${f} of ${latest}."
+  done
+  want="$(awk '$2 == "bootstrap.sh" || $2 == "*bootstrap.sh" {print $1}' "${work}/SHA256SUMS")"
+  [ -n "$want" ] && [ "$(sha_of "${work}/bootstrap.sh")" = "$want" ] || die "The checksum of bootstrap.sh is wrong. Nothing was changed."
+  printf '  The setup runs: bootstrap.sh %s %s\n' "$role" "${args[*]:-}${*:+ $*}"
+  HS_VERSION="$latest" bash "${work}/bootstrap.sh" "$role" ${args[@]+"${args[@]}"} "$@"
+  local rc=$?
+  rm -f "${CACHE}/latest" "${CACHE}/notice-shown"
+  [ "$rc" -ne 0 ] || [ ! -x "${HOME}/.local/bin/herdr-update-check" ] || "${HOME}/.local/bin/herdr-update-check" --now
+  return "$rc"
+}
+
+case "${1:-help}" in
+  update) shift; cmd_update "$@" ;;
+  version | --version | -V) cmd_version ;;
+  notice) cmd_notice ;;
+  refresh) cmd_refresh ;;
+  help | --help | -h) usage ;;
+  *) usage >&2; exit 2 ;;
+esac

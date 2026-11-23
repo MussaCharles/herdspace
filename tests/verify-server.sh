@@ -13,7 +13,7 @@ contains() { case "$1" in *"$2"*) pass "$3" ;; *) fail "$3: wanted [$2] in [${1:
 lacks() { case "$1" in *"$2"*) fail "$3: found [$2]" ;; *) pass "$3" ;; esac; }
 same() { check "$1" cmp -s "$2" "$3"; }
 
-for tool in herdr nvim lazygit delta eza zoxide fzf rg bat fd hopen herdr-update-check; do
+for tool in herdr nvim lazygit delta eza zoxide fzf rg bat fd hopen herdr-update-check herdspace; do
   check "command ${tool}" command -v "$tool"
 done
 check 'nvim runs' nvim --version
