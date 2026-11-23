@@ -52,6 +52,7 @@ export CONTINUED=a\
 b
 export MULTI="one
 two"
+export AFTER_MULTI=1
 export FROM_COMMAND=$(date)
 export FROM_OTHER=$OTHER_VAR
 export TWO=1 THREE=2
@@ -65,7 +66,7 @@ run_move() { "$tmp/run.sh" "MODE=ask; move_bash_exports; echo BACKUPS=\$BACKUP_L
 # The scan.
 bashrc
 scan="$("$tmp/run.sh" 'bash_export_scan "$HOME/.bashrc"')"
-for name in API_TOKEN NAME_WITH_SPACE TOOL_HOME TOOL_BIN; do
+for name in API_TOKEN NAME_WITH_SPACE TOOL_HOME TOOL_BIN AFTER_MULTI; do
   contains "$scan" "move	" "the scan finds lines that move" >/dev/null
   printf '%s\n' "$scan" | grep -q "^move	[0-9]*	${name}$" && pass "${name} moves" || fail "${name} moves: ${scan}"
 done
@@ -87,6 +88,7 @@ lacks "$out" 'secret-value-123' 'the note shows no value'
 ask() {
   bashrc
   [ -z "${2:-}" ] || printf '%s\n' "$2" >"$tmp/home/.zshenv"
+  [ -z "${3:-}" ] || printf '%s\n' "$3" >>"$tmp/home/.bashrc"
   python3 "$ROOT/tests/pty_run.py" 6 "$1" env TERM=xterm-256color "$tmp/run.sh" "MODE=ask; move_bash_exports; echo BACKUPS=\$BACKUP_LIST" 2>&1
 }
 out="$(ask '\r')"
@@ -123,6 +125,13 @@ bash -n "$tmp/home/.bashrc" && pass "the .bashrc has no syntax error" || fail "t
 # A second run finds nothing to move.
 out="$(run_move)"
 lacks "$out" 'API_TOKEN' 'a second run finds nothing to move'
+
+# Other lines of ~/.zshenv can change PATH too. The move still passes.
+out="$(ask 'y\r' 'export PATH="$HOME/cargo/bin:$PATH"' 'export PATH="$HOME/bin:$PATH"')"
+contains "$out" 'Moved the exports of' 'PATH moves when ~/.zshenv also changes PATH'
+got="$(env -i HOME="$tmp/home" PATH=/usr/bin:/bin zsh -c 'echo "$PATH"')"
+contains "$got" "${tmp}/home/bin:" 'zsh has the moved PATH folder'
+contains "$got" "${tmp}/home/cargo/bin:" 'zsh keeps the PATH folder of your own ~/.zshenv line'
 
 # If the test after the move fails, the files come back.
 out="$(ask 'y\r' 'if true; then')"
