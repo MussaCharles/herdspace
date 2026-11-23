@@ -370,6 +370,38 @@ To use the same aliases in both shells, keep them in `~/.bash_aliases`. The defa
 [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
 ```
 
+### Exports from your bash files
+
+An `export` line that is only in `~/.bashrc` or `~/.bash_profile` does not reach zsh. The variable is then missing in each Herdr pane, and in each shell that an agent starts. For example, an API key that an agent needs is missing.
+
+When zsh is your login shell, the setup looks for these lines. At a terminal, it names the variables, and it asks whether to move the lines to `~/.zshenv`. zsh reads `~/.zshenv` for every shell. The setup never shows a value. With no terminal, or if you answer no, the setup only names the variables. It asks again only when the list of variables changes.
+
+The setup moves only plain one-line `export NAME=value` lines at the start of a line. A value can use `$HOME`, `$PATH`, `$USER`, and the variables that move before it. These lines stay, and the setup names them, so you move them by hand:
+
+- A line in a function, or in an `if` or `case` block.
+- A line that ends with `\`, or a value with a quote that runs over more lines.
+- A value with a command, for example `$(...)`, or with another variable.
+
+When you answer yes:
+
+1. The setup backs up `~/.bashrc`, `~/.bash_profile`, and `~/.zshenv`. Only you can read the backups (mode 600), because they hold the values.
+2. It puts the lines in a marked block, `# >>> herdspace bash env >>>`, at the end of `~/.zshenv`, and sets the mode of the file to 600. In the bash file, each line becomes a note, for example `# herdspace moved the export of API_TOKEN to ~/.zshenv.` The value is not in the note.
+3. It makes sure that each variable has the same value in zsh as in bash, and that each file has no syntax error. If a test fails, it puts the files back, deletes the backups, and says so.
+
+The end of the run shows the commands that put a backup back, for example:
+
+```bash
+mv ~/.bashrc.bak-20261122-155530 ~/.bashrc
+```
+
+After the move, bash no longer sets these variables. zsh is your login shell, so put new variables in `~/.zshenv`.
+
+A secrets store is safer than a shell file for a token. Examples are the macOS Keychain, [`pass`](https://www.passwordstore.org/), and the command-line tool of a password manager. `~/.zshenv` can read a value from the store when the shell starts, so no shell file holds the token. For example, on a Mac:
+
+```bash
+export API_TOKEN="$(security find-generic-password -a "$USER" -s API_TOKEN -w)"
+```
+
 ### Put a file back
 
 The end of a run lists each backup of the run, with the command that puts the file back, for example:

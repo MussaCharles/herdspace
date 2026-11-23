@@ -73,6 +73,10 @@ jobs:
         run: tests/test-ghostty.sh
       - name: List of older file versions
         run: tools/known-hashes.sh --check
+      - name: Exports from the bash files
+        run: |
+          command -v zsh >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq zsh >/dev/null; }
+          tests/test-bash-env.sh
 
   linux:
     # One job for each runner and image, so that they run at the same time.

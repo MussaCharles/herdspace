@@ -24,8 +24,14 @@ for base in "$@"; do
     for arch in amd64 arm64; do sudo mkdir -p /var/unsigned-repo/dists/stable/main/binary-\$arch; sudo touch /var/unsigned-repo/dists/stable/main/binary-\$arch/Packages; done
     printf 'Suite: stable\\nCodename: stable\\nComponents: main\\nArchitectures: amd64 arm64\\n' | sudo tee /var/unsigned-repo/dists/stable/Release >/dev/null
     echo 'deb file:/var/unsigned-repo stable main' | sudo tee /etc/apt/sources.list.d/unsigned.list >/dev/null
+    # An export in ~/.bashrc. With no terminal, the setup names it and changes nothing.
+    echo 'export HS_TEST_TOKEN=test-value' >>\$HOME/.bashrc
     start=\$(date +%s)
     ./bootstrap.sh server ${flags} 2>&1 | tee /tmp/setup.log
+    grep -q 'export variables that zsh does not have: HS_TEST_TOKEN' /tmp/setup.log
+    grep -q '^export HS_TEST_TOKEN=test-value' \$HOME/.bashrc
+    ! grep -q 'test-value' /tmp/setup.log
+    echo RESULT bash-export-named
     grep -q 'apt-get update failed' /tmp/setup.log
     echo RESULT unsigned-source-warned
     echo \"RESULT bench setup=\$((\$(date +%s) - start))s\"

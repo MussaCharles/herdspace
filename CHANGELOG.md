@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- On Linux, when zsh is your login shell, the setup finds the plain `export` lines that are only in `~/.bashrc` or `~/.bash_profile`. At a terminal, it asks whether to move them to a marked block in `~/.zshenv`, so that zsh, the Herdr panes, and the agents have the variables. It never shows a value, backs up each file with mode 600 first, and puts the files back if a test after the move fails.
+
 ### Changed
 
 - herdspace keeps its Neovim files in `~/.config/herdspace-nvim`, and never writes in your `~/.config/nvim`. The herdspace shell sets `NVIM_APPNAME=herdspace-nvim` only if you have no `~/.config/nvim`, so `nvim` starts your own Neovim if you have one. The Neovim files of an older herdspace move out of `~/.config/nvim` to a backup folder. A folder with a file that you changed stays.
