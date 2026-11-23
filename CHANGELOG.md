@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-23
+
 ### Added
 
 - `herdspace update` updates to the latest release with the role and the options of your last setup, after a checksum test. `herdspace --version` and `herdspace version` show the installed and the latest version. When a new release exists, the herdspace shell prints one line, at most once a day. It asks GitHub in the background, and `HERDSPACE_UPDATE_CHECK=0` turns it off.
@@ -208,7 +210,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/MussaCharles/herdspace/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/MussaCharles/herdspace/compare/0.6.4...0.7.0
 [0.6.4]: https://github.com/MussaCharles/herdspace/compare/0.6.3...0.6.4
 [0.6.3]: https://github.com/MussaCharles/herdspace/compare/0.6.2...0.6.3
