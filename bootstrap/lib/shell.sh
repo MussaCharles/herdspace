@@ -205,9 +205,11 @@ closes = re.compile(r"^\s*(fi|esac|done)\b")
 function = re.compile(r"^\s*(function\s+\S+|[A-Za-z_][A-Za-z0-9_:-]*\s*\(\s*\))\s*\{?\s*$")
 allowed = {"HOME", "PATH", "USER"}
 
-def strip_quotes(text):
-    """Returns the text with each quoted part removed, or None if a quote stays open."""
-    out, i, quote = [], 0, None
+def strip_quotes(text, quote=None):
+    """Returns the text with each quoted part removed, and the quote that stays open.
+
+    quote is the quote that was open at the start of the text."""
+    out, i = [], 0
     while i < len(text):
         c = text[i]
         if quote == "'":
@@ -226,28 +228,26 @@ def strip_quotes(text):
         else:
             out.append(c)
         i += 1
-    return None if quote else "".join(out)
+    return "".join(out), quote
 
-depth, open_quote, moved = 0, False, set()
+depth, open_quote, moved = 0, None, set()
 for number, line in enumerate(lines, 1):
     continued = number > 1 and lines[number - 2].endswith("\\")
     if open_quote or continued:
         # The line belongs to the line before it.
-        rest = strip_quotes(("'" if open_quote else "") + line)
-        open_quote = rest is None
+        rest, open_quote = strip_quotes(line, open_quote)
         match = None
     else:
         match = export.match(line)
-        rest = strip_quotes(line)
-        open_quote = rest is None
+        rest, open_quote = strip_quotes(line)
     name = None
     if match:
         name, value = match.group(1), match.group(2)
-        bare = strip_quotes(value)
+        bare, value_quote = strip_quotes(value)
         refs = set(re.findall(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)", value))
         good = (
             depth == 0
-            and bare is not None
+            and value_quote is None
             and not line.endswith("\\")
             and re.fullmatch(r"[^\s;&|<>`()]*(\s+#.*)?", bare) is not None
             and "$(" not in value and "`" not in value and "${!" not in value
@@ -258,7 +258,7 @@ for number, line in enumerate(lines, 1):
             moved.add(name)
     elif any_export.match(line):
         print(f"keep\t-\t{any_export.match(line).group(1)}")
-    code = (rest or "").split("#", 1)[0]
+    code = rest.split("#", 1)[0]
     if opens.match(code) or function.match(code) or code.rstrip().endswith("{"):
         depth += 1
     if closes.match(code) or code.strip().startswith("}"):
@@ -358,9 +358,13 @@ move_bash_exports() {
   ensure_block "$zshenv" "$BASH_ENV_BLOCK" "${old_block:+${old_block}
 }${new_lines}"
 
-  # The tests. Each moved variable must have the same value in zsh as in bash.
+  # The tests. zsh must read the lines of the block with the same values as
+  # bash. The test uses only the block, because other lines of ~/.zshenv can
+  # also change a variable, for example PATH.
+  printf '%s\n' "${old_block:+${old_block}
+}${new_lines}" >"$tmp"
   # shellcheck disable=SC2086 # One word for each name.
-  if [ "$(bash_values bash "$tmp" $names)" != "$(bash_values zsh "$zshenv" $names)" ]; then failed="a value differs in zsh"; fi
+  if [ "$(bash_values bash "$tmp" $names)" != "$(bash_values zsh "$tmp" $names)" ]; then failed="a value differs in zsh"; fi
   for f in $BASH_ENV_FILES; do
     [ ! -f "${HOME}/${f}" ] || bash -n "${HOME}/${f}" 2>/dev/null || failed="${failed:+${failed}, }~/${f} has a syntax error"
   done
