@@ -86,6 +86,8 @@ Each of these mistakes broke the setup one time:
 - The last command of `~/.zshrc` sets the status of the first prompt. If the file is missing, `[[ -f FILE ]] && source FILE` ends with status 1. Use `if`. `tests/verify-server.sh` checks that a new shell starts with status 0.
 - If another account can write to the Oh My Zsh folders, Oh My Zsh warns at each start. The setup runs `chmod -R go-w` on the folder.
 - Neovim starts a language server only for a matching file. The setup installs the Mason packages by name, so that the first real start shows no install messages.
+- `bootstrap.sh` saves `~/.local/share/herdspace/version` and `last-setup` after each setup that passes, for `bin/herdspace update`. If you add an option for one run only, leave it out in `save_setup`, as `--replace-all` is.
+- `move_bash_exports` in `shell.sh` must never print a value of an export. `tests/test-bash-env.sh` fails if a value appears in the output.
 - The herdspace Neovim runs with `NVIM_APPNAME=herdspace-nvim`: its files are in `~/.config/herdspace-nvim`, and its data in `~/.local/share/herdspace-nvim`. Start it with `hs_nvim` in `server.sh`. Never write in `~/.config/nvim`. `move_old_nvim` moves that folder to a backup only if it holds only files of an older herdspace.
 - After a failed plugin download, `nvim --headless "+Lazy! restore" +qa` can still exit 0. The plugin step looks for `~/.local/share/herdspace-nvim/lazy/LazyVim`, and tries again. With the folder still missing, it writes no done mark. Check the result of a step, not only the exit code of the tool. `tests/test-nvim-plugins.sh` tests it.
 - A Linux client has no Cmd key. Each Herdr key that uses `cmd+` also needs a `ctrl+shift+` key in `config/herdr/config.toml`.
