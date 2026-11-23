@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- With the latest release already installed, `herdspace update` says that nothing is new, and runs no setup. To run the setup again anyway, run `herdspace update --force`.
+
 ## [0.8.0] - 2026-11-23
 
 ### Added

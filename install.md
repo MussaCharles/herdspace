@@ -93,7 +93,7 @@ Run the same command as in step 5, without `--check`. Add `--yes`, so that the s
 
 When you run the setup, it cannot ask questions. For that reason, one of these options is necessary. With no terminal, the setup installs only the prerequisites that need no password, and it prints a command for each of the others. Homebrew or `sudo` can also ask for a password later. If that happens, stop, give the full command to the person, and ask them to run it in their own terminal. Then run the setup again.
 
-To update a machine that has herdspace 0.8.0 or later, run `herdspace update --yes` with the same `--replace-all` or `--keep-existing` option. It uses the role and the options of the last setup.
+To update a machine that has herdspace 0.8.0 or later, run `herdspace update --yes` with the same `--replace-all` or `--keep-existing` option. It uses the role and the options of the last setup. If the latest release is already installed, it changes nothing. To run the setup again anyway, add `--force`.
 
 On Linux, when zsh is the login shell, the setup can find `export` lines that are only in `~/.bashrc` or `~/.bash_profile`. With no terminal, it only names the variables, and it changes nothing. Tell the person the names, and point them to `https://github.com/MussaCharles/herdspace/blob/main/docs/setup.md#exports-from-your-bash-files`. Do not open or print those files, because they can hold tokens.
 

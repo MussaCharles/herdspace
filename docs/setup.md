@@ -244,6 +244,12 @@ Each setup that passes saves its role and options in `~/.local/share/herdspace/l
 herdspace update --replace-all
 ```
 
+If the latest release is already installed, the command says so and changes nothing. To run the setup again anyway, for example to put back a missing file, run:
+
+```bash
+herdspace update --force
+```
+
 To see the installed version and the latest release, run `herdspace --version`. `herdspace version` prints the same text.
 
 When a new release exists, the herdspace shell prints one line before the prompt, at most once a day:

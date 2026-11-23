@@ -3,6 +3,7 @@
 # updates the setup with the role and the options of the last setup.
 #
 # Usage: herdspace update [setup options]  Update to the latest release.
+#        herdspace update --force          Run the setup again on the latest release.
 #        herdspace --version               The installed and the latest version.
 #        herdspace version                 The same as --version.
 #        herdspace help                    This help.
@@ -78,7 +79,11 @@ cmd_notice() {
 }
 
 cmd_update() {
-  local latest have role="" os="" line work args=() want
+  local latest have role="" os="" line work args=() want force=0 a extra=()
+  for a in "$@"; do
+    if [ "$a" = "--force" ]; then force=1; else extra+=("$a"); fi
+  done
+  set -- ${extra[@]+"${extra[@]}"}
   [ -f "${STATE}/last-setup" ] || die "No setup is saved on this machine. Run the setup once, as the Quick start shows: https://github.com/${REPO}#quick-start"
   while IFS= read -r line; do
     case "$line" in
@@ -92,8 +97,12 @@ cmd_update() {
   latest="$(latest_now)"
   [ -n "$latest" ] || die "GitHub did not answer, so the latest release is unknown. Try again later."
   have="$(installed)"
-  if [ "$latest" = "$have" ]; then
-    printf '  herdspace %s is the latest release. The setup runs again to make sure that nothing is missing.\n' "$have"
+  if [ "$latest" = "$have" ] && [ "$force" -eq 0 ]; then
+    printf '  herdspace %s is the latest release. Nothing to update.\n' "$have"
+    printf '  To run the setup again anyway, run: herdspace update --force\n'
+    return 0
+  elif [ "$latest" = "$have" ]; then
+    printf '  herdspace %s is the latest release. The setup runs again, because of --force.\n' "$have"
   else
     printf '  Updating herdspace from %s to %s.\n' "$have" "$latest"
     printf '  What changed: https://github.com/%s/releases/tag/%s\n' "$REPO" "$latest"
