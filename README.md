@@ -6,7 +6,7 @@ herdspace sets up [Herdr](https://herdr.dev) and its tools on your machines, and
 
 ## Quick start
 
-The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server with SSH. One machine can also be both. Each command below downloads the [setup](docs/setup.md) of the newest release, makes sure that its checksum is correct, and runs it. To update later, run `herdspace update`. See [Update herdspace](docs/setup.md#update-herdspace). Read [Before you start](docs/setup.md#before-you-start) first.
+The server machine runs Herdr, your projects, and your agents. The client machine is the machine that you use, and it connects to the server with SSH. One machine can also be both. Each command below downloads the [setup](docs/setup.md) of the newest release, makes sure that its checksum is correct, and runs it. To update later, see [Update](#update). Read [Before you start](docs/setup.md#before-you-start) first.
 
 ### Server machine
 
@@ -83,6 +83,25 @@ A template splits a project into named panes, and it starts a program in each pa
 | Two agents, tests, and a shell | lazygit and Neovim, to read what an agent changed |
 
 The default is `plain`, one pane with a shell. The [templates guide](docs/templates.md) shows how to add your own template.
+
+## Update
+
+```bash
+herdspace update
+```
+
+The command runs the setup of the latest release with the role and the options of your last setup. `herdspace --version` shows the installed and the latest version. When a new release exists, the shell prints one line, at most once a day. See [Update herdspace](docs/setup.md#update-herdspace).
+
+An update changes only the files of herdspace. Your own files stay yours:
+
+| Your file | What herdspace does |
+|-----------|---------------------|
+| `~/.zshrc` | Adds a marked block that loads the herdspace shell, after a question. See [Your ~/.zshrc](docs/setup.md#your-zshrc). |
+| Ghostty file | Adds marked blocks at the top. Your own lines below them win. See [Your Ghostty file](docs/keyboard-shortcuts.md#your-ghostty-file). |
+| `~/.config/nvim` | Nothing. The herdspace Neovim has its own folder. See [Your Neovim files](docs/setup.md#your-neovim-files). |
+| `export` lines in `~/.bashrc` | On Linux, offers to move them to `~/.zshenv`, so that zsh and the agents have them. See [Exports from your bash files](docs/setup.md#exports-from-your-bash-files). |
+
+If you changed a file of herdspace, the setup asks before it replaces it, and it makes a backup first.
 
 ## How the parts fit
 
