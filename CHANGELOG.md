@@ -8,6 +8,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 - The README and `docs/updating.md` say what an update changes in a running session: the new commands work at once, an open shell needs `exec zsh` for the shell changes, and a new Herdr version needs a restart of the session.
 
+### Fixed
+
+- `herdspace update` no longer prints `work: unbound variable` at the end, and it removes its download folder. The cleanup at exit used a local variable of the function.
+
 ## [0.11.0] - 2026-11-25
 
 ### Added

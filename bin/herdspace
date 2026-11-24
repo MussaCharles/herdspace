@@ -169,7 +169,10 @@ cmd_update() {
     fi
   fi
   work="$(mktemp -d)"
-  trap 'rm -rf "$work"' EXIT
+  # The EXIT trap runs after this function returns, when the local work is
+  # gone, so it uses a global name.
+  HS_UPDATE_WORK="$work"
+  trap 'rm -rf "${HS_UPDATE_WORK:-}"' EXIT
   for f in bootstrap.sh SHA256SUMS; do
     curl -fsSL "https://github.com/${REPO}/releases/download/${latest}/${f}" -o "${work}/${f}" ||
       die "Could not download ${f} of ${latest}.${tag:+ Does this release exist? The list: https://github.com/${REPO}/releases}"
@@ -183,6 +186,7 @@ cmd_update() {
   printf '  The setup runs: bootstrap.sh %s %s\n' "$role" "${args[*]:-}${*:+ $*}"
   HS_VERSION="$latest" bash "${work}/bootstrap.sh" "$role" ${args[@]+"${args[@]}"} "$@"
   local rc=$?
+  rm -rf "$work"
   rm -f "${CACHE}/latest" "${CACHE}/notice-shown"
   [ "$rc" -ne 0 ] || [ ! -x "${HOME}/.local/bin/herdr-update-check" ] || "${HOME}/.local/bin/herdr-update-check" --now
   return "$rc"
