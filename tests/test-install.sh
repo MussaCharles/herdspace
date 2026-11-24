@@ -138,7 +138,7 @@ for script in bootstrap.sh install.sh; do
   if [ -z "$ran" ]; then pass "a cut ${script} runs nothing"; else fail "a cut ${script} runs commands at bytes:${ran}"; fi
 done
 # The whole script still runs.
-out="$(env -i HOME="${cut}/home" PATH="${cut}/bin" /bin/bash -s -- --help <"${dist}/bootstrap.sh" 2>&1)"
+out="$(env -i HOME="${cut}/home" PATH=/usr/bin:/bin /bin/bash -s -- --help <"${dist}/bootstrap.sh" 2>&1)"
 contains "$out" 'Usage' 'the whole bootstrap.sh runs from stdin'
 
 printf 'RESULT failures=%s\n' "$failures"
