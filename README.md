@@ -101,6 +101,11 @@ An update changes only the files of herdspace. Your own files stay yours:
 
 If you changed a file of herdspace, the setup asks before it replaces it, and it makes a backup first.
 
+## Good to know
+
+- On the client, herdspace sends `Cmd+T`, `Cmd+W`, and `Cmd+K` to Herdr (`Ctrl+Shift+T` and others on Linux). Outside Herdr, for example in an SSH session to another server, these keys do nothing. To give them back to Ghostty, run `herdspace keys normal` on the client. To send them to Herdr again, run `herdspace keys herdr`. See [Switch the keys later](docs/keyboard-shortcuts.md#switch-the-keys-later).
+- A server without herdspace does not know the terminal type of Ghostty. herdspace turns on the `ssh-env` feature of Ghostty, so that the `ssh` command that you type works there. If you still see `'xterm-ghostty': unknown terminal type`, see [A server without herdspace](docs/ssh.md#a-server-without-herdspace).
+
 ## How the parts fit
 
 <details>

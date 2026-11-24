@@ -29,3 +29,11 @@ keybind = super+alt+shift+p=toggle_command_palette
 # Option sends Alt, for the Alt keys of Herdr and Neovim.
 macos-option-as-alt = true
 # herdspace keys: end
+
+# herdspace ssh: start. The setup always adds this section.
+# When you type ssh, Ghostty sends TERM=xterm-256color, so that a server
+# without the xterm-ghostty terminal description can run clear and other
+# commands. It writes nothing on the server. The features that this line does
+# not name keep their default.
+shell-integration-features = ssh-env
+# herdspace ssh: end

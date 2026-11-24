@@ -110,5 +110,26 @@ contains "$out" 'The checksum of bootstrap.sh is wrong' 'update stops when the c
 [ ! -e "$HOME/setup.log" ] && pass 'a wrong checksum runs no setup' || fail 'a wrong checksum runs no setup'
 contains "$(LATEST='' hs update)" 'GitHub did not answer' 'update with no network changes nothing'
 
+# keys: show the mode, and change it with the setup of the installed release.
+mkdir -p "$HOME/.local/share/herdspace/0.7.0"
+printf '#!/usr/bin/env bash\necho "KEYS-SETUP $*" >"$HOME/keys.log"\n' >"$HOME/.local/share/herdspace/0.7.0/bootstrap.sh"
+printf 'role=client\nos=linux\narg=--server\narg=box\narg=--use-herdspace-keys\n' >"$HOME/.local/share/herdspace/last-setup"
+contains "$(hs keys)" 'The keys: herdr' 'keys shows the herdr mode by default'
+out="$(hs keys normal)"
+contains "$(cat "$HOME/keys.log" 2>/dev/null)" 'KEYS-SETUP client --os linux --server box --keep-terminal-keys' 'keys normal runs the setup with the saved options and --keep-terminal-keys only'
+lacks "$(cat "$HOME/keys.log" 2>/dev/null)" '--use-herdspace-keys' 'keys normal drops the old key option'
+rm -f "$HOME/keys.log"
+mkdir -p "$HOME/.config/herdspace" && echo terminal >"$HOME/.config/herdspace/keys"
+contains "$(hs keys)" 'The keys: normal' 'keys shows the normal mode'
+contains "$(hs keys normal)" 'Nothing to change' 'keys normal in the normal mode changes nothing'
+[ ! -e "$HOME/keys.log" ] && pass 'keys in the same mode runs no setup' || fail 'keys in the same mode runs no setup'
+hs keys herdr >/dev/null
+contains "$(cat "$HOME/keys.log" 2>/dev/null)" '--use-herdspace-keys' 'keys herdr runs the setup with --use-herdspace-keys'
+out="$(hs keys fancy)"; rc=$?
+contains "$out" "'fancy' is not a key mode" 'keys with a wrong word says so'
+[ "$rc" -eq 2 ] && pass 'keys with a wrong word exits 2' || fail "keys with a wrong word exits 2: ${rc}"
+printf 'role=server\n' >"$HOME/.local/share/herdspace/last-setup"
+contains "$(hs keys normal)" 'on a client machine' 'keys on a server says that it is for a client'
+
 echo "RESULT failures=${failures}"
 exit $((failures > 0))

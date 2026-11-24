@@ -357,7 +357,8 @@ To update herdspace, run `herdspace update`. To see the installed and the latest
 
 | Problem | Action |
 |---------|--------|
-| `Cmd+T`, `Cmd+W`, or `Cmd+K` does nothing | Herdr is not open. Run `herdr`, or use the [replacement keys](keyboard-shortcuts.md#replacement-keys-for-ghostty) of Ghostty. If Herdr is open, run the client setup command again, with the same `--server` names. See [setup](setup.md#macos-client). |
+| `Cmd+T`, `Cmd+W`, or `Cmd+K` does nothing | Herdr is not open. Run `herdr`, or use the [replacement keys](keyboard-shortcuts.md#replacement-keys-for-ghostty) of Ghostty. To give the keys back to Ghostty, run `herdspace keys normal` on the client. If Herdr is open, run the client setup command again, with the same `--server` names. See [setup](setup.md#macos-client). |
+| `'xterm-ghostty': unknown terminal type` on a server | See [A server without herdspace](ssh.md#a-server-without-herdspace). |
 | The `Ctrl` arrow keys change the macOS space | Log out and log in. Then look in System Settings, Keyboard, Keyboard Shortcuts, Mission Control. |
 | `Ctrl+Shift+F` or `Cmd+E` does nothing in Neovim | If text is selected in Ghostty, `Cmd+E` searches for it in Ghostty. Click once to clear the selection. Otherwise, press `/` to search, or click the file tree. |
 | A new tab shows only a number | Start the Auto Title plugin. |

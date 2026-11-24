@@ -60,6 +60,32 @@ You can give the address to the setup with no name: `--server me@203.0.113.10`. 
 
 If the server machine gets a new address, change only the `HostName` line in `~/.ssh/config`. The name stays the same, so the commands and the setup do not change.
 
+## A server without herdspace
+
+Ghostty sets the terminal type `xterm-ghostty`. A server needs a terminal description (terminfo) for that type. Without it, `clear` and other commands fail with `'xterm-ghostty': unknown terminal type`.
+
+The client setup copies the description to each server of `--server`. For every other server, herdspace turns on the `ssh-env` feature of Ghostty in the `herdspace ssh` block of your Ghostty file. When you type `ssh`, Ghostty then sends the type `xterm-256color`, which each server knows. It writes nothing on the server, so it works on a server where you only copy files. This needs Ghostty 1.2.0 or later.
+
+The feature works only for the `ssh` command that you type in a Ghostty shell. It does not work for `scp`, `sftp`, `rsync`, or a script. For those, or for an older Ghostty, use one of these fixes:
+
+- Copy the description to the server one time. This writes a file in your home folder on the server:
+
+  ```bash
+  infocmp -x xterm-ghostty | ssh my-server -- tic -x -
+  ```
+
+- Or send `xterm-256color` to one server always. Add this line to the `Host` entry of the server in `~/.ssh/config` (OpenSSH 8.7 or later):
+
+  ```text
+  SetEnv TERM=xterm-256color
+  ```
+
+To let Ghostty copy the description to each new server for you, add your own line below the herdspace blocks of your Ghostty file:
+
+```text
+shell-integration-features = ssh-env,ssh-terminfo
+```
+
 ## Problems
 
 | Problem | Fix |
@@ -67,6 +93,7 @@ If the server machine gets a new address, change only the `HostName` line in `~/
 | `Permission denied (publickey)` | The server does not have your key. Do step 2 again. |
 | `Could not resolve hostname my-server` | The name is not in `~/.ssh/config`. Do step 3 again, and make sure that the name is the same. |
 | `Connection refused` or `Connection timed out` | SSH is not on, or the address is wrong. Read [Before you start](#before-you-start) again. |
+| `'xterm-ghostty': unknown terminal type` on a server | See [A server without herdspace](#a-server-without-herdspace). |
 | The client setup says `Could not connect to my-server, so this script skips it` | Step 4 does not print `ok`. Fix the connection, and run the client setup again. |
 
 ## References
