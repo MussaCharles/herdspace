@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- `bootstrap.sh` and `install.sh` keep all their code in a `main` function, and the last line calls it. If a download with `curl` stops in the middle, bash runs nothing.
+
 ## [0.10.0] - 2026-11-24
 
 ### Changed
