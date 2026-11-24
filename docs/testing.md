@@ -14,7 +14,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/run-systemd.sh` | The login service starts Herdr in a container with real systemd, and it starts Herdr again after a crash. |
 | `tests/run-client-linux.sh` | A Linux client connects to a server in a second container. Real Ghostty key presses reach Herdr over SSH. |
 | `tests/run-macos.sh` | The macOS scripts work with a temporary home folder and stub commands. It needs Python 3.11 or later from Homebrew. |
-| `tests/test-install.sh` | A release builds, `install.sh` installs `hopen`, and `bootstrap.sh` from `curl` picks the right script. |
+| `tests/test-install.sh` | A release builds, `install.sh` installs `hopen`, and `bootstrap.sh` from `curl` picks the right script. A download that stops in the middle runs nothing. |
 | `tests/test-running-sessions.sh` | With a stub `herdr`, the setup reloads the configuration of each running session after a change, names a session with an older Herdr, and stops no session. It runs in a second. |
 | `tests/test-live-update.sh` | In a test container, `tests/run-linux.sh` installs the latest release, starts a session with a running program, and updates to this folder with a changed `config.toml`. The server, the program, and the panes stay, and the session gets the new configuration. The update asks about no file. |
 | `tests/run-upgrade.sh` | For each of the last 3 releases, a fresh container installs the release and updates to this folder. The update asks about no file, also when the manifest is missing, as in an install from before the manifest. A file that the test changed stays, and only that file differs. A second update changes nothing. |

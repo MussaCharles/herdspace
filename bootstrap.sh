@@ -37,6 +37,9 @@
 #
 # With curl, the script downloads the release into
 # ~/.local/share/herdspace/<tag>, compares its checksum, and runs it.
+# All the code is in main, and the last line calls it. If a download with
+# curl stops in the middle, bash reads only a part of main and runs nothing.
+main() {
 set -euo pipefail
 
 RELEASE="@VERSION@"
@@ -254,3 +257,6 @@ info "Part 2 of 2: the client setup."
 "${HERE}/bootstrap/platforms/${script}" ${PASS_CLIENT[@]+"${PASS_CLIENT[@]}"} || rc=$?
 [ "$rc" -ne 0 ] || save_setup
 exit "$rc"
+}
+
+main "$@"
