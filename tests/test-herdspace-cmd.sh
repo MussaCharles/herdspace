@@ -97,6 +97,7 @@ printf '#!/usr/bin/env bash\necho "SETUP $* VERSION=$HS_VERSION" >"$HOME/setup.l
 (cd "$tmp/release" && { sha256sum bootstrap.sh 2>/dev/null || shasum -a 256 bootstrap.sh; } >SHA256SUMS)
 out="$(LATEST=0.7.1 hs update --skip-mission-control)"
 contains "$out" 'Updating herdspace from 0.7.0 to 0.7.1' 'update names both versions'
+lacks "$out" 'unbound variable' 'update ends with no unbound variable'
 contains "$(cat "$HOME/setup.log" 2>/dev/null)" 'SETUP client --os linux --server box --no-ghostty --skip-mission-control VERSION=0.7.1' 'update runs the setup with the saved role and options, and the new ones'
 rm -f "$HOME/setup.log"
 out="$(LATEST=0.7.0 hs update)"
