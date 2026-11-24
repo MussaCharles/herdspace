@@ -94,6 +94,10 @@ tests/test-ui.sh
 ```
 
 ```bash
+tests/test-extras-keys.sh
+```
+
+```bash
 tests/run-prereqs.sh
 ```
 

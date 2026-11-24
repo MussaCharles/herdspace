@@ -32,6 +32,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-bash-env.sh` | The move of exports from `~/.bashrc` and `~/.bash_profile` to `~/.zshenv`: which lines move and which stay, the question, the backups with mode 600, the test after the move that puts the files back, and that no value appears in the output. It needs bash, zsh, and Python 3, and no network. |
 | `tests/test-herdspace-cmd.sh` | The `herdspace` command with a stub `curl`: `--version` and `version`, the notice once a day, `HERDSPACE_UPDATE_CHECK=0`, no network, and `herdspace update` with the saved role and options and a wrong checksum, and `herdspace update --version` with its checks of the tag. It needs no network. |
 | `tests/test-uninstall.sh` | `herdspace uninstall` in temporary home folders with a fake install: `--check` changes nothing, no terminal needs `--yes`, the default answer is no, a file with no change goes, a changed file stays and is named, the marked blocks go and your own lines stay, the block of moved exports stays, the login service is disabled and not stopped, and the Mission Control keys come back. It uses stub `systemctl` and `defaults` commands, and it needs no network. |
+| `tests/test-extras-keys.sh` | `config/shell/extras.zsh` in a terminal with stub `fzf` and `hopen` commands: a free key gets the fzf widget, a key that you bound before keeps your widget, the file prints no error, and the rest of the file loads. CI also runs it with zsh 5.8 in an `ubuntu:22.04` container. It needs zsh and Python 3, and no network. |
 | `tests/test-ui.sh` | The output and the questions of the setup. It tests plain text with no terminal, and boxes and colors at a terminal. It tests the answers for a changed file, the own lines, the backups, and the next steps. It needs no network. |
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
 | `tests/run-release-check.sh` | Each option of the Quick start works from a published release, with the command of the README, in fresh containers and macOS VMs. See [After a release](#after-a-release). |
@@ -96,6 +97,10 @@ tests/test-links.sh
 
 ```bash
 tests/test-ui.sh
+```
+
+```bash
+tests/test-extras-keys.sh
 ```
 
 ```bash

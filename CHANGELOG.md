@@ -8,6 +8,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 - The README and `docs/updating.md` say what an update changes in a running session: the new commands work at once, an open shell needs `exec zsh` for the shell changes, and a new Herdr version needs a restart of the session.
 
+### Fixed
+
+- With zsh 5.8, for example on Ubuntu 22.04, each new shell printed `extras.zsh:unset:59: _hs_keys[^[c]: invalid parameter name`, and the rest of the shell extras did not load. The extras now save only the keys that have another widget, so they need no `unset` of one key.
+
 ## [0.11.0] - 2026-11-25
 
 ### Added

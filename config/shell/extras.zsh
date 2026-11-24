@@ -53,17 +53,19 @@ if [[ -t 0 && -t 1 ]]; then
       # fzf binds Ctrl+R, Ctrl+T, and Alt+C. A key that you bound to another
       # widget before keeps your widget.
       typeset -A _hs_keys
-      local _hs_key _hs_widget
+      local _hs_key _hs_widget _hs_bound
+      # zsh 5.8 cannot unset a key with a [ in it, such as ^[c, so the list
+      # gets only the keys that have another widget.
       for _hs_key _hs_widget in '^R' history-incremental-search-backward '^T' transpose-chars '^[c' capitalize-word; do
-        _hs_keys[$_hs_key]="${${(z)$(bindkey -- "$_hs_key")}[2]}"
-        [[ "${_hs_keys[$_hs_key]}" == ("$_hs_widget"|undefined-key|) ]] && unset "_hs_keys[$_hs_key]"
+        _hs_bound="${${(z)$(bindkey -- "$_hs_key")}[2]}"
+        [[ "$_hs_bound" == ("$_hs_widget"|undefined-key|) ]] || _hs_keys[$_hs_key]="$_hs_bound"
       done
       source <(fzf --zsh)
       for _hs_key in "${(@k)_hs_keys}"; do
         bindkey -- "$_hs_key" "${_hs_keys[$_hs_key]}"
         HERDSPACE_EXTRAS_SKIPPED+=("fzf key ${_hs_key}")
       done
-      unset _hs_keys _hs_key _hs_widget
+      unset _hs_keys _hs_key _hs_widget _hs_bound
     fi
   fi
 
