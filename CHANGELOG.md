@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-24
+
 ### Changed
 
 - The command palette lists every action in groups, as in VS Code: Projects, Tasks, Files, Git, Agents, Layout, Workspace and tabs, Sessions, Network, herdspace, Herdr, and Help. Each action shows its key or command at the right. The last 5 actions come first. The palette shows only the actions that fit the place, and an action that closes or stops something asks first.
@@ -232,7 +234,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/MussaCharles/herdspace/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/MussaCharles/herdspace/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/MussaCharles/herdspace/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/MussaCharles/herdspace/compare/0.6.4...0.7.0
