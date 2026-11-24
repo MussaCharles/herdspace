@@ -278,6 +278,19 @@ bash_values() {
   esac 2>/dev/null
 }
 
+# bash_start_env FILE prints an export line for each variable that zsh has
+# after it loads FILE in a clean environment. The lines are in single quotes,
+# so bash and zsh read them in the same way.
+bash_start_env() {
+  env -i HOME="$HOME" USER="${USER:-}" PATH=/usr/bin:/bin:/usr/sbin zsh -f -c '. "$1"; env -0' _ "$1" 2>/dev/null | python3 -I -c '
+import re, shlex, sys
+for item in sys.stdin.buffer.read().split(b"\0"):
+    name, sep, value = item.partition(b"=")
+    if sep and re.fullmatch(rb"[A-Za-z_][A-Za-z0-9_]*", name):
+        line = "export " + name.decode() + "=" + shlex.quote(value.decode("utf-8", "surrogateescape")) + "\n"
+        sys.stdout.buffer.write(line.encode("utf-8", "surrogateescape"))'
+}
+
 # ask_bash_exports NAMES asks whether to move the exports. It sets BASH_ENV_ANSWER.
 ask_bash_exports() {
   local answer
@@ -358,13 +371,24 @@ move_bash_exports() {
   ensure_block "$zshenv" "$BASH_ENV_BLOCK" "${old_block:+${old_block}
 }${new_lines}"
 
-  # The tests. zsh must read the lines of the block with the same values as
-  # bash. The test uses only the block, because other lines of ~/.zshenv can
-  # also change a variable, for example PATH.
-  printf '%s\n' "${old_block:+${old_block}
-}${new_lines}" >"$tmp"
+  # The tests. zsh must read the new lines with the same values as bash. Both
+  # shells start with the environment that zsh has after the old block, because
+  # zsh already reads the old block. The test uses no other line of ~/.zshenv,
+  # because those lines can also change a variable, for example PATH.
+  printf '%s\n' "$old_block" >"$tmp"
+  bash_start_env "$tmp" >"${tmp}.start"
+  { cat "${tmp}.start"; printf '%s\n' "$new_lines"; } >"$tmp"
+  rm -f "${tmp}.start"
+  local in_bash in_zsh differ
   # shellcheck disable=SC2086 # One word for each name.
-  if [ "$(bash_values bash "$tmp" $names)" != "$(bash_values zsh "$tmp" $names)" ]; then failed="a value differs in zsh"; fi
+  in_bash="$(bash_values bash "$tmp" $names)"
+  # shellcheck disable=SC2086 # One word for each name.
+  in_zsh="$(bash_values zsh "$tmp" $names)"
+  if [ "$in_bash" != "$in_zsh" ]; then
+    differ="$(diff <(printf '%s\n' "$in_bash") <(printf '%s\n' "$in_zsh") | sed -n 's/^[<>] \([^=]*\)=.*/\1/p' | sort -u | tr '\n' ' ')"
+    failed="zsh gives a different value to ${differ:-a variable}"
+    failed="${failed% }"
+  fi
   for f in $BASH_ENV_FILES; do
     [ ! -f "${HOME}/${f}" ] || bash -n "${HOME}/${f}" 2>/dev/null || failed="${failed:+${failed}, }~/${f} has a syntax error"
   done
