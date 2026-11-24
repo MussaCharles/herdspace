@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-25
+
 ### Added
 
 - Each release tag has an SSH signature, and `.github/release-signers` lists the release keys. `docs/setup.md` shows how to check a tag with `git tag -v`, and what the checksum, the attestation, and the signature each show.
@@ -246,7 +248,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/MussaCharles/herdspace/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/MussaCharles/herdspace/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/MussaCharles/herdspace/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/MussaCharles/herdspace/compare/0.7.0...0.8.0
