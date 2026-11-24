@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-24
+
 ### Added
 
 - `herdspace keys normal` gives `Cmd+T`, `Cmd+W`, and `Cmd+K` back to Ghostty on a client, and `herdspace keys herdr` sends them to Herdr again. `herdspace keys` shows the current keys.
@@ -225,7 +227,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/MussaCharles/herdspace/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/MussaCharles/herdspace/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/MussaCharles/herdspace/compare/0.6.4...0.7.0
 [0.6.4]: https://github.com/MussaCharles/herdspace/compare/0.6.3...0.6.4
