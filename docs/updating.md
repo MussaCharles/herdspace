@@ -28,7 +28,7 @@ flowchart LR
 
 ## Apply the newest version of this repository
 
-Run the same `curl` command again, with the same role and options. It downloads the newest release and runs it. To install another release, add `--version <tag>` after the role.
+Run the same `curl` command again, with the same role and options. It downloads the newest release and runs it. To install another release, add `--version <tag>` after the role. On a machine that has herdspace 0.8.0 or later, you can [go back with `herdspace update --version`](#go-back-to-an-older-release).
 
 If you use a clone, run `git pull` in the clone. Then run `./bootstrap.sh` with the same role and options as before.
 
@@ -48,6 +48,28 @@ herdr session stop my-projects
 A stop ends the programs in the panes of the session. When you open the session again, the layout comes back, the shells start again, and an agent with an integration resumes its conversation.
 
 The script changes only what is different. It updates a file that you did not change, and it asks about a file that you changed. It keeps a backup of each replaced file.
+
+## Go back to an older release
+
+If a release breaks something, install the release before it. Give the tag of that release. A tag is a version with no `v` in front:
+
+```bash
+herdspace update --version 0.9.0
+```
+
+The command prints one line that says it goes back. Then it runs the setup of that release with the role and the options of your last setup, in the same way as `herdspace update`.
+
+- The command checks the tag first. It stops with a message, and changes nothing, if the tag has a `v`, is not a version, or has no release.
+- If the tag is the installed version, the command changes nothing. To run the setup again anyway, add `--force`.
+- An older release does not know an option that a newer release added. The command leaves out each saved option that the older release does not list, and it names each one. For example, `--keep-terminal-look` is not in 0.9.0.
+- The setup saves the options that it ran with. So the saved options no longer hold an option that the command left out. Give the option again when you go forward.
+- A file that herdspace wrote is replaced with no question, because the manifest holds its hash. A file that you changed stays, and the setup asks about it, as in any update.
+- The command `herdspace` is replaced with the one of the older release. It has no `--version` option for `update` if the release is before the one that added it. To go forward again, run the `curl` command of the [setup guide](setup.md) with `--version <tag>` after the role, or run `herdspace update` for the latest release.
+- To stay on the older release, do not run `herdspace update`. The shell prints a notice about the latest release once a day. Set `HERDSPACE_UPDATE_CHECK=0` to turn it off.
+
+To see the installed version, run `herdspace --version`. The [release list](https://github.com/MussaCharles/herdspace/releases) shows the tags.
+
+`tests/run-rollback.sh` tests this. It installs the newest release, goes back to the one before it, and goes forward again.
 
 ## Update the tool versions
 

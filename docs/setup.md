@@ -252,6 +252,12 @@ If the latest release is already installed, the command says so and changes noth
 herdspace update --force
 ```
 
+To install one release, also an older one, give its tag. See [Go back to an older release](updating.md#go-back-to-an-older-release):
+
+```bash
+herdspace update --version 0.9.0
+```
+
 To see the installed version and the latest release, run `herdspace --version`. `herdspace version` prints the same text.
 
 When a new release exists, the herdspace shell prints one line before the prompt, at most once a day:
