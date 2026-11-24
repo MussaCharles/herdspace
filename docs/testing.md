@@ -28,6 +28,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-ci-changes.sh` | `tools/ci-changes.sh` finds a pull request that changes only docs, in a temporary git repository. |
 | `tests/test-links.sh` | Each relative link of each Markdown file points at a file that exists, and each `#anchor` matches a heading. A link in a community file in `.github/` starts with `/`. It needs no network. |
 | `tests/test-ghostty.sh` | How the client setup writes the Ghostty file: the marked blocks at the top, your own lines below them, the file of an older herdspace, the key and look choices, and the key question. It needs no network. |
+| `tests/test-known-hashes.sh` | `tools/known-hashes.sh` in a temporary repository: each older version of a file is in the list, also a version that only a merge commit made, and the version of HEAD is not. It needs git and Python 3, and no network. |
 | `tests/test-sign-tag.sh` | `tools/sign-tag.sh` in a temporary repository, with a temporary SSH key: a signed tag, `git tag -v`, a key that is not a release key, and a tag with no signature. It needs git and ssh-keygen, and no network. |
 | `tests/test-bash-env.sh` | The move of exports from `~/.bashrc` and `~/.bash_profile` to `~/.zshenv`: which lines move and which stay, the question, the backups with mode 600, the test after the move that puts the files back, and that no value appears in the output. It needs bash, zsh, and Python 3, and no network. |
 | `tests/test-herdspace-cmd.sh` | The `herdspace` command with a stub `curl`: `--version` and `version`, the notice once a day, `HERDSPACE_UPDATE_CHECK=0`, no network, and `herdspace update` with the saved role and options and a wrong checksum, and `herdspace update --version` with its checks of the tag. It needs no network. |
@@ -77,6 +78,10 @@ tests/test-verify-release.sh
 
 ```bash
 tests/test-sign-tag.sh
+```
+
+```bash
+tests/test-known-hashes.sh
 ```
 
 ```bash
