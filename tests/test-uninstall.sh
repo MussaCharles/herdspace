@@ -147,6 +147,7 @@ here "$H/.local/bin/herdr" 'Herdr stays'
 here "$H/.config/nvim/init.lua" 'your own Neovim folder stays'
 here "$H/.zshrc.bak-20260101-000000" 'a backup stays'
 here "$H/.config/herdspace/my-note" 'a file of yours in the herdspace config folder stays'
+contains "$out" 'it holds a backup or a file of yours' 'the output says that the config folder stays'
 log="$(cat "$STUB_LOG" 2>/dev/null)"
 contains "$log" 'systemctl --user disable herdr.service' 'the login service is disabled'
 lacks "$log" 'stop' 'the login service is not stopped'

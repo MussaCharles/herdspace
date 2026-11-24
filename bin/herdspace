@@ -403,9 +403,14 @@ un_state() {
   if [ -d "$conf" ]; then
     if [ "$UN_CHECK" -eq 0 ]; then
       rm -f "$conf/keys" "$conf/look"
-      rmdir "$conf" 2>/dev/null || true
+      if rmdir "$conf" 2>/dev/null; then
+        un_say remove "$(un_home "$conf")/"
+      else
+        printf '  %-9s %s\n' keep "$(un_home "$conf")/ (it holds a backup or a file of yours)"
+      fi
+    else
+      un_say remove "$(un_home "$conf")/ (your choice of keys and look, and the folder if it is empty)"
     fi
-    un_say remove "$(un_home "$conf")/ (your choice of keys and look, and the folder if it is empty)"
   fi
   if [ -d "$CACHE" ]; then
     [ "$UN_CHECK" -eq 1 ] || rm -rf "$CACHE"

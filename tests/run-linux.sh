@@ -69,7 +69,7 @@ for base in "$@"; do
     test ! -e \$HOME/.local/bin/hopen
     test ! -e \$HOME/.local/bin/herdspace
     test ! -e \$HOME/.local/share/herdspace
-    test ! -e \$HOME/.config/herdspace
+    test ! -e \$HOME/.config/herdspace/zshrc.zsh
     ! grep -qs '>>> herdspace' \$HOME/.zshrc \$HOME/.zprofile
     grep -q HS_TEST_TOKEN \$HOME/.bashrc
     test -x \$HOME/.local/bin/herdr
