@@ -65,7 +65,7 @@ curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bo
 
 Use `client --server <name>` or `both` in place of `server`, for the role of the machine. If the person does not want the editor keys of herdspace, add `--keep-terminal-keys` to a client or `both` run. The setup saves the choice. Show the person the output of `--check` first, and ask before an update.
 
-To update a machine that has herdspace 0.8.0 or later, run `herdspace update`. It runs the setup of the latest release with the role and the options of the last setup. Add an option after `update` for one run, for example `herdspace update --keep-existing`. To see the installed and the latest version, run `herdspace --version`. On an older version, run the `curl` command above with no `--check`.
+To update a machine that has herdspace 0.8.0 or later, run `herdspace update`. It runs the setup of the latest release with the role and the options of the last setup. Add an option after `update` for one run, for example `herdspace update --keep-existing`. If the latest release is already installed, it changes nothing. To run the setup again anyway, add `--force`. To see the installed and the latest version, run `herdspace --version`. On an older version, run the `curl` command above with no `--check`.
 
 To update only `hopen`:
 

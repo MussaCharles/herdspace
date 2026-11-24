@@ -96,6 +96,14 @@ out="$(LATEST=0.7.1 hs update --skip-mission-control)"
 contains "$out" 'Updating herdspace from 0.7.0 to 0.7.1' 'update names both versions'
 contains "$(cat "$HOME/setup.log" 2>/dev/null)" 'SETUP client --os linux --server box --no-ghostty --skip-mission-control VERSION=0.7.1' 'update runs the setup with the saved role and options, and the new ones'
 rm -f "$HOME/setup.log"
+out="$(LATEST=0.7.0 hs update)"
+contains "$out" 'herdspace 0.7.0 is the latest release. Nothing to update.' 'update on the latest release says that nothing is new'
+contains "$out" 'herdspace update --force' 'update on the latest release names --force'
+[ ! -e "$HOME/setup.log" ] && pass 'update on the latest release runs no setup' || fail 'update on the latest release runs no setup'
+out="$(LATEST=0.7.0 hs update --force --skip-mission-control)"
+contains "$out" 'because of --force' 'update --force says why the setup runs'
+contains "$(cat "$HOME/setup.log" 2>/dev/null)" 'SETUP client --os linux --server box --no-ghostty --skip-mission-control VERSION=0.7.0' 'update --force runs the setup, and does not pass --force to it'
+rm -f "$HOME/setup.log"
 echo 'echo changed' >>"$tmp/release/bootstrap.sh"
 out="$(LATEST=0.7.1 hs update)"
 contains "$out" 'The checksum of bootstrap.sh is wrong' 'update stops when the checksum does not match'

@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- With the latest release already installed, `herdspace update` says that nothing is new, and runs no setup. To run the setup again anyway, run `herdspace update --force`.
+
 ### Fixed
 
 - `herdspace help` no longer prints a line of the script. An unknown command, for example `herdspace --update`, prints one error line, suggests `herdspace update`, and says where the help is, as git and the GNU tools do.
