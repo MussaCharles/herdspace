@@ -29,6 +29,7 @@ done
 [ -n "${LATEST:-}" ] || exit 7
 case "$url" in
   */releases/latest) printf 'HTTP/2 302\r\nlocation: https://github.com/o/r/releases/tag/%s\r\n\r\n' "$LATEST" ;;
+  */download/9.9.9/*) exit 22 ;;
   */download/*) cp "$RELEASE_DIR/$(basename "$url")" "$out" ;;
 esac
 STUB
@@ -109,6 +110,44 @@ out="$(LATEST=0.7.1 hs update)"
 contains "$out" 'The checksum of bootstrap.sh is wrong' 'update stops when the checksum does not match'
 [ ! -e "$HOME/setup.log" ] && pass 'a wrong checksum runs no setup' || fail 'a wrong checksum runs no setup'
 contains "$(LATEST='' hs update)" 'GitHub did not answer' 'update with no network changes nothing'
+
+# update --version: the checks of the tag, a stop at the installed version, and
+# an older release that does not know a saved option.
+printf 'role=client\nos=linux\narg=--server\narg=box\narg=--no-ghostty\narg=--keep-terminal-look\n' >"$HOME/.local/share/herdspace/last-setup"
+printf '#!/usr/bin/env bash\n# Options: --os, --server HOST, --no-ghostty\necho "SETUP $* VERSION=$HS_VERSION" >"$HOME/setup.log"\n' >"$tmp/release/bootstrap.sh"
+(cd "$tmp/release" && { sha256sum bootstrap.sh 2>/dev/null || shasum -a 256 bootstrap.sh; } >SHA256SUMS)
+rm -f "$HOME/setup.log" "$HOME/curl.log"
+echo 0.8.0 >"$HOME/.local/share/herdspace/version"
+out="$(LATEST=0.9.0 hs update --version 0.7.0)"
+contains "$out" 'Going back from herdspace 0.8.0 to the older release 0.7.0.' 'update --version names a step back'
+contains "$out" 'does not know the option --keep-terminal-look' 'update --version names a saved option that the older release does not know'
+contains "$(cat "$HOME/setup.log" 2>/dev/null)" 'SETUP client --os linux --server box --no-ghostty VERSION=0.7.0' 'update --version runs the older setup with the options that it knows'
+lacks "$(cat "$HOME/setup.log" 2>/dev/null)" '--keep-terminal-look' 'update --version leaves out the unknown option'
+[ -z "$(grep 'releases/latest' "$HOME/curl.log")" ] && pass 'update --version does not ask for the latest release' || fail 'update --version does not ask for the latest release'
+rm -f "$HOME/setup.log"
+out="$(LATEST=0.9.0 hs update --version=0.9.0)"
+contains "$out" 'Changing herdspace from 0.8.0 to 0.9.0.' 'update --version=TAG goes to a newer release too'
+rm -f "$HOME/setup.log"
+echo 0.7.0 >"$HOME/.local/share/herdspace/version"
+out="$(LATEST=0.9.0 hs update --version 0.7.0)"
+contains "$out" 'herdspace 0.7.0 is installed already. Nothing to change.' 'update --version of the installed version changes nothing'
+contains "$out" 'herdspace update --version 0.7.0 --force' 'update --version of the installed version names --force'
+[ ! -e "$HOME/setup.log" ] && pass 'update --version of the installed version runs no setup' || fail 'update --version of the installed version runs no setup'
+out="$(LATEST=0.9.0 hs update --version 0.7.0 --force)"
+contains "$out" 'because of --force' 'update --version with --force runs the setup again'
+[ -e "$HOME/setup.log" ] && pass 'update --version with --force runs the setup' || fail 'update --version with --force runs the setup'
+rm -f "$HOME/setup.log"
+out="$(LATEST=0.9.0 hs update --version v0.7.0)"; rc=$?
+contains "$out" 'has no v in front. Use: herdspace update --version 0.7.0' 'update --version with a v says what to use'
+[ "$rc" -eq 1 ] && [ ! -e "$HOME/setup.log" ] && pass 'a tag with a v runs no setup' || fail "a tag with a v runs no setup: ${rc}"
+contains "$(LATEST=0.9.0 hs update --version latest)" "'latest' is not a release tag" 'update --version with a word says that it is not a tag'
+contains "$(LATEST=0.9.0 hs update --version '0.7.0;ls')" 'is not a release tag' 'update --version with odd characters is refused'
+contains "$(LATEST=0.9.0 hs update --version)" '--version needs a release tag' 'update --version with no tag says what is missing'
+out="$(LATEST=0.9.0 hs update --version 9.9.9)"; rc=$?
+contains "$out" 'Could not download bootstrap.sh of 9.9.9. Does this release exist?' 'update --version of a missing release says so'
+[ "$rc" -eq 1 ] && [ ! -e "$HOME/setup.log" ] && pass 'a missing release runs no setup' || fail "a missing release runs no setup: ${rc}"
+contains "$(hs help)" 'herdspace update --version TAG' 'help shows update --version'
+echo 0.7.0 >"$HOME/.local/share/herdspace/version"
 
 # keys: show the mode, and change it with the setup of the installed release.
 mkdir -p "$HOME/.local/share/herdspace/0.7.0"

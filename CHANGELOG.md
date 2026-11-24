@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- `herdspace update --version <tag>` installs one release, also an older one, with the saved role and options. It checks the tag, says when it goes back, and leaves out a saved option that the older release does not know. See [Go back to an older release](docs/updating.md#go-back-to-an-older-release).
+
 ## [0.10.0] - 2026-11-24
 
 ### Changed
