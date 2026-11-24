@@ -133,6 +133,17 @@ got="$(env -i HOME="$tmp/home" PATH=/usr/bin:/bin zsh -c 'echo "$PATH"')"
 contains "$got" "${tmp}/home/bin:" 'zsh has the moved PATH folder'
 contains "$got" "${tmp}/home/cargo/bin:" 'zsh keeps the PATH folder of your own ~/.zshenv line'
 
+# An old block that zsh reads in another way does not stop a new move.
+old_block="$(printf '%s\n' '# >>> herdspace bash env >>>' 'export OLD_DIR=$HOME/old' 'export PATH=$OLD_DIR:h/bin:$PATH' '# <<< herdspace bash env <<<')"
+out="$(ask 'y\r' "$old_block" 'export PATH="$HOME/bin:$PATH"')"
+contains "$out" 'Moved the exports of' 'a new move passes when the old block gives zsh another value'
+contains "$(cat "$tmp/home/.zshenv")" 'export PATH=$OLD_DIR:h/bin:$PATH' 'the old block stays'
+
+# A new line that zsh reads in another way fails, and the message names it.
+out="$(ask 'y\r' '' 'export ZSH_READS_OTHER=$HOME:h')"
+contains "$out" 'zsh gives a different value to ZSH_READS_OTHER' 'the message names the variable that differs'
+lacks "$out" "$tmp/home" 'the message shows no value'
+
 # If the test after the move fails, the files come back.
 out="$(ask 'y\r' 'if true; then')"
 contains "$out" 'put your files back' 'a failed test puts the files back'

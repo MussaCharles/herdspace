@@ -116,5 +116,30 @@ contains "$out" 'bootstrap/platforms/client-macos.sh --check --skip-mission-cont
 out="$(HS_DRY_RUN=1 ./bootstrap.sh both --os wsl 2>&1)"
 contains "$out" 'bootstrap/platforms/client-linux.sh --no-ghostty' 'both on WSL uses no Ghostty'
 
+# A download that stops in the middle runs nothing. Each part of the release
+# scripts goes to bash on stdin, as with curl. Each command that the scripts
+# can call is a stub that writes to a log, and the home folder stays empty.
+cut="${tmp}/cut"
+mkdir -p "${cut}/bin" "${cut}/home"
+for c in curl gh tar git sudo apt-get brew mkdir mktemp cp mv rm ln chmod python3 uname sed awk; do
+  printf '#!/bin/sh\necho "%s" >>"%s/log"\n' "$c" "$cut" >"${cut}/bin/${c}"
+  chmod 755 "${cut}/bin/${c}"
+done
+for script in bootstrap.sh install.sh; do
+  args=()
+  [ "$script" = install.sh ] || args=(server)
+  # The cuts end before the last line, main "$@", because that line runs all.
+  size="$(($(wc -c <"${dist}/${script}") - $(tail -n 1 "${dist}/${script}" | wc -c)))"
+  ran=""
+  for n in $(seq 1 37 "$size") "$size"; do
+    head -c "$n" "${dist}/${script}" | env -i HOME="${cut}/home" PATH="${cut}/bin" /bin/bash -s ${args[@]+"${args[@]}"} >/dev/null 2>&1
+    if [ -s "${cut}/log" ] || [ -n "$(ls -A "${cut}/home")" ]; then ran="${ran} ${n}"; rm -f "${cut}/log"; rm -rf "${cut:?}/home" && mkdir "${cut}/home"; fi
+  done
+  if [ -z "$ran" ]; then pass "a cut ${script} runs nothing"; else fail "a cut ${script} runs commands at bytes:${ran}"; fi
+done
+# The whole script still runs.
+out="$(env -i HOME="${cut}/home" PATH=/usr/bin:/bin /bin/bash -s -- --help <"${dist}/bootstrap.sh" 2>&1)"
+contains "$out" 'Usage' 'the whole bootstrap.sh runs from stdin'
+
 printf 'RESULT failures=%s\n' "$failures"
 [ "$failures" -eq 0 ]
