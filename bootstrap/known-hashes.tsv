@@ -1,5 +1,6 @@
 # The SHA-256 of each older version of each installed file. tools/known-hashes.sh writes this list.
 bin/herdr-update-check	bf52e00920b6ffad6fd9bc4d856f889c0e0d7cd6f260b6fae90be3874ac475e7
+bin/herdspace	409a055aafb8b36dcad4c21840e99b85abc33fe75e2c22b65944f63f92136d91
 bin/herdspace	7623bc3bb8ff64de83da6343ce9fc2f7efdf15824721f8f167bb5851c6827121
 bin/herdspace	8cae381ff7083ef9772900f491d8faa6a52ab0b229306377ec623db03f95fd7d
 bin/herdspace	b7c78524cb7dcb8ad9a3065cb3afd4bffe92ea19dde03187afce7cf9691bdc46
