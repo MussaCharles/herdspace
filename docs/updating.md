@@ -76,6 +76,17 @@ tests/run-linux.sh
 tests/run-macos.sh
 ```
 
+## Old options and deprecation
+
+A deprecated option is an option that still works but goes away in a later release. herdspace follows these rules when an option of a script or of a command changes:
+
+1. The old option keeps working for at least the next two minor releases. For example, an option that is deprecated in 0.11.0 still works in 0.12.0 and 0.13.0.
+2. While it works, the setup prints a warning with the new option.
+3. The CHANGELOG lists the change under `### Deprecated` in the release that deprecates the option, and under `### Removed` in the release that removes it.
+4. `herdspace update` uses the options of your last setup. If a saved option is deprecated, the update still works, and the warning tells you the new option.
+
+A removed option stops the setup with a message that names the new option. A change to the format of `herdspace.toml` or of a project list follows the same rules.
+
 ## Make a release
 
 A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag is a version with no v in front, for example `0.1.2`. A tag with a dash, for example `0.2.0-alpha.1`, becomes a pre-release.

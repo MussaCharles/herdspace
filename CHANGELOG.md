@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- `docs/setup.md` lists the supported systems, and the network use of each part, in "Network use and privacy". herdspace sends no telemetry. `docs/updating.md` has the rules for old options, in "Old options and deprecation".
+
 ## [0.10.0] - 2026-11-24
 
 ### Changed
