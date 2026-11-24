@@ -45,14 +45,21 @@ printf '# A line of the person.\n' >>"$EDIT"
 out="$(differs "$@")"
 [ "$out" = "$EDIT" ] && pass "${TAG} with no manifest: an update asks about the changed file only" || fail "${TAG} with no manifest: an update asks about the changed file only: ${out}"
 
+# A release before 0.8.0 kept its Neovim files in ~/.config/nvim.
+old_nvim=0
+[ -d "${HOME}/.config/nvim" ] && old_nvim=1
 echo "== update to this folder, with no terminal"
 ./bootstrap.sh server "$@" </dev/null >/tmp/upgrade-new.log 2>&1 || { tail -n 20 /tmp/upgrade-new.log; fail "the update runs"; }
 grep -q 'A line of the person' "$EDIT" && pass "the update keeps the changed file" || fail "the update keeps the changed file"
 # The Neovim files of the older release move to their own folder.
 [ ! -e "${HOME}/.config/nvim" ] && pass "the old ~/.config/nvim moves away" || fail "the old ~/.config/nvim moves away"
-ls -d "${HOME}"/.config/nvim.bak-* >/dev/null 2>&1 && pass "the old ~/.config/nvim is in a backup folder" || fail "the old ~/.config/nvim is in a backup folder"
+if [ "$old_nvim" -eq 1 ]; then
+  ls -d "${HOME}"/.config/nvim.bak-* >/dev/null 2>&1 && pass "the old ~/.config/nvim is in a backup folder" || fail "the old ~/.config/nvim is in a backup folder"
+fi
 cmp -s config/nvim/init.lua "${HOME}/.config/herdspace-nvim/init.lua" && pass "the Neovim files are in ~/.config/herdspace-nvim" || fail "the Neovim files are in ~/.config/herdspace-nvim"
-grep -q 'herdspace-nvim' /tmp/upgrade-new.log && pass "the update says where the Neovim files are" || fail "the update says where the Neovim files are"
+if [ "$old_nvim" -eq 1 ]; then
+  grep -q 'herdspace-nvim' /tmp/upgrade-new.log && pass "the update says where the Neovim files are" || fail "the update says where the Neovim files are"
+fi
 
 out="$(differs "$@")"
 [ "$out" = "$EDIT" ] && pass "after the update, only the changed file differs" || fail "after the update, only the changed file differs: ${out}"
