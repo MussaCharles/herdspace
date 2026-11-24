@@ -36,6 +36,8 @@ If you use a clone, run `git pull` in the clone. Then run `./bootstrap.sh` with 
 
 You do not have to stop your Herdr sessions before an update. The setup never stops a running server, so the programs in your panes keep running.
 
+- The new `herdspace` and `hopen` commands, the templates, and the scripts work at once, also inside a running session.
+- A shell that is already open keeps its old environment. To get the shell changes of the update, for example new exports in `~/.zshenv`, run `exec zsh` in that pane, or open a new pane.
 - If the update changes `config.toml`, the setup runs `herdr server reload-config` for each running session. Herdr applies the new settings and keeps the panes. A few settings apply only after a restart. The [Herdr configuration reference](https://herdr.dev/tui/docs/config-reference/) names them.
 - If the update installs a new Herdr version, each running session keeps the old version. The new Herdr attaches to it. The setup names each session with an older version.
 
