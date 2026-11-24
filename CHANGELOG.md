@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- The move of exports from the bash files to `~/.zshenv` no longer fails when `~/.zshenv` already has a block from an earlier move. The test after the move starts from the environment that zsh has after the old block, and checks only the new lines. If the test fails, the message names the variables that differ, with no value.
+- `bootstrap.sh` and `install.sh` keep all their code in a `main` function, and the last line calls it. If a download with `curl` stops in the middle, bash runs nothing.
 ### Added
 
 - `herdspace update --version <tag>` installs one release, also an older one, with the saved role and options. It checks the tag, says when it goes back, and leaves out a saved option that the older release does not know. See [Go back to an older release](docs/updating.md#go-back-to-an-older-release).

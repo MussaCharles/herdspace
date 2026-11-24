@@ -112,6 +112,8 @@ Run the script with `curl`. The command downloads the newest release to `~/.loca
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
 ```
 
+If the download stops in the middle, the script runs nothing. All its code is in one function, and only the last line calls it.
+
 Each section below shows this command. You do not need to clone the repository.
 
 To read or change the files first, clone the repository and run `./bootstrap.sh` from the clone, with the same role and options:

@@ -15,6 +15,9 @@
 #   HOPEN_TEMPLATES  Where the templates go. The default is ~/.config/hopen/templates.
 #   HOPEN_REPO       The GitHub repository, as owner/name. The release sets it.
 #   HOPEN_BASE_URL   Where the release files are. Tests use a file:// address.
+# All the code is in main, and the last line calls it. If a download with
+# curl stops in the middle, bash reads only a part of main and runs nothing.
+main() {
 set -euo pipefail
 
 REPO="${HOPEN_REPO:-@REPO@}"
@@ -130,3 +133,6 @@ case ":${PATH}:" in
   *) warn "${BIN_DIR} is not in your PATH. Add it to your shell startup file." ;;
 esac
 info "Done. Run: hopen --help"
+}
+
+main "$@"
