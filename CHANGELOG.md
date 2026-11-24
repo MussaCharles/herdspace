@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- `herdspace uninstall` removes what the setup wrote. `herdspace uninstall --check` lists the changes and changes nothing. The command asks once, and it needs `--yes` with no terminal. It removes each file that no person changed, the marked blocks of herdspace, the Herdr login service, and the data of herdspace. On a Mac, it gives the Ctrl arrow shortcuts back to Mission Control. It keeps each file that you changed, and it never removes a project, a Herdr session, Herdr, or a package.
+
 ## [0.10.0] - 2026-11-24
 
 ### Changed

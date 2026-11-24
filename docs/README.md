@@ -6,6 +6,7 @@ Scope: each guide of herdspace, in groups. Start with the [README](../README.md)
 
 - [Setup guide](setup.md): set up a server and a client, every option, and what the setup installs.
 - [Update herdspace](setup.md#update-herdspace): `herdspace update`, `herdspace --version`, and the notice of a new release.
+- [Uninstall herdspace](setup.md#uninstall-herdspace): `herdspace uninstall --check` and `herdspace uninstall`.
 - Your own files: [your ~/.zshrc](setup.md#your-zshrc), [your Ghostty file](keyboard-shortcuts.md#your-ghostty-file), [your Neovim files](setup.md#your-neovim-files), and [exports from your bash files](setup.md#exports-from-your-bash-files).
 - [Connect to the server with SSH](ssh.md): what `my-server` means, and how to set up the SSH name and key.
 - [Windows with WSL](windows-wsl.md): use a Windows machine as a client.

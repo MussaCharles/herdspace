@@ -50,6 +50,8 @@ contains "$(LATEST=0.10.0 hs --version)" 'Run: herdspace update' '0.10.0 is newe
 out="$(hs help)"
 contains "$out" 'Usage: herdspace update' 'help shows the usage'
 lacks "$out" 'set -' 'help shows no line of the script'
+contains "$out" 'herdspace uninstall --check' 'help lists uninstall --check'
+contains "$out" 'herdspace uninstall [--yes]' 'help lists uninstall'
 out="$(hs --update)"; rc=$?
 contains "$out" "herdspace: '--update' is not a herdspace command." 'an unknown command says that it is unknown'
 contains "$out" "Did you mean 'herdspace update'?" '--update suggests herdspace update'

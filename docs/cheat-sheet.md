@@ -355,7 +355,7 @@ herdr server reload-config
 | Start the Auto Title plugin | `herdr plugin action invoke restart --plugin herdr.auto-title` |
 | Show the state of the integrations | `herdr integration status` |
 
-To update herdspace, run `herdspace update`. To see the installed and the latest version, run `herdspace --version`. To update the tools, follow the [updating guide](updating.md). To see what a machine still needs, run its setup command again with `--check` after the role, for example `bash -s -- server --check`.
+To update herdspace, run `herdspace update`. To remove herdspace, run `herdspace uninstall --check` and then `herdspace uninstall` (see [uninstall](setup.md#uninstall-herdspace)). To see the installed and the latest version, run `herdspace --version`. To update the tools, follow the [updating guide](updating.md). To see what a machine still needs, run its setup command again with `--check` after the role, for example `bash -s -- server --check`.
 
 ## Problems
 

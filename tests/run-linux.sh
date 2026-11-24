@@ -61,6 +61,19 @@ for base in "$@"; do
     grep -q 'BOOTSTRAP_ROLE=both' \$HOME/.config/herdspace/env.zsh
     ./bootstrap.sh both --check --no-ghostty ${flags} >/tmp/both-check.log 2>&1 || { cat /tmp/both-check.log; exit 1; }
     echo RESULT both-check-clean
+    echo '== uninstall'
+    \$HOME/.local/bin/herdspace uninstall --check >/tmp/un-check.log 2>&1 || { cat /tmp/un-check.log; exit 1; }
+    test -x \$HOME/.local/bin/hopen
+    test -d \$HOME/.local/share/herdspace
+    \$HOME/.local/bin/herdspace uninstall --yes >/tmp/un.log 2>&1 || { cat /tmp/un.log; exit 1; }
+    test ! -e \$HOME/.local/bin/hopen
+    test ! -e \$HOME/.local/bin/herdspace
+    test ! -e \$HOME/.local/share/herdspace
+    test ! -e \$HOME/.config/herdspace
+    ! grep -qs '>>> herdspace' \$HOME/.zshrc \$HOME/.zprofile
+    grep -q HS_TEST_TOKEN \$HOME/.bashrc
+    test -x \$HOME/.local/bin/herdr
+    echo RESULT uninstall-clean
   " >>"$log" 2>&1
   rc=$?
   grep -E '^(FAIL|RESULT)' "$log" | cut -c1-200
