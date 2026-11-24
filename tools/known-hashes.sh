@@ -28,16 +28,18 @@ def add(path, data):
     lines.add(f"{path}\t{hashlib.sha256(data).hexdigest()}")
 
 # Each version of each file in the history, except the version of HEAD. The
-# setup sees the version of HEAD as current, so it needs no line.
+# setup sees the version of HEAD as current, so it needs no line. git log
+# --raw skips merge commits, so a version that only a merge commit made shows
+# only as the old side of a later change. The list takes both sides.
 raw = git("log", "--no-renames", "--no-abbrev", "--format=", "--raw", "HEAD", "--", *roots).decode()
 for line in raw.splitlines():
     if not line.startswith(":"):
         continue
     meta, path = line.split("\t", 1)
-    blob = meta.split()[3]
-    if set(blob) == {"0"} or current.get(path) == blob:
-        continue
-    add(path, git("cat-file", "blob", blob))
+    for blob in meta.split()[2:4]:
+        if set(blob) == {"0"} or current.get(path) == blob:
+            continue
+        add(path, git("cat-file", "blob", blob))
 
 # A release writes its tag in bin/hopen, as tools/release.sh does. The tags
 # come from the headings of CHANGELOG.md, so the pull request of a release adds

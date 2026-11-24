@@ -73,6 +73,8 @@ jobs:
         run: tests/test-ghostty.sh
       - name: List of older file versions
         run: tools/known-hashes.sh --check
+      - name: The tool for the list of older file versions
+        run: tests/test-known-hashes.sh
       - name: The herdspace command
         run: tests/test-herdspace-cmd.sh
       - name: The signed release tags
