@@ -114,6 +114,8 @@ The script reads the repository name from `gh`, and it writes the name into `boo
 
 To run only these checks, and publish nothing, use `tools/release.sh <tag> --preflight`.
 
+If the preflight says `No merged pull request has the commit`, GitHub did not link the merge commit to its pull request. This can happen when the merge gets an error from GitHub, for example `502 Bad Gateway`, even though the merge worked. Do not publish from that commit. Merge a small pull request after it, for example a fix in the docs, and run the preflight again.
+
 After the publish, the job "Release files match the tag" of the workflow "Release check" builds the release again from the tag on a clean runner. It compares each published file with that build. If a file differs, is missing, or is extra, the job fails. Do not use the release then, and publish a new tag. If all files match, the job signs each file with a [GitHub artifact attestation](https://docs.github.com/en/actions/concepts/security/artifact-attestations). An attestation is a signed record of the workflow, the commit, and the checksum of a file.
 
 ## Add something new
