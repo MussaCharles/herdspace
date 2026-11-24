@@ -132,6 +132,7 @@ ghostty_template() {
   if [ "$KEYS" = "herdspace" ]; then
     printf '# >>> herdspace keys >>>\n%s\n# <<< herdspace keys <<<\n' "$(ghostty_section "$src" keys)"
   fi
+  printf '# >>> herdspace ssh >>>\n%s\n# <<< herdspace ssh <<<\n' "$(ghostty_section "$src" ssh)"
   printf '\n# Put your own lines below.\n'
   [ -z "$own" ] || printf '%s\n' "$own"
 }
@@ -179,6 +180,8 @@ install_ghostty_config() {
   fi
   local before
   before="$(file_sha "$file")"
+  # Each block goes at the top, so the ssh block, added first, ends up last.
+  ensure_block "$file" "herdspace ssh" "$(ghostty_section "$src" ssh)" top
   if [ "$KEYS" = "herdspace" ]; then
     ensure_block "$file" "herdspace keys" "$(ghostty_section "$src" keys)" top
   else

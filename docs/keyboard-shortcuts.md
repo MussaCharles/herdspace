@@ -44,12 +44,13 @@ The first client run asks which keys to use, before it changes any key. It shows
 
 ## Your Ghostty file
 
-herdspace never replaces `~/.config/ghostty/config.ghostty`. It writes two marked blocks at the top of the file:
+herdspace never replaces `~/.config/ghostty/config.ghostty`. It writes three marked blocks at the top of the file:
 
 | Block | What it holds | To leave it out |
 |-------|---------------|-----------------|
 | `herdspace appearance` | The background, the opacity, the window size, and on a Mac the blur and the tab title bar | `--keep-terminal-look` |
 | `herdspace keys` | The keys of the table above, the replacement keys, and on a Mac, `Option` as `Alt` | `--keep-terminal-keys` |
+| `herdspace ssh` | `shell-integration-features = ssh-env`, for a [server without herdspace](ssh.md#a-server-without-herdspace) | Put your own `shell-integration-features` line below the blocks |
 
 Put your own lines below the blocks. Ghostty uses the last value of each setting, so your value wins over the herdspace value. For example, a `window-position-x` line of yours stays, and your own `background` replaces the herdspace one. The file of an older herdspace gets this layout after a backup, and its own lines stay below the blocks.
 
@@ -92,6 +93,20 @@ To use the herdspace keys again, add `--use-herdspace-keys`:
 ```bash
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- client --server my-server --use-herdspace-keys
 ```
+
+## Switch the keys later
+
+Run these commands on the client, the machine where Ghostty runs:
+
+| Command | Effect |
+|---------|--------|
+| `herdspace keys` | Show the current keys. |
+| `herdspace keys normal` | Give the keys back to Ghostty, as `--keep-terminal-keys` does. |
+| `herdspace keys herdr` | Send the keys to Herdr again, as `--use-herdspace-keys` does. |
+
+The command runs the setup of the installed version again with the option, and it saves the choice for later updates. Then quit Ghostty and start it again, so that the keys load.
+
+Ghostty cannot change a key only while a program runs. For that reason, the keys cannot switch by themselves when you open or leave Herdr. See [the Ghostty discussion](https://github.com/ghostty-org/ghostty/discussions/9902).
 
 To keep only the Mission Control shortcuts on a Mac, and change the other keys, add `--skip-mission-control` in place of `--keep-terminal-keys`.
 

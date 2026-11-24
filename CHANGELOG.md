@@ -4,6 +4,11 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- `herdspace keys normal` gives `Cmd+T`, `Cmd+W`, and `Cmd+K` back to Ghostty on a client, and `herdspace keys herdr` sends them to Herdr again. `herdspace keys` shows the current keys.
+- The client setup turns on the `ssh-env` feature of Ghostty in a new `herdspace ssh` block. When you type `ssh` to a server without herdspace, Ghostty sends `TERM=xterm-256color`, so `clear` and other commands work there. It writes nothing on the server.
+
 ### Changed
 
 - With the latest release already installed, `herdspace update` says that nothing is new, and runs no setup. To run the setup again anyway, run `herdspace update --force`.

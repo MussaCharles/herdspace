@@ -38,6 +38,7 @@ contains "$out" '# >>> herdspace keys >>>' 'a new file has the keys block'
 contains "$out" 'keybind = super+alt+t=new_tab' 'the keys block has a replacement key for a new tab'
 lacks "$out" 'super+e=unbind' 'Cmd+E keeps its Ghostty action'
 contains "$out" 'Put your own lines below' 'a new file says where your own lines go'
+contains "$out" 'shell-integration-features = ssh-env' 'a new file has the ssh block'
 out="$(run "KEYS=herdspace; LOOK=herdspace; install_ghostty_config $MAC; echo 'window-position-x = 426' >>$F; CHANGED=0; install_ghostty_config $MAC; echo CHANGED=\$CHANGED; tail -n 1 $F")"
 contains "$out" 'CHANGED=0' 'a second run changes nothing'
 contains "$out" 'window-position-x = 426' 'a second run keeps your line at the end'
@@ -62,11 +63,18 @@ out="$(run "KEYS=herdspace LOOK=herdspace install_ghostty_config $MAC; KEYS=term
 lacks "$out" 'unbind' 'the terminal keys remove the keys block'
 lacks "$out" 'background-opacity' 'the terminal look removes the appearance block'
 contains "$out" 'Put your own lines below' 'the rest of the file stays'
+contains "$out" '# >>> herdspace ssh >>>' 'the terminal keys and look keep the ssh block'
+
+# A file from 0.8.0, with no ssh block, gets it, and your lines stay last.
+out="$(run "KEYS=herdspace; LOOK=herdspace; install_ghostty_config $MAC; awk '/# >>> herdspace ssh >>>/{s=1} !s; /# <<< herdspace ssh <<</{s=0}' $F >$F.old; cat $F.old >$F; echo 'font-size = 15' >>$F; install_ghostty_config $MAC; cat $F")"
+contains "$out" 'shell-integration-features = ssh-env' 'an update adds the ssh block'
+[ "$(printf '%s\n' "$out" | tail -n 1)" = 'font-size = 15' ] && pass 'after the ssh block, your own line still comes last' || fail "after the ssh block, your own line still comes last: [$out]"
 
 # Linux gets no macOS lines.
 out="$(run "KEYS=herdspace LOOK=herdspace install_ghostty_config $LINUX; cat $F")"
 lacks "$out" 'macos-' 'Linux gets no macOS lines'
 contains "$out" 'ctrl+alt+shift+t=new_tab' 'Linux gets a replacement key for a new tab'
+contains "$out" 'shell-integration-features = ssh-env' 'Linux gets the ssh block'
 
 # The key question: it explains the keys before it changes any key.
 out="$(run 'load_keys; echo KEYS=$KEYS LOOK=$LOOK; cat $HOME/.config/herdspace/keys')"
