@@ -105,6 +105,15 @@ An update changes only the files of herdspace. Your own files stay yours:
 
 If you changed a file of herdspace, the setup asks before it replaces it, and it makes a backup first.
 
+## Uninstall
+
+```bash
+herdspace uninstall --check
+herdspace uninstall
+```
+
+The first command lists what an uninstall changes, and changes nothing. The second removes the files that the setup wrote and the marked blocks in your shell and Ghostty files. A file that you changed stays. It never removes a project, a Herdr session, Herdr, or a package. See [Uninstall herdspace](docs/setup.md#uninstall-herdspace).
+
 ## Good to know
 
 - On the client, herdspace sends `Cmd+T`, `Cmd+W`, and `Cmd+K` to Herdr (`Ctrl+Shift+T` and others on Linux). Outside Herdr, for example in an SSH session to another server, these keys do nothing. To give them back to Ghostty, run `herdspace keys normal` on the client. To send them to Herdr again, run `herdspace keys herdr`. See [Switch the keys later](docs/keyboard-shortcuts.md#switch-the-keys-later).

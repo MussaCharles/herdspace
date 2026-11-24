@@ -311,6 +311,43 @@ The shell asks GitHub in the background, so the prompt does not wait for the net
 export HERDSPACE_UPDATE_CHECK=0
 ```
 
+## Uninstall herdspace
+
+To see what an uninstall changes, run this command. It changes nothing:
+
+```bash
+herdspace uninstall --check
+```
+
+To uninstall, run:
+
+```bash
+herdspace uninstall
+```
+
+The command asks once. The default answer is no. With no terminal, for example in a script or from an agent, it does nothing unless you add `--yes`:
+
+```bash
+herdspace uninstall --yes
+```
+
+The command does these steps:
+
+1. It reads the manifest, `~/.local/share/herdspace/manifest.tsv`. The manifest has the hash of each file that the setup wrote.
+2. It removes each of these files that has no change. A file with another hash is yours now, so it stays, and the command names it.
+3. It removes each marked block, `# >>> herdspace ... >>>`, from `~/.zshrc`, `~/.zprofile`, and your Ghostty file. Your own lines stay. A file that has only the blocks of herdspace is removed.
+4. On Linux, it turns off the Herdr service that starts at boot, and removes its file. On a Mac, it removes the LaunchAgent. A running Herdr server keeps running, and every pane stays open.
+5. On a Mac, if the setup turned off the Ctrl arrow shortcuts of Mission Control, it turns them on again. The setup records that in `~/.local/share/herdspace/done/mission-control`.
+6. It removes the data of the herdspace Neovim, your choice of keys and look, the cache, and the state folder. A backup file keeps its folder. It removes the `herdspace` command last.
+
+The command never removes a project, a Herdr session, Herdr, or a package that apt or Homebrew installed. It never changes a file of yours. The output ends with what stays and how to remove it by hand: Herdr and the other tools, your login shell, Oh My Zsh in `~/.oh-my-zsh`, the backups named `*.bak-<date>`, and the integrations and the plugin of Herdr.
+
+The block `# >>> herdspace bash env >>>` in `~/.zshenv` stays. It holds the exports that the setup moved from your bash files, and zsh needs them. See [Exports from your bash files](#exports-from-your-bash-files).
+
+A file that the setup wrote before the manifest existed has no hash. The command does not remove it. To remove it, delete it yourself.
+
+To set up herdspace again later, run the setup command of the [README](../README.md#quick-start).
+
 ## Run a script again
 
 You can run a script at any time. It finds what is done, and it does only the rest. On a finished machine, it prints `Everything is already set up` in a few seconds.

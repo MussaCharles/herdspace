@@ -67,6 +67,8 @@ Use `client --server <name>` or `both` in place of `server`, for the role of the
 
 To update a machine that has herdspace 0.8.0 or later, run `herdspace update`. It runs the setup of the latest release with the role and the options of the last setup. Add an option after `update` for one run, for example `herdspace update --keep-existing`. If the latest release is already installed, it changes nothing. To run the setup again anyway, add `--force`. To go back to an older release after a bad update, run `herdspace update --version <tag>`, for example `herdspace update --version 0.9.0`. The tag has no `v` in front. Tell the person that the setup leaves out each saved option that the older release does not know. To see the installed and the latest version, run `herdspace --version`. On an older version, run the `curl` command above with no `--check`.
 
+To remove herdspace, run `herdspace uninstall --check` first. It lists what the uninstall changes, and it changes nothing. Then run `herdspace uninstall`. It asks once. With no terminal, add `--yes`, and only after the person asks for the uninstall. It removes the files that the setup wrote and no person changed, and the marked blocks of herdspace. It never removes a project, a Herdr session, Herdr, or a package.
+
 To update only `hopen`:
 
 ```bash
