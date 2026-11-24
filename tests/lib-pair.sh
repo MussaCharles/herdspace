@@ -62,28 +62,31 @@ open_ghostty() {
   sleep 2
   cli_user bash -c 'openbox >/dev/null 2>&1 &'
   sleep 1
-  cli_user bash -c "nohup dbus-run-session -- ghostty --window-width=150 --window-height=42 --command=${OPEN_CMD:-/home/tester/repo/tests/open-demo.sh} >/tmp/ghostty.log 2>&1 &"
-  win=""
-  for _ in $(seq 1 30); do
-    win="$(cli_user xdotool search --onlyvisible --class ghostty 2>/dev/null | tail -n 1)"
-    [ -n "$win" ] && break
+  local attempt
+  # Ghostty can show no window, or close it during the wait, with no error in
+  # the log. Then start Ghostty one more time.
+  for attempt in 1 2; do
+    cli_user bash -c "nohup dbus-run-session -- ghostty --window-width=150 --window-height=42 --command=${OPEN_CMD:-/home/tester/repo/tests/open-demo.sh} >/tmp/ghostty.log 2>&1 &"
+    win=""
+    for _ in $(seq 1 30); do
+      win="$(cli_user xdotool search --onlyvisible --class ghostty 2>/dev/null | tail -n 1)"
+      [ -n "$win" ] && break
+      sleep 2
+    done
+    sleep 12
+    if [ -n "$win" ] && cli_user xdotool getwindowname "$win" >/dev/null 2>&1; then break; fi
+    if [ "$attempt" -eq 2 ]; then
+      if [ -z "$win" ]; then fail 'ghostty window'; else fail 'ghostty window closed'; fi
+      cli_user tail -n 20 /tmp/ghostty.log
+      # Stop here. The key and screenshot steps wait forever without a window.
+      echo "RESULT exit=1"
+      exit 1
+    fi
+    echo "  Ghostty showed no window, or the window closed. Starting Ghostty again."
+    cli_user tail -n 5 /tmp/ghostty.log
+    cli_user pkill -x ghostty >/dev/null 2>&1 || true
     sleep 2
   done
-  sleep 12
-  if [ -z "$win" ]; then
-    fail 'ghostty window'
-    cli_user tail -n 5 /tmp/ghostty.log
-    # Stop here. The key and screenshot steps wait forever without a window.
-    echo "RESULT exit=1"
-    exit 1
-  fi
-  # A window can close during the wait, for example when Ghostty stops.
-  if ! cli_user xdotool getwindowname "$win" >/dev/null 2>&1; then
-    fail 'ghostty window closed'
-    cli_user tail -n 20 /tmp/ghostty.log
-    echo "RESULT exit=1"
-    exit 1
-  fi
   cli_user timeout 20 xdotool windowactivate --sync "$win" >/dev/null 2>&1
 }
 
