@@ -28,7 +28,7 @@ flowchart LR
 
 ## Apply the newest version of this repository
 
-Run the same `curl` command again, with the same role and options. It downloads the newest release and runs it. To install another release, add `--version <tag>` after the role.
+Run the same `curl` command again, with the same role and options. It downloads the newest release and runs it. To install another release, add `--version <tag>` after the role. On a machine that has herdspace 0.8.0 or later, you can [go back with `herdspace update --version`](#go-back-to-an-older-release).
 
 If you use a clone, run `git pull` in the clone. Then run `./bootstrap.sh` with the same role and options as before.
 
@@ -48,6 +48,28 @@ herdr session stop my-projects
 A stop ends the programs in the panes of the session. When you open the session again, the layout comes back, the shells start again, and an agent with an integration resumes its conversation.
 
 The script changes only what is different. It updates a file that you did not change, and it asks about a file that you changed. It keeps a backup of each replaced file.
+
+## Go back to an older release
+
+If a release breaks something, install the release before it. Give the tag of that release. A tag is a version with no `v` in front:
+
+```bash
+herdspace update --version 0.9.0
+```
+
+The command prints one line that says it goes back. Then it runs the setup of that release with the role and the options of your last setup, in the same way as `herdspace update`.
+
+- The command checks the tag first. It stops with a message, and changes nothing, if the tag has a `v`, is not a version, or has no release.
+- If the tag is the installed version, the command changes nothing. To run the setup again anyway, add `--force`.
+- An older release does not know an option that a newer release added. The command leaves out each saved option that the older release does not list, and it names each one. For example, `--keep-terminal-look` is not in 0.9.0.
+- The setup saves the options that it ran with. So the saved options no longer hold an option that the command left out. Give the option again when you go forward.
+- A file that herdspace wrote is replaced with no question, because the manifest holds its hash. A file that you changed stays, and the setup asks about it, as in any update.
+- The command `herdspace` is replaced with the one of the older release. It has no `--version` option for `update` if the release is before the one that added it. To go forward again, run the `curl` command of the [setup guide](setup.md) with `--version <tag>` after the role, or run `herdspace update` for the latest release.
+- To stay on the older release, do not run `herdspace update`. The shell prints a notice about the latest release once a day. Set `HERDSPACE_UPDATE_CHECK=0` to turn it off.
+
+To see the installed version, run `herdspace --version`. The [release list](https://github.com/MussaCharles/herdspace/releases) shows the tags.
+
+`tests/run-rollback.sh` tests this. It installs the newest release, goes back to the one before it, and goes forward again.
 
 ## Update the tool versions
 
@@ -76,6 +98,17 @@ tests/run-linux.sh
 tests/run-macos.sh
 ```
 
+## Old options and deprecation
+
+A deprecated option is an option that still works but goes away in a later release. herdspace follows these rules when an option of a script or of a command changes:
+
+1. The old option keeps working for at least the next two minor releases. For example, an option that is deprecated in 0.11.0 still works in 0.12.0 and 0.13.0.
+2. While it works, the setup prints a warning with the new option.
+3. The CHANGELOG lists the change under `### Deprecated` in the release that deprecates the option, and under `### Removed` in the release that removes it.
+4. `herdspace update` uses the options of your last setup. If a saved option is deprecated, the update still works, and the warning tells you the new option.
+
+A removed option stops the setup with a message that names the new option. A change to the format of `herdspace.toml` or of a project list follows the same rules.
+
 ## Make a release
 
 A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag is a version with no v in front, for example `0.1.2`. A tag with a dash, for example `0.2.0-alpha.1`, becomes a pre-release.
@@ -87,13 +120,14 @@ A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it dow
    tools/release.sh 0.1.2
    ```
 
-3. Publish the release:
+3. Make sure that your signing key is a release key. See [Sign the release tags](#sign-the-release-tags).
+4. Publish the release. The script makes the signed tag, pushes it, and makes the release from it:
 
    ```bash
    tools/release.sh 0.1.2 --publish
    ```
 
-4. Install the published release in fresh sandboxes, and try each feature. See [After a release](testing.md#after-a-release):
+5. Install the published release in fresh sandboxes, and try each feature. See [After a release](testing.md#after-a-release):
 
    ```bash
    tests/run-release-check.sh --version 0.1.2
@@ -111,12 +145,45 @@ The script reads the repository name from `gh`, and it writes the name into `boo
 - A CI check of the pull request of the commit did not pass.
 - The tag already has a release. A published release does not change. If a release is wrong, publish a new tag.
 - `bootstrap/known-hashes.tsv` is not up to date.
+- The signing key is not in `.github/release-signers`.
 
 To run only these checks, and publish nothing, use `tools/release.sh <tag> --preflight`.
 
 If the preflight says `No merged pull request has the commit`, GitHub did not link the merge commit to its pull request. This can happen when the merge gets an error from GitHub, for example `502 Bad Gateway`, even though the merge worked. Do not publish from that commit. Merge a small pull request after it, for example a fix in the docs, and run the preflight again.
 
 After the publish, the job "Release files match the tag" of the workflow "Release check" builds the release again from the tag on a clean runner. It compares each published file with that build. If a file differs, is missing, or is extra, the job fails. Do not use the release then, and publish a new tag. If all files match, the job signs each file with a [GitHub artifact attestation](https://docs.github.com/en/actions/concepts/security/artifact-attestations). An attestation is a signed record of the workflow, the commit, and the checksum of a file.
+
+### Sign the release tags
+
+Each release tag has an SSH signature. A key in `.github/release-signers` makes it. `tools/sign-tag.sh` makes and checks the signature, and `tools/release.sh` runs it.
+
+To add a release key, do these steps one time:
+
+1. Make a key that is only for the release tags:
+
+   ```bash
+   ssh-keygen -t ed25519 -C herdspace-release -f ~/.ssh/herdspace_release
+   ```
+
+2. Tell git to use it in this repository:
+
+   ```bash
+   git config user.signingkey ~/.ssh/herdspace_release.pub
+   ```
+
+3. Add a line for the key to `.github/release-signers`, and merge the change with a pull request:
+
+   ```bash
+   printf 'herdspace-release namespaces="git" %s\n' "$(cut -d ' ' -f 1,2 ~/.ssh/herdspace_release.pub)" >>.github/release-signers
+   ```
+
+4. Optional: add the public key to your GitHub account as a signing key, so that GitHub shows the tag as "Verified".
+
+5. Make sure that the key is a release key:
+
+   ```bash
+   tools/sign-tag.sh --check
+   ```
 
 ## Add something new
 

@@ -6,7 +6,15 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Added
 
+- Each release tag has an SSH signature, and `.github/release-signers` lists the release keys. `docs/setup.md` shows how to check a tag with `git tag -v`, and what the checksum, the attestation, and the signature each show.
+- `herdspace update --version <tag>` installs one release, also an older one, with the saved role and options. It checks the tag, says when it goes back, and leaves out a saved option that the older release does not know. See [Go back to an older release](docs/updating.md#go-back-to-an-older-release).
+- `docs/setup.md` lists the supported systems, and the network use of each part, in "Network use and privacy". herdspace sends no telemetry. `docs/updating.md` has the rules for old options, in "Old options and deprecation".
 - `herdspace uninstall` removes what the setup wrote. `herdspace uninstall --check` lists the changes and changes nothing. The command asks once, and it needs `--yes` with no terminal. It removes each file that no person changed, the marked blocks of herdspace, the Herdr login service, and the data of herdspace. On a Mac, it gives the Ctrl arrow shortcuts back to Mission Control. It keeps each file that you changed, and it never removes a project, a Herdr session, Herdr, or a package.
+
+### Fixed
+
+- The move of exports from the bash files to `~/.zshenv` no longer fails when `~/.zshenv` already has a block from an earlier move. The test after the move starts from the environment that zsh has after the old block, and checks only the new lines. If the test fails, the message names the variables that differ, with no value.
+- `bootstrap.sh` and `install.sh` keep all their code in a `main` function, and the last line calls it. If a download with `curl` stops in the middle, bash runs nothing.
 
 ## [0.10.0] - 2026-11-24
 

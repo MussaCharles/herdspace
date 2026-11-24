@@ -14,10 +14,11 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/run-systemd.sh` | The login service starts Herdr in a container with real systemd, and it starts Herdr again after a crash. |
 | `tests/run-client-linux.sh` | A Linux client connects to a server in a second container. Real Ghostty key presses reach Herdr over SSH. |
 | `tests/run-macos.sh` | The macOS scripts work with a temporary home folder and stub commands. It needs Python 3.11 or later from Homebrew. |
-| `tests/test-install.sh` | A release builds, `install.sh` installs `hopen`, and `bootstrap.sh` from `curl` picks the right script. |
+| `tests/test-install.sh` | A release builds, `install.sh` installs `hopen`, and `bootstrap.sh` from `curl` picks the right script. A download that stops in the middle runs nothing. |
 | `tests/test-running-sessions.sh` | With a stub `herdr`, the setup reloads the configuration of each running session after a change, names a session with an older Herdr, and stops no session. It runs in a second. |
 | `tests/test-live-update.sh` | In a test container, `tests/run-linux.sh` installs the latest release, starts a session with a running program, and updates to this folder with a changed `config.toml`. The server, the program, and the panes stay, and the session gets the new configuration. The update asks about no file. |
 | `tests/run-upgrade.sh` | For each of the last 3 releases, a fresh container installs the release and updates to this folder. The update asks about no file, also when the manifest is missing, as in an install from before the manifest. A file that the test changed stays, and only that file differs. A second update changes nothing. |
+| `tests/run-rollback.sh` | A fresh container installs the newest release, goes back to the release before it with `herdspace update --version`, and goes forward again. After each step, a `--check` of the target release finds no changed file, so the setup asked no question about a file that herdspace wrote. |
 | `tools/known-hashes.sh --check` | `bootstrap/known-hashes.tsv` lists each older version of each installed file. CI runs it in the fast checks. |
 | `tests/test-verify-release.sh` | `tools/verify-release.sh` accepts release files that match the build, and finds a changed script, a changed or new file in an archive, an extra file, and a file that does not match `SHA256SUMS`. It needs no network. |
 | `tests/run-prereqs.sh` | The prerequisites step finds and installs a missing locale, stops with a fix when `sudo` is missing, works as root, and reports a server with no SSH. |
@@ -27,8 +28,9 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-ci-changes.sh` | `tools/ci-changes.sh` finds a pull request that changes only docs, in a temporary git repository. |
 | `tests/test-links.sh` | Each relative link of each Markdown file points at a file that exists, and each `#anchor` matches a heading. A link in a community file in `.github/` starts with `/`. It needs no network. |
 | `tests/test-ghostty.sh` | How the client setup writes the Ghostty file: the marked blocks at the top, your own lines below them, the file of an older herdspace, the key and look choices, and the key question. It needs no network. |
+| `tests/test-sign-tag.sh` | `tools/sign-tag.sh` in a temporary repository, with a temporary SSH key: a signed tag, `git tag -v`, a key that is not a release key, and a tag with no signature. It needs git and ssh-keygen, and no network. |
 | `tests/test-bash-env.sh` | The move of exports from `~/.bashrc` and `~/.bash_profile` to `~/.zshenv`: which lines move and which stay, the question, the backups with mode 600, the test after the move that puts the files back, and that no value appears in the output. It needs bash, zsh, and Python 3, and no network. |
-| `tests/test-herdspace-cmd.sh` | The `herdspace` command with a stub `curl`: `--version` and `version`, the notice once a day, `HERDSPACE_UPDATE_CHECK=0`, no network, and `herdspace update` with the saved role and options and a wrong checksum. It needs no network. |
+| `tests/test-herdspace-cmd.sh` | The `herdspace` command with a stub `curl`: `--version` and `version`, the notice once a day, `HERDSPACE_UPDATE_CHECK=0`, no network, and `herdspace update` with the saved role and options and a wrong checksum, and `herdspace update --version` with its checks of the tag. It needs no network. |
 | `tests/test-uninstall.sh` | `herdspace uninstall` in temporary home folders with a fake install: `--check` changes nothing, no terminal needs `--yes`, the default answer is no, a file with no change goes, a changed file stays and is named, the marked blocks go and your own lines stay, the block of moved exports stays, the login service is disabled and not stopped, and the Mission Control keys come back. It uses stub `systemctl` and `defaults` commands, and it needs no network. |
 | `tests/test-ui.sh` | The output and the questions of the setup. It tests plain text with no terminal, and boxes and colors at a terminal. It tests the answers for a changed file, the own lines, the backups, and the next steps. It needs no network. |
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
@@ -61,11 +63,19 @@ tests/run-upgrade.sh
 ```
 
 ```bash
+tests/run-rollback.sh
+```
+
+```bash
 tests/test-install.sh
 ```
 
 ```bash
 tests/test-verify-release.sh
+```
+
+```bash
+tests/test-sign-tag.sh
 ```
 
 ```bash

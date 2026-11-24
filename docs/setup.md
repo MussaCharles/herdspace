@@ -33,6 +33,19 @@ flowchart LR
 
 Each agent program creates its configuration folder at its first start. Herdr needs that folder for the integration.
 
+## Supported systems
+
+| System | Versions | Server | Client | Tested in CI |
+|--------|----------|:------:|:------:|:------------:|
+| macOS | macOS 26 on Apple silicon | yes | yes | yes |
+| Ubuntu | 24.04, on x86_64 and arm64 | yes | yes | yes |
+| Debian | 12, on x86_64 and arm64 | yes | yes | yes |
+| Ubuntu | 22.04 | yes | yes | no |
+| Debian | 13 and 14 | yes | yes | no |
+| Windows | WSL with Ubuntu | yes | yes, with no Ghostty | no |
+
+The setup also runs on other versions of these systems, but no test covers them. On a Linux client, the setup installs Ghostty on Ubuntu 26.04 and later, and on Debian 13 and 14. On another version, install Ghostty first, or add `--no-ghostty`. On Linux, the setup needs `apt-get`, so it stops on other distributions, for example Fedora or Arch.
+
 ## Before you start
 
 The setup installs most of what it needs. You do these items yourself:
@@ -112,6 +125,8 @@ Run the script with `curl`. The command downloads the newest release to `~/.loca
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh | bash -s -- server
 ```
 
+If the download stops in the middle, the script runs nothing. All its code is in one function, and only the last line calls it.
+
 Each section below shows this command. You do not need to clone the repository.
 
 To read or change the files first, clone the repository and run `./bootstrap.sh` from the clone, with the same role and options:
@@ -144,6 +159,14 @@ Then run the downloaded script, in a folder that is not a clone of the repositor
 ```bash
 bash bootstrap.sh server
 ```
+
+From 0.11.0 on, each release tag also has an SSH signature. To check the tag in a clone of the repository, run:
+
+```bash
+git -c gpg.ssh.allowedSignersFile=.github/release-signers tag -v 0.11.0
+```
+
+The output starts with `Good "git" signature`. The three checks are different. The checksum in `SHA256SUMS` shows that the download is complete. The attestation shows that the release workflow built the files from the tag. The tag signature shows that a release key of the project made the tag.
 
 ## Options
 
@@ -223,6 +246,24 @@ The scripts do not install the agent programs. Install them first, or run the se
 - On Linux, tools from release pages have a pinned version and a checksum. On macOS, the tools come from Homebrew.
 - Herdr and Neovim do not contact their sites in the background. The update check asks the Homebrew API.
 
+## Network use and privacy
+
+herdspace sends no telemetry. No script sends data about your machine, your projects, or your agents. Each request is a download over HTTPS. The site that answers sees your IP address and the version of `curl` or `git`, as with any download.
+
+| Part | When | Address |
+|------|------|---------|
+| `bootstrap.sh` | At each setup | `github.com`, for the release files of herdspace |
+| The setup on Linux | At each setup | The package mirrors of your system, with `apt-get`. `github.com`, for the release files of Herdr, Neovim, lazygit, fzf, eza, zoxide, delta, and the Ghostty package of Debian 13, each with a pinned checksum |
+| The setup on macOS | At each setup | Homebrew and its package hosts. If Homebrew is missing, `raw.githubusercontent.com`, for the Homebrew install script |
+| The shell setup | At each setup | `github.com`, for Oh My Zsh, Powerlevel10k, and two zsh plugins, at pinned commits |
+| Neovim | At the setup on a server | `github.com`, for the Neovim plugins, at the commits of the lock file |
+| Powerlevel10k | At its first start | `github.com`, for its `gitstatusd` program |
+| `herdspace update`, `herdspace --version` | When you run it | `github.com/MussaCharles/herdspace/releases/latest`, for the tag of the latest release. The update then downloads the release files |
+| The update notice of the shell | At most once a day, in the background | The same address as `herdspace update`. `HERDSPACE_UPDATE_CHECK=0` turns it off |
+| `herdr-update-check` | At an SSH login on a server, at most once every 5 hours | `formulae.brew.sh`, for the version of Herdr |
+
+Herdr does not contact its own site in the background, because the setup turns off its update check.
+
 ## Update herdspace
 
 To update to the latest release, run:
@@ -248,6 +289,12 @@ If the latest release is already installed, the command says so and changes noth
 
 ```bash
 herdspace update --force
+```
+
+To install one release, also an older one, give its tag. See [Go back to an older release](updating.md#go-back-to-an-older-release):
+
+```bash
+herdspace update --version 0.9.0
 ```
 
 To see the installed version and the latest release, run `herdspace --version`. `herdspace version` prints the same text.

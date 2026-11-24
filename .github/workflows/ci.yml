@@ -75,6 +75,8 @@ jobs:
         run: tools/known-hashes.sh --check
       - name: The herdspace command
         run: tests/test-herdspace-cmd.sh
+      - name: The signed release tags
+        run: tests/test-sign-tag.sh
       - name: Uninstall
         run: tests/test-uninstall.sh
       - name: Exports from the bash files

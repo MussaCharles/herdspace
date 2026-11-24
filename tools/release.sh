@@ -9,8 +9,9 @@
 # SHA256SUMS. With --publish, the
 # script creates the GitHub release and uploads the files. Before that, it makes
 # sure that the commit is the head of main, that the CI checks of its pull
-# request passed, and that the tag has no release yet. --preflight runs only
-# these checks. A tag with a dash,
+# request passed, that the tag has no release yet, and that the signing key is
+# in .github/release-signers. It makes a signed tag and pushes it. --preflight
+# runs only these checks. A tag with a dash,
 # for example 0.2.0-alpha.1, becomes a pre-release. A tag has no v in front.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -82,6 +83,8 @@ if [ "$PUBLISH" -eq 1 ] || [ "$PREFLIGHT" -eq 1 ]; then
     printf '%s\n' "${bad:-no check ran}" >&2
     exit 1
   fi
+  # Each release tag has an SSH signature of a key in .github/release-signers.
+  tools/sign-tag.sh --check >/dev/null || exit 1
   echo "Preflight: ${head} is the head of main, its pull request passed $(printf '%s\n' "$runs" | grep -c .) checks, and ${TAG} has no release."
   [ "$PREFLIGHT" -eq 0 ] || exit 0
 fi
@@ -154,5 +157,8 @@ if [ "$PUBLISH" -eq 1 ]; then
   case "$TAG" in *-*) pre="--prerelease" ;; esac
   # gh creates a draft, uploads the files, and then publishes it, so the
   # release works with immutable releases turned on.
-  gh release create "$TAG" --repo "$REPO" --target "$head" $pre --title "$TAG" --notes-file "$notes" "${out}"/*
+  # The signed tag goes to GitHub first, and the release uses it.
+  tools/sign-tag.sh "$TAG" "$head" || exit 1
+  git push origin "refs/tags/${TAG}" || exit 1
+  gh release create "$TAG" --repo "$REPO" --verify-tag $pre --title "$TAG" --notes-file "$notes" "${out}"/*
 fi
