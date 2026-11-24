@@ -4,6 +4,11 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- The command palette lists every action in groups, as in VS Code: Projects, Tasks, Files, Git, Agents, Layout, Workspace and tabs, Sessions, Network, herdspace, Herdr, and Help. Each action shows its key or command at the right. The last 5 actions come first. The palette shows only the actions that fit the place, and an action that closes or stops something asks first.
+- New palette actions: open this folder as its own workspace, open the session in a new window, lazygit in a new tab, git worktrees, go to an agent (blocked and done first), start an agent in a new pane, split and zoom, rename and new tabs, stop a session, update herdspace, the Ghostty keys, the Herdr checks, and a short table of the keys.
+
 ## [0.9.0] - 2026-11-24
 
 ### Added

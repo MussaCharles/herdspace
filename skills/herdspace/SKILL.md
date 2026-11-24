@@ -32,7 +32,7 @@ These commands are for the person, in their own terminal. They open a menu or an
 |---------|--------------|
 | `ff`, or `hopen --find` | Choose a file with fzf, and open it in the editor. |
 | `fif TEXT`, or `hopen --grep TEXT` | Search the files, and open a result at its line. |
-| `hopen --palette` | A menu of actions for the current folder, like the command palette of VS Code. In Herdr, `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) opens it. |
+| `hopen --palette` | A menu of every action, in groups like the command palette of VS Code: projects, tasks, files, git and worktrees, agents, layout, workspaces and tabs, sessions, ports, herdspace, Herdr, and help. In Herdr, `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) opens it. A person runs it. An agent uses the commands of each action. |
 
 `ff` and `fif` load only in an interactive zsh. A person who comes from VS Code can read the VS Code guide: `https://github.com/MussaCharles/herdspace/blob/main/docs/vscode.md`.
 
