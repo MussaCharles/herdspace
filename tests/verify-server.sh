@@ -322,6 +322,9 @@ contains "$(labels_of hb-named)" 'web' 'the session has the project'
 if [ "$(labels_of hb-named)" = "web" ]; then pass 'hopen.parentWorkspace false adds no parent workspace'; else fail "hopen.parentWorkspace false adds no parent workspace: $(labels_of hb-named)"; fi
 contains "$set_out" 'each tab needs a name' 'a tab with no name gives a clear message'
 tabs_of() { HERDR_SESSION="$1" herdr tab list --workspace "$(HERDR_SESSION="$1" herdr workspace list | python3 -c 'import json,sys; print([w["workspace_id"] for w in json.load(sys.stdin)["result"]["workspaces"] if w["label"] == sys.argv[1]][0])' "$2")" | python3 -c 'import json,sys; print(",".join(t["label"] for t in json.load(sys.stdin)["result"]["tabs"]))'; }
+# Herdr can show the first tab names for a moment before hopen renames the
+# tabs, so wait up to 10 seconds for the names.
+for _ in $(seq 1 40); do case "$(tabs_of hb-named web)" in *logs,side*) break ;; esac; sleep 0.25; done
 contains "$(tabs_of hb-named web)" 'logs,side' 'hopen.tabs adds the named tabs'
 sleep 3
 contains "$(cat "$HOME/hb-set/web/opened.txt" 2>/dev/null)" 'from-env from-file' 'hopen.onOpen runs with the hopen.env values and the env file, and env wins'
