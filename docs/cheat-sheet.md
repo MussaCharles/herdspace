@@ -154,6 +154,10 @@ Do not stop a session to leave it. A stop ends every program in that session. Us
 
 After a stop, the workspaces, tabs, panes, and folders return as new shells. Running programs do not return. An agent with an integration that reports its session resumes its conversation. To see the integrations, run `herdr integration status`.
 
+## Command palette
+
+The palette is the place to start. Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) in Herdr, type a few letters, and press Enter. For example, type `split` to split the pane, `worktree` for a new worktree for an agent, `lazygit` to open lazygit in a new tab, or `keys` to show the keys. To show one session in two windows, type `window`. See [The command palette](hopen.md#the-command-palette).
+
 ## Direct keys
 
 These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and the `Ctrl+Shift` keys in this table do nothing, so use the [replacement keys](keyboard-shortcuts.md#replacement-keys-for-ghostty) there, for example `Cmd+Option+T` for a new Ghostty tab and `Cmd+Option+W` to close it.
@@ -167,7 +171,7 @@ These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and
 | Previous or next workspace | `Ctrl+Up`, `Ctrl+Down` | The same |
 | Next or previous pane in the tab | `Alt+Up`, `Alt+Down` | The same |
 | Open lazygit over the pane | `Cmd+Shift+G` | `Ctrl+Shift+G` |
-| Open the command palette (`hopen --palette`) | `Cmd+Shift+P` | `Ctrl+Shift+P` |
+| Open the command palette (`hopen --palette`): every action, in groups | `Cmd+Shift+P` | `Ctrl+Shift+P` |
 
 ## Workspaces
 

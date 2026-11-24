@@ -189,6 +189,40 @@ contains "$pal" 'with the template code' 'in a Herdr popup, the palette offers t
 lacks "$pal" 'Open the list' 'in a Herdr popup, the palette does not offer to attach to a list'
 check 'Herdr has the palette key' grep -qF -- 'hopen\" --palette' "$HOME/.config/herdr/config.toml"
 
+# The palette groups, and the actions that change Herdr.
+pal="$(cd "$work" && env -u HERDR_PANE_ID -u HERDR_ACTIVE_PANE_ID hopen --palette --print)"
+contains "$pal" 'Projects: Open the list' 'the palette shows each action with its group'
+contains "$pal" 'Help: Show the keys' 'the palette has a help group'
+lacks "$pal" 'Layout: Split right' 'outside Herdr, the palette has no Herdr layout actions'
+mkdir -p "$work/hb-pal" && git -C "$work/hb-pal" init -q
+pal_ws_json="$(herdr workspace create --cwd "$work/hb-pal" --label hb-pal --no-focus)"
+pal_ws="$(printf '%s' "$pal_ws_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["workspace"]["workspace_id"])')"
+pal_tab="$(printf '%s' "$pal_ws_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["tab"]["tab_id"])')"
+pal_pane="$(printf '%s' "$pal_ws_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
+in_pal() { (cd "$work/hb-pal" && python3 "$ROOT/tests/pty_run.py" 10 "$1" env TERM=dumb HERDR_ACTIVE_PANE_ID="$pal_pane" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" HERDR_ACTIVE_TAB_ID="$pal_tab" HERDR_ACTIVE_PANE_CWD="$work/hb-pal" hopen --palette 2>&1); }
+pal="$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" hopen --palette --print)"
+contains "$pal" 'Git: New worktree for an agent' 'in a git folder in Herdr, the palette has the git actions'
+contains "$pal" 'Layout: Split right' 'in Herdr, the palette has the layout actions'
+nogit="$(mktemp -d)"
+lacks "$(cd "$nogit" && HERDR_ACTIVE_PANE_ID="$pal_pane" hopen --palette --print)" 'Git: New worktree' 'outside a git folder, the palette has no git actions'
+panes_in() { herdr pane list | python3 -c 'import json,sys; print(sum(1 for p in json.load(sys.stdin)["result"]["panes"] if p["tab_id"] == sys.argv[1]))' "$1"; }
+tabs_in() { herdr tab list --workspace "$1" | python3 -c 'import json,sys; print(",".join(t["label"] for t in json.load(sys.stdin)["result"]["tabs"]))'; }
+in_pal 'split-right\r' >/dev/null
+[ "$(panes_in "$pal_tab")" = 2 ] && pass 'the palette splits the pane' || fail "the palette splits the pane: $(panes_in "$pal_tab") panes"
+in_pal 'rename-tab\rhb-renamed\r' >/dev/null
+for _ in $(seq 1 20); do case "$(tabs_in "$pal_ws")" in *hb-renamed*) break ;; esac; sleep 0.25; done
+contains "$(tabs_in "$pal_ws")" 'hb-renamed' 'the palette renames the tab'
+before="$(tabs_in "$pal_ws")"
+in_pal 'close-tab\r\r' >/dev/null
+[ "$(tabs_in "$pal_ws")" = "$before" ] && pass 'the palette asks before it closes a tab, and the default is no' || fail 'the palette asks before it closes a tab'
+in_pal 'new-tab\r' >/dev/null
+[ "$(tabs_in "$pal_ws" | tr ',' '\n' | wc -l | tr -d ' ')" = 2 ] && pass 'the palette opens a new tab' || fail "the palette opens a new tab: $(tabs_in "$pal_ws")"
+contains "$(in_pal 'window\r')" 'Open a new terminal window' 'the palette prints the command for a second window'
+grep -qx window "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent" && pass 'the palette remembers the last action' || fail 'the palette remembers the last action'
+contains "$(in_pal '\r')" 'Recently used' 'the palette shows the recent actions first'
+lacks "$(cat "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent")" "$work" 'the recent list holds no paths'
+herdr workspace close "$pal_ws" >/dev/null 2>&1 || true
+
 # hopen with no name shows a menu in a terminal: fzf, or a numbered menu.
 # Only Enter: if the keys hold a filter too, fzf can take Enter before the
 # filter, and pick the first list.

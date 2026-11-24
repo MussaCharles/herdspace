@@ -82,6 +82,10 @@ path = "~/code/api"
 
 Run `hopen` again at any time. It starts a stopped session and adds only the new projects. It never closes anything. The [hopen guide](docs/hopen.md) has every command and setting, and how to use a VS Code workspace file as the list.
 
+## The command palette
+
+In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. The palette lists every action in groups, as in VS Code: projects, tasks, files, git, agents, layout, tabs, sessions, and help. Type a few letters to find an action. See [The command palette](docs/hopen.md#the-command-palette).
+
 ## Update
 
 ```bash

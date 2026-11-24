@@ -170,16 +170,40 @@ A task is a command from the list, so it needs the same approval as `on_open`. S
 
 ## The command palette
 
-In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. `Ctrl+B`, then `A` also works. A menu shows the actions that fit the current folder:
+The palette is the place to start an action. In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. `Ctrl+B`, then `A` also works. Outside Herdr, run `hopen --palette`.
 
-- Run a task of the project.
-- Find a file, or search in the files, and open the result.
-- Open lazygit.
-- Show the ports that your programs listen on.
-- Split the current tab with a template.
-- Show every list, or open every list.
+Each action has a group and a name, as in VS Code, and the key or command for it at the right. Type to filter the list, and press Enter to run an action. Esc closes the palette. With no fzf, the palette shows a numbered menu with a heading for each group.
 
-Outside Herdr, run `hopen --palette`. There, the menu also offers to open a list or the current folder. The palette uses fzf if it is installed, and a numbered menu if not. Esc closes it.
+The palette shows only the actions that fit the place. For example, the Git actions show only in a git folder, and the Layout actions only in Herdr.
+
+| Group | Actions |
+|-------|---------|
+| Recently used | The last 5 actions that you ran. |
+| Projects | Open a list. Open this folder in Herdr. Open this folder as its own workspace. Open this session in a new window. Open every list. Show every list. Write a `herdspace.toml` from a VS Code list. |
+| Tasks | Run a task of the project of the current folder. |
+| Files | Find a file (`ff`). Search in the files (`fif`). Open this folder in the editor. |
+| Git | lazygit over the pane, or in a new tab. A new worktree for an agent, on a new branch. Open, show, or remove a worktree. |
+| Agents | Go to an agent: the blocked and done agents come first. Explain the state of an agent. Start an agent program in a new pane. |
+| Layout | Split the tab with a template. Split right or down. Zoom the pane. Show every template. |
+| Workspace and tabs | A new tab or workspace. Rename the workspace, the tab, or the pane. Close the tab. |
+| Sessions | Show the sessions. Stop a session. |
+| Network | Show the ports that your programs listen on. |
+| herdspace | Show the version. Update herdspace. Change the Ghostty keys, on a client. |
+| Herdr | Check for a new Herdr version. Reload the Herdr configuration. Show the state of the server. |
+| Help | Show the keys. Show the links to the cheat sheet and the docs. |
+
+An action that closes or stops something asks first, and the default answer is no. The palette keeps the names of the last actions in `~/.cache/herdspace/palette-recent`. It keeps no paths, and no text that you typed.
+
+### Two monitors
+
+One Herdr session can show in two windows, for example an agent on one monitor and lazygit on the other. Choose "Projects: Open this session in a new window" in the palette. It prints the command to run in the second window. Each window keeps its own workspace and tab. Both windows show the same panes in the same folder, so no copy of the project exists.
+
+Herdr has open issues about two windows on one session. Until they are fixed, keep the two windows on different tabs while an agent runs:
+
+- A second window can stall on the tab of a running Claude Code: [herdr#5749](https://github.com/herdrdev/herdr/issues/5749).
+- After a reconnect, a window can come back on the workspace of the other window: [herdr#5508](https://github.com/herdrdev/herdr/issues/5508).
+
+A workspace takes its name from the folder of its first pane, so an agent that you start in another folder shows that first name in the sidebar ([herdr#5628](https://github.com/herdrdev/herdr/issues/5628)). To see each agent under its own folder, choose "Projects: Open this folder as its own workspace".
 
 ## Use a VS Code workspace file
 
