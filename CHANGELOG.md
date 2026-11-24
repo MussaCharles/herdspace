@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- Each release tag has an SSH signature, and `.github/release-signers` lists the release keys. `docs/setup.md` shows how to check a tag with `git tag -v`, and what the checksum, the attestation, and the signature each show.
+
 ### Fixed
 
 - The move of exports from the bash files to `~/.zshenv` no longer fails when `~/.zshenv` already has a block from an earlier move. The test after the move starts from the environment that zsh has after the old block, and checks only the new lines. If the test fails, the message names the variables that differ, with no value.
