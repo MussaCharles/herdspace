@@ -10,6 +10,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Fixed
 
+- `herdspace help` no longer prints a line of the script. An unknown command, for example `herdspace --update`, prints one error line, suggests `herdspace update`, and says where the help is, as git and the GNU tools do.
 - The move of the bash exports to `~/.zshenv` no longer fails its test when other lines of `~/.zshenv` also change a variable, for example `PATH`. The test now compares only the moved lines in bash and in zsh.
 - After an export with a quoted value over more than one line, the scan of the bash files finds the later exports again. Before, it kept each later export as a line to move by hand.
 
