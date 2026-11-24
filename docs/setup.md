@@ -145,6 +145,14 @@ Then run the downloaded script, in a folder that is not a clone of the repositor
 bash bootstrap.sh server
 ```
 
+From 0.11.0 on, each release tag also has an SSH signature. To check the tag in a clone of the repository, run:
+
+```bash
+git -c gpg.ssh.allowedSignersFile=.github/release-signers tag -v 0.11.0
+```
+
+The output starts with `Good "git" signature`. The three checks are different. The checksum in `SHA256SUMS` shows that the download is complete. The attestation shows that the release workflow built the files from the tag. The tag signature shows that a release key of the project made the tag.
+
 ## Options
 
 The first word is `server`, `client`, or `both`. The script finds the system. Put the options after the role.

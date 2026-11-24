@@ -87,13 +87,14 @@ A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it dow
    tools/release.sh 0.1.2
    ```
 
-3. Publish the release:
+3. Make sure that your signing key is a release key. See [Sign the release tags](#sign-the-release-tags).
+4. Publish the release. The script makes the signed tag, pushes it, and makes the release from it:
 
    ```bash
    tools/release.sh 0.1.2 --publish
    ```
 
-4. Install the published release in fresh sandboxes, and try each feature. See [After a release](testing.md#after-a-release):
+5. Install the published release in fresh sandboxes, and try each feature. See [After a release](testing.md#after-a-release):
 
    ```bash
    tests/run-release-check.sh --version 0.1.2
@@ -111,12 +112,45 @@ The script reads the repository name from `gh`, and it writes the name into `boo
 - A CI check of the pull request of the commit did not pass.
 - The tag already has a release. A published release does not change. If a release is wrong, publish a new tag.
 - `bootstrap/known-hashes.tsv` is not up to date.
+- The signing key is not in `.github/release-signers`.
 
 To run only these checks, and publish nothing, use `tools/release.sh <tag> --preflight`.
 
 If the preflight says `No merged pull request has the commit`, GitHub did not link the merge commit to its pull request. This can happen when the merge gets an error from GitHub, for example `502 Bad Gateway`, even though the merge worked. Do not publish from that commit. Merge a small pull request after it, for example a fix in the docs, and run the preflight again.
 
 After the publish, the job "Release files match the tag" of the workflow "Release check" builds the release again from the tag on a clean runner. It compares each published file with that build. If a file differs, is missing, or is extra, the job fails. Do not use the release then, and publish a new tag. If all files match, the job signs each file with a [GitHub artifact attestation](https://docs.github.com/en/actions/concepts/security/artifact-attestations). An attestation is a signed record of the workflow, the commit, and the checksum of a file.
+
+### Sign the release tags
+
+Each release tag has an SSH signature. A key in `.github/release-signers` makes it. `tools/sign-tag.sh` makes and checks the signature, and `tools/release.sh` runs it.
+
+To add a release key, do these steps one time:
+
+1. Make a key that is only for the release tags:
+
+   ```bash
+   ssh-keygen -t ed25519 -C herdspace-release -f ~/.ssh/herdspace_release
+   ```
+
+2. Tell git to use it in this repository:
+
+   ```bash
+   git config user.signingkey ~/.ssh/herdspace_release.pub
+   ```
+
+3. Add a line for the key to `.github/release-signers`, and merge the change with a pull request:
+
+   ```bash
+   printf 'herdspace-release namespaces="git" %s\n' "$(cut -d ' ' -f 1,2 ~/.ssh/herdspace_release.pub)" >>.github/release-signers
+   ```
+
+4. Optional: add the public key to your GitHub account as a signing key, so that GitHub shows the tag as "Verified".
+
+5. Make sure that the key is a release key:
+
+   ```bash
+   tools/sign-tag.sh --check
+   ```
 
 ## Add something new
 

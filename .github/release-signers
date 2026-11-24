@@ -1,0 +1,3 @@
+# The SSH keys that sign the release tags of herdspace. To check a tag:
+#   git -c gpg.ssh.allowedSignersFile=.github/release-signers tag -v <tag>
+# See docs/setup.md#make-sure-that-a-release-is-genuine.
