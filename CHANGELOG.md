@@ -11,6 +11,9 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 ### Added
 
 - `herdspace update --version <tag>` installs one release, also an older one, with the saved role and options. It checks the tag, says when it goes back, and leaves out a saved option that the older release does not know. See [Go back to an older release](docs/updating.md#go-back-to-an-older-release).
+### Added
+
+- `docs/setup.md` lists the supported systems, and the network use of each part, in "Network use and privacy". herdspace sends no telemetry. `docs/updating.md` has the rules for old options, in "Old options and deprecation".
 
 ## [0.10.0] - 2026-11-24
 
