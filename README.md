@@ -105,6 +105,8 @@ An update changes only the files of herdspace. Your own files stay yours:
 
 If you changed a file of herdspace, the setup asks before it replaces it, and it makes a backup first.
 
+You do not have to stop your Herdr sessions. The new commands work at once. An open shell gets the shell changes after `exec zsh`, and a session uses a new Herdr version after a restart. See [Running sessions](docs/updating.md#running-sessions).
+
 ## Uninstall
 
 ```bash

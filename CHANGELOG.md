@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- The README and `docs/updating.md` say what an update changes in a running session: the new commands work at once, an open shell needs `exec zsh` for the shell changes, and a new Herdr version needs a restart of the session.
+
 ## [0.11.0] - 2026-11-25
 
 ### Added
