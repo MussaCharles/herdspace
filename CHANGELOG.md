@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-11-25
+
 ### Fixed
 
 - `ls -ltr` and other commands with a flag that means something else in `eza` failed, for example with `invalid value 'rF' for '--time <FIELD>'`. `ls` and `ll` now run `eza` only with the flags `-l`, `-a`, `-A`, `-R`, `-F`, `-d`, `-1`, `-r`, and `-h`, and the standard `ls` with any other flag.
@@ -280,7 +282,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.12.1...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.12.2...HEAD
+[0.12.2]: https://github.com/MussaCharles/herdspace/compare/0.12.1...0.12.2
 [0.12.1]: https://github.com/MussaCharles/herdspace/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/MussaCharles/herdspace/compare/0.11.1...0.12.0
 [0.11.1]: https://github.com/MussaCharles/herdspace/compare/0.11.0...0.11.1
