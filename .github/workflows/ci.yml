@@ -83,6 +83,8 @@ jobs:
         run: tests/test-uninstall.sh
       - name: Linux packages from other sources
         run: tests/test-linux-packages.sh
+      - name: Wait for the release files
+        run: tests/test-wait-release-files.sh
       - name: Shell extras and the fzf keys
         run: |
           command -v zsh >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq zsh >/dev/null; }

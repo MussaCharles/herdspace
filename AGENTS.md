@@ -15,6 +15,7 @@ A CLI workspace and session manager for Herdr, the terminal multiplexer for codi
 | `install.md` | Steps that a coding agent follows to install herdspace for a person. |
 | `tools/release.sh` | Builds and publishes a release. |
 | `tools/sign-tag.sh` | Makes and checks the signed tag of a release. |
+| `tools/wait-release-files.sh` | Waits until the files of a published release download. The Release check runs it. |
 | `tests/` | The tests. `docs/testing.md` explains each one. |
 | `skills/herdspace/` | The user skill: it teaches an agent to use herdspace on any machine. |
 | `.agents/skills/` | The contributor skills: they teach an agent to change this repository. |
