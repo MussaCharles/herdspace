@@ -174,6 +174,15 @@ The palette is the place to start an action. In Herdr, press `Cmd+Shift+P` on a 
 
 Each action has a group and a name, as in VS Code, and the key or command for it at the right. Type to filter the list, and press Enter to run an action. Esc closes the palette. With no fzf, the palette shows a numbered menu with a heading for each group.
 
+### Quick open
+
+Press `Cmd+P` in Herdr, as in VS Code. On Linux, press `Ctrl+B`, then `F`, because `Ctrl+P` stays with the shell and Neovim. A popup lists the files of the git project of the focused pane, or of its folder, with a preview. Type to filter, and press Enter:
+
+- If a pane of the tab runs Neovim, the file opens there, and the focus moves to that pane.
+- Else Neovim opens the file in a split on the right, with the focus on it.
+
+`Ctrl+V`, `Ctrl+S`, and `Ctrl+T` open a new editor on the right, below, or in a new tab. The palette has the same action: "Files: Quick open". Outside Herdr, `hopen --quick-open` opens the file in the editor in the same terminal.
+
 ### Choose where a program opens
 
 In Herdr, an action that starts a program can open it beside the current pane. For example, keep an agent on the left, and open lazygit or the editor on the right. Press one of these keys instead of Enter:
