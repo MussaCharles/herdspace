@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- On Linux, the "System packages" step no longer fails with `held broken packages` when a tool comes from another source than apt, for example Node.js from NodeSource, where the `npm` package of the system conflicts with the `nodejs` package. If the commands of a package already work, the setup installs no package for them and names them. A package that is held with `apt-mark hold` now counts as installed.
+
 ## [0.12.0] - 2026-11-25
 
 ### Added

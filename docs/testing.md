@@ -28,6 +28,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-ci-changes.sh` | `tools/ci-changes.sh` finds a pull request that changes only docs, in a temporary git repository. |
 | `tests/test-links.sh` | Each relative link of each Markdown file points at a file that exists, and each `#anchor` matches a heading. A link in a community file in `.github/` starts with `/`. It needs no network. |
 | `tests/test-ghostty.sh` | How the client setup writes the Ghostty file: the marked blocks at the top, your own lines below them, the file of an older herdspace, the key and look choices, and the key question. It needs no network. |
+| `tests/test-linux-packages.sh` | The packages that the Linux server setup asks apt for, with stub commands: a tool that works from another source (NodeSource, nvm, a GitHub `.deb`, cargo) gets no package, an installed or held package stays, and a missing tool gets its package. It needs bash, and no apt and no network. |
 | `tests/test-known-hashes.sh` | `tools/known-hashes.sh` in a temporary repository: each older version of a file is in the list, also a version that only a merge commit made, and the version of HEAD is not. It needs git and Python 3, and no network. |
 | `tests/test-sign-tag.sh` | `tools/sign-tag.sh` in a temporary repository, with a temporary SSH key: a signed tag, `git tag -v`, a key that is not a release key, and a tag with no signature. It needs git and ssh-keygen, and no network. |
 | `tests/test-bash-env.sh` | The move of exports from `~/.bashrc` and `~/.bash_profile` to `~/.zshenv`: which lines move and which stay, the question, the backups with mode 600, the test after the move that puts the files back, and that no value appears in the output. It needs bash, zsh, and Python 3, and no network. |
@@ -82,6 +83,10 @@ tests/test-sign-tag.sh
 
 ```bash
 tests/test-known-hashes.sh
+```
+
+```bash
+tests/test-linux-packages.sh
 ```
 
 ```bash

@@ -61,6 +61,13 @@ if have python3 && ! python3_new_enough; then
   fi
 fi
 
+# Leave out each package whose commands come from another source than apt.
+other_sources="$(skip_other_sources $PACKAGES 2>&1 >/dev/null | tr '\n' ' ')"
+PACKAGES="$(skip_other_sources $PACKAGES 2>/dev/null | tr '\n' ' ')"
+if [ -n "$other_sources" ]; then
+  info "These tools come from another source than apt, so the setup uses them and installs no package for them: ${other_sources% }."
+fi
+
 packages_ready() {
   # shellcheck disable=SC2086 # The list must split into words.
   apt_ready $PACKAGES && have bat && have fd

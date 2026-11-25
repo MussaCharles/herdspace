@@ -75,10 +75,55 @@ set_login_shell_zsh() {
 }
 
 # apt_ready NAME... exits 0 if each package is installed.
+# apt_ready NAME... is true when each package is installed. A package that is
+# held (apt-mark hold) is installed too.
 apt_ready() {
   local name
   for name in "$@"; do
-    dpkg-query -W -f '${Status}' "$name" 2>/dev/null | grep -q 'install ok installed' || return 1
+    dpkg-query -W -f '${Status}' "$name" 2>/dev/null | grep -Eq '^(install|hold) ok installed$' || return 1
+  done
+}
+
+# package_commands NAME prints the commands that the setup needs from a
+# package: words that must all work, and "a|b" when one of a or b is enough.
+# A package with no command, for example ca-certificates, prints nothing.
+package_commands() {
+  case "$1" in
+    ripgrep) echo rg ;;
+    fd-find) echo 'fd|fdfind' ;;
+    bat) echo 'bat|batcat' ;;
+    nodejs) echo node ;;
+    build-essential) echo 'cc|gcc make' ;;
+    git | curl | zsh | python3 | tar | gzip | unzip | npm) echo "$1" ;;
+  esac
+}
+
+# commands_work WORD... is true when each word of package_commands works.
+commands_work() {
+  local word alt ok
+  for word in "$@"; do
+    ok=0
+    for alt in ${word//|/ }; do have "$alt" && { ok=1; break; }; done
+    [ "$ok" -eq 1 ] || return 1
+  done
+}
+
+# skip_other_sources NAME... prints each package that apt must install. It
+# leaves out a package that is not installed when its commands already work,
+# because they come from another source, for example Node.js from NodeSource or
+# nvm, bat or fd from a GitHub .deb, or ripgrep from cargo. A system package
+# can conflict with such a source, and then apt stops the whole step. On
+# standard error, it names each package that it left out.
+skip_other_sources() {
+  local name spec
+  for name in "$@"; do
+    spec="$(package_commands "$name")"
+    # shellcheck disable=SC2086 # The words of spec must split.
+    if [ -n "$spec" ] && ! apt_ready "$name" && commands_work $spec; then
+      printf '%s\n' "$name" >&2
+    else
+      printf '%s\n' "$name"
+    fi
   done
 }
 
