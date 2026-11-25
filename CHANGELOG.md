@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- The install jobs of the Release check wait until the files of a new release download, so that they do not fail right after a publish. See `tools/wait-release-files.sh` and [docs/ci.md](docs/ci.md).
+
 ## [0.12.1] - 2026-11-25
 
 ### Fixed

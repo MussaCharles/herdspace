@@ -59,6 +59,8 @@ The Linux tests start their own containers on the runner, as on a machine of a c
 | Linux, one job for each option | `ubuntu-24.04` and `ubuntu-24.04-arm` | `tests/run-release-check.sh --only linux <option>`: `server`, `client`, `both`, and `hopen`, in fresh containers |
 | macOS, one job for each option | `macos-26` | `tests/run-release-check.sh --here <option>`: `server`, `both`, and `hopen`, on the runner itself |
 
+Before the install, each Linux and macOS job runs `tools/wait-release-files.sh`. Right after a publish, the download addresses of the new files and the `releases/latest` link can answer with an error for a short time. The script tries each file again every 15 seconds, for at most 5 minutes. After that, the job fails with the name of the file.
+
 To check a release again, open the Actions tab, choose "Release check", and click "Run workflow". Type the tag, or leave it empty for the latest release. With the GitHub CLI:
 
 ```bash
