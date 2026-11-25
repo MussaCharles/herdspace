@@ -1485,6 +1485,28 @@ split_run() {
   herdr pane focus "$pane" >/dev/null 2>&1 || true
 }
 
+# run_at DEFAULT LABEL DIR [COMMAND] runs COMMAND in the place that the person
+# chose in the palette (PAL_PLACE), or in DEFAULT: here, right, down, or tab.
+# "here" replaces the palette with COMMAND. Outside Herdr, only "here" works.
+run_at() {
+  local place="${PAL_PLACE:-$1}"
+  [ -n "$PAL_PANE" ] || place=here
+  case "$place" in
+    right | down) split_run "$place" "$3" "${4:-}" ;;
+    tab)
+      if [ -n "${4:-}" ]; then
+        new_tab_run "$2" "$3" "$4"
+      else
+        herdr tab create --workspace "$PAL_WS" --cwd "$3" --label "$2" --focus >/dev/null
+      fi
+      ;;
+    *)
+      cd "$3" || die "No folder ${3}."
+      if [ -n "${4:-}" ]; then eval "exec $4"; else exec "${SHELL:-sh}"; fi
+      ;;
+  esac
+}
+
 # agents_sorted prints "pane<TAB>agent<TAB>state<TAB>cwd" for each agent, the
 # blocked and done agents first.
 agents_sorted() {
@@ -1632,10 +1654,13 @@ palette_items() {
   pal_add docs Help "Show the links to the cheat sheet and the docs"
 }
 
-# palette_menu prints the chosen id. The recent actions come first. With no
-# fzf, the numbered menu has a heading for each group.
+# palette_menu prints the chosen id, a tab, and the chosen place: right, down,
+# tab, or nothing for the default place of the action. In fzf, Ctrl+V, Ctrl+S,
+# and Ctrl+T choose the place. In the numbered menu, a word after the name or
+# the number does: "edit right", "3 down", "git tab". The recent actions come
+# first. With no fzf, the numbered menu has a heading for each group.
 palette_menu() {
-  local items recent="" id head text i=0 last="" answer name
+  local items recent="" id head text i=0 last="" answer name out key place="" header
   if [ -f "$PALETTE_RECENT" ]; then
     while IFS= read -r id; do
       [ -n "$id" ] || continue
@@ -1644,7 +1669,14 @@ palette_menu() {
   fi
   items="$(printf '%s%s' "$(grep -v '^$' <<<"$recent")${recent:+$'\n'}" "$PALETTE_ITEMS" | grep -v '^$')"
   if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
-    fzf --delimiter '\t' --with-nth 3 --prompt '> ' --header 'Type to filter. Enter runs. Esc closes.' --height 100% --reverse --no-multi --tiebreak=index <<<"$items" | cut -f1 || true
+    header='Type to filter. Enter runs. Esc closes.'
+    [ -z "$PAL_PANE" ] || header="${header}"$'\n''A program opens: Ctrl+V on the right, Ctrl+S below, Ctrl+T in a new tab.'
+    out="$(fzf --delimiter '\t' --with-nth 3 --prompt '> ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --height 100% --reverse --no-multi --tiebreak=index <<<"$items")" || true
+    key="$(sed -n 1p <<<"$out")"
+    id="$(sed -n 2p <<<"$out" | cut -f1)"
+    [ -n "$id" ] || return 0
+    case "$key" in ctrl-v) place=right ;; ctrl-s) place=down ;; ctrl-t) place=tab ;; esac
+    printf '%s\t%s\n' "$id" "$place"
     return 0
   fi
   while IFS=$'\t' read -r id head text; do
@@ -1655,15 +1687,22 @@ palette_menu() {
     fi
     printf '  %3d) %s\n' "$i" "$text" >&2
   done <<<"$items"
+  [ -z "$PAL_PANE" ] || printf '\n  A word after the action opens a program in another place: right, down, or tab.' >&2
   printf '\n  Action? Type a number or a name: ' >&2
   IFS= read -r answer </dev/tty || answer=""
+  case "$answer" in
+    *" right" | *" down" | *" tab")
+      place="${answer##* }"
+      answer="${answer% *}"
+      ;;
+  esac
   case "$answer" in
     "") return 0 ;;
     *[!0-9]*) name="$(awk -F '\t' -v n="$answer" '$1 == n {print $1; exit}' <<<"$items")" ;;
     *) name="$(awk -F '\t' -v n="$answer" 'NR == n {print $1; exit}' <<<"$items")" ;;
   esac
   [ -n "$name" ] || { printf '  [err]  No action %s.\n' "$answer" >&2; return 1; }
-  printf '%s\n' "$name"
+  printf '%s\t%s\n' "$name" "$place"
 }
 
 # remember ID puts ID first in the recent list. Agent ids change, so they stay out.
@@ -1691,6 +1730,9 @@ palette() {
   [ -t 0 ] && [ -t 1 ] || die "hopen --palette needs a terminal."
   choice="$(palette_menu)" || exit 1
   [ -n "$choice" ] || exit 0
+  PAL_PLACE="${choice#*$'\t'}"
+  choice="${choice%%$'\t'*}"
+  [ -n "$choice" ] || exit 0
   remember "$choice"
   cd "$dir" || die "No folder ${dir}."
   case "$choice" in
@@ -1706,18 +1748,16 @@ palette() {
       name="$(ask_text 'The name of the VS Code list')"
       [ -z "$name" ] || then_wait "$self" --convert "$name"
       ;;
-    task:*) exec "$self" --task "${choice#task:}" ;;
-    find) exec "$self" --find ;;
+    task:*) run_at here task "$dir" "$(printf '%q --task %q' "$self" "${choice#task:}")" ;;
+    find) run_at here find "$dir" "$(printf '%q --find' "$self")" ;;
     grep)
       text="$(ask_text 'Search for')"
       [ -n "$text" ] || exit 0
-      exec "$self" --grep "$text"
+      run_at here search "$dir" "$(printf '%q --grep %q' "$self" "$text")"
       ;;
-    edit)
-      if [ -n "$PAL_PANE" ]; then new_tab_run edit "$dir" "$(editor_command) ."; else eval "exec $(editor_command) ."; fi
-      ;;
-    git) exec lazygit ;;
-    git-tab) new_tab_run git "$dir" "lazygit" ;;
+    edit) run_at tab edit "$dir" "$(editor_command) ." ;;
+    git) run_at here git "$dir" lazygit ;;
+    git-tab) run_at tab git "$dir" lazygit ;;
     wt-new)
       name="$(ask_text 'The name of the new branch')"
       [ -n "$name" ] || exit 0
@@ -1726,7 +1766,9 @@ palette() {
     wt-open | wt-remove)
       pick="$(worktrees "$dir" | awk -F '\t' '{ print $1 "\t" $2 "  " $1 }' | choose "Worktree")" || exit 1
       [ -n "$pick" ] || exit 0
-      if [ "$choice" = wt-open ]; then
+      if [ "$choice" = wt-open ] && [ -n "${PAL_PLACE:-}" ]; then
+        run_at here "$(basename "$pick")" "$pick"
+      elif [ "$choice" = wt-open ]; then
         herdr worktree open --cwd "$dir" --path "$pick" --focus >/dev/null
       else
         name="$(worktrees "$dir" | awk -F '\t' -v p="$pick" '$1 == p { print $3 }')"
@@ -1741,7 +1783,7 @@ palette() {
       pick="$(agents_sorted | awk -F '\t' '{ print $1 "\t" $2 " (" $3 ")  " $4 }' | choose "Agent")" || exit 1
       [ -z "$pick" ] || then_wait herdr agent explain "$pick"
       ;;
-    start:*) split_run right "$dir" "${choice#start:}" ;;
+    start:*) run_at right "${choice#start:}" "$dir" "${choice#start:}" ;;
     apply:*) then_wait "$self" --apply "${choice#apply:}" ;;
     split-right) split_run right "$dir" ;;
     split-down) split_run down "$dir" ;;
