@@ -28,6 +28,16 @@ if [[ -t 0 && -t 1 ]]; then
       alias "$1=$2"
     fi
   }
+  # _hs_func NAME: true if the extras may define the function NAME: NAME is
+  # free, or this is the herdspace shell and NAME is no function yet. In the
+  # herdspace shell, it removes an alias NAME first.
+  _hs_func() {
+    if (( ${HERDSPACE_SHELL:-0} )) && (( ! ${+functions[$1]} )); then
+      unalias "$1" 2>/dev/null
+      return 0
+    fi
+    _hs_free "$1"
+  }
   # _hs_export NAME VALUE: the variable, if it has no value yet.
   _hs_export() {
     if [[ -n "${(P)1}" ]]; then
@@ -84,8 +94,33 @@ if [[ -t 0 && -t 1 ]]; then
     _hs_free fif && fif() { hopen --grep "$*"; }
   fi
   if command -v eza >/dev/null; then
-    _hs_alias ls "eza"
-    _hs_alias ll "eza -la"
+    # ls and ll run eza only with flags that mean the same in eza: -l, -a, -A,
+    # -R, -d, -1, -r, -h (eza shows human sizes with no flag), and -F (eza
+    # needs --classify=always, because its -F takes a value). With any
+    # other flag, for example -t, -S, -G, or a long option, they run the
+    # standard ls, so that ls -ltr works as people expect.
+    _herdspace_ls() {
+      local a f i=0 classify=0
+      local -a eza_args
+      for a in "$@"; do
+        (( i++ ))
+        case "$a" in
+          --) eza_args+=("${@[i,-1]}"); break ;;
+          --* | -*[!laARFd1rh]*) command ls "$@"; return ;;
+          -*)
+            [[ "$a" != *F* ]] || classify=1
+            f="${${a//h/}//F/}"
+            [[ "$f" == - ]] || eza_args+=("$f")
+            ;;
+          *) eza_args+=("$a") ;;
+        esac
+      done
+      (( ! classify )) || eza_args=(--classify=always "${eza_args[@]}")
+      eza "${eza_args[@]}"
+    }
+    # The function keyword keeps an alias ls from changing the name.
+    _hs_func ls && function ls { _herdspace_ls "$@"; }
+    _hs_func ll && function ll { _herdspace_ls -la "$@"; }
     _hs_alias tree "eza --tree"
   fi
   command -v bat >/dev/null && _hs_alias cat "bat"
@@ -103,5 +138,5 @@ if [[ -t 0 && -t 1 ]]; then
     add-zsh-hook precmd _hs_update_notice
   fi
 
-  unfunction _hs_free _hs_alias _hs_export
+  unfunction _hs_free _hs_alias _hs_func _hs_export
 fi

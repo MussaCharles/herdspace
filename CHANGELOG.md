@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- `ls -ltr` and other commands with a flag that means something else in `eza` failed, for example with `invalid value 'rF' for '--time <FIELD>'`. `ls` and `ll` now run `eza` only with the flags `-l`, `-a`, `-A`, `-R`, `-F`, `-d`, `-1`, `-r`, and `-h`, and the standard `ls` with any other flag.
+
 ### Changed
 
 - The install jobs of the Release check wait until the files of a new release download, so that they do not fail right after a publish. See `tools/wait-release-files.sh` and [docs/ci.md](docs/ci.md).

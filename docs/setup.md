@@ -439,7 +439,7 @@ herdspace never replaces a `~/.zshrc` of yours. It owns only its own files in `~
 | File | What it holds |
 |------|---------------|
 | `zshrc.zsh` | The herdspace shell: the prompt, Oh My Zsh, and the shell extras. |
-| `extras.zsh` | The shell extras: the `fzf` keys, `zoxide`, `ff`, `fif`, the completion of `hopen`, and `eza` and `bat` for `ls` and `cat`. |
+| `extras.zsh` | The shell extras: the `fzf` keys, `zoxide`, `ff`, `fif`, the completion of `hopen`, and `eza` and `bat` for `ls` and `cat`. `ls` and `ll` run `eza` only with the flags `-l`, `-a`, `-A`, `-R`, `-F`, `-d`, `-1`, `-r`, and `-h`. With another flag, for example `-t`, they run the standard `ls`. |
 
 Your `~/.zshrc` loads one of them from a marked block, between `# >>> herdspace >>>` and `# <<< herdspace <<<`. A later run changes only the text of the block. The script does this with your `~/.zshrc`:
 

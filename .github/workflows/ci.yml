@@ -89,10 +89,11 @@ jobs:
         run: |
           command -v zsh >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq zsh >/dev/null; }
           tests/test-extras-keys.sh
+          tests/test-extras-ls.sh
       - name: Shell extras with zsh 5.8 (ubuntu:22.04)
         run: >-
           docker run --rm -v "$PWD:/src:ro" ubuntu:22.04 sh -c
-          'apt-get -qq update >/dev/null && apt-get -qq install -y zsh python3 >/dev/null && /src/tests/test-extras-keys.sh'
+          'apt-get -qq update >/dev/null && apt-get -qq install -y zsh python3 >/dev/null && /src/tests/test-extras-keys.sh && /src/tests/test-extras-ls.sh'
       - name: Exports from the bash files
         run: |
           command -v zsh >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq zsh >/dev/null; }

@@ -99,6 +99,10 @@ tests/test-extras-keys.sh
 ```
 
 ```bash
+tests/test-extras-ls.sh
+```
+
+```bash
 tests/run-prereqs.sh
 ```
 
