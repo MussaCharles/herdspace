@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-11-25
+
 ### Fixed
 
 - On Linux, the "System packages" step no longer fails with `held broken packages` when a tool comes from another source than apt, for example Node.js from NodeSource, where the `npm` package of the system conflicts with the `nodejs` package. If the commands of a package already work, the setup installs no package for them and names them. A package that is held with `apt-mark hold` now counts as installed.
@@ -270,7 +272,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.12.1...HEAD
+[0.12.1]: https://github.com/MussaCharles/herdspace/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/MussaCharles/herdspace/compare/0.11.1...0.12.0
 [0.11.1]: https://github.com/MussaCharles/herdspace/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/MussaCharles/herdspace/compare/0.10.0...0.11.0
