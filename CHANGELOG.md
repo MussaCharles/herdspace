@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-25
+
 ### Added
 
 - In the command palette, `Ctrl+V`, `Ctrl+S`, and `Ctrl+T` open a program on the right of the current pane, below it, or in a new tab, instead of its usual place. This works for the editor, lazygit, find, search, tasks, agents, and worktrees. In the numbered menu, a word after the action does the same, for example `edit right`. See [Choose where a program opens](docs/hopen.md#choose-where-a-program-opens).
@@ -264,7 +266,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.11.1...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/MussaCharles/herdspace/compare/0.11.1...0.12.0
 [0.11.1]: https://github.com/MussaCharles/herdspace/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/MussaCharles/herdspace/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/MussaCharles/herdspace/compare/0.9.0...0.10.0
