@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-11-25
+
 ### Changed
 
 - The README and `docs/updating.md` say what an update changes in a running session: the new commands work at once, an open shell needs `exec zsh` for the shell changes, and a new Herdr version needs a restart of the session.
@@ -258,7 +260,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.11.1...HEAD
+[0.11.1]: https://github.com/MussaCharles/herdspace/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/MussaCharles/herdspace/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/MussaCharles/herdspace/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/MussaCharles/herdspace/compare/0.8.0...0.9.0
