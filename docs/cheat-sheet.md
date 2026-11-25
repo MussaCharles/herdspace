@@ -319,6 +319,17 @@ Run `nvim .` in a project. If you have your own `~/.config/nvim`, run `NVIM_APPN
 
 In a Python project, Neovim uses the `.venv` or `venv` folder of the project, so that the language server finds its packages.
 
+### Markdown and images
+
+Neovim renders a Markdown file in the editor: headings with an icon in place of `###`, tables, code blocks, and checkboxes. The line with the cursor shows the raw text, so that you can edit it. To read a Markdown file, open the palette and choose "Files: Read a Markdown file, rendered". Press `Ctrl+V` instead of Enter to open it on the right of an agent.
+
+| Action | Keys |
+|--------|------|
+| Show the raw text, or render again | `Space`, `u`, `m` |
+| Preview in a browser (on the machine that runs Neovim) | `Space`, `c`, `p` |
+
+Neovim also shows images: an image in a Markdown file, and an image file that you open. It uses the Kitty graphics protocol. Ghostty supports it, and Herdr 0.9.2 and later pass the images of a pane to Ghostty. With no ImageMagick (`magick`), Neovim shows PNG files only. Run `:checkhealth snacks` to see what works in your terminal.
+
 ## lazygit
 
 Press `Cmd+Shift+G` in a Herdr pane, or `Ctrl+Shift+G` on Linux. You can also run `lazygit` in a project. The branches of coding agents have their own colors, for example `claude/` and `codex/`. In a narrow pane, the file list is on top and the diff below it.

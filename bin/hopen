@@ -1587,6 +1587,7 @@ palette_items() {
   command -v rg >/dev/null 2>&1 && pal_add grep Files "Search in the files, and open a result" "fif"
   if command -v nvim >/dev/null 2>&1 || [ -n "${EDITOR:-}" ]; then
     pal_add edit Files "Open this folder in the editor"
+    pal_add read-md Files "Read a Markdown file, rendered"
   fi
   # Git
   if git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -1756,6 +1757,13 @@ palette() {
       run_at here search "$dir" "$(printf '%q --grep %q' "$self" "$text")"
       ;;
     edit) run_at tab edit "$dir" "$(editor_command) ." ;;
+    read-md)
+      text="$(list_files 2>/dev/null | sed 's|^\./||' | grep -iE '\.(md|markdown)$' | sort)" || true
+      [ -n "$text" ] || { then_wait printf '  No Markdown file in %s.\n' "$dir"; exit 0; }
+      pick="$(awk '{ print $0 "\t" $0 }' <<<"$text" | choose "Markdown file")" || exit 1
+      [ -n "$pick" ] || exit 0
+      run_at tab "$(basename "$pick")" "$dir" "$(editor_command) -R $(printf '%q' "$pick")"
+      ;;
     git) run_at here git "$dir" lazygit ;;
     git-tab) run_at tab git "$dir" lazygit ;;
     wt-new)
