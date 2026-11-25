@@ -185,7 +185,7 @@ In Herdr, an action that starts a program can open it beside the current pane. F
 | `Ctrl+S` | In a split below the current pane |
 | `Ctrl+T` | In a new tab |
 
-The keys work for these actions: open this folder in the editor, lazygit, find a file, search in the files, run a task, start an agent, and open a worktree. A worktree opens as a shell in its folder. For another action, the keys work as Enter. In the numbered menu, type the place after the name or the number, for example `edit right`, `3 down`, or `git tab`.
+The keys work for these actions: open this folder in the editor, read a Markdown file, lazygit, find a file, search in the files, run a task, start an agent, and open a worktree. A worktree opens as a shell in its folder. For another action, the keys work as Enter. In the numbered menu, type the place after the name or the number, for example `edit right`, `3 down`, or `git tab`.
 
 The palette shows only the actions that fit the place. For example, the Git actions show only in a git folder, and the Layout actions only in Herdr.
 
@@ -194,7 +194,7 @@ The palette shows only the actions that fit the place. For example, the Git acti
 | Recently used | The last 5 actions that you ran. |
 | Projects | Open a list. Open this folder in Herdr. Open this folder as its own workspace. Open this session in a new window. Open every list. Show every list. Write a `herdspace.toml` from a VS Code list. |
 | Tasks | Run a task of the project of the current folder. |
-| Files | Find a file (`ff`). Search in the files (`fif`). Open this folder in the editor. |
+| Files | Find a file (`ff`). Search in the files (`fif`). Open this folder in the editor. Read a Markdown file, rendered. |
 | Git | lazygit over the pane, or in a new tab. A new worktree for an agent, on a new branch. Open, show, or remove a worktree. |
 | Agents | Go to an agent: the blocked and done agents come first. Explain the state of an agent. Start an agent program in a new pane. |
 | Layout | Split the tab with a template. Split right or down. Zoom the pane. Show every template. |

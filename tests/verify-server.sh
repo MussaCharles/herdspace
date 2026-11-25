@@ -77,6 +77,10 @@ result.confirm = vim.o.confirm
 result.netrw_off = vim.g.loaded_netrw == 1
 result.flush = vim.api.nvim_get_hl(0, { name = "Normal" }).bg == nil
 result.venv = require("lazy.core.config").plugins["venv-selector.nvim"] ~= nil
+local md = require("lazy.core.plugin").values(require("lazy.core.config").plugins["render-markdown.nvim"], "opts", false)
+result.md_icons = #(md.heading and md.heading.icons or {})
+result.md_checkbox = md.checkbox and md.checkbox.enabled == true
+result.image = Snacks.config.image and Snacks.config.image.enabled == true
 vim.fn.writefile({ vim.json.encode(result) }, vim.env.RESULT)
 vim.cmd("qa!")
 LUA
@@ -90,6 +94,9 @@ contains "$nv" '"confirm":true' 'neovim asks before it quits with unsaved change
 contains "$nv" '"netrw_off":true' 'netrw shows no folder listing in the editor'
 contains "$nv" '"flush":true' 'the editor has the background of the terminal'
 contains "$nv" '"venv":true' 'the Python venv selector is set up'
+contains "$nv" '"md_icons":6' 'Markdown headings show icons'
+contains "$nv" '"md_checkbox":true' 'Markdown checkboxes show as boxes'
+contains "$nv" '"image":true' 'snacks.image is on'
 
 # `nvim .` opens the file tree and an empty editor, with no folder buffer.
 cat >"$work/tree.lua" <<'LUA'
@@ -229,6 +236,13 @@ in_pal 'find tab\r' >/dev/null
 for _ in $(seq 1 20); do case "$(tabs_in "$pal_ws")" in *find*) break ;; esac; sleep 0.25; done
 contains "$(tabs_in "$pal_ws")" 'find' 'find tab opens the file finder in a new tab'
 grep -qx find "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent" && pass 'the recent list keeps the action without the place' || fail 'the recent list keeps the action without the place'
+# Read a Markdown file: the menu lists the .md files, and the file opens in a
+# new tab with its name.
+printf '# Notes\n' >"$work/hb-pal/NOTES.md"
+contains "$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" hopen --palette --print)" 'Files: Read a Markdown file, rendered' 'the palette offers to read a Markdown file'
+in_pal 'read-md\r1\r' >/dev/null
+for _ in $(seq 1 20); do case "$(tabs_in "$pal_ws")" in *NOTES.md*) break ;; esac; sleep 0.25; done
+contains "$(tabs_in "$pal_ws")" 'NOTES.md' 'read-md opens the Markdown file in a new tab'
 contains "$(in_pal 'window\r')" 'Open a new terminal window' 'the palette prints the command for a second window'
 grep -qx window "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent" && pass 'the palette remembers the last action' || fail 'the palette remembers the last action'
 contains "$(in_pal '\r')" 'Recently used' 'the palette shows the recent actions first'

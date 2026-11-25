@@ -4,6 +4,11 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- Neovim shows Markdown headings with an icon in place of `###`, and checkboxes as boxes. It shows images in a Markdown file and image files, with the Kitty graphics protocol, in Ghostty and in Herdr 0.9.2 and later. Without ImageMagick, it shows PNG files only.
+- The palette action "Files: Read a Markdown file, rendered" opens a Markdown file of the folder read-only in the editor. See [Markdown and images](docs/cheat-sheet.md#markdown-and-images).
+
 ## [0.12.2] - 2026-11-25
 
 ### Fixed
