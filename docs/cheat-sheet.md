@@ -290,7 +290,7 @@ zoxide knows only the folders that you visited. Use `cd` with the full path the 
 | Search the shell history | `Ctrl+R` |
 | Insert a file path | `Ctrl+T` |
 | Go to a folder from a list | `Alt+C` |
-| List files with `eza` | `ls`, `ll`, `tree` |
+| List files with `eza` | `ls`, `ll`, `tree`. A flag that means something else in `eza`, for example `ls -ltr`, runs the standard `ls` |
 | Show a file with `bat` | `cat file` |
 | Find a file by name (`hopen --find`) | `ff` |
 | Search the files for text (`hopen --grep`) | `fif TEXT` |
