@@ -6,8 +6,13 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Added
 
+- Quick open, like `Cmd+P` in VS Code: `Cmd+P` in Herdr (`Ctrl+B`, then `F` on Linux) lists the files of the project. The chosen file opens in the Neovim pane of the tab, or in a new split on the right, and gets the focus. See [Quick open](docs/hopen.md#quick-open).
 - Neovim shows Markdown headings with an icon in place of `###`, and checkboxes as boxes. It shows images in a Markdown file and image files, with the Kitty graphics protocol, in Ghostty and in Herdr 0.9.2 and later. Without ImageMagick, it shows PNG files only.
 - The palette action "Files: Read a Markdown file, rendered" opens a Markdown file of the folder read-only in the editor. See [Markdown and images](docs/cheat-sheet.md#markdown-and-images).
+
+### Fixed
+
+- After `Ctrl+V` or `Ctrl+S` in the palette, the new pane gets the focus. Before, the focus stayed on the old pane.
 
 ## [0.12.2] - 2026-11-25
 

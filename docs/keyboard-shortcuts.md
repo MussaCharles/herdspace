@@ -13,6 +13,7 @@ By default, the client setup changes some keys of Ghostty and macOS. With the ch
 | `Cmd+K` | `Ctrl+Shift+K` | Ghostty, on a Mac: clear the screen | Herdr: go to any workspace, tab, or agent |
 | `Cmd+E` | `Ctrl+Shift+E` | Ghostty: search for the selected text on a Mac, or split down on Linux | Neovim: go to the file tree. On a Mac, Ghostty still searches when you select text in Ghostty. |
 | `Cmd+Shift+G` | `Ctrl+Shift+G` | Ghostty, on a Mac: go to the previous search result | Herdr: open lazygit over the pane. On a Mac, Ghostty still uses it while its search is open. |
+| `Cmd+P` | | Ghostty: nothing | Herdr: quick open, a file in the editor of the tab. On Linux, use `Ctrl+B`, then `F`, because `Ctrl+P` stays with the shell and Neovim. |
 | `Cmd+Shift+P` | `Ctrl+Shift+P` | Ghostty: the command palette of Ghostty | Herdr: the command palette of `hopen` |
 | | `Ctrl+Shift+F` | Ghostty: search | Neovim: search the project |
 | `Option` | | macOS: type special characters, for example `å` | Sends `Alt`, for the `Alt` keys of Herdr and Neovim |

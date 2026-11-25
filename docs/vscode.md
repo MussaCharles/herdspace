@@ -11,7 +11,7 @@ herdspace is terminal first. Herdr holds the terminals, `hopen` opens your proje
 | A multi-root workspace file | A `herdspace.toml` list, opened with `hopen my-projects`. `hopen` also reads your `.code-workspace` file. See the [hopen guide](hopen.md). |
 | Open a folder (`code .`) | `hopen .` |
 | Recent workspaces | `hopen` with no name shows a menu of your lists. `z` and `zi` jump to the folders that you used. |
-| Quick Open (`Cmd+P`) | `ff` in the shell, or `Ctrl+P` in Neovim |
+| Quick Open (`Cmd+P`) | `Cmd+P` in Herdr, or `Ctrl+B`, then `F` on Linux. The file opens in the Neovim pane of the tab, or in a new split on the right, with the focus on it. In the shell, `ff`. In Neovim, `Ctrl+P`. |
 | Search in files (`Cmd+Shift+F`) | `fif TEXT` in the shell, or `Ctrl+Shift+F` or `/` in Neovim |
 | The Explorer | The file tree of Neovim. `Cmd+E` focuses it. |
 | The command palette (`Cmd+Shift+P`) | `Cmd+Shift+P` in Herdr opens the palette of `hopen`. See [The command palette](hopen.md#the-command-palette). |

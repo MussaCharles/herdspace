@@ -19,6 +19,7 @@ window-height = 25
 keybind = super+t=unbind
 keybind = super+w=unbind
 keybind = super+k=unbind
+keybind = super+p=unbind
 keybind = super+shift+p=unbind
 # The replacement keys. Cmd+Option+W closes a tab already. Cmd+E and
 # Cmd+Shift+G keep their Ghostty action, which works only with a selection or
