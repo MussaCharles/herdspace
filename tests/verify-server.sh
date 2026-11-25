@@ -217,6 +217,16 @@ in_pal 'close-tab\r\r' >/dev/null
 [ "$(tabs_in "$pal_ws")" = "$before" ] && pass 'the palette asks before it closes a tab, and the default is no' || fail 'the palette asks before it closes a tab'
 in_pal 'new-tab\r' >/dev/null
 [ "$(tabs_in "$pal_ws" | tr ',' '\n' | wc -l | tr -d ' ')" = 2 ] && pass 'the palette opens a new tab' || fail "the palette opens a new tab: $(tabs_in "$pal_ws")"
+# A word after the action chooses the place of the program, as Ctrl+S and
+# Ctrl+T do in fzf.
+contains "$(in_pal '\r')" 'A word after the action opens a program in another place' 'in Herdr, the numbered menu names the place words'
+in_pal 'find down\r' >/dev/null
+for _ in $(seq 1 20); do [ "$(panes_in "$pal_tab")" = 3 ] && break; sleep 0.25; done
+[ "$(panes_in "$pal_tab")" = 3 ] && pass 'find down opens the file finder in a split below' || fail "find down opens the file finder in a split below: $(panes_in "$pal_tab") panes"
+in_pal 'find tab\r' >/dev/null
+for _ in $(seq 1 20); do case "$(tabs_in "$pal_ws")" in *find*) break ;; esac; sleep 0.25; done
+contains "$(tabs_in "$pal_ws")" 'find' 'find tab opens the file finder in a new tab'
+grep -qx find "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent" && pass 'the recent list keeps the action without the place' || fail 'the recent list keeps the action without the place'
 contains "$(in_pal 'window\r')" 'Open a new terminal window' 'the palette prints the command for a second window'
 grep -qx window "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent" && pass 'the palette remembers the last action' || fail 'the palette remembers the last action'
 contains "$(in_pal '\r')" 'Recently used' 'the palette shows the recent actions first'

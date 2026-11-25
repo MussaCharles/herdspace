@@ -174,6 +174,19 @@ The palette is the place to start an action. In Herdr, press `Cmd+Shift+P` on a 
 
 Each action has a group and a name, as in VS Code, and the key or command for it at the right. Type to filter the list, and press Enter to run an action. Esc closes the palette. With no fzf, the palette shows a numbered menu with a heading for each group.
 
+### Choose where a program opens
+
+In Herdr, an action that starts a program can open it beside the current pane. For example, keep an agent on the left, and open lazygit or the editor on the right. Press one of these keys instead of Enter:
+
+| Key | The program opens |
+|-----|-------------------|
+| Enter | In the usual place of the action |
+| `Ctrl+V` | In a split on the right of the current pane |
+| `Ctrl+S` | In a split below the current pane |
+| `Ctrl+T` | In a new tab |
+
+The keys work for these actions: open this folder in the editor, lazygit, find a file, search in the files, run a task, start an agent, and open a worktree. A worktree opens as a shell in its folder. For another action, the keys work as Enter. In the numbered menu, type the place after the name or the number, for example `edit right`, `3 down`, or `git tab`.
+
 The palette shows only the actions that fit the place. For example, the Git actions show only in a git folder, and the Layout actions only in Herdr.
 
 | Group | Actions |

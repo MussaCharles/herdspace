@@ -156,7 +156,7 @@ After a stop, the workspaces, tabs, panes, and folders return as new shells. Run
 
 ## Command palette
 
-The palette is the place to start. Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) in Herdr, type a few letters, and press Enter. For example, type `split` to split the pane, `worktree` for a new worktree for an agent, `lazygit` to open lazygit in a new tab, or `keys` to show the keys. To show one session in two windows, type `window`. See [The command palette](hopen.md#the-command-palette).
+The palette is the place to start. Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) in Herdr, type a few letters, and press Enter. For example, type `split` to split the pane, `worktree` for a new worktree for an agent, `lazygit` to open lazygit in a new tab, or `keys` to show the keys. To show one session in two windows, type `window`. To open a program beside the current pane, press `Ctrl+V` (right), `Ctrl+S` (below), or `Ctrl+T` (new tab) instead of Enter. See [The command palette](hopen.md#the-command-palette).
 
 ## Direct keys
 

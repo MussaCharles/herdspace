@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- In the command palette, `Ctrl+V`, `Ctrl+S`, and `Ctrl+T` open a program on the right of the current pane, below it, or in a new tab, instead of its usual place. This works for the editor, lazygit, find, search, tasks, agents, and worktrees. In the numbered menu, a word after the action does the same, for example `edit right`. See [Choose where a program opens](docs/hopen.md#choose-where-a-program-opens).
+
 ## [0.11.1] - 2026-11-25
 
 ### Changed
