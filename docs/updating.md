@@ -116,20 +116,21 @@ A removed option stops the setup with a message that names the new option. A cha
 A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag is a version with no v in front, for example `0.1.2`. A tag with a dash, for example `0.2.0-alpha.1`, becomes a pre-release.
 
 1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Change the links at the end of the file to the new tag. Run `tools/known-hashes.sh`, so that the list of older file versions holds the `hopen` of the new tag. Merge the change, and run the tests.
-2. Build the files and look at them. The script writes the release notes to `dist/<tag>.notes.md`: the section of the tag from `CHANGELOG.md`, with a link to the install steps at the top.
+2. Review every skill against the changes since the last tag, and merge the changes first. See "Before each release" in [`AGENTS.md`](../AGENTS.md#before-each-release). `tools/release.sh --preflight` names each skill with no change since the last tag.
+3. Build the files and look at them. The script writes the release notes to `dist/<tag>.notes.md`: the section of the tag from `CHANGELOG.md`, with a link to the install steps at the top.
 
    ```bash
    tools/release.sh 0.1.2
    ```
 
-3. Make sure that your signing key is a release key. See [Sign the release tags](#sign-the-release-tags).
-4. Publish the release. The script makes the signed tag, pushes it, and makes the release from it:
+4. Make sure that your signing key is a release key. See [Sign the release tags](#sign-the-release-tags).
+5. Publish the release. The script makes the signed tag, pushes it, and makes the release from it:
 
    ```bash
    tools/release.sh 0.1.2 --publish
    ```
 
-5. Install the published release in fresh sandboxes, and try each feature. See [After a release](testing.md#after-a-release):
+6. Install the published release in fresh sandboxes, and try each feature. See [After a release](testing.md#after-a-release):
 
    ```bash
    tests/run-release-check.sh --version 0.1.2
@@ -161,27 +162,27 @@ Each release tag has an SSH signature. A key in `.github/release-signers` makes 
 
 To add a release key, do these steps one time:
 
-1. Make a key that is only for the release tags:
+7. Make a key that is only for the release tags:
 
    ```bash
    ssh-keygen -t ed25519 -C herdspace-release -f ~/.ssh/herdspace_release
    ```
 
-2. Tell git to use it in this repository:
+8. Tell git to use it in this repository:
 
    ```bash
    git config user.signingkey ~/.ssh/herdspace_release.pub
    ```
 
-3. Add a line for the key to `.github/release-signers`, and merge the change with a pull request:
+9. Add a line for the key to `.github/release-signers`, and merge the change with a pull request:
 
    ```bash
    printf 'herdspace-release namespaces="git" %s\n' "$(cut -d ' ' -f 1,2 ~/.ssh/herdspace_release.pub)" >>.github/release-signers
    ```
 
-4. Optional: add the public key to your GitHub account as a signing key, so that GitHub shows the tag as "Verified".
+10. Optional: add the public key to your GitHub account as a signing key, so that GitHub shows the tag as "Verified".
 
-5. Make sure that the key is a release key:
+11. Make sure that the key is a release key:
 
    ```bash
    tools/sign-tag.sh --check

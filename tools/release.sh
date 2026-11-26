@@ -85,6 +85,18 @@ if [ "$PUBLISH" -eq 1 ] || [ "$PREFLIGHT" -eq 1 ]; then
   fi
   # Each release tag has an SSH signature of a key in .github/release-signers.
   tools/sign-tag.sh --check >/dev/null || exit 1
+  # A reminder, not a stop: the skills went stale over four releases once.
+  last="$(git describe --tags --abbrev=0 HEAD 2>/dev/null || true)"
+  if [ -n "$last" ] && [ -n "$(git diff --name-only "$last" HEAD -- bin bootstrap bootstrap.sh config install.sh tools)" ]; then
+    stale=""
+    for skill in skills/*/SKILL.md .agents/skills/herdspace-*/SKILL.md; do
+      [ -n "$(git diff --name-only "$last" HEAD -- "$skill")" ] || stale="${stale}  ${skill}"$'\n'
+    done
+    if [ -n "$stale" ]; then
+      echo "Reminder: the code changed since ${last}, and these skills did not. Review them before the release (AGENTS.md, Keep the skills current):"
+      printf '%s' "$stale"
+    fi
+  fi
   echo "Preflight: ${head} is the head of main, its pull request passed $(printf '%s\n' "$runs" | grep -c .) checks, and ${TAG} has no release."
   [ "$PREFLIGHT" -eq 0 ] || exit 0
 fi

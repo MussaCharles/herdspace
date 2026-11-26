@@ -68,6 +68,12 @@ npx skills add MussaCharles/herdspace --skill herdspace -g
 
 Then ask the agent, for example: "Open my-projects in Herdr with the code template."
 
+`-g` installs the skill for every project of each agent that the skills CLI supports. Leave out `-g` to install it only in the current project.
+
+The skill comes from the `main` branch of this repository. It changes with the docs, also between releases. To get the newest skill, run the same command again.
+
+The herdspace skill is about herdspace. The Herdr skill is about Herdr itself: it teaches an agent in a Herdr pane to read, split, and start panes and other agents. The server setup installs the Herdr skill for each agent that it finds, from `herdr --skill`, so it matches the installed Herdr. `herdspace update` installs it again after a new Herdr version. See [Agent programs and integrations](agents.md#agent-programs-and-integrations).
+
 ## Work in a clone of this repository
 
 A clone has skills for a person who changes herdspace. They are in `.agents/skills/`, and `.claude/skills/` links to them for Claude Code. The [agent instructions](../AGENTS.md) in `AGENTS.md` list them, and an agent in the clone finds them by itself.
