@@ -23,7 +23,7 @@ herdspace is terminal first. Herdr holds the terminals, `hopen` opens your proje
 | Tasks (`tasks.json`) | `tasks` in a list, run with `hopen --task test`. See [Tasks](hopen.md#tasks). |
 | A task that runs at the start | `on_open` in a list |
 | Environment values and a `.env` file | `env` and `env_file` in a list |
-| The terminal panel | Herdr panes. The [cheat sheet](cheat-sheet.md#panes) has the keys to split a pane. |
+| The terminal panel | Herdr panes. The [Panes and layout page](layout.md#panes) has the keys to split a pane. |
 | The Ports view | `hopen --ports` |
 
 ## Git and agents
@@ -32,12 +32,12 @@ herdspace is terminal first. Herdr holds the terminals, `hopen` opens your proje
 |------------|--------------|
 | Source Control | lazygit. `Cmd+Shift+G` opens it over the pane. |
 | Review the changes of an agent | The `review` template: lazygit and Neovim side by side. Run `hopen --apply review` in a new tab. |
-| A branch for each task | A git worktree for each agent. See [One worktree for each agent](cheat-sheet.md#one-worktree-for-each-agent). |
+| A branch for each task | A git worktree for each agent. See [One worktree for each agent](git.md#one-worktree-for-each-agent). |
 | Notifications | The sidebar of Herdr marks each agent that waits for you, and each agent that is done. |
 
 ## Neovim for VS Code users
 
-Neovim has modes. You start in Normal mode, where keys move and run commands. Press `i` to type text, and `Esc` to return to Normal mode. The [cheat sheet](cheat-sheet.md#neovim) has the keys that herdspace adds, such as `Ctrl+P` and the file tree.
+Neovim has modes. You start in Normal mode, where keys move and run commands. Press `i` to type text, and `Esc` to return to Normal mode. The [Files and the editor page](files.md#neovim) has the keys that herdspace adds, such as `Ctrl+P` and the file tree.
 
 | In VS Code | In Neovim (Normal mode) |
 |------------|-------------------------|

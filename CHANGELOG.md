@@ -4,13 +4,17 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- The keys and commands have one page for each task: [move around](docs/navigation.md), [panes and layout](docs/layout.md) (with the swap keys `ctrl+b`, `shift+h` to `shift+l`), [files and the editor](docs/files.md), [git and worktrees](docs/git.md), [sessions](docs/sessions.md), and [agents](docs/agents.md). The cheat sheet keeps the daily commands and links each page. The README starts with the links to the docs and the quick start.
+
 ## [0.13.0] - 2026-11-26
 
 ### Added
 
 - Quick open, like `Cmd+P` in VS Code: `Cmd+P` in Herdr (`Ctrl+B`, then `F` on Linux) lists the files of the project. The chosen file opens in the Neovim pane of the tab, or in a new split on the right, and gets the focus. See [Quick open](docs/hopen.md#quick-open).
 - Neovim shows Markdown headings with an icon in place of `###`, and checkboxes as boxes. It shows images in a Markdown file and image files, with the Kitty graphics protocol, in Ghostty and in Herdr 0.9.2 and later. Without ImageMagick, it shows PNG files only.
-- The palette action "Files: Read a Markdown file, rendered" opens a Markdown file of the folder read-only in the editor. See [Markdown and images](docs/cheat-sheet.md#markdown-and-images).
+- The palette action "Files: Read a Markdown file, rendered" opens a Markdown file of the folder read-only in the editor. See [Markdown and images](docs/files.md#markdown-and-images).
 
 ### Changed
 

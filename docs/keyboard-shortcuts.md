@@ -76,14 +76,7 @@ The [cheat sheet](cheat-sheet.md) has every key for daily use. The [keyboard doc
 
 ## Move in the lists
 
-The Goto picker of Herdr (`Cmd+K`, or `Ctrl+Shift+K` on Linux) and the lists of herdspace use different keys:
-
-| List | Move down | Move up | Search |
-|------|-----------|---------|--------|
-| The Goto picker of Herdr | `j` or the down arrow | `k` or the up arrow | Press `/`, then type. While you type, only the arrow keys move. |
-| The command palette and quick open of herdspace | `Ctrl+N`, `Ctrl+J`, or the down arrow | `Ctrl+P`, `Ctrl+K`, or the up arrow | Type at once. |
-
-The Goto picker belongs to Herdr, and Herdr has no setting for its keys. In it, `b`, `w`, `i`, and `d` show only the blocked, working, idle, or done agents, and `a` shows all terminals again. The lists of herdspace use fzf, which has the keys of Emacs and of Vim.
+The Goto picker of Herdr and the lists of herdspace use different keys. See [Move in the lists](navigation.md#move-in-the-lists).
 
 ## Keep the keys of your terminal
 

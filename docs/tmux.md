@@ -66,7 +66,7 @@ The sidebar marks an agent that waits for you, and an agent that is done. When y
 
 If you prefer two terminal windows, run `herdr --session one` in the first window and `herdr --session two` in the second window. Each window then holds its own session.
 
-An agent can also control other panes through Herdr. To make one agent start another agent, mention Herdr in the prompt. See [Agents in panes](cheat-sheet.md#agents-in-panes) for an example prompt. To keep two agents from changing the same files, give each one its own git worktree. See [One worktree for each agent](cheat-sheet.md#one-worktree-for-each-agent).
+An agent can also control other panes through Herdr. To make one agent start another agent, mention Herdr in the prompt. See [Agents in panes](agents.md#agents-in-panes) for an example prompt. To keep two agents from changing the same files, give each one its own git worktree. See [One worktree for each agent](git.md#one-worktree-for-each-agent).
 
 ## Configuration
 
