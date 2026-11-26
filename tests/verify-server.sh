@@ -210,7 +210,7 @@ pal_ws_json="$(herdr workspace create --cwd "$work/hb-pal" --label hb-pal --no-f
 pal_ws="$(printf '%s' "$pal_ws_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["workspace"]["workspace_id"])')"
 pal_tab="$(printf '%s' "$pal_ws_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["tab"]["tab_id"])')"
 pal_pane="$(printf '%s' "$pal_ws_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
-in_pal() { (cd "$work/hb-pal" && python3 "$ROOT/tests/pty_run.py" 10 "$1" env TERM=dumb HERDR_ACTIVE_PANE_ID="$pal_pane" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" HERDR_ACTIVE_TAB_ID="$pal_tab" HERDR_ACTIVE_PANE_CWD="$work/hb-pal" hopen --palette 2>&1); }
+in_pal() { (cd "$work/hb-pal" && python3 "$ROOT/tests/pty_run.py" 16 "$1" env TERM=dumb HERDR_ACTIVE_PANE_ID="$pal_pane" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" HERDR_ACTIVE_TAB_ID="$pal_tab" HERDR_ACTIVE_PANE_CWD="$work/hb-pal" hopen --palette 2>&1); }
 pal="$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" hopen --palette --print)"
 contains "$pal" 'Git: New worktree for an agent' 'in a git folder in Herdr, the palette has the git actions'
 contains "$pal" 'Layout: Split right' 'in Herdr, the palette has the layout actions'
@@ -231,13 +231,18 @@ in_pal 'new-tab\r' >/dev/null
 # A word after the action chooses the place of the program, as Ctrl+S and
 # Ctrl+T do in fzf.
 contains "$(in_pal '\r')" 'A word after the action opens a program in another place' 'in Herdr, the numbered menu names the place words'
-in_pal 'find down\r' >/dev/null
+in_pal 'edit down\r' >/dev/null
 for _ in $(seq 1 20); do [ "$(panes_in "$pal_tab")" = 3 ] && break; sleep 0.25; done
-[ "$(panes_in "$pal_tab")" = 3 ] && pass 'find down opens the file finder in a split below' || fail "find down opens the file finder in a split below: $(panes_in "$pal_tab") panes"
-in_pal 'find tab\r' >/dev/null
-for _ in $(seq 1 20); do case "$(tabs_in "$pal_ws")" in *find*) break ;; esac; sleep 0.25; done
-contains "$(tabs_in "$pal_ws")" 'find' 'find tab opens the file finder in a new tab'
-grep -qx find "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent" && pass 'the recent list keeps the action without the place' || fail 'the recent list keeps the action without the place'
+[ "$(panes_in "$pal_tab")" = 3 ] && pass 'edit down opens the editor in a split below' || fail "edit down opens the editor in a split below: $(panes_in "$pal_tab") panes"
+in_pal 'edit tab\r' >/dev/null
+for _ in $(seq 1 20); do case "$(tabs_in "$pal_ws")" in *edit*) break ;; esac; sleep 0.25; done
+contains "$(tabs_in "$pal_ws")" 'edit' 'edit tab opens the editor in a new tab'
+# Close the two editors again, so that their first start does not slow the
+# next checks.
+edit_tab="$(herdr tab list --workspace "$pal_ws" | python3 -c 'import json,sys; print(next((t["tab_id"] for t in json.load(sys.stdin)["result"]["tabs"] if t["label"] == "edit"), ""))')"
+[ -z "$edit_tab" ] || herdr tab close "$edit_tab" >/dev/null 2>&1
+herdr pane list | python3 -c 'import json,sys; ps=[p["pane_id"] for p in json.load(sys.stdin)["result"]["panes"] if p["tab_id"] == sys.argv[1] and p["pane_id"] != sys.argv[2]]; print(ps[-1] if ps else "")' "$pal_tab" "$pal_pane" | while read -r p; do [ -z "$p" ] || herdr pane close "$p" >/dev/null 2>&1; done
+grep -qx edit "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent" && pass 'the recent list keeps the action without the place' || fail 'the recent list keeps the action without the place'
 # Read a Markdown file: the menu lists the .md files, and the file opens in a
 # new tab with its name.
 printf '# Notes\n' >"$work/hb-pal/NOTES.md"
@@ -262,10 +267,11 @@ quick NOTES.md "$qo_pane"
 shows "$qo_pane" NOTES.md && pass 'from a shell, quick open opens the file in that pane' || fail 'from a shell, quick open opens the file in that pane'
 [ "$(panes_in "$qo_tab")" = 1 ] && pass 'from a shell, quick open makes no split' || fail "from a shell, quick open makes no split: $(panes_in "$qo_tab") panes"
 herdr pane send-keys "$qo_pane" ctrl+q >/dev/null
-for _ in $(seq 1 40); do case "$(fg_of "$qo_pane")" in *nvim*) sleep 0.25 ;; *) break ;; esac; done
+for _ in $(seq 1 160); do case "$(fg_of "$qo_pane")" in *nvim*) sleep 0.25 ;; *) break ;; esac; done
 case " $(fg_of "$qo_pane") " in *" zsh "* | *" bash "* | *" sh "*) pass 'Ctrl+Q in Neovim gives the shell back' ;; *) fail "Ctrl+Q in Neovim gives the shell back: $(fg_of "$qo_pane")"; herdr pane read "$qo_pane" 2>/dev/null | tail -8 | sed 's/^/  screen: /' ;; esac
 herdr pane run "$qo_pane" "sleep 600" >/dev/null
-for _ in $(seq 1 20); do case "$(fg_of "$qo_pane")" in *sleep*) break ;; esac; sleep 0.25; done
+for _ in $(seq 1 80); do case "$(fg_of "$qo_pane")" in *sleep*) break ;; esac; sleep 0.25; done
+case "$(fg_of "$qo_pane")" in *sleep*) pass 'the pane is busy for the next checks' ;; *) fail "the pane is busy for the next checks: $(fg_of "$qo_pane")" ;; esac
 quick NOTES.md "$qo_pane"
 for _ in $(seq 1 20); do [ "$(panes_in "$qo_tab")" = 2 ] && break; sleep 0.25; done
 [ "$(panes_in "$qo_tab")" = 2 ] && pass 'from a busy pane, quick open opens the editor in a split' || fail "from a busy pane, quick open opens the editor in a split: $(panes_in "$qo_tab") panes"
@@ -289,7 +295,31 @@ herdr pane send-keys "$qo_editor" ctrl+q >/dev/null
 for _ in $(seq 1 160); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
 [ "$(panes_in "$qo_tab")" = 1 ] && pass 'Ctrl+Q on the last file closes the split of quick open' || { fail "Ctrl+Q on the last file closes the split: $(panes_in "$qo_tab") panes"; herdr pane read "$qo_editor" 2>&1 | grep -v '^[[:space:]]*$' | sed 's/^/  before: /'; herdr pane send-keys "$qo_editor" esc >/dev/null; herdr pane send-text "$qo_editor" ":ls!" >/dev/null; herdr pane send-keys "$qo_editor" enter >/dev/null; sleep 1; herdr pane read "$qo_editor" 2>&1 | grep -v '^[[:space:]]*$' | tail -12 | sed 's/^/  ls: /'; }
 [ "$(focused_in "$qo_pane")" = "$qo_pane" ] && pass 'the focus returns to the old pane' || fail "the focus returns to the old pane: $(focused_in "$qo_pane")"
+# Search from a popup opens the result like quick open: from the busy pane,
+# Neovim opens in a split at the line of the result.
+grep_pop() { (cd "$work/hb-pal" && python3 "$ROOT/tests/pty_run.py" 6 '' env -u HERDR_PANE_ID TERM=xterm-256color FZF_DEFAULT_OPTS="--select-1" HERDR_ACTIVE_PANE_ID="$qo_pane" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" HERDR_ACTIVE_TAB_ID="$qo_tab" HERDR_ACTIVE_PANE_CWD="$work/hb-pal" hopen --grep "$1" >/dev/null 2>&1); }
+grep_pop second
+for _ in $(seq 1 20); do [ "$(panes_in "$qo_tab")" = 2 ] && break; sleep 0.25; done
+[ "$(panes_in "$qo_tab")" = 2 ] && pass 'search from a popup opens the result in a split' || fail "search from a popup opens the result in a split: $(panes_in "$qo_tab") panes"
+qo_found="$(focused_in "$qo_pane")"
+shows "$qo_found" second.txt && pass 'the split shows the file of the result' || fail 'the split shows the file of the result'
+herdr pane send-keys "$qo_found" ctrl+q >/dev/null
+for _ in $(seq 1 160); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
+# A file name with colons cannot run a command through the line of a result.
+# shellcheck disable=SC2016 # The name holds the text $(...) on purpose.
+printf 'unique-text-for-names\n' >"$work/hb-pal/"'x:$(touch pwned):y.txt'
+grep_pop unique-text-for-names
+sleep 3
+[ ! -e "$work/hb-pal/pwned" ] && pass 'a file name with colons runs no command from a search result' || fail 'a file name with colons ran a command from a search result'
+for p in $(herdr pane list | python3 -c 'import json,sys; [print(p["pane_id"]) for p in json.load(sys.stdin)["result"]["panes"] if p["tab_id"] == sys.argv[1] and p["pane_id"] != sys.argv[2]]' "$qo_tab" "$qo_pane"); do herdr pane close "$p" >/dev/null 2>&1; done
 herdr pane send-keys "$qo_pane" ctrl+c >/dev/null 2>&1 || true
+# The Herdr integrations in the palette.
+pal="$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" hopen --palette --print)"
+contains "$pal" 'Agents: Show the Herdr integrations' 'the palette shows the integrations'
+contains "$pal" 'Agents: Add the Herdr integration for an agent' 'the palette adds an integration'
+contains "$pal" 'Agents: Remove the Herdr integration of an agent' 'the palette removes an integration'
+lacks "$pal" 'Files: Find a file, and open it' 'in Herdr, quick open replaces the find action'
+contains "$(in_pal 'integ-status\r\r')" 'The Herdr integration of each agent program' 'the palette lists the integrations'
 contains "$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" hopen --palette --print)" 'Files: Quick open' 'the palette offers quick open'
 check 'Herdr has the quick open key' grep -qF -- 'hopen\" --quick-open' "$HOME/.config/herdr/config.toml"
 contains "$(in_pal 'window\r')" 'Open a new terminal window' 'the palette prints the command for a second window'

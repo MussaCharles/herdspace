@@ -58,7 +58,7 @@ The server setup adds the integration of Herdr, and the Herdr skill where the ag
 | Antigravity CLI | `agy` | yes, the conversation only |
 | Gemini CLI | `gemini` | no: Herdr shows the state from the screen only, and cannot resume it |
 
-To see the integrations on a machine, run `herdr integration status`. To add one by hand, run `herdr integration install NAME`, for example `herdr integration install claude`.
+To see the integrations on a machine, open the command palette and choose "Agents: Show the Herdr integrations", or run `herdr integration status`. To add one, choose "Agents: Add the Herdr integration for an agent", or run `herdr integration install NAME`, for example `herdr integration install claude`. "Agents: Remove the Herdr integration of an agent" asks first, and then runs `herdr integration uninstall NAME`.
 
 ## References
 
