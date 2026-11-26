@@ -12,7 +12,7 @@ Scope: quick open, find and search in the files, Neovim, and Markdown and images
 | Find a file in the shell, and open it | `ff` | `ff` |
 | Search in the files, and open a result | `fif TEXT` | `fif TEXT` |
 
-See [Quick open](hopen.md#quick-open).
+In Herdr, a result of the search of the palette ("Files: Search in the files") opens like quick open, at its line. See [Quick open](hopen.md#quick-open).
 
 ## Neovim
 

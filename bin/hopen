@@ -1290,10 +1290,24 @@ grep_files() {
   need fzf "hopen --grep"
   [ -t 0 ] && [ -t 1 ] || die "hopen --grep needs a terminal."
   command -v bat >/dev/null 2>&1 && preview="bat --color=always --style=numbers --highlight-line {2} {1}"
-  hit="$(cd "$DIR" && rg --line-number --no-heading --color=always --smart-case --fixed-strings -- "$GREP_TEXT" |
-    fzf --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --preview "$preview" --preview-window '+{2}-5' --height 80% --reverse)" || true
+  if ! in_popup; then
+    hit="$(cd "$DIR" && rg --line-number --no-heading --color=always --smart-case --fixed-strings -- "$GREP_TEXT" |
+      fzf --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --preview "$preview" --preview-window '+{2}-5' --height 80% --reverse)" || true
+    [ -n "$hit" ] || exit 0
+    cd "$DIR" && open_in_editor "$(cut -d: -f1 <<<"$hit")" "$(cut -d: -f2 <<<"$hit")"
+  fi
+  # In a Herdr popup, the result opens like quick open, at its line.
+  local out key
+  PAL_PANE="${HERDR_ACTIVE_PANE_ID:-}"
+  PAL_WS="${HERDR_ACTIVE_WORKSPACE_ID:-}"
+  PAL_TAB="${HERDR_ACTIVE_TAB_ID:-}"
+  out="$(cd "$DIR" && rg --line-number --no-heading --color=always --smart-case --fixed-strings -- "$GREP_TEXT" |
+    fzf --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --header "Enter opens the result. Ctrl+V opens a new editor on the right, Ctrl+S below, Ctrl+T in a new tab." --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --preview-window '+{2}-5' --height 100% --reverse)" || true
+  key="$(sed -n 1p <<<"$out")"
+  hit="$(sed -n 2p <<<"$out")"
   [ -n "$hit" ] || exit 0
-  cd "$DIR" && open_in_editor "$(cut -d: -f1 <<<"$hit")" "$(cut -d: -f2 <<<"$hit")"
+  case "$key" in ctrl-v) PAL_PLACE=right ;; ctrl-s) PAL_PLACE=down ;; ctrl-t) PAL_PLACE=tab ;; *) PAL_PLACE="" ;; esac
+  open_target "$(cd "$DIR" && pwd)/$(cut -d: -f1 <<<"$hit")" "$DIR" "$(cut -d: -f2 <<<"$hit")"
 }
 
 # ---------- ports, like the Ports view of VS Code
@@ -1553,10 +1567,13 @@ for p in json.load(sys.stdin).get("result", {}).get("panes", []):
   return 1
 }
 
-# drop_in PANE PATH opens PATH in the Neovim of PANE, and focuses PANE.
+# drop_in PANE PATH [LINE] opens PATH in the Neovim of PANE, at LINE, and
+# focuses PANE.
 drop_in() {
+  local go=""
+  [ -z "${3:-}" ] || go=" | call cursor(${3}, 1)"
   herdr pane send-keys "$1" esc >/dev/null
-  herdr pane send-text "$1" ":execute 'drop' fnameescape('${2//\'/\'\'}')" >/dev/null
+  herdr pane send-text "$1" ":execute 'drop' fnameescape('${2//\'/\'\'}')${go}" >/dev/null
   herdr pane send-keys "$1" enter >/dev/null
   focus_pane "$1" || true
 }
@@ -1587,21 +1604,32 @@ quick_open() {
     cd "$root" && open_in_editor "$file"
   fi
   case "$key" in ctrl-v) PAL_PLACE=right ;; ctrl-s) PAL_PLACE=down ;; ctrl-t) PAL_PLACE=tab ;; *) PAL_PLACE="" ;; esac
-  if [ -z "$PAL_PLACE" ]; then
+  open_target "$path" "$root"
+}
+
+# open_target PATH ROOT [LINE] opens a file for quick open and search, in this
+# order: the Neovim of the focused pane, the focused shell at its prompt, the
+# Neovim pane of the tab, or a new split on the right. PAL_PLACE (right, down,
+# or tab) asks for a new editor in that place. A new editor runs with exec, so
+# that its pane closes when Neovim quits.
+open_target() {
+  local path="$1" root="$2" line="${3:-}" pane plus=""
+  [ -z "$line" ] || plus="+${line} "
+  if [ -z "${PAL_PLACE:-}" ]; then
     if pane_runs "$PAL_PANE" editor; then
-      drop_in "$PAL_PANE" "$path"
+      drop_in "$PAL_PANE" "$path" "$line"
       exit 0
     fi
     if pane_runs "$PAL_PANE" shell; then
-      herdr pane run "$PAL_PANE" "$(editor_command) $(printf '%q' "$path")" >/dev/null
+      herdr pane run "$PAL_PANE" "$(editor_command) ${plus}$(printf '%q' "$path")" >/dev/null
       exit 0
     fi
     if pane="$(editor_pane "$PAL_TAB")"; then
-      drop_in "$pane" "$path"
+      drop_in "$pane" "$path" "$line"
       exit 0
     fi
   fi
-  run_at right "$(basename "$file")" "$root" "exec env $(editor_command) $(printf '%q' "$path")"
+  run_at right "$(basename "$path")" "$root" "exec env $(editor_command) ${plus}$(printf '%q' "$path")"
 }
 
 # run_at DEFAULT LABEL DIR [COMMAND] runs COMMAND in the place that the person
@@ -1624,6 +1652,19 @@ run_at() {
       if [ -n "${4:-}" ]; then eval "exec $4"; else exec "${SHELL:-sh}"; fi
       ;;
   esac
+}
+
+# integrations prints "name<TAB>state" for each Herdr integration, for example
+# "claude<TAB>current (v11)" or "kimi<TAB>not installed".
+integrations() {
+  herdr integration status 2>/dev/null | sed -E 's/^([a-z-]+)( \(experimental\))?: ([^(]*[^ (])( \(v[0-9]+\))?.*$/\1\t\3\4/'
+}
+
+# show_integrations prints the integrations in two columns.
+show_integrations() {
+  printf '  The Herdr integration of each agent program:\n\n'
+  integrations | awk -F '\t' '{ printf "  %-18s %s\n", $1, $2 }'
+  printf '\n  An agent needs its integration only for the state and the resume of\n  its conversation. See the agents page of the herdspace docs.\n'
 }
 
 # agents_sorted prints "pane<TAB>agent<TAB>state<TAB>cwd" for each agent, the
@@ -1702,35 +1743,42 @@ palette_items() {
     done < <(read_list "$file" items 2>/dev/null | awk -F '\036' -v l="$label" '$1 == "K" && $2 == l { print $3 "\t" $4 }')
   fi
   # Files
-  command -v fzf >/dev/null 2>&1 && pal_add find Files "Find a file, and open it" "ff"
+  # In Herdr, quick open replaces this action.
+  [ -n "$PAL_PANE" ] || ! command -v fzf >/dev/null 2>&1 || pal_add find Files "Find a file, and open it" "ff"
   [ -z "$PAL_PANE" ] || ! command -v fzf >/dev/null 2>&1 || pal_add quick Files "Quick open: a file in the editor of this tab" "Cmd+P, Ctrl+B F"
-  command -v rg >/dev/null 2>&1 && pal_add grep Files "Search in the files, and open a result" "fif"
+  command -v rg >/dev/null 2>&1 && pal_add grep Files "Search in the files, and open a result" "fif TEXT"
   if command -v nvim >/dev/null 2>&1 || [ -n "${EDITOR:-}" ]; then
-    pal_add edit Files "Open this folder in the editor"
-    pal_add read-md Files "Read a Markdown file, rendered"
+    pal_add edit Files "Open this folder in the editor" "nvim ."
+    pal_add read-md Files "Read a Markdown file, rendered" "nvim -R FILE.md"
   fi
   # Git
   if git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     if command -v lazygit >/dev/null 2>&1; then
-      pal_add git Git "Git status (lazygit)" "Ctrl+B D"
-      [ -z "$PAL_PANE" ] || pal_add git-tab Git "Open lazygit in a new tab"
+      pal_add git Git "Git status (lazygit)" "Cmd+Shift+G, Ctrl+B D"
+      [ -z "$PAL_PANE" ] || pal_add git-tab Git "Open lazygit in a new tab" "lazygit"
     fi
     if [ -n "$PAL_PANE" ]; then
       pal_add wt-new Git "New worktree for an agent, on a new branch" "Ctrl+B Shift+G"
-      pal_add wt-open Git "Open a worktree"
+      pal_add wt-open Git "Open a worktree" "herdr worktree open"
       pal_add wt-list Git "Show the worktrees" "herdr worktree list"
-      pal_add wt-remove Git "Remove a worktree"
+      pal_add wt-remove Git "Remove a worktree" "herdr worktree remove"
     fi
   fi
   # Agents
   if [ -n "$PAL_PANE" ]; then
     while IFS=$'\t' read -r name kind state cwd; do
-      [ -n "$name" ] && pal_add "agent:${name}" Agents "Go to ${kind} (${state}) in ${cwd/#"$HOME"/\~}"
+      [ -n "$name" ] && pal_add "agent:${name}" Agents "Go to ${kind} (${state}) in ${cwd/#"$HOME"/\~}" "Cmd+K"
     done < <(agents_sorted)
     [ -z "$(agents_sorted)" ] || pal_add explain Agents "Explain the state of an agent" "herdr agent explain"
     for kind in claude codex opencode gemini pi amp aider; do
-      command -v "$kind" >/dev/null 2>&1 && pal_add "start:${kind}" Agents "Start ${kind} in a new pane"
+      command -v "$kind" >/dev/null 2>&1 && pal_add "start:${kind}" Agents "Start ${kind} in a new pane" "$kind"
     done
+  fi
+  # The Herdr integrations of the agent programs.
+  if command -v herdr >/dev/null 2>&1; then
+    pal_add integ-status Agents "Show the Herdr integrations" "herdr integration status"
+    pal_add integ-add Agents "Add the Herdr integration for an agent" "herdr integration install"
+    pal_add integ-remove Agents "Remove the Herdr integration of an agent" "herdr integration uninstall"
   fi
   # Layout
   if [ -n "$PAL_PANE" ]; then
@@ -1744,12 +1792,12 @@ palette_items() {
   pal_add templates Layout "Show every template" "hopen --templates"
   # Workspace and tabs
   if [ -n "$PAL_PANE" ]; then
-    pal_add new-tab "Workspace and tabs" "New tab" "Ctrl+B C"
+    pal_add new-tab "Workspace and tabs" "New tab" "Cmd+T, Ctrl+B C"
     pal_add new-ws "Workspace and tabs" "New workspace in this folder" "Ctrl+B Shift+N"
     pal_add rename-ws "Workspace and tabs" "Rename the workspace" "Ctrl+B Shift+W"
     pal_add rename-tab "Workspace and tabs" "Rename the tab" "Ctrl+B Shift+T"
     pal_add rename-pane "Workspace and tabs" "Rename the pane" "Ctrl+B Shift+P"
-    pal_add close-tab "Workspace and tabs" "Close the tab" "Ctrl+B Shift+X"
+    pal_add close-tab "Workspace and tabs" "Close the tab" "Cmd+W, Ctrl+B Shift+X"
   fi
   # Sessions
   if command -v herdr >/dev/null 2>&1; then
@@ -1766,13 +1814,13 @@ palette_items() {
     case "$role" in client | both) pal_add hs-keys herdspace "Show or change the Ghostty keys" "herdspace keys" ;; esac
   fi
   if command -v herdr >/dev/null 2>&1; then
-    [ ! -x "$HOME/.local/bin/herdr-update-check" ] || pal_add herdr-update Herdr "Check for a new Herdr version"
+    [ ! -x "$HOME/.local/bin/herdr-update-check" ] || pal_add herdr-update Herdr "Check for a new Herdr version" "herdr-update-check --now"
     pal_add herdr-reload Herdr "Reload the Herdr configuration" "herdr server reload-config"
     pal_add herdr-status Herdr "Show the state of the Herdr server" "herdr status"
   fi
   # Help
   pal_add keys-help Help "Show the keys"
-  pal_add docs Help "Show the links to the cheat sheet and the docs"
+  pal_add docs Help "Show the links to the cheat sheet and the docs" "herdspace help"
 }
 
 # palette_menu prints the chosen id, a tab, and the chosen place: right, down,
@@ -1790,7 +1838,8 @@ palette_menu() {
   fi
   items="$(printf '%s%s' "$(grep -v '^$' <<<"$recent")${recent:+$'\n'}" "$PALETTE_ITEMS" | grep -v '^$')"
   if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
-    header='Type to filter. Enter runs. Esc closes.'
+    header='Type to filter. Enter runs. Esc closes. At the right: the key or the command of each action.'
+    [ -z "$PAL_PANE" ] || header="${header}"$'\n''This palette: Cmd+Shift+P, or Ctrl+B, then A. On Linux, Cmd keys are Ctrl+Shift (Cmd+P is Ctrl+B, then F).'
     [ -z "$PAL_PANE" ] || header="${header}"$'\n''A program opens: Ctrl+V on the right, Ctrl+S below, Ctrl+T in a new tab.'
     out="$(fzf --delimiter '\t' --with-nth 3 --prompt '> ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --height 100% --reverse --no-multi --tiebreak=index <<<"$items")" || true
     key="$(sed -n 1p <<<"$out")"
@@ -1908,6 +1957,18 @@ palette() {
       ;;
     wt-list) then_wait sh -c 'herdr worktree list --cwd "$1" | python3 -c "import json,sys; [print(\"  \"+(w.get(\"branch\") or \"-\")+\"  \"+w.get(\"path\",\"\")) for w in json.load(sys.stdin).get(\"result\",{}).get(\"worktrees\",[])]"' _ "$dir" ;;
     agent:*) herdr agent focus "${choice#agent:}" >/dev/null ;;
+    integ-status) then_wait show_integrations ;;
+    integ-add)
+      pick="$(integrations | awk -F '\t' '$2 !~ /^current/ { print $1 "\t" $1 "  (" $2 ")" }' | choose "Integration to add")" || exit 1
+      [ -n "$pick" ] || exit 0
+      then_wait herdr integration install "$pick"
+      ;;
+    integ-remove)
+      pick="$(integrations | awk -F '\t' '$2 !~ /^not installed/ { print $1 "\t" $1 "  (" $2 ")" }' | choose "Integration to remove")" || exit 1
+      [ -n "$pick" ] || exit 0
+      confirm "Remove the Herdr integration of ${pick}? Herdr then shows its state from the screen only." || exit 0
+      then_wait herdr integration uninstall "$pick"
+      ;;
     explain)
       pick="$(agents_sorted | awk -F '\t' '{ print $1 "\t" $2 " (" $3 ")  " $4 }' | choose "Agent")" || exit 1
       [ -z "$pick" ] || then_wait herdr agent explain "$pick"

@@ -172,7 +172,7 @@ A task is a command from the list, so it needs the same approval as `on_open`. S
 
 The palette is the place to start an action. In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. `Ctrl+B`, then `A` also works. Outside Herdr, run `hopen --palette`.
 
-Each action has a group and a name, as in VS Code, and the key or command for it at the right. Type to filter the list, and press Enter to run an action. Esc closes the palette. With no fzf, the palette shows a numbered menu with a heading for each group.
+Each action has a group and a name, as in VS Code, and the key or command for it at the right, with the direct key first, for example `Cmd+T, Ctrl+B C`. On Linux, a `Cmd` key is `Ctrl+Shift`, except for quick open, which is `Ctrl+B`, then `F`. Type to filter the list, and press Enter to run an action. Esc closes the palette. With no fzf, the palette shows a numbered menu with a heading for each group.
 
 ### Quick open
 
@@ -207,9 +207,9 @@ The palette shows only the actions that fit the place. For example, the Git acti
 | Recently used | The last 5 actions that you ran. |
 | Projects | Open a list. Open this folder in Herdr. Open this folder as its own workspace. Open this session in a new window. Open every list. Show every list. Write a `herdspace.toml` from a VS Code list. |
 | Tasks | Run a task of the project of the current folder. |
-| Files | Find a file (`ff`). Search in the files (`fif`). Open this folder in the editor. Read a Markdown file, rendered. |
+| Files | Quick open, in Herdr. Find a file (`ff`), outside Herdr. Search in the files (`fif`): in Herdr, the result opens like quick open, at its line. Open this folder in the editor. Read a Markdown file, rendered. |
 | Git | lazygit over the pane, or in a new tab. A new worktree for an agent, on a new branch. Open, show, or remove a worktree. |
-| Agents | Go to an agent: the blocked and done agents come first. Explain the state of an agent. Start an agent program in a new pane. |
+| Agents | Go to an agent: the blocked and done agents come first. Explain the state of an agent. Start an agent program in a new pane. Show the Herdr integrations, add one for an agent, or remove one. |
 | Layout | Split the tab with a template. Split right or down. Zoom the pane. Show every template. |
 | Workspace and tabs | A new tab or workspace. Rename the workspace, the tab, or the pane. Close the tab. |
 | Sessions | Show the sessions. Stop a session. |

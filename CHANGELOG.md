@@ -6,6 +6,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- Each action of the palette shows its key or its command at the right, with the direct key first, for example `Cmd+T, Ctrl+B C`. The header says how to open the palette, and that the `Cmd` keys are `Ctrl+Shift` on Linux.
+- The palette shows the Herdr integrations, and adds or removes one for an agent. In Herdr, a result of "Files: Search in the files" opens like quick open, at its line, and "Files: Find a file, and open it" shows only outside Herdr, because quick open replaces it.
 - Quick open opens the file in the focused pane when it is a shell at its prompt, and the shell comes back when Neovim closes. A new editor of quick open closes its split when Neovim closes, and the focus returns to the old pane.
 - `Ctrl+Q` in Neovim closes the file, as `Cmd+W` in VS Code, and closes Neovim when no other file is open.
 - The server setup adds the Herdr integration for each of the 18 agents that Herdr 0.9.5 supports, when the agent command is on the `PATH` and its folder exists. It looks for the same command names as Herdr, for example `cursor-agent`, not the `cursor` command of the Cursor editor. See [Agent programs and integrations](docs/agents.md#agent-programs-and-integrations).
