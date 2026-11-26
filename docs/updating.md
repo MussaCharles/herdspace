@@ -116,7 +116,7 @@ A removed option stops the setup with a message that names the new option. A cha
 A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it downloads, `install.sh`, an archive with `hopen` and its templates, and `SHA256SUMS`. A tag is a version with no v in front, for example `0.1.2`. A tag with a dash, for example `0.2.0-alpha.1`, becomes a pre-release.
 
 1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Change the links at the end of the file to the new tag. Run `tools/known-hashes.sh`, so that the list of older file versions holds the `hopen` of the new tag. Merge the change, and run the tests.
-2. Review every skill against the changes since the last tag, and merge the changes first. See "Before each release" in [`AGENTS.md`](../AGENTS.md#before-each-release). `tools/release.sh --preflight` names each skill with no change since the last tag.
+2. Review every skill against the changes since the last tag, and merge the changes first. The `herdspace-release` skill has the steps, in [Review the skills](../.agents/skills/herdspace-release/SKILL.md#review-the-skills). `tools/release.sh --preflight` names each skill with no change since the last tag.
 3. Build the files and look at them. The script writes the release notes to `dist/<tag>.notes.md`: the section of the tag from `CHANGELOG.md`, with a link to the install steps at the top.
 
    ```bash

@@ -70,13 +70,7 @@ A lesson goes to one skill only. Other skills link to it. Write only public fact
 
 ### Before each release
 
-A task can end with no skill review. Once, the skills went stale over four releases. So before each release, review every skill against the changes since the last tag:
-
-1. Run `git diff --stat <last-tag> HEAD`, and read the CHANGELOG section of the new release.
-2. Read each skill in `skills/` and `.agents/skills/`. Fix each fact that is no longer true. Add each new feature, command, and lesson that the skill owns.
-3. Merge the skill changes before the release pull request.
-
-The code can change after the last tag while a skill stays the same. Then `tools/release.sh --preflight` prints a reminder that names that skill. The reminder does not stop the release. A skill with no change can still be current, so read it, and decide.
+Before each release, review every skill against the changes since the last tag. The `herdspace-release` skill has the steps.
 
 ## Commands
 
