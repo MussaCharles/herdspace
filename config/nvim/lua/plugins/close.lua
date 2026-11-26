@@ -13,13 +13,14 @@ local function close_file()
   end, vim.fn.getbufinfo({ buflisted = 1 }))
   if #files > 1 then
     Snacks.bufdelete()
-  elseif #vim.tbl_filter(function(b) return b.changed == 1 end, vim.fn.getbufinfo({ buflisted = 1 })) > 0 then
+  elseif #vim.tbl_filter(function(b) return b.changed == 1 end, files) > 0 then
     vim.cmd("confirm qall")
   else
-    -- Nothing to save. Quit with no question, also while a plugin still
-    -- downloads a parser or a tool in the background. It starts again the
-    -- next time Neovim opens.
-    vim.cmd("qall!")
+    -- Nothing to save. Quit with no question and no "Press ENTER", also
+    -- while a plugin still downloads a parser or a tool and prints messages.
+    -- The download starts again the next time Neovim opens.
+    vim.o.more = false
+    vim.cmd("silent! qall!")
   end
 end
 
