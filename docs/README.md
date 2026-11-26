@@ -13,12 +13,21 @@ Scope: each guide of herdspace, in groups. Start with the [README](../README.md)
 - [Ask an agent to do the setup](agent-setup.md): what to say to a coding agent.
 - [Agent install steps](../install.md): the steps that a coding agent follows to install herdspace.
 
+## Keys and commands by task
+
+- [Move around](navigation.md): workspaces, tabs, the focus between panes, the Goto picker and the keys of the lists, folder jumps, and the mouse.
+- [Panes and layout](layout.md): split, swap, resize, zoom, and close panes, templates, and scroll, search, and copy.
+- [Files and the editor](files.md): quick open, find and search, Neovim, and Markdown and images.
+- [Git and worktrees](git.md): lazygit, and one worktree for each agent.
+- [Sessions](sessions.md): open all projects, start, leave, return, stop, and delete.
+- [Agents](agents.md): agents in panes.
+
 ## Use
 
 - [hopen guide](hopen.md): write a list, its settings, the commands, and how to install, update, or remove `hopen`.
 - [Templates and panes](templates.md): each template, how to add your own, and videos of the pane keys.
 - [Keyboard shortcuts](keyboard-shortcuts.md): the keys that the setup changes, and how to keep the keys of your terminal.
-- [Cheat sheet](cheat-sheet.md): keys and commands for daily use, with a [table of daily commands](cheat-sheet.md#daily-commands) and links to the official Herdr docs.
+- [Cheat sheet](cheat-sheet.md): the daily commands, the words, the direct keys, and the problems, with a [table of the task pages](cheat-sheet.md#by-task) and links to the official Herdr docs.
 - [From VS Code](vscode.md): the herdspace command or key for each VS Code action.
 - [From tmux](tmux.md): the Herdr command or key for each tmux action, and how to run agents side by side.
 

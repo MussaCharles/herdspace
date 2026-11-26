@@ -2,19 +2,7 @@
 
 herdspace sets up [Herdr](https://herdr.dev) and its tools on your machines, and opens your projects in Herdr with one command. Herdr is a terminal multiplexer for coding agents. It keeps your terminals and agents running after you disconnect.
 
-## Templates
-
-A template splits a project into named panes, and it starts a program in each pane.
-
-| `code` | `agent` |
-|:------:|:-------:|
-| ![The code template: Neovim, an agent, and lazygit](docs/media/template-code.png) | ![The agent template: an agent and a shell](docs/media/template-agent.png) |
-| Neovim, an agent, and lazygit | An agent and a shell |
-| `grid` | `review` |
-| ![The grid template: four panes](docs/media/template-grid.png) | ![The review template: lazygit and Neovim](docs/media/template-review.png) |
-| Two agents, tests, and a shell | lazygit and Neovim, to read what an agent changed |
-
-The default is `plain`, one pane with a shell. The [templates guide](docs/templates.md) shows how to add your own template. To see four projects open in Herdr, each in its own workspace, watch the [demo](docs/templates.md#open-every-project).
+[Documentation index](docs/README.md) · [Setup guide](docs/setup.md) · [Cheat sheet](docs/cheat-sheet.md) · [Keys by task](docs/cheat-sheet.md#by-task) · [Changelog](CHANGELOG.md)
 
 ## Quick start
 
@@ -82,9 +70,34 @@ path = "~/code/api"
 
 Run `hopen` again at any time. It starts a stopped session and adds only the new projects. It never closes anything. The [hopen guide](docs/hopen.md) has every command and setting, and how to use a VS Code workspace file as the list.
 
-## The command palette
+## Templates
 
-In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. The palette lists every action in groups, as in VS Code: projects, tasks, files, git, agents, layout, tabs, sessions, and help. Type a few letters to find an action. See [The command palette](docs/hopen.md#the-command-palette).
+A template splits a project into named panes, and it starts a program in each pane.
+
+| `code` | `agent` |
+|:------:|:-------:|
+| ![The code template: Neovim, an agent, and lazygit](docs/media/template-code.png) | ![The agent template: an agent and a shell](docs/media/template-agent.png) |
+| Neovim, an agent, and lazygit | An agent and a shell |
+| `grid` | `review` |
+| ![The grid template: four panes](docs/media/template-grid.png) | ![The review template: lazygit and Neovim](docs/media/template-review.png) |
+| Two agents, tests, and a shell | lazygit and Neovim, to read what an agent changed |
+
+The default is `plain`, one pane with a shell. The [templates guide](docs/templates.md) shows how to add your own template. To see four projects open in Herdr, each in its own workspace, watch the [demo](docs/templates.md#open-every-project).
+
+## Find your way in Herdr
+
+| Action | Mac | Linux |
+|--------|-----|-------|
+| Every action, in groups: the command palette | `Cmd+Shift+P` | `Ctrl+Shift+P` |
+| Quick open a file of the project | `Cmd+P` | `Ctrl+B`, then `F` |
+| Go to any workspace, tab, or agent | `Cmd+K` | `Ctrl+Shift+K` |
+| New tab, close tab | `Cmd+T`, `Cmd+W` | `Ctrl+Shift+T`, `Ctrl+Shift+W` |
+| Next or previous pane | `Alt+Up`, `Alt+Down` | The same |
+| lazygit over the pane | `Cmd+Shift+G` | `Ctrl+Shift+G` |
+
+The palette lists every action, as in VS Code: projects, tasks, files, git, agents, layout, tabs, sessions, and help. Type a few letters to find an action. See [The command palette](docs/hopen.md#the-command-palette).
+
+The keys for each task have their own page: [move around](docs/navigation.md), [panes and layout](docs/layout.md), [files and the editor](docs/files.md), [git and worktrees](docs/git.md), [sessions](docs/sessions.md), and [agents](docs/agents.md).
 
 ## Update
 
