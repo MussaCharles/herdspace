@@ -81,6 +81,7 @@ local md = require("lazy.core.plugin").values(require("lazy.core.config").plugin
 result.md_icons = #(md.heading and md.heading.icons or {})
 result.md_checkbox = md.checkbox and md.checkbox.enabled == true
 result.image = Snacks.config.image and Snacks.config.image.enabled == true
+result.ctrl_q = vim.fn.maparg("<C-q>", "n") ~= ""
 vim.fn.writefile({ vim.json.encode(result) }, vim.env.RESULT)
 vim.cmd("qa!")
 LUA
@@ -97,6 +98,7 @@ contains "$nv" '"venv":true' 'the Python venv selector is set up'
 contains "$nv" '"md_icons":6' 'Markdown headings show icons'
 contains "$nv" '"md_checkbox":true' 'Markdown checkboxes show as boxes'
 contains "$nv" '"image":true' 'snacks.image is on'
+contains "$nv" '"ctrl_q":true' 'Ctrl+Q is mapped at startup'
 
 # `nvim .` opens the file tree and an empty editor, with no folder buffer.
 cat >"$work/tree.lua" <<'LUA'
@@ -261,7 +263,7 @@ shows "$qo_pane" NOTES.md && pass 'from a shell, quick open opens the file in th
 [ "$(panes_in "$qo_tab")" = 1 ] && pass 'from a shell, quick open makes no split' || fail "from a shell, quick open makes no split: $(panes_in "$qo_tab") panes"
 herdr pane send-keys "$qo_pane" ctrl+q >/dev/null
 for _ in $(seq 1 40); do case "$(fg_of "$qo_pane")" in *nvim*) sleep 0.25 ;; *) break ;; esac; done
-case " $(fg_of "$qo_pane") " in *" zsh "* | *" bash "* | *" sh "*) pass 'Ctrl+Q in Neovim gives the shell back' ;; *) fail "Ctrl+Q in Neovim gives the shell back: $(fg_of "$qo_pane")" ;; esac
+case " $(fg_of "$qo_pane") " in *" zsh "* | *" bash "* | *" sh "*) pass 'Ctrl+Q in Neovim gives the shell back' ;; *) fail "Ctrl+Q in Neovim gives the shell back: $(fg_of "$qo_pane")"; herdr pane read "$qo_pane" 2>/dev/null | tail -8 | sed 's/^/  screen: /' ;; esac
 herdr pane run "$qo_pane" "sleep 600" >/dev/null
 for _ in $(seq 1 20); do case "$(fg_of "$qo_pane")" in *sleep*) break ;; esac; sleep 0.25; done
 quick NOTES.md "$qo_pane"
@@ -283,7 +285,7 @@ for _ in $(seq 1 60); do herdr pane read "$qo_editor" 2>/dev/null | grep -q 'sec
 shows "$qo_editor" NOTES.md || true
 herdr pane send-keys "$qo_editor" ctrl+q >/dev/null
 for _ in $(seq 1 60); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
-[ "$(panes_in "$qo_tab")" = 1 ] && pass 'Ctrl+Q on the last file closes the split of quick open' || fail "Ctrl+Q on the last file closes the split: $(panes_in "$qo_tab") panes"
+[ "$(panes_in "$qo_tab")" = 1 ] && pass 'Ctrl+Q on the last file closes the split of quick open' || { fail "Ctrl+Q on the last file closes the split: $(panes_in "$qo_tab") panes"; herdr pane read "$qo_editor" 2>/dev/null | tail -8 | sed 's/^/  screen: /'; }
 [ "$(focused_in "$qo_pane")" = "$qo_pane" ] && pass 'the focus returns to the old pane' || fail "the focus returns to the old pane: $(focused_in "$qo_pane")"
 herdr pane send-keys "$qo_pane" ctrl+c >/dev/null 2>&1 || true
 contains "$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" hopen --palette --print)" 'Files: Quick open' 'the palette offers quick open'
