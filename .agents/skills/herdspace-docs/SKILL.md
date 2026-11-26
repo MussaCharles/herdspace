@@ -26,7 +26,7 @@ Follow the `simple-english` skill for every doc. These rules matter most here:
 | one machine as both | One machine that is the server machine and the client machine. |
 | SSH name | A short name for a server in `~/.ssh/config`, for example `my-server`. |
 | list | The file of projects that `hopen` reads: `herdspace.toml` first, and a VS Code workspace file for people who come from VS Code. The example list of the docs is `my-projects`. Do not use `work`, which reads as an ordinary word, or a name with `workspace`, which is one project in Herdr. |
-| Herdr | The terminal program `herdr`, from `curl -fsSL https://herdr.dev/install.sh \| sh` or `brew install herdr`. The first page of herdr.dev installs the Herdr app (`herdr-app`, `hc`), a different program that `hopen` cannot use. Say which one you mean. |
+| Herdr | The terminal program `herdr`, from `curl -fsSL https://herdr.dev/install.sh \| sh` or `brew install herdr`. The Herdr website calls it Herdr TUI, and its docs are at `https://herdr.dev/tui`. The first page of herdr.dev is about the Herdr App, a different program on top of herdr-core (`hc`), which `hopen` cannot use. They do not share agents. Say which one you mean. Issue #241 keeps the record of the three products. |
 | setup | The script `bootstrap.sh`. Name it in each place where a person runs it. `hopen` is the second part, and the server setup installs it. |
 
 Define each of these at its first use in a doc, before you use it.
@@ -46,6 +46,8 @@ Define each of these at its first use in a doc, before you use it.
 - A list is for three or more items. A table is for items with the same fields.
 - A fix lives in one doc. Other docs link to it.
 - If you add a guide, add it to the documentation index, `docs/README.md`.
+- The keys and commands live on task pages: `docs/navigation.md`, `docs/layout.md`, `docs/files.md`, `docs/git.md`, `docs/sessions.md`, and `docs/agents.md`. Each one starts with links to the documentation index, the cheat sheet, and the words. Put a new key or command on the page of its task. The cheat sheet keeps only the daily commands, the words, the direct keys, the palette, the configuration, and the problems, with a "By task" table.
+- The README starts with the links to the docs and the quick start, then the projects, the templates, "Find your way in Herdr", and "Commands". Keep the important parts near the top. `tests/run-release-check.sh` reads the install commands from the `###` sections of the quick start, so keep those headings.
 - The community files are in `.github/`: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, and `SECURITY.md`. GitHub reads that folder first. A link in them starts with `/`, from the root of the repository, for example `[Testing](/docs/testing.md)`. GitHub also shows `CONTRIBUTING.md` on the Contributing tab of the repository, and that tab reads a relative link such as `../AGENTS.md` from the wrong folder. A link that starts with `/` works on both pages. `LICENSE`, `README.md`, `CHANGELOG.md`, `AGENTS.md`, and `install.md` stay in the root folder.
 
 ## Add a skill

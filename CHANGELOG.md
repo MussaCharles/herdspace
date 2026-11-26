@@ -6,6 +6,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- The herdspace skill for agents knows quick open, `Ctrl+Q`, the place keys and the integration actions of the palette, and the Herdr integrations of the server setup. It says that herdspace never installs an agent.
 - `docs/setup.md` says plainly that the client setup installs no Herdr, that `--server` installs nothing on a server, and what `both` does, and the table of the parts has a Both column.
 
 ## [0.14.0] - 2026-11-27

@@ -17,9 +17,9 @@ A tag is the version alone, with no v in front, for example `0.1.2`. Use [Semant
 
 Follow these steps only when the person asks for a release.
 
-1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Change the links at the end of the file. Then run `tools/known-hashes.sh`, so that `bootstrap/known-hashes.tsv` holds the `hopen` of the new tag. `--preflight` stops if the list is not up to date.
+1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Use the date of today, not the date of the last release. Change the links at the end of the file. Commit the change first. Then run `tools/known-hashes.sh`, and commit `bootstrap/known-hashes.tsv`, so that it holds the `hopen` of the new tag. The script reads the committed `CHANGELOG.md`. A run before the commit misses the new tag, and the CI check "List of older file versions" fails. If the list is not up to date, `--preflight` stops too.
 2. Run all tests. `docs/testing.md` lists them. All tests must pass. `tests/run-upgrade.sh` must pass: an update from each of the last 3 releases, also with no manifest, asks about no file that the test did not change.
-3. Merge the change to `main` after CI passes. The `herdspace-ci` skill has the merge command.
+3. Merge the change to `main` after every CI check is done and passed. The `herdspace-ci` skill has the merge command, and says how to wait for every check.
 4. Build the files:
 
    ```bash
@@ -39,7 +39,7 @@ Follow these steps only when the person asks for a release.
    tools/release.sh 0.1.2 --publish
    ```
 
-The ruleset "release tags" lets only the admin role create a tag, so run `--publish` with the account of the owner. `--publish` runs the checks of `--preflight` first. It also stops if the folder has a change or an untracked file, or if `CHANGELOG.md` has no section for the tag.
+The ruleset "release tags" lets only the admin role create a tag, so run `--publish` with the account of the owner. `--publish` signs the tag with the SSH key of `git config user.signingkey`, which must be in `.github/release-signers`. To test this, run `tools/sign-tag.sh --check`. After the publish, `git -c gpg.ssh.allowedSignersFile=.github/release-signers tag -v <tag>` must print `Good "git" signature`, and GitHub shows the tag as Verified. `--publish` runs the checks of `--preflight` first. It also stops if the folder has a change or an untracked file, or if `CHANGELOG.md` has no section for the tag.
 
 ## What a release holds
 
@@ -57,7 +57,7 @@ The `hopen` in both archives has the tag in `HOPEN_VERSION`. In an early pre-rel
 1. Make sure that `https://github.com/MussaCharles/herdspace/releases/latest/download/bootstrap.sh` and `install.sh` return 200.
 2. Install `hopen` with `install.sh`, and make sure that `hopen --version` shows the new tag.
 3. Run `bootstrap.sh server --check` from `curl`. It changes nothing in the setup. It only downloads the release files.
-4. The workflow "Release check" starts by itself for a published release. Its job "Release files match the tag" builds the release again from the tag, compares each published file with the build, and signs the files with an attestation. If this job fails, a release file differs from its tag: tell the person at once, and do not use the release. The other jobs install the release on Linux and macOS runners and try each feature. They do not run for a pre-release. Wait for the result:
+4. The workflow "Release check" starts by itself for a published release. Right after a publish, the new files and the `releases/latest` link can fail to download for a short time. So its install jobs first run `tools/wait-release-files.sh`. If an install job still fails within seconds, run the failed jobs again with `gh run rerun <run-id> --failed` before you look for a bug. Its job "Release files match the tag" builds the release again from the tag, compares each published file with the build, and signs the files with an attestation. If this job fails, a release file differs from its tag: tell the person at once, and do not use the release. The other jobs install the release on Linux and macOS runners and try each feature. They do not run for a pre-release. Wait for the result:
 
    ```bash
    gh run list --workflow release.yml --limit 1
