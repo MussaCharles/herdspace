@@ -29,6 +29,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-links.sh` | Each relative link of each Markdown file points at a file that exists, and each `#anchor` matches a heading. A link in a community file in `.github/` starts with `/`. It needs no network. |
 | `tests/test-ghostty.sh` | How the client setup writes the Ghostty file: the marked blocks at the top, your own lines below them, the file of an older herdspace, the key and look choices, and the key question. It needs no network. |
 | `tests/test-wait-release-files.sh` | `tools/wait-release-files.sh` with a stub `curl`: files that answer at once or after errors, a late `releases/latest` link, and a file that never answers. It needs no network. |
+| `tests/test-agents.sh` | The agents that get the Herdr integration in the server setup, with stub `herdr` and agent commands: the command names of the Herdr registry, the folder of each integration, and an experimental status line. It needs no network. |
 | `tests/test-linux-packages.sh` | The packages that the Linux server setup asks apt for, with stub commands: a tool that works from another source (NodeSource, nvm, a GitHub `.deb`, cargo) gets no package, an installed or held package stays, and a missing tool gets its package. It needs bash, and no apt and no network. |
 | `tests/test-known-hashes.sh` | `tools/known-hashes.sh` in a temporary repository: each older version of a file is in the list, also a version that only a merge commit made, and the version of HEAD is not. It needs git and Python 3, and no network. |
 | `tests/test-sign-tag.sh` | `tools/sign-tag.sh` in a temporary repository, with a temporary SSH key: a signed tag, `git tag -v`, a key that is not a release key, and a tag with no signature. It needs git and ssh-keygen, and no network. |
@@ -89,6 +90,10 @@ tests/test-known-hashes.sh
 
 ```bash
 tests/test-linux-packages.sh
+```
+
+```bash
+tests/test-agents.sh
 ```
 
 ```bash
