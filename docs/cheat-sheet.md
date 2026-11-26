@@ -166,7 +166,7 @@ These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and
 |--------|-----|------------------|
 | New tab | `Cmd+T` | `Ctrl+Shift+T` |
 | Close tab | `Cmd+W` | `Ctrl+Shift+W` |
-| Go to any workspace, tab, or agent | `Cmd+K` | `Ctrl+Shift+K` |
+| Go to any workspace, tab, or agent. Move with `j` and `k`, search with `/` | `Cmd+K` | `Ctrl+Shift+K` |
 | Previous or next tab | `Ctrl+Left`, `Ctrl+Right` | The same |
 | Previous or next workspace | `Ctrl+Up`, `Ctrl+Down` | The same |
 | Next or previous pane in the tab | `Alt+Up`, `Alt+Down` | The same |
