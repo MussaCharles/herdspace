@@ -2,7 +2,8 @@
 # Steps that are the same on a Linux server and on a macOS server.
 
 STARTED_SERVER=0
-AGENTS="claude codex pi opencode hermes copilot cursor grok"
+# The integrations of Herdr 0.9.5, by their name in "herdr integration".
+AGENTS="claude codex pi omp opencode hermes copilot cursor grok devin droid kimi kilo qodercli qwen letta mastracode antigravity-cli"
 
 HERDR_CONFIG_BEFORE=""
 
@@ -181,16 +182,51 @@ install_auto_title() {
 }
 
 # agent_folder prints the folder that an agent program creates at its first start.
-agent_folder() {
+# agent_commands NAME prints the commands of an agent, as the integration
+# registry of Herdr 0.9.5 names them. One of them is enough.
+agent_commands() {
   case "$1" in
-    claude) echo "${HOME}/.claude" ;;
-    codex) echo "${HOME}/.codex" ;;
+    cursor) echo "cursor-agent" ;;
+    kilo) echo "kilo kilo-code" ;;
+    qodercli) echo "qodercli qoder qoderclicn qodercn" ;;
+    antigravity-cli) echo "agy" ;;
+    *) echo "$1" ;;
+  esac
+}
+
+# agent_found NAME is true when a command of the agent is on the PATH.
+agent_found() {
+  local cmd
+  for cmd in $(agent_commands "$1"); do
+    have "$cmd" && return 0
+  done
+  return 1
+}
+
+# agent_folder NAME prints the configuration folder that the integration of
+# Herdr needs. The agent makes it at its first start. The folders and the
+# variables come from the integration docs of Herdr.
+agent_folder() {
+  local config="${XDG_CONFIG_HOME:-${HOME}/.config}"
+  case "$1" in
+    claude) echo "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}" ;;
+    codex) echo "${CODEX_HOME:-${HOME}/.codex}" ;;
     pi) echo "${HOME}/.pi/agent/extensions" ;;
+    omp) echo "${HOME}/.omp/agent" ;;
     opencode) echo "${HOME}/.config/opencode" ;;
-    hermes) echo "${HOME}/.hermes" ;;
-    copilot) echo "${HOME}/.copilot" ;;
-    cursor) echo "${HOME}/.cursor" ;;
-    grok) echo "${HOME}/.grok" ;;
+    hermes) echo "${HERMES_HOME:-${HOME}/.hermes}" ;;
+    copilot) echo "${COPILOT_HOME:-${HOME}/.copilot}" ;;
+    cursor) echo "${CURSOR_CONFIG_DIR:-${HOME}/.cursor}" ;;
+    grok) echo "${GROK_HOME:-${HOME}/.grok}" ;;
+    devin) echo "${config}/devin" ;;
+    droid) echo "${HOME}/.factory" ;;
+    kimi) echo "${KIMI_CODE_HOME:-${HOME}/.kimi-code}" ;;
+    kilo) echo "${HOME}/.config/kilo" ;;
+    qodercli) echo "${QODER_CONFIG_DIR:-${HOME}/.qoder}" ;;
+    qwen) echo "${QWEN_HOME:-${HOME}/.qwen}" ;;
+    letta) echo "${HOME}/.letta" ;;
+    mastracode) echo "${HOME}/.mastracode" ;;
+    antigravity-cli) echo "${ANTIGRAVITY_CLI_CONFIG_DIR:-${HOME}/.gemini/config}" ;;
   esac
 }
 
@@ -213,9 +249,9 @@ agents_ready() {
   skill="$(mktemp)"
   herdr --skill >"$skill"
   for agent in $AGENTS; do
-    have "$agent" || continue
+    agent_found "$agent" || continue
     [ -d "$(agent_folder "$agent")" ] || continue
-    if ! grep -q "^${agent}: current" <<<"$status"; then
+    if ! grep -Eq "^${agent}( \(experimental\))?: current" <<<"$status"; then
       rm -f "$skill"
       return 1
     fi
@@ -235,7 +271,7 @@ install_agents() {
   skill="$(mktemp)"
   herdr --skill >"$skill"
   for agent in $AGENTS; do
-    have "$agent" || continue
+    agent_found "$agent" || continue
     if [ ! -d "$(agent_folder "$agent")" ]; then
       warn "Start ${agent} one time, and then run this script again."
       continue
