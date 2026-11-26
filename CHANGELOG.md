@@ -10,6 +10,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - Neovim shows Markdown headings with an icon in place of `###`, and checkboxes as boxes. It shows images in a Markdown file and image files, with the Kitty graphics protocol, in Ghostty and in Herdr 0.9.2 and later. Without ImageMagick, it shows PNG files only.
 - The palette action "Files: Read a Markdown file, rendered" opens a Markdown file of the folder read-only in the editor. See [Markdown and images](docs/cheat-sheet.md#markdown-and-images).
 
+### Changed
+
+- `docs/keyboard-shortcuts.md` links the keyboard docs of Herdr, and its new section "Move in the lists" gives the keys of the Goto picker (`j`, `k`, `/`) and of the herdspace lists (`Ctrl+N`, `Ctrl+P`).
+
 ### Fixed
 
 - After `Ctrl+V` or `Ctrl+S` in the palette, the new pane gets the focus. Before, the focus stayed on the old pane.

@@ -70,8 +70,20 @@ The prefix key of Herdr is `Ctrl+B`. Press it, release it, and then press the ke
 | Next or previous pane | `Ctrl+B`, then `Tab` or `Shift+Tab` |
 | lazygit | `Ctrl+B`, then `D` |
 | The command palette of `hopen` | `Ctrl+B`, then `A` |
+| Quick open a file | `Ctrl+B`, then `F` |
 
-The [cheat sheet](cheat-sheet.md) has every key for daily use.
+The [cheat sheet](cheat-sheet.md) has every key for daily use. The [keyboard docs of Herdr](https://herdr.dev/tui/docs/keyboard/) list every key of Herdr, and explain the prefix key.
+
+## Move in the lists
+
+The Goto picker of Herdr (`Cmd+K`, or `Ctrl+Shift+K` on Linux) and the lists of herdspace use different keys:
+
+| List | Move down | Move up | Search |
+|------|-----------|---------|--------|
+| The Goto picker of Herdr | `j` or the down arrow | `k` or the up arrow | Press `/`, then type. While you type, only the arrow keys move. |
+| The command palette and quick open of herdspace | `Ctrl+N`, `Ctrl+J`, or the down arrow | `Ctrl+P`, `Ctrl+K`, or the up arrow | Type at once. |
+
+The Goto picker belongs to Herdr, and Herdr has no setting for its keys. In it, `b`, `w`, `i`, and `d` show only the blocked, working, idle, or done agents, and `a` shows all terminals again. The lists of herdspace use fzf, which has the keys of Emacs and of Vim.
 
 ## Keep the keys of your terminal
 
@@ -114,3 +126,9 @@ To keep only the Mission Control shortcuts on a Mac, and change the other keys, 
 ## Windows
 
 WSL uses Windows Terminal, not Ghostty. The [Windows with WSL guide](windows-wsl.md) has the steps for its keys.
+
+## References
+
+- [Herdr keyboard](https://herdr.dev/tui/docs/keyboard/): the prefix key, every default key, and the Goto picker.
+- [The `config.toml` reference of Herdr](https://herdr.dev/tui/docs/config-reference/): each key that `config.toml` can set.
+- [fzf](https://github.com/junegunn/fzf): the keys of the herdspace lists.
