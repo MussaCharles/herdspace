@@ -6,8 +6,10 @@
 -- file of LazyVim loads later, so a key there does nothing in the first
 -- moment after Neovim starts.
 local function close_file()
+  -- A file buffer counts. An empty buffer with no name and no change, which
+  -- Neovim can keep after it starts, does not.
   local files = vim.tbl_filter(function(b)
-    return vim.bo[b.bufnr].buftype == ""
+    return vim.bo[b.bufnr].buftype == "" and (b.name ~= "" or b.changed == 1)
   end, vim.fn.getbufinfo({ buflisted = 1 }))
   if #files > 1 then
     Snacks.bufdelete()
