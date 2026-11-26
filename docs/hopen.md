@@ -178,10 +178,14 @@ Each action has a group and a name, as in VS Code, and the key or command for it
 
 Press `Cmd+P` in Herdr, as in VS Code. On Linux, press `Ctrl+B`, then `F`, because `Ctrl+P` stays with the shell and Neovim. A popup lists the files of the git project of the focused pane, or of its folder, with a preview. Type to filter, and press Enter:
 
-- If a pane of the tab runs Neovim, the file opens there, and the focus moves to that pane.
-- Else Neovim opens the file in a split on the right, with the focus on it.
+1. If the focused pane runs Neovim, the file opens there.
+2. If the focused pane is a shell at its prompt, Neovim opens the file in that pane. When you close Neovim, the shell comes back.
+3. If another pane of the tab runs Neovim, the file opens there, and the focus moves to that pane.
+4. In all other cases, Neovim opens the file in a split on the right, with the focus on it. When you close Neovim, the split closes, and the focus returns to the old pane.
 
-`Ctrl+V`, `Ctrl+S`, and `Ctrl+T` open a new editor on the right, below, or in a new tab. The palette has the same action: "Files: Quick open". Outside Herdr, `hopen --quick-open` opens the file in the editor in the same terminal.
+To close the file, press `Ctrl+Q` in Neovim. With no other file open, `Ctrl+Q` closes Neovim. With unsaved changes, Neovim asks first.
+
+`Ctrl+V`, `Ctrl+S`, and `Ctrl+T` open a new editor on the right, below, or in a new tab. That editor also closes with Neovim. The palette has the same action: "Files: Quick open". Outside Herdr, `hopen --quick-open` opens the file in the editor in the same terminal.
 
 ### Choose where a program opens
 

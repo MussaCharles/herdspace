@@ -43,7 +43,7 @@ Neovim has modes. You start in Normal mode, where keys move and run commands. Pr
 |------------|-------------------------|
 | Type text | `i`, then type. `Esc` stops. |
 | Save | `:w`, then `Enter` |
-| Close the file | `:q`. `:q!` closes and drops the changes. |
+| Close the file | `Ctrl+Q`, as `Cmd+W` in VS Code. With no other file, it closes Neovim. Or `:q`. `:q!` closes and drops the changes. |
 | Undo, redo | `u`, `Ctrl+R` |
 | Go to a line | `:42`, then `Enter` |
 | Go to the start or the end of the file | `gg`, `G` |
