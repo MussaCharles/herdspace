@@ -305,6 +305,13 @@ qo_found="$(focused_in "$qo_pane")"
 shows "$qo_found" second.txt && pass 'the split shows the file of the result' || fail 'the split shows the file of the result'
 herdr pane send-keys "$qo_found" ctrl+q >/dev/null
 for _ in $(seq 1 160); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
+# A file name with colons cannot run a command through the line of a result.
+# shellcheck disable=SC2016 # The name holds the text $(...) on purpose.
+printf 'unique-text-for-names\n' >"$work/hb-pal/"'x:$(touch pwned):y.txt'
+grep_pop unique-text-for-names
+sleep 3
+[ ! -e "$work/hb-pal/pwned" ] && pass 'a file name with colons runs no command from a search result' || fail 'a file name with colons ran a command from a search result'
+for p in $(herdr pane list | python3 -c 'import json,sys; [print(p["pane_id"]) for p in json.load(sys.stdin)["result"]["panes"] if p["tab_id"] == sys.argv[1] and p["pane_id"] != sys.argv[2]]' "$qo_tab" "$qo_pane"); do herdr pane close "$p" >/dev/null 2>&1; done
 herdr pane send-keys "$qo_pane" ctrl+c >/dev/null 2>&1 || true
 # The Herdr integrations in the palette.
 pal="$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" hopen --palette --print)"

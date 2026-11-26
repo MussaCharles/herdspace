@@ -1570,8 +1570,11 @@ for p in json.load(sys.stdin).get("result", {}).get("panes", []):
 # drop_in PANE PATH [LINE] opens PATH in the Neovim of PANE, at LINE, and
 # focuses PANE.
 drop_in() {
-  local go=""
-  [ -z "${3:-}" ] || go=" | call cursor(${3}, 1)"
+  local go="" line="${3:-}"
+  # Only digits: the line comes from a search result, and a file name can
+  # hold any text.
+  [[ "$line" =~ ^[0-9]+$ ]] || line=""
+  [ -z "$line" ] || go=" | call cursor(${line}, 1)"
   herdr pane send-keys "$1" esc >/dev/null
   herdr pane send-text "$1" ":execute 'drop' fnameescape('${2//\'/\'\'}')${go}" >/dev/null
   herdr pane send-keys "$1" enter >/dev/null
@@ -1614,6 +1617,9 @@ quick_open() {
 # that its pane closes when Neovim quits.
 open_target() {
   local path="$1" root="$2" line="${3:-}" pane plus=""
+  # Only digits: the line comes from a search result, and a file name can
+  # hold any text, also a colon.
+  [[ "$line" =~ ^[0-9]+$ ]] || line=""
   [ -z "$line" ] || plus="+${line} "
   if [ -z "${PAL_PLACE:-}" ]; then
     if pane_runs "$PAL_PANE" editor; then
