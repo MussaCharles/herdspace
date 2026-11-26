@@ -284,7 +284,9 @@ for _ in $(seq 1 60); do herdr pane read "$qo_editor" 2>/dev/null | grep -q 'sec
 [ "$(panes_in "$qo_tab")" = 2 ] && pass 'Ctrl+Q closes one file, and the editor stays while a file is open' || fail "Ctrl+Q with two files: $(panes_in "$qo_tab") panes"
 shows "$qo_editor" NOTES.md || true
 herdr pane send-keys "$qo_editor" ctrl+q >/dev/null
-for _ in $(seq 1 60); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
+# Neovim stops its language servers before it quits, which can take a while
+# on a busy runner.
+for _ in $(seq 1 160); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
 [ "$(panes_in "$qo_tab")" = 1 ] && pass 'Ctrl+Q on the last file closes the split of quick open' || { fail "Ctrl+Q on the last file closes the split: $(panes_in "$qo_tab") panes"; herdr pane send-text "$qo_editor" ":ls!" >/dev/null; herdr pane send-keys "$qo_editor" enter >/dev/null; sleep 1; herdr pane read "$qo_editor" 2>/dev/null | tail -12 | sed 's/^/  screen: /'; }
 [ "$(focused_in "$qo_pane")" = "$qo_pane" ] && pass 'the focus returns to the old pane' || fail "the focus returns to the old pane: $(focused_in "$qo_pane")"
 herdr pane send-keys "$qo_pane" ctrl+c >/dev/null 2>&1 || true
