@@ -1514,6 +1514,18 @@ else:
   done
 }
 
+# pane_runs PANE KIND is true when the foreground of PANE is Neovim or Vim
+# (KIND editor), or only a shell at its prompt (KIND shell).
+pane_runs() {
+  herdr pane process-info --pane "$1" 2>/dev/null | python3 -c '
+import json, sys
+procs = json.load(sys.stdin).get("result", {}).get("process_info", {}).get("foreground_processes", [])
+names = {p.get("name") for p in procs}
+if sys.argv[1] == "editor":
+    sys.exit(0 if names & {"nvim", "vim"} else 1)
+sys.exit(0 if names and names <= {"zsh", "bash", "sh", "fish", "dash"} else 1)' "$2"
+}
+
 # editor_pane TAB prints the first pane of TAB that runs Neovim or Vim.
 editor_pane() {
   local pane
@@ -1522,10 +1534,7 @@ import json, sys
 for p in json.load(sys.stdin).get("result", {}).get("panes", []):
     if p.get("tab_id") == sys.argv[1]:
         print(p["pane_id"])' "$1"); do
-    if herdr pane process-info --pane "$pane" 2>/dev/null | python3 -c '
-import json, sys
-procs = json.load(sys.stdin).get("result", {}).get("process_info", {}).get("foreground_processes", [])
-sys.exit(0 if any(p.get("name") in ("nvim", "vim") for p in procs) else 1)'; then
+    if pane_runs "$pane" editor; then
       printf '%s\n' "$pane"
       return 0
     fi
@@ -1533,10 +1542,20 @@ sys.exit(0 if any(p.get("name") in ("nvim", "vim") for p in procs) else 1)'; the
   return 1
 }
 
+# drop_in PANE PATH opens PATH in the Neovim of PANE, and focuses PANE.
+drop_in() {
+  herdr pane send-keys "$1" esc >/dev/null
+  herdr pane send-text "$1" ":execute 'drop' fnameescape('${2//\'/\'\'}')" >/dev/null
+  herdr pane send-keys "$1" enter >/dev/null
+  focus_pane "$1" || true
+}
+
 # quick_open lets the person choose a file of the project, as Cmd+P does in VS
 # Code, and opens it with the focus on it. In Herdr, Enter opens the file in
-# the Neovim pane of the tab, or in a new split on the right. Ctrl+V, Ctrl+S,
-# and Ctrl+T open a new editor on the right, below, or in a new tab.
+# the focused pane when it runs Neovim or is a shell at its prompt, else in the
+# Neovim pane of the tab, else in a new split on the right. Ctrl+V, Ctrl+S, and
+# Ctrl+T open a new editor on the right, below, or in a new tab. A new editor
+# runs with exec, so that its pane closes when Neovim quits.
 quick_open() {
   local root out key file path pane preview="cat {}" header
   need fzf "hopen --quick-open"
@@ -1546,7 +1565,7 @@ quick_open() {
   PAL_PANE="${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:-}}"
   PAL_WS="${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}"
   PAL_TAB="${HERDR_ACTIVE_TAB_ID:-${HERDR_TAB_ID:-}}"
-  header="Type to filter. Enter opens the file. Esc closes."
+  header="Type to filter. Enter opens the file. Esc closes. In Neovim, Ctrl+Q closes the file."
   [ -z "$PAL_PANE" ] || header="${header}"$'\n''Ctrl+V opens a new editor on the right, Ctrl+S below, Ctrl+T in a new tab.'
   out="$(cd "$root" && list_files | sed 's|^\./||' | fzf --prompt 'Open file > ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --height 100% --reverse)" || true
   key="$(sed -n 1p <<<"$out")"
@@ -1557,14 +1576,21 @@ quick_open() {
     cd "$root" && open_in_editor "$file"
   fi
   case "$key" in ctrl-v) PAL_PLACE=right ;; ctrl-s) PAL_PLACE=down ;; ctrl-t) PAL_PLACE=tab ;; *) PAL_PLACE="" ;; esac
-  if [ -z "$PAL_PLACE" ] && pane="$(editor_pane "$PAL_TAB")"; then
-    herdr pane send-keys "$pane" esc >/dev/null
-    herdr pane send-text "$pane" ":execute 'drop' fnameescape('${path//\'/\'\'}')" >/dev/null
-    herdr pane send-keys "$pane" enter >/dev/null
-    focus_pane "$pane" || true
-    exit 0
+  if [ -z "$PAL_PLACE" ]; then
+    if pane_runs "$PAL_PANE" editor; then
+      drop_in "$PAL_PANE" "$path"
+      exit 0
+    fi
+    if pane_runs "$PAL_PANE" shell; then
+      herdr pane run "$PAL_PANE" "$(editor_command) $(printf '%q' "$path")" >/dev/null
+      exit 0
+    fi
+    if pane="$(editor_pane "$PAL_TAB")"; then
+      drop_in "$pane" "$path"
+      exit 0
+    fi
   fi
-  run_at right "$(basename "$file")" "$root" "$(editor_command) $(printf '%q' "$path")"
+  run_at right "$(basename "$file")" "$root" "exec env $(editor_command) $(printf '%q' "$path")"
 }
 
 # run_at DEFAULT LABEL DIR [COMMAND] runs COMMAND in the place that the person

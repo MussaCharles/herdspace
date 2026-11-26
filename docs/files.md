@@ -33,6 +33,7 @@ Run `nvim .` in a project. If you have your own `~/.config/nvim`, run `NVIM_APPN
 | Switch the git branch | `Space`, `g`, `c` |
 | Show the keys after the leader | `Space` |
 | Save | `:w` |
+| Close the file. With no other file, close Neovim | `Ctrl+Q`. With unsaved changes, Neovim asks first. |
 | Quit | `:q`. With unsaved changes, Neovim asks first. |
 | Update the plugins | `:Lazy update` |
 

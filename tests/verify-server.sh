@@ -243,27 +243,46 @@ contains "$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" hopen --palett
 in_pal 'read-md\r1\r' >/dev/null
 for _ in $(seq 1 20); do case "$(tabs_in "$pal_ws")" in *NOTES.md*) break ;; esac; sleep 0.25; done
 contains "$(tabs_in "$pal_ws")" 'NOTES.md' 'read-md opens the Markdown file in a new tab'
-# Quick open, like Cmd+P in VS Code: the first file opens Neovim in a split
-# with the focus on it, and the next file opens in the same Neovim pane.
+# Quick open, like Cmd+P in VS Code. From a shell at its prompt, the file opens
+# in that pane, and Ctrl+Q gives the shell back. From a busy pane, Neovim opens
+# in a split with the focus, the next file opens in the same Neovim, and Ctrl+Q
+# closes the files and then the split.
 printf 'second\n' >"$work/hb-pal/second.txt"
 qo_json="$(herdr tab create --workspace "$pal_ws" --cwd "$work/hb-pal" --label qo --focus)"
 qo_tab="$(printf '%s' "$qo_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["tab"]["tab_id"])')"
 qo_pane="$(printf '%s' "$qo_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
 quick() { (cd "$work/hb-pal" && python3 "$ROOT/tests/pty_run.py" 6 '' env TERM=xterm-256color FZF_DEFAULT_OPTS="--query $1 --select-1" HERDR_ACTIVE_PANE_ID="$2" HERDR_ACTIVE_WORKSPACE_ID="$pal_ws" HERDR_ACTIVE_TAB_ID="$qo_tab" HERDR_ACTIVE_PANE_CWD="$work/hb-pal" hopen --quick-open >/dev/null 2>&1); }
 focused_in() { herdr pane layout --pane "$1" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["layout"]["focused_pane_id"])'; }
+fg_of() { herdr pane process-info --pane "$1" 2>/dev/null | python3 -c 'import json,sys; print(" ".join(p.get("name","") for p in json.load(sys.stdin)["result"]["process_info"]["foreground_processes"]))'; }
+shows() { for _ in $(seq 1 40); do herdr pane read "$1" 2>/dev/null | grep -q "$2" && return 0; sleep 0.25; done; return 1; }
+sleep 1
+quick NOTES.md "$qo_pane"
+shows "$qo_pane" NOTES.md && pass 'from a shell, quick open opens the file in that pane' || fail 'from a shell, quick open opens the file in that pane'
+[ "$(panes_in "$qo_tab")" = 1 ] && pass 'from a shell, quick open makes no split' || fail "from a shell, quick open makes no split: $(panes_in "$qo_tab") panes"
+herdr pane send-keys "$qo_pane" ctrl+q >/dev/null
+for _ in $(seq 1 40); do case "$(fg_of "$qo_pane")" in *nvim*) sleep 0.25 ;; *) break ;; esac; done
+case " $(fg_of "$qo_pane") " in *" zsh "* | *" bash "* | *" sh "*) pass 'Ctrl+Q in Neovim gives the shell back' ;; *) fail "Ctrl+Q in Neovim gives the shell back: $(fg_of "$qo_pane")" ;; esac
+herdr pane run "$qo_pane" "sleep 600" >/dev/null
+for _ in $(seq 1 20); do case "$(fg_of "$qo_pane")" in *sleep*) break ;; esac; sleep 0.25; done
 quick NOTES.md "$qo_pane"
 for _ in $(seq 1 20); do [ "$(panes_in "$qo_tab")" = 2 ] && break; sleep 0.25; done
-[ "$(panes_in "$qo_tab")" = 2 ] && pass 'quick open opens the editor in a split' || fail "quick open opens the editor in a split: $(panes_in "$qo_tab") panes"
+[ "$(panes_in "$qo_tab")" = 2 ] && pass 'from a busy pane, quick open opens the editor in a split' || fail "from a busy pane, quick open opens the editor in a split: $(panes_in "$qo_tab") panes"
 qo_editor="$(focused_in "$qo_pane")"
 [ -n "$qo_editor" ] && [ "$qo_editor" != "$qo_pane" ] && pass 'quick open puts the focus on the new editor' || fail "quick open puts the focus on the new editor: $qo_editor"
-for _ in $(seq 1 40); do herdr pane read "$qo_editor" 2>/dev/null | grep -q 'NOTES.md' && break; sleep 0.25; done
-contains "$(herdr pane read "$qo_editor" 2>/dev/null)" 'NOTES.md' 'the editor shows the chosen file'
+shows "$qo_editor" NOTES.md && pass 'the editor shows the chosen file' || fail 'the editor shows the chosen file'
 herdr pane focus --pane "$qo_editor" --direction left >/dev/null 2>&1
 quick second.txt "$qo_pane"
-for _ in $(seq 1 40); do herdr pane read "$qo_editor" 2>/dev/null | grep -q 'second.txt' && break; sleep 0.25; done
+shows "$qo_editor" second.txt && pass 'the open editor shows the next file' || fail 'the open editor shows the next file'
 [ "$(panes_in "$qo_tab")" = 2 ] && pass 'quick open uses the open editor of the tab' || fail "quick open uses the open editor of the tab: $(panes_in "$qo_tab") panes"
-contains "$(herdr pane read "$qo_editor" 2>/dev/null)" 'second.txt' 'the open editor shows the next file'
 [ "$(focused_in "$qo_pane")" = "$qo_editor" ] && pass 'quick open moves the focus to the open editor' || fail "quick open moves the focus to the open editor: $(focused_in "$qo_pane")"
+herdr pane send-keys "$qo_editor" ctrl+q >/dev/null
+sleep 1
+[ "$(panes_in "$qo_tab")" = 2 ] && pass 'Ctrl+Q closes one file, and the editor stays while a file is open' || fail "Ctrl+Q with two files: $(panes_in "$qo_tab") panes"
+herdr pane send-keys "$qo_editor" ctrl+q >/dev/null
+for _ in $(seq 1 20); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
+[ "$(panes_in "$qo_tab")" = 1 ] && pass 'Ctrl+Q on the last file closes the split of quick open' || fail "Ctrl+Q on the last file closes the split: $(panes_in "$qo_tab") panes"
+[ "$(focused_in "$qo_pane")" = "$qo_pane" ] && pass 'the focus returns to the old pane' || fail "the focus returns to the old pane: $(focused_in "$qo_pane")"
+herdr pane send-keys "$qo_pane" ctrl+c >/dev/null 2>&1 || true
 contains "$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" hopen --palette --print)" 'Files: Quick open' 'the palette offers quick open'
 check 'Herdr has the quick open key' grep -qF -- 'hopen\" --quick-open' "$HOME/.config/herdr/config.toml"
 contains "$(in_pal 'window\r')" 'Open a new terminal window' 'the palette prints the command for a second window'
