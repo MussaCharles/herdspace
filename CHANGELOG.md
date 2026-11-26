@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-27
+
 ### Changed
 
 - Each action of the palette shows its key or its command at the right, with the direct key first, for example `Cmd+T, Ctrl+B C`. The header says how to open the palette, and that the `Cmd` keys are `Ctrl+Shift` on Linux.
@@ -308,7 +310,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.13.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.14.0...HEAD
+[0.14.0]: https://github.com/MussaCharles/herdspace/compare/0.13.0...0.14.0
 [0.13.0]: https://github.com/MussaCharles/herdspace/compare/0.12.2...0.13.0
 [0.12.2]: https://github.com/MussaCharles/herdspace/compare/0.12.1...0.12.2
 [0.12.1]: https://github.com/MussaCharles/herdspace/compare/0.12.0...0.12.1
