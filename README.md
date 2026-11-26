@@ -119,6 +119,16 @@ Each command runs in a shell on the server. In Herdr, the palette and the keys a
 
 The [hopen guide](docs/hopen.md#commands) has every command of `hopen`, and `herdspace help` lists every command of `herdspace`.
 
+## For coding agents
+
+The herdspace skill teaches a coding agent, for example Claude Code or Codex, to use `hopen` and the setup: open your projects, add a project to a list, split a tab with a template, see the Herdr integrations, and check or update the setup. To install it for all your projects, use the [skills CLI](https://github.com/vercel-labs/skills):
+
+```bash
+npx skills add MussaCharles/herdspace --skill herdspace -g
+```
+
+The server setup also installs the Herdr skill for each agent that it finds, so that the agents can control Herdr. See [Teach your agent to use herdspace](docs/agent-setup.md#teach-your-agent-to-use-herdspace).
+
 ## Update
 
 ```bash

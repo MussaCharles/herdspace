@@ -1,6 +1,6 @@
 # herdspace
 
-A CLI workspace and session manager for Herdr, the terminal multiplexer for coding agents. These instructions are for every coding agent that works in this repository. Claude Code, Codex, and other agents read this file.
+A CLI workspace and session manager for Herdr, the terminal multiplexer for coding agents. These instructions are for every coding agent that works in this repository. Codex and other agents read this file. Claude Code reads `CLAUDE.md`, a link to this file.
 
 ## The parts
 
@@ -67,6 +67,16 @@ At the end of each task, before you report that it is done, review the skills:
 4. Put the skill change in the same pull request as the task, or in a pull request right after it. Run `tests/test-skills.sh`.
 
 A lesson goes to one skill only. Other skills link to it. Write only public facts: no names of machines, accounts, or private projects.
+
+### Before each release
+
+A task can end with no skill review. Once, the skills went stale over four releases. So before each release, review every skill against the changes since the last tag:
+
+1. Run `git diff --stat <last-tag> HEAD`, and read the CHANGELOG section of the new release.
+2. Read each skill in `skills/` and `.agents/skills/`. Fix each fact that is no longer true. Add each new feature, command, and lesson that the skill owns.
+3. Merge the skill changes before the release pull request.
+
+The code can change after the last tag while a skill stays the same. Then `tools/release.sh --preflight` prints a reminder that names that skill. The reminder does not stop the release. A skill with no change can still be current, so read it, and decide.
 
 ## Commands
 

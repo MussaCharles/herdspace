@@ -18,22 +18,23 @@ A tag is the version alone, with no v in front, for example `0.1.2`. Use [Semant
 Follow these steps only when the person asks for a release.
 
 1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Use the date of today, not the date of the last release. Change the links at the end of the file. Commit the change first. Then run `tools/known-hashes.sh`, and commit `bootstrap/known-hashes.tsv`, so that it holds the `hopen` of the new tag. The script reads the committed `CHANGELOG.md`. A run before the commit misses the new tag, and the CI check "List of older file versions" fails. If the list is not up to date, `--preflight` stops too.
-2. Run all tests. `docs/testing.md` lists them. All tests must pass. `tests/run-upgrade.sh` must pass: an update from each of the last 3 releases, also with no manifest, asks about no file that the test did not change.
-3. Merge the change to `main` after every CI check is done and passed. The `herdspace-ci` skill has the merge command, and says how to wait for every check.
-4. Build the files:
+2. Review every skill against the changes since the last tag, as "Before each release" in `AGENTS.md` says. Merge the skill changes first. `--preflight` names each skill with no change since the last tag.
+3. Run all tests. `docs/testing.md` lists them. All tests must pass. `tests/run-upgrade.sh` must pass: an update from each of the last 3 releases, also with no manifest, asks about no file that the test did not change.
+4. Merge the change to `main` after every CI check is done and passed. The `herdspace-ci` skill has the merge command, and says how to wait for every check.
+5. Build the files:
 
    ```bash
    tools/release.sh 0.1.2
    ```
 
-5. Show `dist/0.1.2.notes.md` to the person. It is the changelog section of the tag, with a link to the install steps at the top.
-6. Run the checks of `--publish` with no publish. They make sure that the commit is the head of `origin/main`, that each CI check of its pull request passed, and that the tag has no release:
+6. Show `dist/0.1.2.notes.md` to the person. It is the changelog section of the tag, with a link to the install steps at the top.
+7. Run the checks of `--publish` with no publish. They make sure that the commit is the head of `origin/main`, that each CI check of its pull request passed, and that the tag has no release:
 
    ```bash
    tools/release.sh 0.1.2 --preflight
    ```
 
-7. When the person agrees, publish:
+8. When the person agrees, publish:
 
    ```bash
    tools/release.sh 0.1.2 --publish
