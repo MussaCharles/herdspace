@@ -8,6 +8,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 - Quick open opens the file in the focused pane when it is a shell at its prompt, and the shell comes back when Neovim closes. A new editor of quick open closes its split when Neovim closes, and the focus returns to the old pane.
 - `Ctrl+Q` in Neovim closes the file, as `Cmd+W` in VS Code, and closes Neovim when no other file is open.
+- The server setup adds the Herdr integration for each of the 18 agents that Herdr 0.9.5 supports, when the agent command is on the `PATH` and its folder exists. It looks for the same command names as Herdr, for example `cursor-agent`, not the `cursor` command of the Cursor editor. See [Agent programs and integrations](docs/agents.md#agent-programs-and-integrations).
 - The README has a "Commands" section with the daily commands: the palette, quick open, `ff`, `fif`, tasks, ports, and the `herdspace` commands.
 - The keys and commands have one page for each task: [move around](docs/navigation.md), [panes and layout](docs/layout.md) (with the swap keys `ctrl+b`, `shift+h` to `shift+l`), [files and the editor](docs/files.md), [git and worktrees](docs/git.md), [sessions](docs/sessions.md), and [agents](docs/agents.md). The cheat sheet keeps the daily commands and links each page. The README starts with the links to the docs and the quick start.
 

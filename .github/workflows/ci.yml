@@ -81,6 +81,8 @@ jobs:
         run: tests/test-sign-tag.sh
       - name: Uninstall
         run: tests/test-uninstall.sh
+      - name: Agent integrations
+        run: tests/test-agents.sh
       - name: Linux packages from other sources
         run: tests/test-linux-packages.sh
       - name: Wait for the release files

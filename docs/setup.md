@@ -231,7 +231,7 @@ flowchart LR
 | ripgrep and Node.js, for Neovim and its language tools | | yes |
 | Herdr, with keys, colors, and sidebar | | yes |
 | Auto Title plugin | | yes |
-| Agent skill and integration for each agent program that it finds | | yes |
+| Agent skill and integration for each agent program that it finds. See [Agent programs and integrations](agents.md#agent-programs-and-integrations) | | yes |
 | Neovim with a file tree, and lazygit with delta | | yes |
 | `hopen`, which opens the projects of one list or of every list, with templates | | yes |
 | A login service that starts Herdr, and a check for new versions | | yes |
