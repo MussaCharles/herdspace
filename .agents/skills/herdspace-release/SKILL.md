@@ -18,7 +18,7 @@ A tag is the version alone, with no v in front, for example `0.1.2`. Use [Semant
 Follow these steps only when the person asks for a release.
 
 1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Use the date of today, not the date of the last release. Change the links at the end of the file. Commit the change first. Then run `tools/known-hashes.sh`, and commit `bootstrap/known-hashes.tsv`, so that it holds the `hopen` of the new tag. The script reads the committed `CHANGELOG.md`. A run before the commit misses the new tag, and the CI check "List of older file versions" fails. If the list is not up to date, `--preflight` stops too.
-2. Review every skill against the changes since the last tag, as "Before each release" in `AGENTS.md` says. Merge the skill changes first. `--preflight` names each skill with no change since the last tag.
+2. Review every skill against the changes since the last tag, as [Review the skills](#review-the-skills) says. Merge the skill changes first.
 3. Run all tests. `docs/testing.md` lists them. All tests must pass. `tests/run-upgrade.sh` must pass: an update from each of the last 3 releases, also with no manifest, asks about no file that the test did not change.
 4. Merge the change to `main` after every CI check is done and passed. The `herdspace-ci` skill has the merge command, and says how to wait for every check.
 5. Build the files:
@@ -41,6 +41,16 @@ Follow these steps only when the person asks for a release.
    ```
 
 The ruleset "release tags" lets only the admin role create a tag, so run `--publish` with the account of the owner. `--publish` signs the tag with the SSH key of `git config user.signingkey`, which must be in `.github/release-signers`. To test this, run `tools/sign-tag.sh --check`. After the publish, `git -c gpg.ssh.allowedSignersFile=.github/release-signers tag -v <tag>` must print `Good "git" signature`, and GitHub shows the tag as Verified. `--publish` runs the checks of `--preflight` first. It also stops if the folder has a change or an untracked file, or if `CHANGELOG.md` has no section for the tag.
+
+## Review the skills
+
+A task can end with no skill review. Once, the skills went stale over four releases. So before each release:
+
+1. Run `git diff --stat <last-tag> HEAD`, and read the CHANGELOG section of the new release.
+2. Read each skill in `skills/` and `.agents/skills/`. Fix each fact that is no longer true. Add each new feature, command, and lesson that the skill owns.
+3. Merge the skill changes before the release pull request.
+
+The code can change after the last tag while a skill stays the same. Then `tools/release.sh --preflight` prints a reminder that names that skill. The reminder does not stop the release. A skill with no change can still be current, so read it, and decide.
 
 ## What a release holds
 

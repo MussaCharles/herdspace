@@ -93,7 +93,7 @@ if [ "$PUBLISH" -eq 1 ] || [ "$PREFLIGHT" -eq 1 ]; then
       [ -n "$(git diff --name-only "$last" HEAD -- "$skill")" ] || stale="${stale}  ${skill}"$'\n'
     done
     if [ -n "$stale" ]; then
-      echo "Reminder: the code changed since ${last}, and these skills did not. Review them before the release (AGENTS.md, Keep the skills current):"
+      echo "Reminder: the code changed since ${last}, and these skills did not. Review them before the release (the herdspace-release skill, Review the skills):"
       printf '%s' "$stale"
     fi
   fi
