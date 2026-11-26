@@ -276,10 +276,13 @@ shows "$qo_editor" second.txt && pass 'the open editor shows the next file' || f
 [ "$(panes_in "$qo_tab")" = 2 ] && pass 'quick open uses the open editor of the tab' || fail "quick open uses the open editor of the tab: $(panes_in "$qo_tab") panes"
 [ "$(focused_in "$qo_pane")" = "$qo_editor" ] && pass 'quick open moves the focus to the open editor' || fail "quick open moves the focus to the open editor: $(focused_in "$qo_pane")"
 herdr pane send-keys "$qo_editor" ctrl+q >/dev/null
-sleep 1
+# Wait until Neovim shows the other file, so that the next Ctrl+Q closes the
+# last one. A slow runner needs more time here.
+for _ in $(seq 1 60); do herdr pane read "$qo_editor" 2>/dev/null | grep -q 'second.txt' || break; sleep 0.25; done
 [ "$(panes_in "$qo_tab")" = 2 ] && pass 'Ctrl+Q closes one file, and the editor stays while a file is open' || fail "Ctrl+Q with two files: $(panes_in "$qo_tab") panes"
+shows "$qo_editor" NOTES.md || true
 herdr pane send-keys "$qo_editor" ctrl+q >/dev/null
-for _ in $(seq 1 20); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
+for _ in $(seq 1 60); do [ "$(panes_in "$qo_tab")" = 1 ] && break; sleep 0.25; done
 [ "$(panes_in "$qo_tab")" = 1 ] && pass 'Ctrl+Q on the last file closes the split of quick open' || fail "Ctrl+Q on the last file closes the split: $(panes_in "$qo_tab") panes"
 [ "$(focused_in "$qo_pane")" = "$qo_pane" ] && pass 'the focus returns to the old pane' || fail "the focus returns to the old pane: $(focused_in "$qo_pane")"
 herdr pane send-keys "$qo_pane" ctrl+c >/dev/null 2>&1 || true
