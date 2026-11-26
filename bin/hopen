@@ -1470,12 +1470,23 @@ editor_command() {
   fi
 }
 
+# pane_ready PANE waits until the shell of a new pane draws its prompt, for at
+# most 15 seconds. Text that reaches a shell before it starts can get lost.
+pane_ready() {
+  local _
+  for _ in $(seq 1 60); do
+    [ -z "$(herdr pane read "$1" 2>/dev/null | tr -d '[:space:]')" ] || return 0
+    sleep 0.25
+  done
+}
+
 # new_tab_run LABEL DIR COMMAND opens a new tab in the current workspace and
 # runs COMMAND in it.
 new_tab_run() {
   local pane
   pane="$(herdr_json root_pane.pane_id tab create --workspace "$PAL_WS" --cwd "$2" --label "$1" --focus)"
   [ -n "$pane" ] || die "Herdr did not open a new tab."
+  pane_ready "$pane"
   herdr pane run "$pane" "$3" >/dev/null
 }
 
@@ -1485,7 +1496,7 @@ split_run() {
   local pane
   pane="$(herdr_json pane.pane_id pane split --pane "$PAL_PANE" --direction "$1" --cwd "$2" --focus)"
   [ -n "$pane" ] || die "Herdr did not split the pane."
-  [ -z "${3:-}" ] || herdr pane run "$pane" "$3" >/dev/null
+  [ -z "${3:-}" ] || { pane_ready "$pane"; herdr pane run "$pane" "$3" >/dev/null; }
 }
 
 # focus_pane PANE moves the focus to PANE in its tab. Herdr moves the focus
