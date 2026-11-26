@@ -93,6 +93,12 @@ Each of these mistakes broke the setup one time:
 - A Linux client has no Cmd key. Each Herdr key that uses `cmd+` also needs a `ctrl+shift+` key in `config/herdr/config.toml`.
 - On macOS, `brew install --cask` writes to `/Applications`, so it works only from an admin account. The prerequisites step prints the command for an admin account.
 - `server` and then `client` on one machine write two different roles. Use `both`.
+- An apt package can conflict with a tool from another source, for example `npm` with the `nodejs` of NodeSource. Then apt stops the whole step with "held broken packages". For each package that is not installed, `skip_other_sources` looks at its commands. If they already work, the package stays out of the list. If you add a package to a list, add its commands to `package_commands` in `linux-tools.sh`.
+- `AGENTS` in `server.sh` lists the integrations of Herdr. `agent_commands` uses the command names of the Herdr registry (`src/integration/registry.rs`), for example `cursor-agent`, not `cursor`, the command of the Cursor editor. `agent_folder` uses the folders of the Herdr integration docs. When Herdr adds an integration, add all three, and a case to `tests/test-agents.sh`.
+- zsh 5.8 (Ubuntu 22.04) refuses `unset "arr[key]"` for a key with `[` in it, and the error stops the rest of the file. In `config/shell/extras.zsh`, avoid such an unset, and run the extras tests in an `ubuntu:22.04` container.
+- zsh reads a whole block before it runs it. So an alias such as the `ls` of Oh My Zsh changes a later `ls() {` definition in the same block. Use `function ls {`.
+- `ls` and `ll` are functions that run eza only for flags that mean the same in eza. If you change them, run `tests/test-extras-ls.sh` and the real eza with each flag.
+- LazyVim loads `lua/config/keymaps.lua` after startup. Put a Neovim key that must work at once, such as `Ctrl+Q`, in the `keys` of a plugin spec that loads at startup. `config/nvim/lua/plugins/close.lua` is an example.
 
 ## Rules
 

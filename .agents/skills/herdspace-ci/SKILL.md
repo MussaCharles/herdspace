@@ -48,6 +48,8 @@ Each of these made a job fail one time:
 - systemd in a Docker container did not start on an Ubuntu runner with the cgroups of the host. Use `--cgroupns=private`, with no mount of `/sys/fs/cgroup`. Wait for `systemctl is-system-running` to answer `running` or `degraded`, and try `loginctl enable-linger` again until the login manager answers.
 - The pitfalls of the tests themselves are in the `herdspace-test` skill. Read them too.
 - A client test once lost its Ghostty window on a runner, and the next commands waited until the job stopped at 60 minutes. Give a step that can hang its own `timeout-minutes`, below the limit of the job, and give the test itself time limits.
+- `apt-get` failed with "File has unexpected size ... Mirror sync in progress?". The Ubuntu mirror was in a sync. Run the failed jobs again.
+- A check failed only on the arm64 runners, which are slower. A wait in the test was too short, or two steps raced. The `herdspace-test` skill says how to test with a slow container.
 - A macOS runner has Homebrew and many tools already. It is not a clean Mac, and it has no screen. The real key test runs only in the Linux client test.
 
 ## Change a repository setting
@@ -69,7 +71,7 @@ If `main` changed and the branch has a conflict, merge `main` into the branch, f
 
 ## Merge a pull request
 
-Only the repository admin role can merge, through the bypass of "main: who can merge". Wait until every CI job passes, then merge with `--admin`:
+Only the repository admin role can merge, through the bypass of "main: who can merge". Wait until every CI job is done and passed, then merge with `--admin`. Right after a push, the main CI workflow can still be queued, so only the CodeQL checks show, and `gh pr checks --watch` can return at once. Wait until every required check is listed and none is pending. Else the merge fails with "Repository rule violations found".
 
 ```bash
 gh pr merge <number> --repo MussaCharles/herdspace --merge --admin --delete-branch

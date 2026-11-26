@@ -25,6 +25,18 @@ A task gives a `K` line after its `R` or `P` line. `hopen --task` finds the proj
 
 `hopen --palette` builds a menu of actions with `choose`, and runs the chosen one with `exec "$0" ...`. In a Herdr popup (`HERDR_ACTIVE_PANE_ID` set, no `HERDR_PANE_ID`), `then_wait` waits for Enter after an action that prints a result, because the popup closes when its command ends. The key is a `[[keys.command]]` popup in `config/herdr/config.toml`.
 
+`hopen --quick-open` (the Herdr key `Cmd+P`, or `Ctrl+B`, then `F`) and a search result from a popup open a file through `open_target PATH ROOT [LINE]`. It tries these places in order:
+
+1. The focused pane runs Neovim. `drop_in` sends `:drop`.
+2. The focused pane is a shell at its prompt. `herdr pane run` starts the editor there.
+3. Another pane of the tab runs Neovim.
+4. A new split on the right, with `exec env EDITOR`, so that the split closes with Neovim.
+ `pane_runs PANE editor|shell` reads `herdr pane process-info`. `PAL_PLACE` (`right`, `down`, or `tab`) skips the order and asks `run_at` for a new editor in that place. The palette sets it from `Ctrl+V`, `Ctrl+S`, and `Ctrl+T` (fzf `--expect`), or from a word after the action in the numbered menu.
+
+The fourth argument of `pal_add` is the hint at the right of an action: the direct key first, then the prefix key or the command, for example `Cmd+T, Ctrl+B C`.
+
+The integration actions of the palette read `herdr integration status` through `integrations`, which prints `name<TAB>state`. A line can have ` (experimental)` after the name.
+
 `hopen --completion zsh|bash` prints a completion script. The script calls `hopen --complete lists|templates|tasks` for the names. The bash script must work with bash 3.2, so it uses no `mapfile` and no `compopt`. `tests/test-hopen-list.sh` runs it.
 
 `hopen` never closes a workspace, a tab, or a pane.
@@ -64,6 +76,9 @@ Each of these mistakes broke `hopen` one time:
 - A command line is visible to each user in `ps`. Send an environment value to a child program on stdin, not as an argument.
 - A checksum that is not 64 hexadecimal characters means "not approved". An empty checksum must never match.
 - A Herdr popup has `HERDR_ACTIVE_PANE_ID` and no `HERDR_PANE_ID`. Use `${HERDR_PANE_ID:-${HERDR_ACTIVE_PANE_ID:-}}` for the pane to split.
+- `herdr pane split` gives the focus to the new pane only with `--focus`. `herdr pane focus` takes a direction, not a pane ID, so `focus_pane` steps from the focused pane toward the target through `herdr pane layout`.
+- Herdr has no option to start a split or a tab with a command. Text that comes before the shell starts gets lost. So `split_run` and `new_tab_run` wait for the prompt of the new pane with `pane_ready` before `herdr pane run`.
+- A file name can hold any text, also `:` and `$(...)`. For the line of an `rg` result, `hopen` accepts digits only. An automated security review found this one: the line went unquoted into a command for a shell and for Neovim. Quote each value from a file name with `printf '%q'`, and check each number.
 
 ## Rules
 

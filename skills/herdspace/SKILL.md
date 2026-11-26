@@ -1,6 +1,6 @@
 ---
 name: herdspace
-description: Use herdspace to open projects in Herdr with hopen, add a project to a list, split a tab with a pane template, and check or update the setup. Use when a person asks to open, add, or arrange projects in Herdr, mentions hopen or herdspace, or asks to install or update herdspace.
+description: Use herdspace to open projects in Herdr with hopen, add a project to a list, split a tab with a pane template, see the Herdr integrations of agents, and check or update the setup. Use it for a request to open, add, or arrange projects in Herdr, for hopen or herdspace, for an agent integration in Herdr, or to install or update herdspace.
 license: MIT
 metadata:
   source: "https://github.com/MussaCharles/herdspace"
@@ -30,11 +30,12 @@ These commands are for the person, in their own terminal. They open a menu or an
 
 | Command | What it does |
 |---------|--------------|
+| `hopen --quick-open` | Like Quick Open of VS Code. In Herdr, `Cmd+P` (Mac) or `Ctrl+B`, then `F` (Linux) opens it. The chosen file opens in the focused Neovim or shell first. Else it opens in the Neovim pane of the tab, or in a new split on the right. The focus moves to the file. In Neovim, `Ctrl+Q` closes the file. With no other file open, `Ctrl+Q` closes Neovim. |
 | `ff`, or `hopen --find` | Choose a file with fzf, and open it in the editor. |
-| `fif TEXT`, or `hopen --grep TEXT` | Search the files, and open a result at its line. |
-| `hopen --palette` | A menu of every action, in groups like the command palette of VS Code: projects, tasks, files, git and worktrees, agents, layout, workspaces and tabs, sessions, ports, herdspace, Herdr, and help. In Herdr, `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) opens it. A person runs it. An agent uses the commands of each action. |
+| `fif TEXT`, or `hopen --grep TEXT` | Search the files, and open a result at its line. From the palette in Herdr, the result opens like quick open. |
+| `hopen --palette` | A menu of every action, in groups like the command palette of VS Code. The groups are projects, tasks, files, git, agents and their Herdr integrations, layout, tabs, sessions, ports, herdspace, Herdr, and help. In Herdr, `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) opens it. Each action shows its key or its command at the right. In place of Enter, `Ctrl+V` opens a program on the right, `Ctrl+S` below, and `Ctrl+T` in a new tab. A person runs it. An agent uses the commands of each action. |
 
-`ff` and `fif` load only in an interactive zsh. A person who comes from VS Code can read the VS Code guide: `https://github.com/MussaCharles/herdspace/blob/main/docs/vscode.md`.
+`ff` and `fif` load only in an interactive zsh. A person who comes from VS Code can read the VS Code guide: `https://github.com/MussaCharles/herdspace/blob/main/docs/vscode.md`. The keys and commands for each task are in the documentation index: `https://github.com/MussaCharles/herdspace/blob/main/docs/README.md`.
 
 When you run `hopen` yourself, add `--no-attach`. You cannot use the session. Tell the person to attach in their own terminal:
 
@@ -55,7 +56,21 @@ hopen my-projects
 
 `hopen --apply grid` splits the current tab with the `grid` template. It works only inside Herdr, in a tab that has only one pane. The templates are in `~/.config/hopen/templates`. Each line of a template file is one pane: `NAME FROM DIRECTION SIZE COMMAND`.
 
+## Agents and their Herdr integrations
+
+herdspace never installs or updates an agent program. The person installs each agent. The server setup adds the Herdr integration and the Herdr skill for each agent that it finds. To find an agent, the setup looks for a command of the agent on the `PATH`, for example `claude`, `codex`, or `cursor-agent`. The folder where the agent keeps its files must exist too. The agent makes that folder at its first start. Herdr supports 18 integrations. Gemini CLI has none: Herdr shows its state from the screen only.
+
+| The person wants to | Run |
+|---------------------|-----|
+| See the integrations | `herdr integration status` |
+| Add the integration of one agent | `herdr integration install NAME`, for example `herdr integration install codex`. Ask the person first, because it changes the files of the agent. |
+| Add the integrations of all agents found | Run the server setup again, as in the next section. |
+
+The list of agents, commands, and folders is in `https://github.com/MussaCharles/herdspace/blob/main/docs/agents.md#agent-programs-and-integrations`.
+
 ## Check or update the setup
+
+The client setup prepares the machine that the person uses: Ghostty, its keys, and the shell. It installs no Herdr there. `--server NAME` of the client setup tests the SSH connection, and copies the terminal description of Ghostty to the server. The server setup installs Herdr, `hopen`, and Neovim, and it runs on the server itself.
 
 On a server machine, a client machine, or one machine as both, `--check` reports what is done and what is missing. It changes nothing in the setup. From `curl`, it only downloads the release files first. If an item is not done, it exits with status 1:
 

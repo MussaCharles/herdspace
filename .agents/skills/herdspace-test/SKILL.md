@@ -17,7 +17,7 @@ Run each check. Do not install a missing tool without the agreement of the perso
 | Ghostty in a container | Docker answers, and the machine can build `tests/Dockerfile.client` | `tests/run-client-linux.sh` (real key presses) |
 | macOS stubs | `uname -s` is `Darwin`, and Homebrew has the server tools (Herdr, Neovim, and the others) and Python 3.11 or later. The test uses the real tools, with a temporary home folder. Only commands that change the system are stubs. | `tests/run-macos.sh` |
 | macOS VM | `uname -m` is `arm64` on a Mac, `tart` is installed, and `tart list --quiet` shows the base image (`tahoe-base`) | the macOS part of `tests/run-release-check.sh` |
-| Any machine | bash, git, and Python 3.11 or later | `tests/test-hopen-list.sh`, `tests/test-skills.sh`, `tests/test-install.sh`, `tests/test-nvim-plugins.sh`, `tests/test-links.sh`, `tests/test-ui.sh`, `shellcheck` |
+| Any machine | bash, git, and Python 3.11 or later | The fast tests: `tests/test-*.sh`, and `shellcheck`. `docs/testing.md` lists each one. `tests/test-extras-keys.sh` and `tests/test-extras-ls.sh` also need zsh. CI runs them with zsh 5.8 in an `ubuntu:22.04` container too. |
 
 ## 2. Run the tests that the change touches
 
@@ -30,11 +30,21 @@ Run each check. Do not install a missing tool without the agreement of the perso
 | The prerequisites step | `tests/run-prereqs.sh` |
 | A skill or `AGENTS.md` | `tests/test-skills.sh` |
 | A Markdown file | `tests/test-links.sh` |
+| `config/shell/extras.zsh` | `tests/test-extras-keys.sh` and `tests/test-extras-ls.sh`, also in an `ubuntu:22.04` container (zsh 5.8) |
+| The package list of the Linux setup | `tests/test-linux-packages.sh` |
+| The agents of the server setup | `tests/test-agents.sh` |
+| `tools/known-hashes.sh` | `tests/test-known-hashes.sh` |
+| `tools/wait-release-files.sh` | `tests/test-wait-release-files.sh` |
+| The palette, quick open, or a pane helper of `hopen` | `tests/run-linux.sh`, also once with less than one CPU (see "A slow machine") |
 | The output or a question of the setup | `tests/test-ui.sh` |
 | A release, before you publish it | every test above |
 | A release, after you publish it | `tests/run-release-check.sh` |
 
 Run a test that takes more than two minutes in the background, with its output in a log file in `tests/.work`. Watch it with a quiet script. The script prints a line in two cases: the test ends, or the log stops growing for five minutes. Start such a script with `bash` by name, because your own shell can be zsh. If a test stops moving, find the cause. For example, a question can wait for an answer. Do not wait forever.
+
+## A slow machine
+
+A CI runner, and an arm64 runner most of all, is slower than your machine. A race that never shows on your machine can fail there. A change can touch the palette, quick open, or another step that waits for Herdr or Neovim. Before you push it, run the Linux test once with less than one CPU. Make a copy of `tests/run-linux.sh` that adds `--cpus 0.7` to `docker run`, and run the copy. Do not commit the copy.
 
 ## CI
 
@@ -78,6 +88,13 @@ tests/run-release-check.sh --version 0.5.0
 - If the Ghostty window of a client test does not open, the test must stop with the Ghostty log. A test that waits for a window can wait forever. A window can also close after the test found it, so `open_ghostty` checks it again after its wait.
 - Each command that `tests/lib-pair.sh` runs in a container has a time limit, `STEP_LIMIT` (15 minutes by default). Keep a time limit on each new helper, so that one stuck command fails the test.
 - A slow or broken package mirror looks like a stuck test. Set `APT_MIRROR_UBUNTU` or `APT_MIRROR_DEBIAN`. See the testing guide.
+- Text that `herdr pane run` sends to a new pane before its shell starts gets lost. `hopen` waits for the prompt with `pane_ready`. A test must also wait until a pane runs the expected program before it sends the next key.
+- At its first start, the herdspace Neovim installs parsers and language tools in the background, and prints many messages. A quit then can wait for a key. A test that quits Neovim must wait long enough. On a failure, it must dump the screen.
+- LazyVim loads `lua/config/keymaps.lua` after startup. A key that must work at once belongs in the `keys` of a plugin spec that loads at startup.
+- `tests/pty_run.py` sends all its keys at once, at half of its time limit, and stops the program at the limit. Give a slow step enough time.
+- Leave no busy program behind for the next check. For example, close an editor that a check opened, because its first start takes the CPU.
+- When a check fails only on CI, add a dump to the failure: the screen of the pane (`herdr pane read`), and `herdr pane process-info`. Read the dump before you change the code.
+- In a container, a test from a git worktree fails "release build". The `.git` file of a worktree points to a path outside the container. Run the test from a normal clone.
 - Find the real cause of a failed test before you add code. Code that answers the terminal queries of fzf did not fix a fzf test, because the cause was a race. The code was removed again.
 
 ## Rules
