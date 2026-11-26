@@ -6,6 +6,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- The README has a "Commands" section with the daily commands: the palette, quick open, `ff`, `fif`, tasks, ports, and the `herdspace` commands.
 - The keys and commands have one page for each task: [move around](docs/navigation.md), [panes and layout](docs/layout.md) (with the swap keys `ctrl+b`, `shift+h` to `shift+l`), [files and the editor](docs/files.md), [git and worktrees](docs/git.md), [sessions](docs/sessions.md), and [agents](docs/agents.md). The cheat sheet keeps the daily commands and links each page. The README starts with the links to the docs and the quick start.
 
 ## [0.13.0] - 2026-11-26

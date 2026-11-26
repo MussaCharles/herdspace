@@ -99,6 +99,26 @@ The palette lists every action, as in VS Code: projects, tasks, files, git, agen
 
 The keys for each task have their own page: [move around](docs/navigation.md), [panes and layout](docs/layout.md), [files and the editor](docs/files.md), [git and worktrees](docs/git.md), [sessions](docs/sessions.md), and [agents](docs/agents.md).
 
+## Commands
+
+Each command runs in a shell on the server. In Herdr, the palette and the keys above run most of them for you.
+
+| Command | Effect |
+|---------|--------|
+| `hopen --palette` | The command palette: every action, in groups. In Herdr, `Cmd+Shift+P`. |
+| `hopen --quick-open` | Choose a file of the project, and open it in the editor of the tab, with the focus on it. In Herdr, `Cmd+P`. |
+| `ff` | Find a file in the current folder, and open it. |
+| `fif TEXT` | Search in the files, and open a result at its line. |
+| `hopen --task test` | Run the task `test` of the current project. With no name, choose from a menu. See [Tasks](docs/hopen.md#tasks). |
+| `hopen --ports` | Show the ports that your programs listen on, and their projects. |
+| `hopen --apply grid` | Split the current tab with a template. |
+| `herdspace update` | Update herdspace to the latest release. See [Update](#update). |
+| `herdspace --version` | Show the installed and the latest version. |
+| `herdspace keys normal` | On a client: give `Cmd+T`, `Cmd+W`, and `Cmd+K` back to Ghostty. `herdspace keys herdr` sends them to Herdr again. |
+| `herdspace uninstall --check` | List what an uninstall changes, and change nothing. See [Uninstall](#uninstall). |
+
+The [hopen guide](docs/hopen.md#commands) has every command of `hopen`, and `herdspace help` lists every command of `herdspace`.
+
 ## Update
 
 ```bash
