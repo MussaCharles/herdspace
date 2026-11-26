@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- `docs/setup.md` says plainly that the client setup installs no Herdr, that `--server` installs nothing on a server, and what `both` does, and the table of the parts has a Both column.
+
 ## [0.14.0] - 2026-11-27
 
 ### Changed

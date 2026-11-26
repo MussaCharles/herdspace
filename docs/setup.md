@@ -221,20 +221,26 @@ flowchart LR
 
 ## What the setup installs
 
-| Part | Client | Server |
-|------|:------:|:------:|
-| Ghostty with keys that reach Herdr | yes | |
-| Terminal description for Ghostty on each server | yes | |
-| Free `Ctrl` arrow keys on a Mac | yes | |
-| zsh, Oh My Zsh, and Powerlevel10k, with a different color on each side | yes | yes |
-| fzf, zoxide, eza, bat, and fd | yes | yes |
-| ripgrep and Node.js, for Neovim and its language tools | | yes |
-| Herdr, with keys, colors, and sidebar | | yes |
-| Auto Title plugin | | yes |
-| Agent skill and integration for each agent program that it finds. See [Agent programs and integrations](agents.md#agent-programs-and-integrations) | | yes |
-| Neovim with a file tree, and lazygit with delta | | yes |
-| `hopen`, which opens the projects of one list or of every list, with templates | | yes |
-| A login service that starts Herdr, and a check for new versions | | yes |
+Each machine runs one role:
+
+- The client setup prepares the machine that you use: Ghostty, its keys, and the shell. It installs no Herdr, no `hopen`, and no Neovim there. You run Herdr on the server, through SSH.
+- `--server NAME` of the client setup installs nothing on a server. It only checks the SSH connection, and copies the terminal description of Ghostty to the server, so that colors and keys work there. Run the server setup on the server itself.
+- `both` runs the server setup and then the client setup on one machine, for Herdr on the machine that you use.
+
+| Part | Client | Server | Both |
+|------|:------:|:------:|:----:|
+| Ghostty with keys that reach Herdr | yes |  | yes |
+| Terminal description for Ghostty on each server | yes |  |  |
+| Free `Ctrl` arrow keys on a Mac | yes |  | yes |
+| zsh, Oh My Zsh, and Powerlevel10k, with a different color on each side | yes | yes | yes |
+| fzf, zoxide, eza, bat, and fd | yes | yes | yes |
+| ripgrep and Node.js, for Neovim and its language tools |  | yes | yes |
+| Herdr, with keys, colors, and sidebar |  | yes | yes |
+| Auto Title plugin |  | yes | yes |
+| Agent skill and integration for each agent program that it finds. See [Agent programs and integrations](agents.md#agent-programs-and-integrations) |  | yes | yes |
+| Neovim with a file tree, and lazygit with delta |  | yes | yes |
+| `hopen`, which opens the projects of one list or of every list, with templates |  | yes | yes |
+| A login service that starts Herdr, and a check for new versions |  | yes | yes |
 
 The scripts do not install the agent programs. Install them first, or run the server script again after you install one.
 
