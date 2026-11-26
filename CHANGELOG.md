@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-26
+
 ### Added
 
 - Quick open, like `Cmd+P` in VS Code: `Cmd+P` in Herdr (`Ctrl+B`, then `F` on Linux) lists the files of the project. The chosen file opens in the Neovim pane of the tab, or in a new split on the right, and gets the focus. See [Quick open](docs/hopen.md#quick-open).
@@ -296,7 +298,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.12.2...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.13.0...HEAD
+[0.13.0]: https://github.com/MussaCharles/herdspace/compare/0.12.2...0.13.0
 [0.12.2]: https://github.com/MussaCharles/herdspace/compare/0.12.1...0.12.2
 [0.12.1]: https://github.com/MussaCharles/herdspace/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/MussaCharles/herdspace/compare/0.11.1...0.12.0
