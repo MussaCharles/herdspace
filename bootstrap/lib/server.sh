@@ -52,14 +52,97 @@ old_nvim_is_herdspace() {
   done 3< <(cd "$OLD_NVIM_DIR" && find . \( -type f -o -type l \) | sed 's|^\./||')
 }
 
+# OWN_NVIM_ANSWER keeps the answer "keep" about your own ~/.config/nvim, so
+# that the next update does not ask again.
+OWN_NVIM_ANSWER="${STATE_DIR}/own-nvim"
+
+# own_nvim_note says that your own Neovim stays, and how to start the
+# herdspace editor. Once in each run, so that an update with no change in your
+# editor does not surprise you.
+own_nvim_note() {
+  info "Your own $(short_home "$OLD_NVIM_DIR") stays, and nvim starts it. For the herdspace editor, run: NVIM_APPNAME=${HS_NVIM_APPNAME} nvim. See https://github.com/MussaCharles/herdspace/blob/main/docs/setup.md#your-neovim-files"
+  [ ! -f "$OWN_NVIM_ANSWER" ] || info "The setup does not ask again about it. To be asked in the next update, run: rm $(short_home "$OWN_NVIM_ANSWER")"
+}
+
+# show_nvim_diff shows the difference between your own ~/.config/nvim and the
+# Neovim files of herdspace, in the pager.
+show_nvim_diff() {
+  local src="${REPO_ROOT}/config/nvim"
+  printf '\n  The difference between %s (your files, -) and the herdspace editor (+).\n' "$(short_home "$OLD_NVIM_DIR")"
+  if have git; then
+    printf '  It opens in a pager. Press q to come back to the question.\n'
+    sleep 1
+    git --no-pager diff --no-index --color=always -- "$OLD_NVIM_DIR" "$src" | ${PAGER:-less -R} || true
+  else
+    diff -ru "$OLD_NVIM_DIR" "$src" | ${PAGER:-cat} || true
+  fi
+}
+
+# decide_own_nvim sets DECISION to keep or replace for your own
+# ~/.config/nvim. --keep-existing, "keep all", a saved answer, and a run with
+# no terminal keep it. --replace-all and "replace all" use the herdspace
+# editor. Else the setup asks, and saves a keep answer.
+decide_own_nvim() {
+  local answer
+  case "$MODE" in
+    keep) DECISION="keep"; return 0 ;;
+    replace) DECISION="replace"; return 0 ;;
+  esac
+  if [ "$ASK_ALL" = "keep" ] || [ "$ASK_ALL" = "replace" ]; then
+    DECISION="$ASK_ALL"
+    return 0
+  fi
+  if [ -f "$OWN_NVIM_ANSWER" ] || [ ! -t 0 ]; then
+    DECISION="keep"
+    return 0
+  fi
+  while true; do
+    printf '\n  %s%sYou have your own %s, and nvim starts it.%s\n' "$C_BOLD" "$C_CYAN" "$(short_home "$OLD_NVIM_DIR")" "$C_RESET"
+    printf '  The herdspace editor has its own folder, %s.\n\n' "$(short_home "$NVIM_DIR")"
+    ui_key k "Keep your own Neovim. The setup does not ask again" "(Enter)"
+    ui_key r "Use the herdspace editor (your folder goes to a backup)"
+    ui_key d "Show the difference" "(q comes back)"
+    printf '\n  Your choice: '
+    IFS= read -r answer || answer="k"
+    case "$answer" in
+      r | replace) DECISION="replace"; return 0 ;;
+      d | diff) show_nvim_diff ;;
+      k | keep | "")
+        DECISION="keep"
+        mkdir -p "$(dirname "$OWN_NVIM_ANSWER")"
+        echo keep >"$OWN_NVIM_ANSWER"
+        return 0
+        ;;
+    esac
+  done
+}
+
+# backup_old_nvim moves ~/.config/nvim to a backup folder.
+backup_old_nvim() {
+  local backup="${OLD_NVIM_DIR}.bak-${STAMP}"
+  mv "$OLD_NVIM_DIR" "$backup"
+  BACKUP_LIST="${BACKUP_LIST}${OLD_NVIM_DIR}
+"
+  CHANGED=$((CHANGED + 1))
+  NVIM_BACKUP="$backup"
+}
+
 # move_old_nvim moves the Neovim files of an older herdspace out of
-# ~/.config/nvim, to a backup folder. A folder with a file of the person stays.
+# ~/.config/nvim, to a backup folder. For a folder with files of the person,
+# decide_own_nvim decides.
 move_old_nvim() {
   if ! old_nvim_is_herdspace; then
-    # Your own Neovim stays, and nvim starts it. Say so once in each run, so
-    # that an update with no change in your editor does not surprise you.
-    if [ -e "$OLD_NVIM_DIR" ] && [ "${NVIM_APPNAME:-}" != "$HS_NVIM_APPNAME" ]; then
-      info "Your own $(short_home "$OLD_NVIM_DIR") stays, and nvim starts it. For the herdspace editor, run: NVIM_APPNAME=${HS_NVIM_APPNAME} nvim. See https://github.com/MussaCharles/herdspace/blob/main/docs/setup.md#your-neovim-files"
+    [ -e "$OLD_NVIM_DIR" ] && [ "${NVIM_APPNAME:-}" != "$HS_NVIM_APPNAME" ] || return 0
+    if [ "$MODE" = "check" ]; then
+      own_nvim_note
+      return 0
+    fi
+    decide_own_nvim
+    if [ "$DECISION" = "replace" ]; then
+      backup_old_nvim
+      info "Your own $(short_home "$OLD_NVIM_DIR") is now in $(short_home "$NVIM_BACKUP"). In a new shell, nvim starts the herdspace editor."
+    else
+      own_nvim_note
     fi
     return 0
   fi
@@ -67,13 +150,9 @@ move_old_nvim() {
     note_todo "${OLD_NVIM_DIR} holds the Neovim files of an older herdspace"
     return 0
   fi
-  local backup="${OLD_NVIM_DIR}.bak-${STAMP}"
-  mv "$OLD_NVIM_DIR" "$backup"
-  BACKUP_LIST="${BACKUP_LIST}${OLD_NVIM_DIR}
-"
-  info "The herdspace Neovim files are now in $(short_home "$NVIM_DIR"). The old $(short_home "$OLD_NVIM_DIR") is in $(short_home "$backup")."
+  backup_old_nvim
+  info "The herdspace Neovim files are now in $(short_home "$NVIM_DIR"). The old $(short_home "$OLD_NVIM_DIR") is in $(short_home "$NVIM_BACKUP")."
   info "The old plugins in $(short_home "${HOME}/.local/share/nvim") stay. You can remove them."
-  CHANGED=$((CHANGED + 1))
 }
 
 # done_ready and done_mark use small files to record finished long steps.

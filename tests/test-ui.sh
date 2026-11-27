@@ -197,5 +197,39 @@ lacks "$out" 'Your own' 'the folder of an older herdspace moves with no note abo
 out="$(nv 'rm -rf $HOME/.config/nvim')"
 lacks "$out" 'nvim' 'with no ~/.config/nvim, nothing moves'
 
+# The question about your own ~/.config/nvim, at a terminal.
+nvq() {
+  python3 "$ROOT/tests/pty_run.py" 6 "$1" env TERM=xterm-256color PAGER=cat "$tmp/run.sh" "
+    source $ROOT/bootstrap/lib/server.sh; MODE=ask; STAMP=test
+    rm -rf \$HOME/.config/nvim* \$STATE_DIR/own-nvim; mkdir -p \$HOME/.config/nvim/lua
+    echo 'mine = 1' >\$HOME/.config/nvim/lua/plugins.lua; ${2:-true}
+    move_old_nvim; ls -d \$HOME/.config/nvim* | sed 's|.*/|DIR=|'; echo SAVED=\$(cat \$STATE_DIR/own-nvim 2>/dev/null)" 2>&1
+}
+out="$(nvq '\r')"
+contains "$out" 'Use the herdspace editor' 'the setup asks about your own Neovim'
+contains "$out" 'DIR=nvim' 'Enter keeps your own Neovim'
+contains "$out" 'SAVED=keep' 'the setup saves the keep answer'
+out="$(nvq 'r\r')"
+contains "$out" 'DIR=nvim.bak-test' 'r moves your own Neovim to a backup'
+lacks "$out" 'DIR=nvim
+' 'r leaves no ~/.config/nvim'
+contains "$out" 'nvim starts the herdspace editor' 'r says that nvim starts the herdspace editor'
+lacks "$out" 'SAVED=keep' 'r saves no answer'
+out="$(nvq 'd\rk\r')"
+contains "$out" 'mine = 1' 'd shows the difference with your own files'
+contains "$out" 'DIR=nvim' 'after d, k keeps your own Neovim'
+out="$(nvq 'r\r' 'mkdir -p $STATE_DIR; echo keep >$STATE_DIR/own-nvim')"
+lacks "$out" 'Use the herdspace editor' 'a saved keep answer asks nothing'
+contains "$out" 'DIR=nvim' 'a saved keep answer keeps your own Neovim'
+contains "$out" 'rm ~/.local/share/herdspace/own-nvim' 'the setup says how to be asked again'
+out="$(nvq 'r\r' 'MODE=keep')"
+lacks "$out" 'Use the herdspace editor' '--keep-existing asks nothing about your own Neovim'
+contains "$out" 'DIR=nvim' '--keep-existing keeps your own Neovim'
+out="$(nvq '' 'MODE=replace')"
+contains "$out" 'DIR=nvim.bak-test' '--replace-all moves your own Neovim to a backup'
+out="$(nvq '' 'ASK_ALL=keep')"
+contains "$out" 'DIR=nvim' 'keep all keeps your own Neovim'
+lacks "$out" 'Use the herdspace editor' 'keep all asks nothing about your own Neovim'
+
 echo "RESULT failures=${failures}"
 exit $((failures > 0))
