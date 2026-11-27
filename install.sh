@@ -48,8 +48,8 @@ if [ "$ACTION" = uninstall ]; then
     info "hopen is not in ${BIN_DIR}."
   fi
   if [ -d "${BIN_DIR}/../lib/hopen" ]; then
-    rm -f "${BIN_DIR}/../lib/hopen/"*.sh
-    rmdir "${BIN_DIR}/../lib/hopen" 2>/dev/null || true
+    find "${BIN_DIR}/../lib/hopen" -type f -name '*.sh' -exec rm -f {} +
+    find "${BIN_DIR}/../lib/hopen" -depth -type d -exec rmdir {} + 2>/dev/null || true
     info "Removed the modules of hopen."
   fi
   info "The templates stay in ${TEMPLATE_DIR}. Delete that folder if you do not want them."
@@ -109,11 +109,12 @@ src="${work}/hopen-${VERSION}"
 LIB_DIR="${BIN_DIR}/../lib/hopen"
 mkdir -p "$LIB_DIR"
 changed=0
-for file in "${src}"/lib/hopen/*.sh; do
-  cmp -s "$file" "${LIB_DIR}/$(basename "$file")" && continue
-  cp "$file" "${LIB_DIR}/$(basename "$file")"
+while IFS= read -r file; do
+  cmp -s "${src}/lib/hopen/${file}" "${LIB_DIR}/${file}" && continue
+  mkdir -p "$(dirname "${LIB_DIR}/${file}")"
+  cp "${src}/lib/hopen/${file}" "${LIB_DIR}/${file}"
   changed=$((changed + 1))
-done
+done < <(cd "${src}/lib/hopen" && find . -type f -name '*.sh' | sed 's|^\./||' | sort)
 [ "$changed" -eq 0 ] || info "Installed ${changed} modules of hopen in ${LIB_DIR}."
 
 mkdir -p "$BIN_DIR"
