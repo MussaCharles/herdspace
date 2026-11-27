@@ -77,6 +77,14 @@ Only the repository admin role can merge, through the bypass of "main: who can m
 gh pr merge <number> --repo MussaCharles/herdspace --merge --admin --delete-branch
 ```
 
+Before the merge, make sure that the pull request names each issue that it fixes, with `Closes #N` in its description:
+
+```bash
+gh pr view <number> --json closingIssuesReferences -q '[.closingIssuesReferences[].number]'
+```
+
+After the merge, make sure that each of those issues is closed. Tick the issue in its tracking issue, if it has one.
+
 Without `--admin`, `gh` answers "the base branch policy prohibits the merge", also after CI passes. `--admin` does not skip the CI checks, because nobody can bypass that ruleset. An agent with no admin access opens the pull request, and the owner merges it.
 
 ## Rules
