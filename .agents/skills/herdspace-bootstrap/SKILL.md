@@ -1,6 +1,6 @@
 ---
 name: herdspace-bootstrap
-description: Change the herdspace setup scripts, add a tool or a configuration file to the setup, or update a pinned version. Use when you change bootstrap.sh, bootstrap/lib/, bootstrap/platforms/, bootstrap/service/, config/, or tools/versions.env.
+description: Change the herdspace setup scripts, add a tool or a configuration file to the setup, or update a pinned version. Use when you change bootstrap.sh, bootstrap/lib/, bootstrap/platforms/, bootstrap/service/, config/, tools/versions.env, or the herdspace command in bin/herdspace and lib/herdspace/.
 ---
 
 # Change the setup

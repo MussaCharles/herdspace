@@ -7,6 +7,8 @@ description: Write or change the herdspace docs, the README, install.md, a skill
 
 The docs are for a person who does not know Herdr or herdspace. Write each sentence so that the person understands it on one read.
 
+If you add, move, or split a module in `lib/` or `bootstrap/lib/`, update the tables of `docs/code-layout.md` in the same pull request.
+
 ## Language
 
 Follow the `simple-english` skill for every doc. These rules matter most here:
