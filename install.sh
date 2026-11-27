@@ -48,7 +48,7 @@ if [ "$ACTION" = uninstall ]; then
     info "hopen is not in ${BIN_DIR}."
   fi
   if [ -d "${BIN_DIR}/../lib/hopen" ]; then
-    find "${BIN_DIR}/../lib/hopen" -type f -name '*.sh' -exec rm -f {} +
+    find "${BIN_DIR}/../lib/hopen" -type f \( -name '*.sh' -o -name '*.py' \) -exec rm -f {} +
     find "${BIN_DIR}/../lib/hopen" -depth -type d -exec rmdir {} + 2>/dev/null || true
     info "Removed the modules of hopen."
   fi
@@ -114,7 +114,7 @@ while IFS= read -r file; do
   mkdir -p "$(dirname "${LIB_DIR}/${file}")"
   cp "${src}/lib/hopen/${file}" "${LIB_DIR}/${file}"
   changed=$((changed + 1))
-done < <(cd "${src}/lib/hopen" && find . -type f -name '*.sh' | sed 's|^\./||' | sort)
+done < <(cd "${src}/lib/hopen" && find . -type f \( -name '*.sh' -o -name '*.py' \) | sed 's|^\./||' | sort)
 [ "$changed" -eq 0 ] || info "Installed ${changed} modules of hopen in ${LIB_DIR}."
 
 mkdir -p "$BIN_DIR"
