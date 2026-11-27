@@ -173,5 +173,19 @@ contains "$out" "'fancy' is not a key mode" 'keys with a wrong word says so'
 printf 'role=server\n' >"$HOME/.local/share/herdspace/last-setup"
 contains "$(hs keys normal)" 'on a client machine' 'keys on a server says that it is for a client'
 
+# editor: show the mode, and change it in ~/.config/herdspace/editor.
+rm -f "$HOME/.config/herdspace/editor"
+contains "$(hs --help)" 'herdspace editor [reader|normal]' 'help lists editor'
+contains "$(hs editor)" 'The editor: reader' 'editor shows the reader mode by default'
+contains "$(hs editor reader)" 'Nothing to change' 'editor reader in the reader mode changes nothing'
+contains "$(hs editor normal)" 'The editor: normal' 'editor normal changes the mode'
+[ "$(cat "$HOME/.config/herdspace/editor" 2>/dev/null)" = normal ] && pass 'editor normal saves the choice' || fail 'editor normal saves the choice'
+contains "$(hs editor)" 'The editor: normal' 'editor shows the normal mode'
+hs editor reader >/dev/null
+[ "$(cat "$HOME/.config/herdspace/editor" 2>/dev/null)" = reader ] && pass 'editor reader saves the choice' || fail 'editor reader saves the choice'
+out="$(hs editor fancy 2>&1)"; rc=$?
+contains "$out" "'fancy' is not an editor mode" 'editor with a wrong word says so'
+[ "$rc" -eq 2 ] && pass 'editor with a wrong word exits 2' || fail "editor with a wrong word exits 2: ${rc}"
+
 echo "RESULT failures=${failures}"
 exit $((failures > 0))

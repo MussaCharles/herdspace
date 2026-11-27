@@ -120,6 +120,45 @@ contains "$tree_out" '"tree":true' 'nvim . opens the file tree'
 contains "$tree_out" '"folder":false' 'nvim . keeps no folder buffer in the editor'
 contains "$tree_out" '"focused":true' 'nvim . puts the cursor in the file tree'
 
+# A Markdown file opens with no warnings and no spell marks, because the
+# files are for reading.
+printf '# A\n#### B\nteh  \n' >"$work/read.md"
+cat >"$work/read.lua" <<'LUA'
+vim.defer_fn(function()
+  vim.fn.writefile({ vim.json.encode({
+    diag = vim.diagnostic.is_enabled(),
+    spell = vim.wo.spell,
+    ft = vim.bo.filetype,
+  }) }, vim.env.RESULT)
+  vim.cmd("qa!")
+end, 3000)
+LUA
+read_out="$(cd "$work" && RESULT="$work/read.json" python3 "$ROOT/tests/pty_run.py" 12 '' nvim read.md "+luafile $work/read.lua" >/dev/null 2>&1; cat "$work/read.json" 2>/dev/null)"
+contains "$read_out" '"ft":"markdown"' 'a Markdown file opens as Markdown'
+contains "$read_out" '"diag":false' 'the editor shows no warnings'
+contains "$read_out" '"spell":false' 'a Markdown file has no spell marks'
+# herdspace editor normal keeps the defaults of LazyVim: the warnings are on,
+# and herdspace adds no rule against the spell marks. A Lua file has no spell
+# check, so no question about a spell file can stop Neovim.
+mkdir -p "$HOME/.config/herdspace" && echo normal >"$HOME/.config/herdspace/editor"
+printf 'local x = 1\n' >"$work/normal.lua"
+cat >"$work/normal-check.lua" <<'LUA'
+vim.defer_fn(function()
+  vim.fn.writefile({ vim.json.encode({
+    diag = vim.diagnostic.is_enabled(),
+    no_spell_rule = pcall(vim.api.nvim_get_autocmds, { group = "herdspace_no_spell" }),
+  }) }, vim.env.RESULT)
+  vim.cmd("qa!")
+end, 3000)
+LUA
+rm -f "$work/normal.json"
+(cd "$work" && RESULT="$work/normal.json" python3 "$ROOT/tests/pty_run.py" 12 '' nvim normal.lua "+luafile $work/normal-check.lua" >"$work/normal.screen" 2>&1)
+normal_out="$(cat "$work/normal.json" 2>/dev/null)"
+contains "$normal_out" '"diag":true' 'herdspace editor normal shows the warnings'
+contains "$normal_out" '"no_spell_rule":false' 'herdspace editor normal adds no rule against the spell marks'
+[ -n "$normal_out" ] || tail -c 1500 "$work/normal.screen" | tr -cd '[:print:]\n' | sed 's/^/  screen: /'
+rm -f "$HOME/.config/herdspace/editor"
+
 # Herdr itself. This server is throwaway, so a stop is safe.
 server_up() { case "$(herdr workspace list 2>/dev/null)" in *workspace_list*) return 0 ;; *) return 1 ;; esac; }
 if ! server_up; then

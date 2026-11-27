@@ -18,6 +18,8 @@ In Herdr, a result of the search of the palette ("Files: Search in the files") o
 
 Run `nvim .` in a project. If you have your own `~/.config/nvim`, run `NVIM_APPNAME=herdspace-nvim nvim .` for the herdspace editor. See [Your Neovim files](setup.md#your-neovim-files). Neovim opens the file tree on the left, with the cursor in it. Move with `j` and `k`, or the arrow keys, to see each file on the right. Neovim is a viewer in this setup, because the agents write the code. Its colors are One Dark, on the background of Ghostty. Folder icons have colors by folder name, for example `src`, `tests`, and `docs`.
 
+The editor shows no warnings of linters and language servers, and no spell marks, because you read the files and do not fix them. Go to a definition and hover still work. To show the warnings, press `Space`, then `u`, then `d`. To show the spell marks, press `Space`, then `u`, then `s`. To keep the defaults of LazyVim in each new Neovim, run `herdspace editor normal` on the server. `herdspace editor reader` hides the warnings again, and `herdspace editor` shows the mode.
+
 ![Neovim with a file tree and a file preview](media/neovim.png)
 
 | Action | Keys |
