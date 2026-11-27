@@ -114,6 +114,7 @@ Each command runs in a shell on the server. In Herdr, the palette and the keys a
 | `hopen --apply grid` | Split the current tab with a template. |
 | `herdspace update` | Update herdspace to the latest release. See [Update](#update). |
 | `herdspace --version` | Show the installed and the latest version. |
+| `herdspace editor normal` | On a server: Neovim shows the warnings and the spell marks, as LazyVim does. `herdspace editor reader` hides them again. |
 | `herdspace keys normal` | On a client: give `Cmd+T`, `Cmd+W`, and `Cmd+K` back to Ghostty. `herdspace keys herdr` sends them to Herdr again. |
 | `herdspace uninstall --check` | List what an uninstall changes, and change nothing. See [Uninstall](#uninstall). |
 

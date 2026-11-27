@@ -8,6 +8,7 @@
 #        herdspace --version               The installed and the latest version.
 #        herdspace version                 The same as --version.
 #        herdspace keys [normal|herdr]     Show or change the Ghostty keys (client).
+#        herdspace editor [reader|normal]  Show or change the Neovim defaults (server).
 #        herdspace uninstall --check       List what an uninstall changes. Change nothing.
 #        herdspace uninstall [--yes]       Remove what the setup wrote. Ask once first.
 #        herdspace help                    This help.
@@ -190,6 +191,38 @@ cmd_update() {
   rm -f "${CACHE}/latest" "${CACHE}/notice-shown"
   [ "$rc" -ne 0 ] || [ ! -x "${HOME}/.local/bin/herdr-update-check" ] || "${HOME}/.local/bin/herdr-update-check" --now
   return "$rc"
+}
+
+# cmd_editor [reader|normal] shows or changes the defaults of the herdspace
+# Neovim. reader, the default, hides the warnings and the spell marks, because
+# the agents write the code and the person reads it. normal keeps the defaults
+# of LazyVim. Neovim reads the choice in ~/.config/herdspace/editor when it starts.
+cmd_editor() {
+  local want="${1:-}" file="${HOME}/.config/herdspace/editor" now
+  now="$(cat "$file" 2>/dev/null || echo reader)"
+  [ "$now" = normal ] || now=reader
+  case "$want" in
+    "")
+      if [ "$now" = normal ]; then
+        printf '  The editor: normal. Neovim shows the warnings and the spell marks, as LazyVim does.\n'
+        printf '  To hide them, run: herdspace editor reader\n'
+      else
+        printf '  The editor: reader. Neovim hides the warnings and the spell marks, because you read the files.\n'
+        printf '  To show them, as LazyVim does, run: herdspace editor normal\n'
+      fi
+      return 0
+      ;;
+    reader | normal) ;;
+    *) printf "herdspace: '%s' is not an editor mode. Use 'reader' or 'normal'.\n" "$want" >&2; exit 2 ;;
+  esac
+  if [ "$want" = "$now" ]; then
+    printf '  The editor is already in the %s mode. Nothing to change.\n' "$want"
+    return 0
+  fi
+  if ! { mkdir -p "$(dirname "$file")" && printf '%s\n' "$want" >"$file"; }; then
+    die "Could not write ${file}."
+  fi
+  printf '  The editor: %s. Neovim uses it the next time it starts.\n' "$want"
 }
 
 # cmd_keys [normal|herdr] shows or changes the Ghostty keys of a client. It
@@ -469,14 +502,14 @@ un_state() {
   local conf="${HOME}/.config/herdspace" self="${HOME}/.local/bin/herdspace"
   if [ -d "$conf" ]; then
     if [ "$UN_CHECK" -eq 0 ]; then
-      rm -f "$conf/keys" "$conf/look"
+      rm -f "$conf/keys" "$conf/look" "$conf/editor"
       if rmdir "$conf" 2>/dev/null; then
         un_say remove "$(un_home "$conf")/"
       else
         printf '  %-9s %s\n' keep "$(un_home "$conf")/ (it holds a backup or a file of yours)"
       fi
     else
-      un_say remove "$(un_home "$conf")/ (your choice of keys and look, and the folder if it is empty)"
+      un_say remove "$(un_home "$conf")/ (your choice of keys, look, and editor, and the folder if it is empty)"
     fi
   fi
   if [ -d "$CACHE" ]; then
@@ -556,6 +589,7 @@ cmd_uninstall() {
 case "${1:-help}" in
   update) shift; cmd_update "$@" ;;
   keys) shift; cmd_keys "$@" ;;
+  editor) shift; cmd_editor "$@" ;;
   uninstall) shift; cmd_uninstall "$@"; exit $? ;;
   version | --version | -V) cmd_version ;;
   notice) cmd_notice ;;
@@ -565,7 +599,7 @@ case "${1:-help}" in
     # As git and GNU tools do: the error, a suggestion, and where the help is.
     printf "herdspace: '%s' is not a herdspace command.\n" "$1" >&2
     case "${1#"${1%%[!-]*}"}" in
-      update | version | help | keys | uninstall) printf "Did you mean 'herdspace %s'?\n" "${1#"${1%%[!-]*}"}" >&2 ;;
+      update | version | help | keys | editor | uninstall) printf "Did you mean 'herdspace %s'?\n" "${1#"${1%%[!-]*}"}" >&2 ;;
     esac
     printf "Run 'herdspace help' for the usage.\n" >&2
     exit 2
