@@ -35,6 +35,8 @@ Run each check. Do not install a missing tool without the agreement of the perso
 |-------------|-----|
 | `bin/hopen`, `lib/hopen/`, or a template | `tests/test-hopen-list.sh` and `tests/test-palette-groups.sh`, then `tests/run-linux.sh` and `tests/run-macos.sh server` |
 | A setup script or a configuration file | `tests/test-install.sh`, `tests/run-macos.sh`, `tests/run-linux.sh` |
+| `bin/herdspace` or `lib/herdspace/` | `tests/test-herdspace-cmd.sh` and `tests/test-uninstall.sh`, then `tests/run-linux.sh` and `tests/run-rollback.sh`, which runs `herdspace update --version` |
+| A file in `bootstrap/lib/` | `tests/test-ui.sh` and the other fast tests, then every `tests/run-*.sh` script |
 | A key, or the client setup | `tests/run-client-linux.sh` too |
 | The login service | `tests/run-systemd.sh` too |
 | The prerequisites step | `tests/run-prereqs.sh` |
