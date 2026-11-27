@@ -1161,7 +1161,7 @@ choose() {
   items="$(cat)"
   # fzf draws nothing with no TERM, or with TERM=dumb.
   if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
-    fzf --delimiter '\t' --with-nth 2.. --prompt "${prompt} > " --header 'Esc cancels.' --height 40% --reverse --no-multi <<<"$items" | cut -f1 || true
+    ui_fzf "$prompt" --delimiter '\t' --with-nth 2.. --prompt "${prompt} > " --header 'Esc cancels.' --height 40% --reverse --no-multi <<<"$items" | cut -f1 || true
     return 0
   fi
   while IFS=$'\t' read -r name text; do
@@ -1287,6 +1287,68 @@ open_in_editor() {
 
 need() { command -v "$1" >/dev/null 2>&1 || die "$2 needs $1. The server setup installs it."; }
 
+# ---------- the look of the popups
+# The colors of the Herdr theme of the setup: Dracula, with the herdspace
+# colors of [theme.custom] in config/herdr/config.toml. Change them here only.
+UI_BG="#282a36"
+UI_ROW="#45475a"
+UI_FG="#f8f8f2"
+UI_DIM="#6272a4"
+UI_ACCENT="#bd93f9"
+UI_MATCH="#ff79c6"
+UI_MARK="#50fa7b"
+
+# ui_color prints yes when the popups can use color: not with NO_COLOR.
+ui_color() { [ -z "${NO_COLOR:-}" ]; }
+
+# sgr HEX prints the terminal code for the text color HEX, for example #ff79c6.
+sgr() {
+  local h="${1#\#}"
+  printf '\033[38;2;%d;%d;%dm' "0x${h:0:2}" "0x${h:2:2}" "0x${h:4:2}"
+}
+
+# group_color GROUP prints the color of a group of the palette, so that each
+# group is easy to find.
+group_color() {
+  case "$1" in
+    Projects) echo "#50fa7b" ;;
+    "Workspace and tabs") echo "#8be9fd" ;;
+    Layout) echo "#f1fa8c" ;;
+    Agents) echo "#ff79c6" ;;
+    Files) echo "#ffb86c" ;;
+    Git) echo "#ff5555" ;;
+    Sessions) echo "#bd93f9" ;;
+    Herdr) echo "#4e82ef" ;;
+    herdspace) echo "#a78bfa" ;;
+    Network) echo "#a4ffff" ;;
+    *) echo "$UI_FG" ;;
+  esac
+}
+
+# ui_fzf LABEL ARGS... runs fzf like a Herdr popup: the colors of the theme,
+# and a rounded frame with LABEL at the top. With NO_COLOR, fzf has no color.
+ui_fzf() {
+  local label="$1"
+  shift
+  if ui_color; then
+    fzf --border rounded --border-label " ${label} " --padding 0,1 \
+      --color "bg:${UI_BG},bg+:${UI_ROW},fg:${UI_FG},fg+:${UI_FG},hl:${UI_MATCH},hl+:${UI_MATCH},prompt:${UI_ACCENT},pointer:${UI_MATCH},marker:${UI_MARK},header:${UI_DIM},info:${UI_DIM},border:${UI_DIM},label:${UI_ACCENT},spinner:${UI_ACCENT},gutter:${UI_BG},preview-bg:${UI_BG},preview-border:${UI_DIM}" \
+      "$@"
+  else
+    fzf --no-color --border rounded --border-label " ${label} " --padding 0,1 "$@"
+  fi
+}
+
+# dim_folders shows the folder of each path of stdin dim and the file name
+# bright, as VS Code does. With NO_COLOR, it changes nothing.
+dim_folders() {
+  if ui_color; then
+    sed -E "s|^(.*/)([^/]*)\$|$(sgr "$UI_DIM")\\1$(printf '\033[0m')\\2|"
+  else
+    cat
+  fi
+}
+
 # fd_cmd prints the name of fd: fd, or fdfind on Debian.
 fd_cmd() {
   if command -v fd >/dev/null 2>&1; then echo fd
@@ -1347,7 +1409,7 @@ find_file() {
   need fzf "hopen --find"
   [ -t 0 ] && [ -t 1 ] || die "hopen --find needs a terminal."
   command -v bat >/dev/null 2>&1 && preview="bat --color=always --style=numbers {}"
-  file="$(cd "$DIR" && list_files | sed 's|^\./\([^-]\)|\1|' | fzf --prompt 'Open file > ' --preview "$preview" --height 80% --reverse)" || true
+  file="$(cd "$DIR" && list_files | sed 's|^\./\([^-]\)|\1|' | dim_folders | ui_fzf "Find a file" --ansi --prompt 'Open file > ' --preview "$preview" --height 80% --reverse)" || true
   [ -n "$file" ] || exit 0
   cd "$DIR" && open_in_editor "$file"
 }
@@ -1362,7 +1424,7 @@ grep_files() {
   command -v bat >/dev/null 2>&1 && preview="bat --color=always --style=numbers --highlight-line {2} {1}"
   if ! in_popup; then
     hit="$(cd "$DIR" && search_text |
-      fzf --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --preview "$preview" --preview-window '+{2}-5' --height 80% --reverse)" || true
+      ui_fzf "Search" --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --preview "$preview" --preview-window '+{2}-5' --height 80% --reverse)" || true
     [ -n "$hit" ] || exit 0
     cd "$DIR" && open_in_editor "$(cut -d: -f1 <<<"$hit")" "$(cut -d: -f2 <<<"$hit")"
   fi
@@ -1372,7 +1434,7 @@ grep_files() {
   PAL_WS="${HERDR_ACTIVE_WORKSPACE_ID:-}"
   PAL_TAB="${HERDR_ACTIVE_TAB_ID:-}"
   out="$(cd "$DIR" && search_text |
-    fzf --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --header "Enter opens the result. Ctrl+V opens a new editor on the right, Ctrl+S below, Ctrl+T in a new tab." --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --preview-window '+{2}-5' --height 100% --reverse)" || true
+    ui_fzf "Search" --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --header "Enter opens the result. Ctrl+V opens a new editor on the right, Ctrl+S below, Ctrl+T in a new tab." --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --preview-window '+{2}-5' --height 100% --reverse)" || true
   key="$(sed -n 1p <<<"$out")"
   hit="$(sed -n 2p <<<"$out")"
   [ -n "$hit" ] || exit 0
@@ -1505,12 +1567,18 @@ then_wait() {
 PALETTE_RECENT="${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent"
 PALETTE_ITEMS=""
 
-# pal_add ID GROUP TEXT [HINT] adds one action.
+# pal_add ID GROUP TEXT [HINT] adds one action, as "ID<TAB>GROUP<TAB>line<TAB>
+# colored line". The colored line has the group in its color and the hint dim.
 pal_add() {
-  local line
+  local line color pad=""
   line="$(printf '%s: %s' "$2" "$3")"
-  [ -z "${4:-}" ] || line="$(printf '%-58s %s' "$line" "$4")"
-  PALETTE_ITEMS="${PALETTE_ITEMS}$1"$'\t'"$2"$'\t'"${line}"$'\n'
+  color="$(sgr "$(group_color "$2")")$2"$'\033[0m'": $3"
+  if [ -n "${4:-}" ]; then
+    [ "${#line}" -ge 58 ] || pad="$(printf '%*s' $((58 - ${#line})) '')"
+    line="$(printf '%-58s %s' "$line" "$4")"
+    color="${color}${pad} $(sgr "$UI_DIM")$4"$'\033[0m'
+  fi
+  PALETTE_ITEMS="${PALETTE_ITEMS}$1"$'\t'"$2"$'\t'"${line}"$'\t'"${color}"$'\n'
 }
 
 # herdr_json ARGS... runs a Herdr command and prints one field of its result,
@@ -1540,7 +1608,7 @@ pick_folders() {
   local items answer n
   items="$(cat)"
   if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
-    fzf --multi --prompt 'Folders > ' --header 'Tab marks a folder. Enter searches the marked folders, with the ignored files. Esc cancels.' --height 60% --reverse <<<"$items" || true
+    ui_fzf "Folders with the ignored files" --multi --prompt 'Folders > ' --header 'Tab marks a folder. Enter searches the marked folders, with the ignored files. Esc cancels.' --height 60% --reverse <<<"$items" || true
     return 0
   fi
   awk '{ printf "  %2d) %s\n", NR, $0 }' <<<"$items" >&2
@@ -1686,7 +1754,7 @@ quick_open() {
   PAL_TAB="${HERDR_ACTIVE_TAB_ID:-${HERDR_TAB_ID:-}}"
   header="Type to filter. Enter opens the file. Esc closes. In Neovim, Ctrl+Q closes the file."
   [ -z "$PAL_PANE" ] || header="${header}"$'\n''Ctrl+V opens a new editor on the right, Ctrl+S below, Ctrl+T in a new tab.'
-  out="$(cd "$root" && list_files | sed 's|^\./\([^-]\)|\1|' | fzf --prompt 'Open file > ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --height 100% --reverse)" || true
+  out="$(cd "$root" && list_files | sed 's|^\./\([^-]\)|\1|' | dim_folders | ui_fzf "Quick open" --ansi --prompt 'Open file > ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --height 100% --reverse)" || true
   key="$(sed -n 1p <<<"$out")"
   file="$(sed -n 2p <<<"$out")"
   [ -n "$file" ] || exit 0
@@ -1925,11 +1993,11 @@ palette_items() {
 # the number does: "edit right", "3 down", "git tab". The recent actions come
 # first. With no fzf, the numbered menu has a heading for each group.
 palette_menu() {
-  local items recent="" id head text i=0 last="" answer name out key place="" header
+  local items recent="" id head text i=0 last="" answer name out key place="" header field
   if [ -f "$PALETTE_RECENT" ]; then
     while IFS= read -r id; do
       [ -n "$id" ] || continue
-      recent="${recent}$(awk -F '\t' -v id="$id" '$1 == id { print $1 "\tRecently used\t" $3; exit }' <<<"$PALETTE_ITEMS")"$'\n'
+      recent="${recent}$(awk -F '\t' -v id="$id" '$1 == id { print $1 "\tRecently used\t" $3 "\t" $4; exit }' <<<"$PALETTE_ITEMS")"$'\n'
     done <"$PALETTE_RECENT"
   fi
   items="$(printf '%s%s' "$(grep -v '^$' <<<"$recent")${recent:+$'\n'}" "$PALETTE_ITEMS" | grep -v '^$')"
@@ -1937,7 +2005,9 @@ palette_menu() {
     header='Type to filter. Enter runs. Esc closes. At the right: the key or the command of each action.'
     [ -z "$PAL_PANE" ] || header="${header}"$'\n''This palette: Cmd+Shift+P, or Ctrl+B, then A. On Linux, Cmd keys are Ctrl+Shift (Cmd+P is Ctrl+B, then F).'
     [ -z "$PAL_PANE" ] || header="${header}"$'\n''A program opens: Ctrl+V on the right, Ctrl+S below, Ctrl+T in a new tab.'
-    out="$(fzf --delimiter '\t' --with-nth 3 --prompt '> ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --height 100% --reverse --no-multi --tiebreak=index <<<"$items")" || true
+    field=3
+    ! ui_color || field=4
+    out="$(ui_fzf "Command palette" --ansi --delimiter '\t' --with-nth "$field" --prompt '> ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --height 100% --reverse --no-multi --tiebreak=index <<<"$items")" || true
     key="$(sed -n 1p <<<"$out")"
     id="$(sed -n 2p <<<"$out" | cut -f1)"
     [ -n "$id" ] || return 0
@@ -1945,7 +2015,7 @@ palette_menu() {
     printf '%s\t%s\n' "$id" "$place"
     return 0
   fi
-  while IFS=$'\t' read -r id head text; do
+  while IFS=$'\t' read -r id head text _; do
     i=$((i + 1))
     if [ "$head" != "$last" ]; then
       printf '\n  %s\n' "$head" >&2

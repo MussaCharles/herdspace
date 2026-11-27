@@ -6,6 +6,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- The palette, quick open, and the search look like the popups of Herdr: the colors of the Herdr theme and a rounded frame with a label. Each group of the palette has its own color, and quick open shows the folder of a file dim. `NO_COLOR=1` turns the colors off.
 - The palette action "Files: Choose folders, and search them with the ignored files" opens a file or searches the text in the folders that you choose, with the files that `.gitignore` names. It skips `node_modules`, `.venv`, and other folders of dependencies. `hopen --find`, `--quick-open`, and `--grep` take `--with-ignored FOLDER` for the same search. `docs/files.md` names `H` in the file tree, which shows the ignored files.
 - In Herdr or over SSH, a copy in the herdspace Neovim, for example `yy`, goes to the clipboard of the computer in front of you, with OSC 52. Before, the text stayed in Neovim.
 - The palette has "herdspace: Show or change the editor mode" on a server. When your own `~/.config/nvim` stays, the server setup says that `nvim` starts it, and how to start the herdspace editor.

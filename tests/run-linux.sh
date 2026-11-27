@@ -76,7 +76,7 @@ for base in "$@"; do
     echo RESULT uninstall-clean
   " >>"$log" 2>&1
   rc=$?
-  grep -E '^(FAIL|RESULT)' "$log" | cut -c1-200
+  grep -E '^(FAIL|RESULT|  (screen|before|ls):)' "$log" | cut -c1-200
   echo "${base}: exit ${rc}"
   [ "$rc" -eq 0 ] || status=1
   remove_images "$tag"
