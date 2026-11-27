@@ -19,3 +19,22 @@ local mode_file = vim.fn.expand("~/.config/herdspace/editor")
 local mode = vim.fn.filereadable(mode_file) == 1 and vim.trim(vim.fn.readfile(mode_file)[1] or "") or ""
 vim.g.herdspace_reader = mode ~= "normal"
 if vim.g.herdspace_reader then vim.diagnostic.enable(false) end
+-- Copy to the clipboard of the computer in front of you. In Herdr or over SSH,
+-- "yy" sends the text as OSC 52, a terminal code that Herdr passes on to the
+-- outer terminal. A paste with "p" uses the last copy of Neovim, so that the
+-- terminal never asks for permission to read the clipboard.
+if vim.env.SSH_CONNECTION or vim.env.TERM_PROGRAM == "herdr" then
+  local send = require("vim.ui.clipboard.osc52").copy("+")
+  local last = { {}, "v" }
+  local function copy(lines, regtype)
+    last = { lines, regtype }
+    send(lines)
+  end
+  local function paste() return last end
+  vim.g.clipboard = {
+    name = "herdspace OSC 52",
+    copy = { ["+"] = copy, ["*"] = copy },
+    paste = { ["+"] = paste, ["*"] = paste },
+  }
+  vim.opt.clipboard = "unnamedplus"
+end

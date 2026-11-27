@@ -20,6 +20,8 @@ Run `nvim .` in a project. If you have your own `~/.config/nvim`, run `NVIM_APPN
 
 The editor shows no warnings of linters and language servers, and no spell marks, because you read the files and do not fix them. Go to a definition and hover still work. To show the warnings, press `Space`, then `u`, then `d`. To show the spell marks, press `Space`, then `u`, then `s`. To keep the defaults of LazyVim in each new Neovim, run `herdspace editor normal` on the server. `herdspace editor reader` hides the warnings again, and `herdspace editor` shows the mode.
 
+In Herdr or over SSH, a copy in the editor, for example `yy` or `3yy`, goes to the clipboard of the computer in front of you. The editor sends the text as OSC 52, a terminal code for the clipboard, and Herdr passes it on to your terminal. `p` pastes the last copy of the editor. To paste text from another app, use `Cmd+V`.
+
 ![Neovim with a file tree and a file preview](media/neovim.png)
 
 | Action | Keys |

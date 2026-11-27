@@ -159,6 +159,34 @@ contains "$normal_out" '"no_spell_rule":false' 'herdspace editor normal adds no 
 [ -n "$normal_out" ] || tail -c 1500 "$work/normal.screen" | tr -cd '[:print:]\n' | sed 's/^/  screen: /'
 rm -f "$HOME/.config/herdspace/editor"
 
+# Over SSH, "yy" sends the line as OSC 52 to the outer terminal, and "p"
+# pastes the same line back with no question to the terminal.
+printf 'copy me\n' >"$work/copy.txt"
+cat >"$work/copy.lua" <<'LUA'
+vim.defer_fn(function()
+  vim.cmd("normal! yyp")
+  vim.fn.writefile({ vim.json.encode({
+    provider = vim.g.clipboard and vim.g.clipboard.name or "",
+    lines = vim.api.nvim_buf_line_count(0),
+  }) }, vim.env.RESULT)
+  vim.defer_fn(function() vim.cmd("qa!") end, 300)
+end, 3000)
+LUA
+rm -f "$work/copy.json" "$work/copy.raw"
+(cd "$work" && RESULT="$work/copy.json" PTY_RAW="$work/copy.raw" python3 "$ROOT/tests/pty_run.py" 12 '' env SSH_CONNECTION='10.0.0.1 1 10.0.0.2 22' nvim copy.txt "+luafile $work/copy.lua" >/dev/null 2>&1)
+copy_out="$(cat "$work/copy.json" 2>/dev/null)"
+contains "$copy_out" '"provider":"herdspace OSC 52"' 'over SSH the editor copies with OSC 52'
+contains "$copy_out" '"lines":2' 'over SSH p pastes the line that yy copied'
+if LC_ALL=C grep -q "]52;c;$(printf 'copy me\n' | base64)" "$work/copy.raw" 2>/dev/null; then
+  pass 'over SSH yy sends the line to the outer terminal'
+else
+  fail 'over SSH yy sends the line to the outer terminal'
+fi
+# With no SSH and no Herdr, the editor keeps the clipboard of LazyVim.
+rm -f "$work/copy.json"
+(cd "$work" && RESULT="$work/copy.json" python3 "$ROOT/tests/pty_run.py" 12 '' env -u SSH_CONNECTION -u TERM_PROGRAM nvim copy.txt "+luafile $work/copy.lua" >/dev/null 2>&1)
+contains "$(cat "$work/copy.json" 2>/dev/null)" '"provider":""' 'with no SSH the editor keeps the system clipboard'
+
 # Herdr itself. This server is throwaway, so a stop is safe.
 server_up() { case "$(herdr workspace list 2>/dev/null)" in *workspace_list*) return 0 ;; *) return 1 ;; esac; }
 if ! server_up; then
