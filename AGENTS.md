@@ -6,7 +6,8 @@ A CLI workspace and session manager for Herdr, the terminal multiplexer for codi
 
 | Path | What it is |
 |------|------------|
-| `bin/hopen` | The command that opens the projects of a list (`herdspace.toml`, or a VS Code workspace file) in one Herdr session. Bash, with small Python parts. |
+| `bin/hopen` | The command that opens the projects of a list (`herdspace.toml`, or a VS Code workspace file) in one Herdr session. Bash, with small Python parts. It holds the options and the main steps, and loads its modules from `lib/hopen/`. |
+| `lib/hopen/` | The modules of `hopen`, one file for each part: for example `lists.sh`, `sessions.sh`, `search.sh`, `ui.sh`, and `palette.sh`. The setup installs them to `~/.local/lib/hopen/`. |
 | `config/templates/` | The pane templates of `hopen`. |
 | `bootstrap.sh` | The entry point of the setup. It picks a script in `bootstrap/platforms/` from the role and the system. |
 | `bootstrap/lib/` | The shared steps of the setup scripts. |
@@ -34,7 +35,7 @@ If you rename or remove a skill, change or remove its link too. `tests/test-skil
 
 | Skill | Use it when you |
 |-------|-----------------|
-| `herdspace-hopen` | Change `bin/hopen` or a template. |
+| `herdspace-hopen` | Change `bin/hopen`, a module in `lib/hopen/`, or a template. |
 | `herdspace-ci` | Change a workflow, a repository setting, or find the cause of a failed CI job. |
 | `herdspace-bootstrap` | Change a setup script, a configuration file, or a pinned version. |
 | `herdspace-docs` | Write or change a doc, the README, or a skill. |

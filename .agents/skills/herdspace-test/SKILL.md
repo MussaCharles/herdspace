@@ -23,7 +23,7 @@ Run each check. Do not install a missing tool without the agreement of the perso
 
 | You changed | Run |
 |-------------|-----|
-| `bin/hopen` or a template | `tests/test-hopen-list.sh`, then `tests/run-linux.sh` and `tests/run-macos.sh server` |
+| `bin/hopen`, `lib/hopen/`, or a template | `tests/test-hopen-list.sh`, then `tests/run-linux.sh` and `tests/run-macos.sh server` |
 | A setup script or a configuration file | `tests/test-install.sh`, `tests/run-macos.sh`, `tests/run-linux.sh` |
 | A key, or the client setup | `tests/run-client-linux.sh` too |
 | The login service | `tests/run-systemd.sh` too |

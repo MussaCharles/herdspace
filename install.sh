@@ -47,6 +47,11 @@ if [ "$ACTION" = uninstall ]; then
   else
     info "hopen is not in ${BIN_DIR}."
   fi
+  if [ -d "${BIN_DIR}/../lib/hopen" ]; then
+    rm -f "${BIN_DIR}/../lib/hopen/"*.sh
+    rmdir "${BIN_DIR}/../lib/hopen" 2>/dev/null || true
+    info "Removed the modules of hopen."
+  fi
   info "The templates stay in ${TEMPLATE_DIR}. Delete that folder if you do not want them."
   exit 0
 fi
@@ -97,6 +102,19 @@ want="$(awk -v f="$ARCHIVE" '$2 == f || $2 == "*" f {print $1}' "${work}/SHA256S
 tar -xzf "${work}/${ARCHIVE}" -C "$work"
 src="${work}/hopen-${VERSION}"
 [ -f "${src}/hopen" ] || die "The archive has no hopen file."
+[ -f "${src}/lib/hopen/core.sh" ] || die "The archive has no modules of hopen."
+
+# The modules go next to the bin folder, where hopen looks for them, and
+# before hopen, so that a new hopen never runs without them.
+LIB_DIR="${BIN_DIR}/../lib/hopen"
+mkdir -p "$LIB_DIR"
+changed=0
+for file in "${src}"/lib/hopen/*.sh; do
+  cmp -s "$file" "${LIB_DIR}/$(basename "$file")" && continue
+  cp "$file" "${LIB_DIR}/$(basename "$file")"
+  changed=$((changed + 1))
+done
+[ "$changed" -eq 0 ] || info "Installed ${changed} modules of hopen in ${LIB_DIR}."
 
 mkdir -p "$BIN_DIR"
 target="${BIN_DIR}/hopen"

@@ -6,6 +6,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- `hopen` is split into modules in `lib/hopen/`, one file for each part, so that a change touches one small file. The setup and `install.sh` install the modules to `~/.local/lib/hopen/`, next to `~/.local/bin/hopen`, and the uninstall removes them. The behavior of `hopen` does not change.
 - When you have your own `~/.config/nvim`, the server setup asks once: keep it, use the herdspace editor (your folder goes to a backup), or show the difference. A keep answer stays saved. With no terminal or with `--keep-existing`, the setup keeps the folder. `--replace-all` moves it to a backup.
 - The palette, quick open, and the search look like the popups of Herdr: the colors of the Herdr theme and a rounded frame with a label. Each group of the palette has its own color, and quick open shows the folder of a file dim. `NO_COLOR=1` turns the colors off.
 - The palette action "Files: Choose folders, and search them with the ignored files" opens a file or searches the text in the folders that you choose, with the files that `.gitignore` names. It skips `node_modules`, `.venv`, and other folders of dependencies. `hopen --find`, `--quick-open`, and `--grep` take `--with-ignored FOLDER` for the same search. `docs/files.md` names `H` in the file tree, which shows the ignored files.

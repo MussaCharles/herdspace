@@ -19,8 +19,13 @@ lacks() { case "$1" in *"$2"*) fail "$3: found [$2]" ;; *) pass "$3" ;; esac; }
 RS=$'\x1e'
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-# shellcheck disable=SC1090 # The functions come from bin/hopen.
-source <(sed -n '/^list_python() {/,/^}/p;/^read_list() {/,/^}/p;/^find_lists() {/,/^}/p;/^valid_name() {/,/^}/p;/^list_actions() {/,/^}/p;/^file_hash() {/,/^}/p;/^list_trusted() {/,/^}/p;/^trust_file() {/p;/^warn() {/p;/^short_path() {/p' bin/hopen)
+# The functions come from the modules of hopen.
+# shellcheck source=lib/hopen/core.sh
+source "$ROOT/lib/hopen/core.sh"
+# shellcheck source=lib/hopen/lists.sh
+source "$ROOT/lib/hopen/lists.sh"
+# shellcheck source=lib/hopen/trust.sh
+source "$ROOT/lib/hopen/trust.sh"
 mkdir -p "$tmp/code/a" "$tmp/code/b"
 
 # Settings.

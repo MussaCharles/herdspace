@@ -23,6 +23,7 @@ contains "$(grep -c '@VERSION@\|@REPO@' "${dist}/install.sh")" '0' 'install.sh h
 full_hopen="$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/bin/hopen")"
 contains "$full_hopen" "HOPEN_VERSION=\"${tag}\"" 'the full archive has hopen with the tag'
 if [ "$full_hopen" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/hopen")" ]; then pass 'both archives have the same hopen'; else fail 'both archives have the same hopen'; fi
+if [ "$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/lib/hopen/palette.sh")" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/lib/hopen/palette.sh")" ]; then pass 'both archives have the modules of hopen'; else fail 'both archives have the modules of hopen'; fi
 
 home="${tmp}/home"
 mkdir -p "${home}/.local/bin" "${tmp}/old"
@@ -34,6 +35,8 @@ out="$(run_install)"
 contains "$out" 'Replaced the link' 'install replaces an old link'
 if [ -f "${home}/.local/bin/hopen" ] && [ ! -L "${home}/.local/bin/hopen" ] && [ -x "${home}/.local/bin/hopen" ]; then pass 'hopen is a real file'; else fail 'hopen is a real file'; fi
 contains "$(HOME="$home" "${home}/.local/bin/hopen" --version)" "hopen ${tag}" 'hopen shows the release tag'
+if [ -f "${home}/.local/lib/hopen/core.sh" ]; then pass 'the modules of hopen are next to the bin folder'; else fail 'the modules of hopen are next to the bin folder'; fi
+contains "$(HOME="$home" XDG_CONFIG_HOME="" "${home}/.local/bin/hopen" --templates 2>&1)" 'code' 'the installed hopen loads its modules'
 for t in code agent grid review; do
   if [ -f "${home}/.config/hopen/templates/${t}.layout" ]; then pass "template ${t} installed"; else fail "template ${t} installed"; fi
 done
@@ -41,6 +44,7 @@ if [ -f "${tmp}/old/hopen" ]; then pass 'the old file stays'; else fail 'the old
 
 out="$(run_install)"
 contains "$out" 'is up to date' 'a second run changes nothing'
+lacks "$out" 'modules of hopen' 'a second run copies no module'
 if find "$home" -name '*.new' | grep -q .; then fail 'a second run writes no .new file'; else pass 'a second run writes no .new file'; fi
 
 printf '\n# my change\n' >>"${home}/.config/hopen/templates/code.layout"
@@ -64,6 +68,7 @@ run_install >/dev/null
 out="$(run_install --uninstall)"
 contains "$out" 'Removed' 'uninstall removes hopen'
 if [ ! -e "${home}/.local/bin/hopen" ] && [ -d "${home}/.config/hopen/templates" ]; then pass 'uninstall keeps the templates'; else fail 'uninstall keeps the templates'; fi
+if [ ! -e "${home}/.local/lib/hopen" ]; then pass 'uninstall removes the modules of hopen'; else fail 'uninstall removes the modules of hopen'; fi
 
 # The release notes come from the changelog section of the tag.
 cl="${tmp}/CHANGELOG.md"

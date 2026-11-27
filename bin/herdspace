@@ -292,7 +292,7 @@ TEMPLATE_LINES='# Your zsh configuration. herdspace changes only the marked bloc
 BLOCK_FILES=".zshrc .zprofile .config/ghostty/config.ghostty"
 BLOCK_NAMES="herdspace|herdspace extras|herdspace keys|herdspace ssh|herdspace appearance"
 # Folders that other programs share. The uninstall never removes them.
-SHARED_DIRS=".config .local .local/bin .local/share .cache Library Library/LaunchAgents Library/Application_Support .config/systemd .config/systemd/user"
+SHARED_DIRS=".config .local .local/bin .local/lib .local/share .cache Library Library/LaunchAgents Library/Application_Support .config/systemd .config/systemd/user"
 UN_CHECK=1
 UN_KEPT=""
 UN_GONE=""
