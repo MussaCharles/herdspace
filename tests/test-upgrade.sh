@@ -5,6 +5,8 @@
 # person changed must stay, with a question.
 # Usage: tests/test-upgrade.sh TAG [setup options]   It runs in a test container.
 set -uo pipefail
+# shellcheck source=tests/sandbox-guard.sh
+. "$(dirname "$0")/sandbox-guard.sh"
 cd "$(dirname "$0")/.." || exit 1
 failures=0
 pass() { echo "PASS $1"; }

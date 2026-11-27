@@ -4,6 +4,8 @@
 #
 # Usage: tests/test-idempotent.sh SCRIPT SAMPLE_FILE [script options...]
 set -uo pipefail
+# shellcheck source=tests/sandbox-guard.sh
+. "$(dirname "$0")/sandbox-guard.sh"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPT="${ROOT}/$1"
 SAMPLE="$2"

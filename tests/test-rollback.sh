@@ -5,6 +5,8 @@
 # asked no question about a file that herdspace wrote, and kept no file.
 # Usage: tests/test-rollback.sh NEW OLD [setup options]   It runs in a test container.
 set -uo pipefail
+# shellcheck source=tests/sandbox-guard.sh
+. "$(dirname "$0")/sandbox-guard.sh"
 cd "$(dirname "$0")/.." || exit 1
 failures=0
 pass() { echo "PASS $1"; }

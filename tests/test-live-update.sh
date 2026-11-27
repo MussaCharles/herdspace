@@ -7,6 +7,8 @@
 # new configuration with no restart.
 # Usage: tests/test-live-update.sh [setup options]   It runs in a test container.
 set -uo pipefail
+# shellcheck source=tests/sandbox-guard.sh
+. "$(dirname "$0")/sandbox-guard.sh"
 cd "$(dirname "$0")/.." || exit 1
 failures=0
 pass() { echo "PASS $1"; }
