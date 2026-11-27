@@ -8,6 +8,8 @@ A CLI workspace and session manager for Herdr, the terminal multiplexer for codi
 |------|------------|
 | `bin/hopen` | The command that opens the projects of a list (`herdspace.toml`, or a VS Code workspace file) in one Herdr session. Bash, with small Python parts. It holds the options and the main steps, and loads its modules from `lib/hopen/`. |
 | `lib/hopen/` | The modules of `hopen`, one file for each part: for example `lists.sh`, `sessions.sh`, `search.sh`, `ui.sh`, and `palette.sh`. The setup installs them to `~/.local/lib/hopen/`. |
+| `bin/herdspace` | The `herdspace` command: `update`, `uninstall`, `editor`, `keys`, and `version`. It holds the help and the dispatch, and loads its modules from `lib/herdspace/`. |
+| `lib/herdspace/` | The modules of the `herdspace` command, one file for each command, and `common.sh` for the shared helpers. The setup installs them to `~/.local/lib/herdspace/`. |
 | `config/templates/` | The pane templates of `hopen`. |
 | `bootstrap.sh` | The entry point of the setup. It picks a script in `bootstrap/platforms/` from the role and the system. |
 | `bootstrap/lib/` | The shared steps of the setup scripts. |

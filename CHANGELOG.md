@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- The `herdspace` command is split into modules in `lib/herdspace/`, one file for each command. The setup installs them to `~/.local/lib/herdspace/`, next to `~/.local/bin/herdspace`, and the uninstall removes them last. The behavior of the command does not change.
+
 ## [0.15.0] - 2026-11-28
 
 ### Changed
