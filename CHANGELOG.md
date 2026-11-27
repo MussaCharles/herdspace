@@ -6,6 +6,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- In Herdr or over SSH, a copy in the herdspace Neovim, for example `yy`, goes to the clipboard of the computer in front of you, with OSC 52. Before, the text stayed in Neovim.
 - The palette has "herdspace: Show or change the editor mode" on a server. When your own `~/.config/nvim` stays, the server setup says that `nvim` starts it, and how to start the herdspace editor.
 - The herdspace Neovim shows no warnings of linters and language servers, and no spell marks in Markdown and text files, because the files are for reading. `Space`, `u`, `d` shows the warnings, and `Space`, `u`, `s` the spell marks. Go to a definition and hover still work. `herdspace editor normal` keeps the defaults of LazyVim, and `herdspace editor reader` goes back.
 - The README has a section "For coding agents" with the command that installs the herdspace skill, and `docs/agent-setup.md` explains `-g`, the update, and the Herdr skill. `tools/release.sh --preflight` names each skill with no change since the last tag, when the code changed.

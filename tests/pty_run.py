@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Run a command in a pseudo terminal, print its output, and exit with its status."""
+"""Run a command in a pseudo terminal, print its output, and exit with its status.
+
+With PTY_RAW=file, it also writes the raw output, with the escape codes, to the file."""
 import fcntl, os, pty, re, select, signal, struct, sys, termios, time
 
 limit, keys, command = float(sys.argv[1]), sys.argv[2], sys.argv[3:]
@@ -32,6 +34,8 @@ for _ in range(20):
 else:
     os.kill(pid, signal.SIGKILL)
     os.waitpid(pid, 0)
+if os.environ.get("PTY_RAW"):
+    open(os.environ["PTY_RAW"], "wb").write(output)
 text = re.sub(rb"\x1b\[[0-9;?<>=]*[a-zA-Z]|\x1b\][^\x07\x1b]*(\x07|\x1b\\)|\x1b[()=>][A-Z0-9]?", b"", output)
 sys.stdout.write(text.decode("utf-8", "ignore").replace("\r", ""))
 sys.exit(status)
