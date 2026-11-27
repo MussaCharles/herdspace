@@ -66,6 +66,13 @@ SEARCH_IN=()
 # SKIP_DIRS are folders of dependencies and caches. The search with the
 # ignored files never reads them.
 SKIP_DIRS=(.git node_modules .venv venv __pycache__ .mypy_cache .pytest_cache .ruff_cache .tox .next .gradle Pods DerivedData target)
+# add_search_dir FOLDER adds FOLDER to SEARCH_IN. A name that starts with "-"
+# gets "./" in front, so that fd, find, and rg never read it as an option.
+add_search_dir() {
+  local d="${1%/}"
+  case "$d" in -*) d="./$d" ;; esac
+  SEARCH_IN+=("$d")
+}
 # FOLDER is set for "hopen <folder>" when the folder has no list of its own.
 FOLDER=""
 
@@ -127,7 +134,7 @@ while [ "$#" -gt 0 ]; do
       ;;
     --with-ignored)
       [ "$#" -ge 2 ] || { usage >&2; exit 2; }
-      SEARCH_IN+=("${2%/}"); shift 2
+      add_search_dir "$2"; shift 2
       ;;
     --no-attach) ATTACH=0; shift ;;
     --trust) TRUST_FLAG=1; shift ;;
@@ -1269,6 +1276,9 @@ run_task() {
 # open_in_editor FILE [LINE] opens FILE in $VISUAL or $EDITOR, or else Neovim.
 open_in_editor() {
   local editor="${VISUAL:-${EDITOR:-nvim}}"
+  # A name that starts with "-" gets "./" in front, so that the editor never
+  # reads it as an option.
+  case "$1" in -*) set -- "./$1" "${2:-}" ;; esac
   case "$(basename "${editor%% *}")" in
     code | code-insiders | cursor) exec ${editor} --goto "$1${2:+:$2}" ;;
     *) if [ -n "${2:-}" ]; then exec ${editor} "+$2" "$1"; else exec ${editor} "$1"; fi ;;
@@ -1337,7 +1347,7 @@ find_file() {
   need fzf "hopen --find"
   [ -t 0 ] && [ -t 1 ] || die "hopen --find needs a terminal."
   command -v bat >/dev/null 2>&1 && preview="bat --color=always --style=numbers {}"
-  file="$(cd "$DIR" && list_files | sed 's|^\./||' | fzf --prompt 'Open file > ' --preview "$preview" --height 80% --reverse)" || true
+  file="$(cd "$DIR" && list_files | sed 's|^\./\([^-]\)|\1|' | fzf --prompt 'Open file > ' --preview "$preview" --height 80% --reverse)" || true
   [ -n "$file" ] || exit 0
   cd "$DIR" && open_in_editor "$file"
 }
@@ -1676,7 +1686,7 @@ quick_open() {
   PAL_TAB="${HERDR_ACTIVE_TAB_ID:-${HERDR_TAB_ID:-}}"
   header="Type to filter. Enter opens the file. Esc closes. In Neovim, Ctrl+Q closes the file."
   [ -z "$PAL_PANE" ] || header="${header}"$'\n''Ctrl+V opens a new editor on the right, Ctrl+S below, Ctrl+T in a new tab.'
-  out="$(cd "$root" && list_files | sed 's|^\./||' | fzf --prompt 'Open file > ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --height 100% --reverse)" || true
+  out="$(cd "$root" && list_files | sed 's|^\./\([^-]\)|\1|' | fzf --prompt 'Open file > ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --height 100% --reverse)" || true
   key="$(sed -n 1p <<<"$out")"
   file="$(sed -n 2p <<<"$out")"
   [ -n "$file" ] || exit 0
@@ -2014,7 +2024,7 @@ palette() {
       [ -n "$text" ] || { then_wait printf '  No folder in %s.\n' "$dir"; exit 0; }
       pick="$(pick_folders <<<"$text")" || exit 1
       [ -n "$pick" ] || exit 0
-      while IFS= read -r name; do [ -z "$name" ] || SEARCH_IN+=("$name"); done <<<"$pick"
+      while IFS= read -r name; do [ -z "$name" ] || add_search_dir "$name"; done <<<"$pick"
       choice="$(printf 'open\tOpen a file of these folders\ntext\tSearch the text in these folders\n' | choose "Search")" || exit 1
       DIR="$dir"
       case "$choice" in
@@ -2033,7 +2043,7 @@ palette() {
       ;;
     edit) run_at tab edit "$dir" "$(editor_command) ." ;;
     read-md)
-      text="$(list_files 2>/dev/null | sed 's|^\./||' | grep -iE '\.(md|markdown)$' | sort)" || true
+      text="$(list_files 2>/dev/null | sed 's|^\./\([^-]\)|\1|' | grep -iE '\.(md|markdown)$' | sort)" || true
       [ -n "$text" ] || { then_wait printf '  No Markdown file in %s.\n' "$dir"; exit 0; }
       pick="$(awk '{ print $0 "\t" $0 }' <<<"$text" | choose "Markdown file")" || exit 1
       [ -n "$pick" ] || exit 0

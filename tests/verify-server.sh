@@ -267,6 +267,8 @@ echo 'needle log' >"$work/hb-ign/build/logs/run.log"
 echo 'needle dep' >"$work/hb-ign/build/node_modules/x/dep.js"
 ign_find() { (cd "$work/hb-ign" && python3 "$ROOT/tests/pty_run.py" 6 '\r' env TERM=xterm-256color FZF_DEFAULT_OPTS="--query $1" EDITOR='echo OPENED' hopen --find "${@:2}" 2>&1); }
 contains "$(ign_find run.log --with-ignored build)" 'OPENED build/logs/run.log' 'hopen --find --with-ignored opens an ignored file'
+mkdir -p "$work/hb-ign/-x" && echo 'dash' >"$work/hb-ign/-x/dash.txt"
+contains "$(ign_find dash.txt --with-ignored -x)" 'OPENED ./-x/dash.txt' 'hopen --with-ignored reads a folder name with a dash as a folder'
 case "$(ign_find run.log)" in *OPENED*) fail 'hopen --find skips the ignored files' ;; *) pass 'hopen --find skips the ignored files' ;; esac
 case "$(ign_find dep.js --with-ignored build)" in *OPENED*) fail 'hopen --with-ignored skips node_modules' ;; *) pass 'hopen --with-ignored skips node_modules' ;; esac
 found="$(cd "$work/hb-ign" && python3 "$ROOT/tests/pty_run.py" 6 '\r' env TERM=xterm-256color EDITOR='echo OPENED' hopen --grep 'needle' --with-ignored build 2>&1)"
