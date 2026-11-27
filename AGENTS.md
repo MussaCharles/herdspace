@@ -4,6 +4,8 @@ A CLI workspace and session manager for Herdr, the terminal multiplexer for codi
 
 ## The parts
 
+[The code layout](docs/code-layout.md) says what each module does, and how to add a palette action or a `herdspace` command.
+
 | Path | What it is |
 |------|------------|
 | `bin/hopen` | The command that opens the projects of a list (`herdspace.toml`, or a VS Code workspace file) in one Herdr session. Bash, with small Python parts. It holds the options and the main steps, and loads its modules from `lib/hopen/`. |
@@ -39,7 +41,7 @@ If you rename or remove a skill, change or remove its link too. `tests/test-skil
 |-------|-----------------|
 | `herdspace-hopen` | Change `bin/hopen`, a module in `lib/hopen/`, or a template. |
 | `herdspace-ci` | Change a workflow, a repository setting, or find the cause of a failed CI job. |
-| `herdspace-bootstrap` | Change a setup script, a configuration file, or a pinned version. |
+| `herdspace-bootstrap` | Change a setup script, the `herdspace` command, a configuration file, or a pinned version. |
 | `herdspace-docs` | Write or change a doc, the README, or a skill. |
 | `herdspace-release` | Update the changelog, or make a release. |
 | `herdspace-test` | Run the tests on the sandboxes of this machine, or check a published release. |
@@ -80,7 +82,7 @@ Before each release, review every skill against the changes since the last tag. 
 ## Commands
 
 ```bash
-shellcheck -S warning bin/hopen bin/herdr-update-check bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
+shellcheck -S warning bin/hopen bin/herdr-update-check bin/herdspace bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
 ```
 
 ```bash

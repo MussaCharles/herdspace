@@ -49,6 +49,8 @@ A container cannot run macOS. For that reason, `tests/run-macos.sh` does not cha
 
 ## Run the tests
 
+To test one module, load it with `source` in a test, with the modules that it needs. The [code layout](code-layout.md#check-and-test-a-module) shows how.
+
 Run each command from the root folder of this repository:
 
 ```bash

@@ -34,6 +34,7 @@ Scope: each guide of herdspace, in groups. Start with the [README](../README.md)
 ## Change herdspace
 
 - [Updating](updating.md): update the tools, add something new, and make a release.
+- [Code layout](code-layout.md): what each file of the code does, and how to add a palette action or a `herdspace` command.
 - [Testing](testing.md): the tests, and how to run them.
 - [CI](ci.md): the tests that GitHub Actions runs for each pull request and each release.
 - [Repository settings](repository-settings.md): the GitHub settings of this repository, and the reason for each one.
