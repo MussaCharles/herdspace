@@ -143,26 +143,22 @@ rm -f "${out}/hopen.tagged"
 )
 ls -1 "$out"
 
-# The release notes are the section of CHANGELOG.md for this tag, with a link
-# to the install steps at the top. HS_CHANGELOG names another file for tests.
-changelog="${HS_CHANGELOG:-CHANGELOG.md}"
+# tools/release-notes.sh writes the notes: the link to the install steps, the
+# section of CHANGELOG.md for this tag, and the list of the merged pull requests.
 notes="dist/${TAG}.notes.md"
-section="$(awk -v tag="$TAG" '
-  index($0, "## [" tag "]") == 1 { found = 1; next }
-  found && (/^## \[/ || /^\[[^]]+\]: /) { exit }
-  found { print }
-' "$changelog" 2>/dev/null | sed '/./,$!d')" || section=""
-if [ -z "$section" ]; then
-  if [ "$PUBLISH" -eq 1 ]; then
-    echo "${changelog} has no section for ${TAG}. Add \"## [${TAG}] - <date>\" with the changes, and commit it." >&2
-    exit 1
-  fi
-  echo "Note: ${changelog} has no section for ${TAG}, so ${notes} has only the install link." >&2
-fi
-{
-  printf 'To install, follow the [Quick start](https://github.com/%s/blob/%s/README.md#quick-start). The [setup guide](https://github.com/%s/blob/%s/docs/setup.md) has every option.\n' "$REPO" "$TAG" "$REPO" "$TAG"
-  [ -z "$section" ] || printf '\n%s\n' "$section"
-} >"$notes"
+notes_status=0
+tools/release-notes.sh "$TAG" --repo "$REPO" >"$notes" || notes_status=$?
+case "$notes_status" in
+  0) ;;
+  3)
+    if [ "$PUBLISH" -eq 1 ]; then
+      echo "${HS_CHANGELOG:-CHANGELOG.md} has no section for ${TAG}. Add \"## [${TAG}] - <date>\" with the changes, and commit it." >&2
+      exit 1
+    fi
+    echo "Note: ${HS_CHANGELOG:-CHANGELOG.md} has no section for ${TAG}, so ${notes} has no changes." >&2
+    ;;
+  *) exit 1 ;;
+esac
 echo "$notes"
 
 if [ "$PUBLISH" -eq 1 ]; then

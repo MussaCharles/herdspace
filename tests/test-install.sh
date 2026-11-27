@@ -6,6 +6,8 @@
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 failures=0
+# The release builds of this test ask GitHub for no list of pull requests.
+export HS_NO_PR_LIST=1
 pass() { printf 'PASS %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1"; failures=$((failures + 1)); }
 lacks() { case "$1" in *"$2"*) fail "$3: found [$2]" ;; *) pass "$3" ;; esac; }
@@ -83,6 +85,18 @@ notes="$(cat "dist/${tag}.notes.md" 2>/dev/null)"
 contains "$notes" '- A test item.' 'the notes have the changelog section'
 contains "$notes" "blob/${tag}/README.md#quick-start" 'the notes link to the install steps'
 case "$notes" in *'An old item'*|*'example.com'*) fail 'the notes stop at the next section' ;; *) pass 'the notes stop at the next section' ;; esac
+# The list of pull requests comes from GitHub, from the previous tag of the
+# changelog to this tag. A stub gh prints a list and saves its arguments.
+stub="${tmp}/stub"
+mkdir -p "$stub"
+printf '#!/bin/sh\nprintf "%%s\\n" "$@" >"%s/gh-args"\nprintf "## What'"'"'s Changed\\n* A change by @someone in #7\\n"\n' "$tmp" >"${stub}/gh"
+chmod +x "${stub}/gh"
+notes="$(HS_NO_PR_LIST=0 PATH="${stub}:${PATH}" HS_CHANGELOG="$cl" tools/release-notes.sh "$tag" --repo example/hopen-test 2>&1)"
+contains "$notes" '* A change by @someone in #7' 'the notes end with the list of pull requests'
+contains "$(cat "${tmp}/gh-args" 2>/dev/null)" 'previous_tag_name=0.0.1' 'the list starts at the previous tag of the changelog'
+case "$notes" in *'- A test item.'*'A change by @someone'*) pass 'the list comes after the changelog section' ;; *) fail 'the list comes after the changelog section' ;; esac
+notes="$(HS_NO_PR_LIST=0 PATH="${stub}:${PATH}" HS_CHANGELOG=/nonexistent tools/release-notes.sh "$tag" --repo example/hopen-test 2>/dev/null)"; rc=$?
+if [ "$rc" -eq 3 ]; then pass 'release-notes.sh exits 3 with no section'; else fail "release-notes.sh exits 3 with no section: ${rc}"; fi
 contains "$(HS_CHANGELOG=/nonexistent tools/release.sh "$tag" --repo example/hopen-test 2>&1)" 'has no section' 'a missing section is reported'
 
 touch release-guard-test.txt

@@ -27,7 +27,7 @@ Follow these steps only when the person asks for a release.
    tools/release.sh 0.1.2
    ```
 
-6. Show `dist/0.1.2.notes.md` to the person. It is the changelog section of the tag, with a link to the install steps at the top.
+6. Show `dist/0.1.2.notes.md` to the person. `tools/release-notes.sh` writes it: a link to the install steps, the changelog section of the tag, and the list of the merged pull requests with their authors. GitHub makes that list with its generate-notes API, from the previous tag of `CHANGELOG.md` to the new tag. The API saves nothing. If the list is missing, `gh` cannot reach GitHub: the script prints a note, and the notes have no list.
 7. Run the checks of `--publish` with no publish. They make sure that the commit is the head of `origin/main`, that each CI check of its pull request passed, and that the tag has no release:
 
    ```bash
@@ -76,7 +76,22 @@ The `hopen` in both archives has the tag in `HOPEN_VERSION`. In an early pre-rel
 
 5. Follow the `herdspace-test` skill to run `tests/run-release-check.sh --version <tag>`. It installs the release in fresh sandboxes and tries each feature. Report each sandbox that it skipped.
 
+## Update the notes of a published release
+
+The notes of a release can change after the publish. The tag and the release files stay the same. To write the notes of a release again, for example after a fix in `CHANGELOG.md`:
+
+```bash
+tools/release-notes.sh 0.1.2 --repo MussaCharles/herdspace >/tmp/notes.md
+```
+
+```bash
+gh release edit 0.1.2 --repo MussaCharles/herdspace --notes-file /tmp/notes.md
+```
+
+Read the file before the edit. Change one release first, and look at its page.
+
 ## Rules
 
 - Do not change a published tag. If a release is wrong, publish a new one. `--publish` stops when the tag already has a release.
 - Do not put install commands in the release notes. The notes link to the install steps.
+- Keep `CHANGELOG.md` a list of changes for people, as Keep a Changelog says. The list of pull requests goes only in the release notes.

@@ -117,7 +117,7 @@ A release holds `bootstrap.sh`, the archive `herdspace-<tag>.tar.gz` that it dow
 
 1. In `CHANGELOG.md`, change `## [Unreleased]` to `## [<tag>] - <date>`, and add a new empty `## [Unreleased]` above it. Change the links at the end of the file to the new tag. Run `tools/known-hashes.sh`, so that the list of older file versions holds the `hopen` of the new tag. Merge the change, and run the tests.
 2. Review every skill against the changes since the last tag, and merge the changes first. The `herdspace-release` skill has the steps, in [Review the skills](../.agents/skills/herdspace-release/SKILL.md#review-the-skills). `tools/release.sh --preflight` names each skill with no change since the last tag.
-3. Build the files and look at them. The script writes the release notes to `dist/<tag>.notes.md`: the section of the tag from `CHANGELOG.md`, with a link to the install steps at the top.
+3. Build the files and look at them. The script writes the release notes to `dist/<tag>.notes.md`: a link to the install steps, the section of the tag from `CHANGELOG.md`, and the list of the pull requests that were merged since the previous tag, each with its author. `tools/release-notes.sh` writes them. GitHub makes the list, and `.github/release.yml` leaves out the pull requests of bots.
 
    ```bash
    tools/release.sh 0.1.2

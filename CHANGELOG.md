@@ -6,6 +6,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- Each release page lists the pull requests of the release below the changes, with the author of each and a link to the full comparison.
 - The reader of the project lists of `hopen` is now a Python file, `lib/hopen/lists.py`, and no longer a script inside `lists.sh`. The setup and `install.sh` install it to `~/.local/lib/hopen/`. It reads each list as before. It is the first step of the move of `hopen` and the `herdspace` command to Python, which uses only the standard library.
 
 ## [0.16.0] - 2026-11-28
