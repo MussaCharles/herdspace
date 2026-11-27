@@ -1,6 +1,6 @@
 ---
 name: herdspace-hopen
-description: Change the hopen command or its pane templates in the herdspace repository. Use when you edit bin/hopen, a file in config/templates/, the list file format, the state files, or the Auto Title guard.
+description: Change the hopen command or its pane templates in the herdspace repository. Use when you edit bin/hopen, a module in lib/hopen/, a file in config/templates/, the list file format, the state files, or the Auto Title guard.
 ---
 
 # Change hopen
@@ -65,7 +65,8 @@ Each of these mistakes broke `hopen` one time:
 - A list can hide terminal escape codes or bidi characters in a name. `emit` shows each control, format, and separator character as `?`. Keep each new field in `emit`.
 - An automated security review of each change to the list reader or to the approval found a real problem four times in a row. After such a change, ask for a security review before the merge.
 - Before you add a feature, read what Herdr and the installed tools already do. Read `herdr --help` and the Herdr docs. If a tool already does it, use that tool, and install nothing new.
-- `bin/hopen` runs from the top to the bottom. Define a function above the dispatch code that calls it.
+- `bin/hopen` loads every module of `lib/hopen/` before it reads the options. Put a new function in the module of its part. A module defines functions and variables, and runs nothing, so that the order of the modules does not matter. A new module needs a `source` line with a `# shellcheck source=` line in `bin/hopen`, and a line in `AGENTS.md`.
+- `hopen` finds its modules in `../lib/hopen` from its own folder. The setup, `install.sh`, and `tools/release.sh` install or pack the modules with `hopen`. A new place that installs `hopen` must install the modules too.
 - `choose` gets its items on stdin, so it reads the answer from `/dev/tty`. A menu that reads stdin gets an item, not the answer.
 - With an empty `TERM`, or `TERM=dumb`, fzf draws nothing. `choose` uses the numbered menu then.
 - In bash 5, `${path/#$HOME/~}` expands the `~` again, and prints the full path. Use `short_path`.

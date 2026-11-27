@@ -1,0 +1,3 @@
+# Follow the files that a script loads with source, for example the modules
+# of bin/hopen in lib/hopen. Then a variable that a module uses is not unused.
+external-sources=true

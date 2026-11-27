@@ -50,6 +50,7 @@ mkdir -p "$H"
 seed "$H" '
   install_file "${REPO_ROOT}/config/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
   install_file "${REPO_ROOT}/config/lazygit/config.yml" "${HOME}/.config/lazygit/config.yml"
+  install_tree "${REPO_ROOT}/lib/hopen" "${HOME}/.local/lib/hopen"
   install_file "${REPO_ROOT}/bin/hopen" "${HOME}/.local/bin/hopen" 755
   install_file "${REPO_ROOT}/bin/herdspace" "${HOME}/.local/bin/herdspace" 755
   install_file "${REPO_ROOT}/config/shell/zshrc.zsh" "${HOME}/.config/herdspace/zshrc.zsh"
@@ -116,6 +117,7 @@ out="$(HOME="$H" "$H/.local/bin/herdspace" uninstall --yes 2>&1)"; rc=$?
 [ -z "${SHOW:-}" ] || echo "$out"
 gone "$H/.config/herdr/config.toml" 'a file with no change is gone'
 gone "$H/.local/bin/hopen" 'hopen is gone'
+gone "$H/.local/lib/hopen" 'the modules of hopen are gone'
 gone "$H/.local/bin/herdspace" 'the herdspace command is gone'
 gone "$H/.config/hopen" 'the folder of the templates is gone'
 gone "$H/.config/herdspace-nvim" 'the Neovim folder with no change is gone'
