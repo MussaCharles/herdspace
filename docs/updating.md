@@ -49,7 +49,7 @@ herdr session stop my-projects
 
 A stop ends the programs in the panes of the session. When you open the session again, the layout comes back, the shells start again, and an agent with an integration resumes its conversation.
 
-The script changes only what is different. It updates a file that you did not change, and it asks about a file that you changed. It keeps a backup of each replaced file.
+The script changes only what is different. It updates a file that you did not change, and it asks about a file that you changed. It keeps a backup of each replaced file. When you have your own `~/.config/nvim`, it asks once whether to keep it or to use the herdspace editor. See [Your Neovim files](setup.md#your-neovim-files).
 
 ## Go back to an older release
 

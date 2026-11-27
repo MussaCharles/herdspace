@@ -473,7 +473,17 @@ An older herdspace put your own lines in `~/.zshrc.local`. The herdspace shell s
 
 herdspace keeps its Neovim files in `~/.config/herdspace-nvim`, and its plugins in `~/.local/share/herdspace-nvim`. Your `~/.config/nvim` stays yours, and the setup writes nothing in it. Neovim reads the herdspace folder when `NVIM_APPNAME=herdspace-nvim` is set.
 
-The herdspace shell sets `NVIM_APPNAME=herdspace-nvim` only if you have no `~/.config/nvim`. Then `nvim`, and the layouts of `hopen`, start the herdspace editor. If you have your own `~/.config/nvim`, `nvim` starts your own Neovim. An update does not change that, and the setup prints a line about it.
+The herdspace shell sets `NVIM_APPNAME=herdspace-nvim` only if you have no `~/.config/nvim`. Then `nvim`, and the layouts of `hopen`, start the herdspace editor. If you have your own `~/.config/nvim`, `nvim` starts your own Neovim. At a terminal, the setup asks about it:
+
+- `k`, or Enter: keep your own Neovim. The setup saves the answer and does not ask again. It prints a line about your Neovim in each run.
+- `r`: use the herdspace editor. The setup moves `~/.config/nvim` to `~/.config/nvim.bak-<date>`. In a new shell, `nvim` starts the herdspace editor.
+- `d`: show the difference between your folder and the herdspace editor, in the pager. `q` comes back to the question.
+
+With no terminal, or with `--keep-existing`, the setup keeps your folder and asks nothing. `--replace-all` moves it to a backup. To be asked again in the next update, run this command:
+
+```bash
+rm ~/.local/share/herdspace/own-nvim
+```
 
 To try the herdspace editor one time:
 
