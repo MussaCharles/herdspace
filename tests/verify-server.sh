@@ -138,9 +138,11 @@ contains "$read_out" '"ft":"markdown"' 'a Markdown file opens as Markdown'
 contains "$read_out" '"diag":false' 'the editor shows no warnings'
 contains "$read_out" '"spell":false' 'a Markdown file has no spell marks'
 mkdir -p "$HOME/.config/herdspace" && echo normal >"$HOME/.config/herdspace/editor"
+rm -f "$work/read.json"
 read_out="$(cd "$work" && RESULT="$work/read.json" python3 "$ROOT/tests/pty_run.py" 12 '' nvim read.md "+luafile $work/read.lua" >/dev/null 2>&1; cat "$work/read.json" 2>/dev/null)"
 contains "$read_out" '"diag":true' 'herdspace editor normal shows the warnings'
 contains "$read_out" '"spell":true' 'herdspace editor normal shows the spell marks'
+[ -n "$read_out" ] || python3 "$ROOT/tests/pty_run.py" 12 '' sh -c "cd '$work' && nvim read.md" 2>&1 | tail -c 1500 | sed 's/^/  screen: /'
 rm -f "$HOME/.config/herdspace/editor"
 
 # Herdr itself. This server is throwaway, so a stop is safe.
