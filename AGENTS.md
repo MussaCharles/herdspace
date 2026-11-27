@@ -49,6 +49,8 @@ If you rename or remove a skill, change or remove its link too. `tests/test-skil
 - A setup script must ask before it replaces a file that a person changed.
 - Do not add personal data, host names, private project names, or secrets to a file, a commit, an issue, or a pull request. This repository is public.
 - Add or change a test for each change in behavior. Make sure that the test fails without the change.
+- Open an issue before you start a fix or a feature, and put `Closes #N` in the description of its pull request, so that the merge closes the issue. A routine pull request whose description says everything, for example a release, a skill review, or a refresh of `bootstrap/known-hashes.tsv`, needs no issue. Follow the common practice of open source projects: an issue must carry a report, a plan, a checklist, or a discussion. After the merge, make sure that the issue is closed.
+- Run a test that runs the setup only in a container, or through a `tests/run-*.sh` script, which gives it a temporary home folder. Never run it on your real home folder or against the Herdr server of the person. The `herdspace-test` skill says which test needs which sandbox.
 - Before you open a pull request, run the tests that the change touches. Put the `RESULT` lines in the description.
 - CI runs the tests again for each pull request. Merge only after every CI job passes. `docs/ci.md` explains the jobs.
 - If you change a workflow in `.github/workflows/`, follow the security rules in `docs/ci.md`.

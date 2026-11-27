@@ -42,6 +42,8 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-skills.sh` | Each skill follows the Agent Skills specification, and each Claude Code link points at its skill. |
 | `tests/run-release-check.sh` | Each option of the Quick start works from a published release, with the command of the README, in fresh containers and macOS VMs. See [After a release](#after-a-release). |
 
+Do not run every `tests/test-*.sh` file in a loop on your computer. `tests/test-upgrade.sh`, `tests/test-rollback.sh`, `tests/test-live-update.sh`, and `tests/test-idempotent.sh` run the setup in the home folder. The `run-*.sh` scripts start them in a container or with a temporary home folder. Outside a container, on your real home folder, each of them stops at once with exit code 2 (`tests/sandbox-guard.sh`).
+
 A container cannot run macOS. For that reason, `tests/run-macos.sh` does not change macOS shortcuts or install Homebrew packages.
 
 ## Run the tests

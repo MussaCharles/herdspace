@@ -7,6 +7,16 @@ description: Run the herdspace tests on the sandboxes that this machine supports
 
 The tests run in sandboxes. Linux tests use Docker containers. macOS tests use a Tart VM, or a temporary home folder with stub commands. A machine can support some of them and not others. Find out first, run the tests for each sandbox that exists, and report each one that you skipped. The [testing guide](../../../docs/testing.md) explains each test.
 
+## Only in a sandbox
+
+A test must never change the real home folder of the person or talk to their Herdr server. Two mistakes did that before. A loop over each `tests/test-*.sh` file ran the setup in the real home folder, and reloaded the configuration of the running Herdr sessions. A part of `tests/verify-server.sh`, cut out and run by hand, made a workspace in a session of the person, and wrote a file in their cache.
+
+- Start a test that runs the setup, Herdr, or `hopen` only through its `tests/run-*.sh` script. That script gives it a container, or a temporary home folder and its own Herdr server.
+- `tests/test-upgrade.sh`, `tests/test-rollback.sh`, `tests/test-live-update.sh`, and `tests/test-idempotent.sh` run in a container only. Do not run every `tests/test-*.sh` file in a loop.
+- `tests/verify-server.sh` runs only inside the sandbox of `tests/run-linux.sh` or `tests/run-macos.sh`. Do not run a part of it by hand.
+- A new test that runs the setup in the home folder must source `tests/sandbox-guard.sh`. It stops the test on the real home folder, outside a container.
+- To try a change by hand, use a container, or set `HOME` to a temporary folder and start a Herdr server with its own session. Do not use the Herdr server of the person.
+
 ## 1. Find the sandboxes of this machine
 
 Run each check. Do not install a missing tool without the agreement of the person.
