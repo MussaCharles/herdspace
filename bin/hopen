@@ -1818,6 +1818,7 @@ palette_items() {
     pal_add hs-update herdspace "Update herdspace" "herdspace update"
     role="$(sed -n 's/^role=//p' "${XDG_DATA_HOME:-$HOME/.local/share}/herdspace/last-setup" 2>/dev/null)"
     case "$role" in client | both) pal_add hs-keys herdspace "Show or change the Ghostty keys" "herdspace keys" ;; esac
+    case "$role" in server | both) pal_add hs-editor herdspace "Show or change the editor mode: reader or normal" "herdspace editor" ;; esac
   fi
   if command -v herdr >/dev/null 2>&1; then
     [ ! -x "$HOME/.local/bin/herdr-update-check" ] || pal_add herdr-update Herdr "Check for a new Herdr version" "herdr-update-check --now"
@@ -2014,6 +2015,12 @@ palette() {
       pick="$(printf 'normal\tnormal: Cmd+T, Cmd+W, and Cmd+K stay with Ghostty\nherdr\therdr: Cmd+T, Cmd+W, and Cmd+K go to Herdr\n' | choose "Keys")" || exit 1
       [ -n "$pick" ] || exit 0
       if [ -n "$PAL_PANE" ]; then new_tab_run keys "$HOME" "herdspace keys ${pick}"; else exec herdspace keys "$pick"; fi
+      ;;
+    hs-editor)
+      herdspace editor
+      pick="$(printf 'reader\treader: no warnings and no spell marks\nnormal\tnormal: the defaults of LazyVim\n' | choose "Editor")" || exit 1
+      [ -n "$pick" ] || exit 0
+      then_wait herdspace editor "$pick"
       ;;
     herdr-update) then_wait "$HOME/.local/bin/herdr-update-check" --now ;;
     herdr-reload) then_wait herdr server reload-config ;;

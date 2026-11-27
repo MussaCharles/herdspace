@@ -363,6 +363,11 @@ contains "$(cd "$work/hb-pal" && HERDR_ACTIVE_PANE_ID="$pal_pane" hopen --palett
 check 'Herdr has the quick open key' grep -qF -- 'hopen\" --quick-open' "$HOME/.config/herdr/config.toml"
 contains "$(in_pal 'window\r')" 'Open a new terminal window' 'the palette prints the command for a second window'
 grep -qx window "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent" && pass 'the palette remembers the last action' || fail 'the palette remembers the last action'
+# The palette shows and changes the editor mode.
+rm -f "$HOME/.config/herdspace/editor"
+in_pal 'hs-editor\rnormal\r' >/dev/null
+[ "$(cat "$HOME/.config/herdspace/editor" 2>/dev/null)" = normal ] && pass 'the palette changes the editor mode' || fail 'the palette changes the editor mode'
+rm -f "$HOME/.config/herdspace/editor"
 contains "$(in_pal '\r')" 'Recently used' 'the palette shows the recent actions first'
 lacks "$(cat "${XDG_CACHE_HOME:-$HOME/.cache}/herdspace/palette-recent")" "$work" 'the recent list holds no paths'
 herdr workspace close "$pal_ws" >/dev/null 2>&1 || true

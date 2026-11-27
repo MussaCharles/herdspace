@@ -188,6 +188,12 @@ contains "$(printf '%s\n' "$out" | grep -x nvim)" 'nvim' 'a changed Neovim file 
 lacks "$out" 'nvim.bak-' 'a changed Neovim file makes no backup folder'
 out="$(nv 'echo x >$HOME/.config/nvim/lua/plugins.lua')"
 contains "$(printf '%s\n' "$out" | grep -x nvim)" 'nvim' 'a Neovim file of the person keeps ~/.config/nvim where it is'
+contains "$out" 'Your own ~/.config/nvim stays, and nvim starts it' 'the setup says that your own Neovim starts'
+contains "$out" 'NVIM_APPNAME=herdspace-nvim nvim' 'the setup says how to start the herdspace editor'
+out="$(nv 'echo x >$HOME/.config/nvim/lua/plugins.lua; export NVIM_APPNAME=herdspace-nvim')"
+lacks "$out" 'Your own' 'with NVIM_APPNAME=herdspace-nvim, the setup says nothing about your own Neovim'
+out="$(nv true)"
+lacks "$out" 'Your own' 'the folder of an older herdspace moves with no note about your own Neovim'
 out="$(nv 'rm -rf $HOME/.config/nvim')"
 lacks "$out" 'nvim' 'with no ~/.config/nvim, nothing moves'
 

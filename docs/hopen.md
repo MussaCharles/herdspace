@@ -214,7 +214,7 @@ The palette shows only the actions that fit the place. For example, the Git acti
 | Workspace and tabs | A new tab or workspace. Rename the workspace, the tab, or the pane. Close the tab. |
 | Sessions | Show the sessions. Stop a session. |
 | Network | Show the ports that your programs listen on. |
-| herdspace | Show the version. Update herdspace. Change the Ghostty keys, on a client. |
+| herdspace | Show the version. Update herdspace. Change the Ghostty keys, on a client. Change the editor mode (reader or normal), on a server. |
 | Herdr | Check for a new Herdr version. Reload the Herdr configuration. Show the state of the server. |
 | Help | Show the keys. Show the links to the cheat sheet and the docs. |
 

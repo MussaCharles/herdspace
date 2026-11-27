@@ -473,7 +473,7 @@ An older herdspace put your own lines in `~/.zshrc.local`. The herdspace shell s
 
 herdspace keeps its Neovim files in `~/.config/herdspace-nvim`, and its plugins in `~/.local/share/herdspace-nvim`. Your `~/.config/nvim` stays yours, and the setup writes nothing in it. Neovim reads the herdspace folder when `NVIM_APPNAME=herdspace-nvim` is set.
 
-The herdspace shell sets `NVIM_APPNAME=herdspace-nvim` only if you have no `~/.config/nvim`. Then `nvim`, and the layouts of `hopen`, start the herdspace editor. If you have your own `~/.config/nvim`, `nvim` starts your own Neovim.
+The herdspace shell sets `NVIM_APPNAME=herdspace-nvim` only if you have no `~/.config/nvim`. Then `nvim`, and the layouts of `hopen`, start the herdspace editor. If you have your own `~/.config/nvim`, `nvim` starts your own Neovim. An update does not change that, and the setup prints a line about it.
 
 To try the herdspace editor one time:
 
