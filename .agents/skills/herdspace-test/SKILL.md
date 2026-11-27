@@ -40,6 +40,8 @@ Run each check. Do not install a missing tool without the agreement of the perso
 | A release, before you publish it | every test above |
 | A release, after you publish it | `tests/run-release-check.sh` |
 
+Do not run every `tests/test-*.sh` file in a loop. Four of them run the setup in the home folder, and only a `run-*.sh` script gives them a container or a temporary home. One loop changed the real setup of a user, and reloaded the configuration of the running Herdr sessions. `tests/sandbox-guard.sh` now stops them on the real home folder.
+
 Run a test that takes more than two minutes in the background, with its output in a log file in `tests/.work`. Watch it with a quiet script. The script prints a line in two cases: the test ends, or the log stops growing for five minutes. Start such a script with `bash` by name, because your own shell can be zsh. If a test stops moving, find the cause. For example, a question can wait for an answer. Do not wait forever.
 
 ## A slow machine
