@@ -357,12 +357,23 @@ quick() { (cd "$work/hb-pal" && python3 "$ROOT/tests/pty_run.py" 6 '' env TERM=x
 focused_in() { herdr pane layout --pane "$1" | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["layout"]["focused_pane_id"])'; }
 fg_of() { herdr pane process-info --pane "$1" 2>/dev/null | python3 -c 'import json,sys; print(" ".join(p.get("name","") for p in json.load(sys.stdin)["result"]["process_info"]["foreground_processes"]))'; }
 shows() { for _ in $(seq 1 40); do herdr pane read "$1" 2>/dev/null | grep -q "$2" && return 0; sleep 0.25; done; return 1; }
+# quit_editor PANE presses Ctrl+Q until Neovim in PANE ends, at most 40 seconds.
+# LazyVim adds its keys late, at VeryLazy, so on a slow runner the first press
+# can come before the Ctrl+Q key exists. A new press comes every 2 seconds,
+# only while Neovim still runs.
+quit_editor() {
+  local i
+  for i in $(seq 0 159); do
+    case "$(fg_of "$1")" in *nvim*) ;; *) return 0 ;; esac
+    [ $((i % 8)) -ne 0 ] || herdr pane send-keys "$1" ctrl+q >/dev/null 2>&1
+    sleep 0.25
+  done
+}
 sleep 1
 quick NOTES.md "$qo_pane"
 shows "$qo_pane" NOTES.md && pass 'from a shell, quick open opens the file in that pane' || fail 'from a shell, quick open opens the file in that pane'
 [ "$(panes_in "$qo_tab")" = 1 ] && pass 'from a shell, quick open makes no split' || fail "from a shell, quick open makes no split: $(panes_in "$qo_tab") panes"
-herdr pane send-keys "$qo_pane" ctrl+q >/dev/null
-for _ in $(seq 1 160); do case "$(fg_of "$qo_pane")" in *nvim*) sleep 0.25 ;; *) break ;; esac; done
+quit_editor "$qo_pane"
 case " $(fg_of "$qo_pane") " in *" zsh "* | *" bash "* | *" sh "*) pass 'Ctrl+Q in Neovim gives the shell back' ;; *) fail "Ctrl+Q in Neovim gives the shell back: $(fg_of "$qo_pane")"; herdr pane read "$qo_pane" 2>/dev/null | tail -8 | sed 's/^/  screen: /' ;; esac
 herdr pane run "$qo_pane" "sleep 600" >/dev/null
 for _ in $(seq 1 80); do case "$(fg_of "$qo_pane")" in *sleep*) break ;; esac; sleep 0.25; done
