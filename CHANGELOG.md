@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-28
+
 ### Changed
 
 - `hopen` is split into modules in `lib/hopen/`, one file for each part, so that a change touches one small file. The setup and `install.sh` install the modules to `~/.local/lib/hopen/`, next to `~/.local/bin/hopen`, and the uninstall removes them. The behavior of `hopen` does not change.
@@ -323,7 +325,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.14.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.15.0...HEAD
+[0.15.0]: https://github.com/MussaCharles/herdspace/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/MussaCharles/herdspace/compare/0.13.0...0.14.0
 [0.13.0]: https://github.com/MussaCharles/herdspace/compare/0.12.2...0.13.0
 [0.12.2]: https://github.com/MussaCharles/herdspace/compare/0.12.1...0.12.2
