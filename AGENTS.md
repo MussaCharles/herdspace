@@ -12,7 +12,7 @@ A CLI workspace and session manager for Herdr, the terminal multiplexer for codi
 | `lib/herdspace/` | The modules of the `herdspace` command, one file for each command, and `common.sh` for the shared helpers. The setup installs them to `~/.local/lib/herdspace/`. |
 | `config/templates/` | The pane templates of `hopen`. |
 | `bootstrap.sh` | The entry point of the setup. It picks a script in `bootstrap/platforms/` from the role and the system. |
-| `bootstrap/lib/` | The shared steps of the setup scripts. |
+| `bootstrap/lib/` | The shared steps of the setup scripts. `common.sh` holds the shared values and options, and loads `ui.sh`, `files.sh`, `ask.sh`, `run.sh`, and `tools.sh`. |
 | `config/` | The configuration files that the setup installs. |
 | `install.sh` | Installs only `hopen` from a release. |
 | `install.md` | Steps that a coding agent follows to install herdspace for a person. |
