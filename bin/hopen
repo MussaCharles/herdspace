@@ -25,6 +25,9 @@
 #        hopen --quick-open      Choose a file of the project, and open it in the editor
 #                                of the tab, with the focus on it (Cmd+P in Herdr).
 #        hopen --grep TEXT       Search the files, and open a result at its line.
+#        --with-ignored FOLDER   With --find, --quick-open, or --grep: search only
+#                                FOLDER, with the files that .gitignore names. Repeat
+#                                it for more folders.
 #        hopen --ports           Show the TCP ports that your programs listen on.
 #        hopen --palette         Choose an action from a menu, like the command
 #                                palette of VS Code. Cmd+Shift+P opens it in Herdr.
@@ -57,6 +60,19 @@ ENV_ARGS=()
 TRUST_FLAG=0
 TASK_NAME=""
 GREP_TEXT=""
+# SEARCH_IN holds the folders of --with-ignored. When it has folders, the file
+# list and the search read only them, with the files that .gitignore names.
+SEARCH_IN=()
+# SKIP_DIRS are folders of dependencies and caches. The search with the
+# ignored files never reads them.
+SKIP_DIRS=(.git node_modules .venv venv __pycache__ .mypy_cache .pytest_cache .ruff_cache .tox .next .gradle Pods DerivedData target)
+# add_search_dir FOLDER adds FOLDER to SEARCH_IN. A name that starts with "-"
+# gets "./" in front, so that fd, find, and rg never read it as an option.
+add_search_dir() {
+  local d="${1%/}"
+  case "$d" in -*) d="./$d" ;; esac
+  SEARCH_IN+=("$d")
+}
 # FOLDER is set for "hopen <folder>" when the folder has no list of its own.
 FOLDER=""
 
@@ -74,6 +90,7 @@ usage() {
   echo "       hopen --find"
   echo "       hopen --quick-open"
   echo "       hopen --grep TEXT"
+  echo "       hopen --find | --quick-open | --grep TEXT --with-ignored FOLDER..."
   echo "       hopen --ports"
   echo "       hopen --palette"
   echo "       hopen --version"
@@ -114,6 +131,10 @@ while [ "$#" -gt 0 ]; do
     --grep)
       [ "$#" -ge 2 ] || { usage >&2; exit 2; }
       ACTION="grep"; GREP_TEXT="$2"; shift 2
+      ;;
+    --with-ignored)
+      [ "$#" -ge 2 ] || { usage >&2; exit 2; }
+      add_search_dir "$2"; shift 2
       ;;
     --no-attach) ATTACH=0; shift ;;
     --trust) TRUST_FLAG=1; shift ;;
@@ -175,7 +196,7 @@ completion_script() {
 #compdef hopen
 _hopen() {
   local -a options
-  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --task --find --quick-open --grep --ports --palette --completion --version --help)
+  options=(--all --list --templates --apply --convert --file --template --no-attach --trust --task --find --quick-open --grep --with-ignored --ports --palette --completion --version --help)
   case "${words[CURRENT-1]}" in
     --template | --apply) compadd -- ${(f)"$(hopen --complete templates 2>/dev/null)"}; return ;;
     --convert) compadd -- ${(f)"$(hopen --complete lists 2>/dev/null)"}; return ;;
@@ -1255,6 +1276,9 @@ run_task() {
 # open_in_editor FILE [LINE] opens FILE in $VISUAL or $EDITOR, or else Neovim.
 open_in_editor() {
   local editor="${VISUAL:-${EDITOR:-nvim}}"
+  # A name that starts with "-" gets "./" in front, so that the editor never
+  # reads it as an option.
+  case "$1" in -*) set -- "./$1" "${2:-}" ;; esac
   case "$(basename "${editor%% *}")" in
     code | code-insiders | cursor) exec ${editor} --goto "$1${2:+:$2}" ;;
     *) if [ -n "${2:-}" ]; then exec ${editor} "+$2" "$1"; else exec ${editor} "$1"; fi ;;
@@ -1263,10 +1287,56 @@ open_in_editor() {
 
 need() { command -v "$1" >/dev/null 2>&1 || die "$2 needs $1. The server setup installs it."; }
 
+# fd_cmd prints the name of fd: fd, or fdfind on Debian.
+fd_cmd() {
+  if command -v fd >/dev/null 2>&1; then echo fd
+  elif command -v fdfind >/dev/null 2>&1; then echo fdfind
+  else return 1
+  fi
+}
+
+# skip_args fills the array SKIP with an --exclude option for each folder of
+# SKIP_DIRS, for fd. A loop, because bash 3.2 has no mapfile.
+skip_args() { local d; SKIP=(); for d in "${SKIP_DIRS[@]}"; do SKIP+=(--exclude "$d"); done; }
+
+# list_files prints the files of the current folder. With SEARCH_IN, it prints
+# only the files of those folders, with the files that .gitignore names, but
+# not the folders of SKIP_DIRS.
 list_files() {
-  if command -v fd >/dev/null 2>&1; then fd --type f --hidden --exclude .git
-  elif command -v fdfind >/dev/null 2>&1; then fdfind --type f --hidden --exclude .git
+  local fd SKIP
+  if [ "${#SEARCH_IN[@]}" -gt 0 ]; then
+    fd="$(fd_cmd)" || { find "${SEARCH_IN[@]}" -type f ! -path '*/.git/*'; return; }
+    skip_args
+    "$fd" --type f --hidden --no-ignore-vcs "${SKIP[@]}" . "${SEARCH_IN[@]}"
+    return
+  fi
+  if fd="$(fd_cmd)"; then "$fd" --type f --hidden --exclude .git
   else find . -type f ! -path '*/.git/*'
+  fi
+}
+
+# list_folders prints the folders of the current folder, with the folders that
+# .gitignore names, but not the folders of SKIP_DIRS.
+list_folders() {
+  local fd SKIP
+  if fd="$(fd_cmd)"; then
+    skip_args
+    "$fd" --type d --hidden --no-ignore-vcs "${SKIP[@]}" | sed 's|/$||'
+  else
+    find . -mindepth 1 -type d ! -path '*/.git*' | sed 's|^\./||'
+  fi
+}
+
+# search_text prints the lines of the files that hold GREP_TEXT, as
+# "file:line:text". With SEARCH_IN, it searches only those folders, with the
+# files that .gitignore names, but not the folders of SKIP_DIRS.
+search_text() {
+  local d globs=()
+  if [ "${#SEARCH_IN[@]}" -gt 0 ]; then
+    for d in "${SKIP_DIRS[@]}"; do globs+=(--glob "!${d}/"); done
+    rg --line-number --no-heading --color=always --smart-case --fixed-strings --hidden --no-ignore-vcs "${globs[@]}" -- "$GREP_TEXT" "${SEARCH_IN[@]}"
+  else
+    rg --line-number --no-heading --color=always --smart-case --fixed-strings -- "$GREP_TEXT"
   fi
 }
 
@@ -1277,7 +1347,7 @@ find_file() {
   need fzf "hopen --find"
   [ -t 0 ] && [ -t 1 ] || die "hopen --find needs a terminal."
   command -v bat >/dev/null 2>&1 && preview="bat --color=always --style=numbers {}"
-  file="$(cd "$DIR" && list_files | sed 's|^\./||' | fzf --prompt 'Open file > ' --preview "$preview" --height 80% --reverse)" || true
+  file="$(cd "$DIR" && list_files | sed 's|^\./\([^-]\)|\1|' | fzf --prompt 'Open file > ' --preview "$preview" --height 80% --reverse)" || true
   [ -n "$file" ] || exit 0
   cd "$DIR" && open_in_editor "$file"
 }
@@ -1291,7 +1361,7 @@ grep_files() {
   [ -t 0 ] && [ -t 1 ] || die "hopen --grep needs a terminal."
   command -v bat >/dev/null 2>&1 && preview="bat --color=always --style=numbers --highlight-line {2} {1}"
   if ! in_popup; then
-    hit="$(cd "$DIR" && rg --line-number --no-heading --color=always --smart-case --fixed-strings -- "$GREP_TEXT" |
+    hit="$(cd "$DIR" && search_text |
       fzf --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --preview "$preview" --preview-window '+{2}-5' --height 80% --reverse)" || true
     [ -n "$hit" ] || exit 0
     cd "$DIR" && open_in_editor "$(cut -d: -f1 <<<"$hit")" "$(cut -d: -f2 <<<"$hit")"
@@ -1301,7 +1371,7 @@ grep_files() {
   PAL_PANE="${HERDR_ACTIVE_PANE_ID:-}"
   PAL_WS="${HERDR_ACTIVE_WORKSPACE_ID:-}"
   PAL_TAB="${HERDR_ACTIVE_TAB_ID:-}"
-  out="$(cd "$DIR" && rg --line-number --no-heading --color=always --smart-case --fixed-strings -- "$GREP_TEXT" |
+  out="$(cd "$DIR" && search_text |
     fzf --ansi --delimiter : --prompt "Search ${GREP_TEXT} > " --header "Enter opens the result. Ctrl+V opens a new editor on the right, Ctrl+S below, Ctrl+T in a new tab." --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --preview-window '+{2}-5' --height 100% --reverse)" || true
   key="$(sed -n 1p <<<"$out")"
   hit="$(sed -n 2p <<<"$out")"
@@ -1464,6 +1534,24 @@ ask_text() {
   printf '%s' "$text"
 }
 
+# pick_folders lets the person mark one or more folders of stdin, and prints
+# them, one on each line. With no fzf, it asks for the numbers of the folders.
+pick_folders() {
+  local items answer n
+  items="$(cat)"
+  if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
+    fzf --multi --prompt 'Folders > ' --header 'Tab marks a folder. Enter searches the marked folders, with the ignored files. Esc cancels.' --height 60% --reverse <<<"$items" || true
+    return 0
+  fi
+  awk '{ printf "  %2d) %s\n", NR, $0 }' <<<"$items" >&2
+  printf '  Folders? Type the numbers, with a space between them: ' >&2
+  IFS= read -r answer </dev/tty || answer=""
+  for n in $answer; do
+    case "$n" in *[!0-9]*) printf '  [err]  No folder %s.\n' "$n" >&2; return 1 ;; esac
+    awk -v n="$n" 'NR == n' <<<"$items"
+  done
+}
+
 # confirm TEXT asks a yes or no question. The default is no.
 confirm() {
   local answer=""
@@ -1598,7 +1686,7 @@ quick_open() {
   PAL_TAB="${HERDR_ACTIVE_TAB_ID:-${HERDR_TAB_ID:-}}"
   header="Type to filter. Enter opens the file. Esc closes. In Neovim, Ctrl+Q closes the file."
   [ -z "$PAL_PANE" ] || header="${header}"$'\n''Ctrl+V opens a new editor on the right, Ctrl+S below, Ctrl+T in a new tab.'
-  out="$(cd "$root" && list_files | sed 's|^\./||' | fzf --prompt 'Open file > ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --height 100% --reverse)" || true
+  out="$(cd "$root" && list_files | sed 's|^\./\([^-]\)|\1|' | fzf --prompt 'Open file > ' --header "$header" --expect ctrl-v,ctrl-s,ctrl-t --preview "$preview" --height 100% --reverse)" || true
   key="$(sed -n 1p <<<"$out")"
   file="$(sed -n 2p <<<"$out")"
   [ -n "$file" ] || exit 0
@@ -1753,6 +1841,7 @@ palette_items() {
   [ -n "$PAL_PANE" ] || ! command -v fzf >/dev/null 2>&1 || pal_add find Files "Find a file, and open it" "ff"
   [ -z "$PAL_PANE" ] || ! command -v fzf >/dev/null 2>&1 || pal_add quick Files "Quick open: a file in the editor of this tab" "Cmd+P, Ctrl+B F"
   command -v rg >/dev/null 2>&1 && pal_add grep Files "Search in the files, and open a result" "fif TEXT"
+  command -v rg >/dev/null 2>&1 && pal_add ignored Files "Choose folders, and search them with the ignored files" "hopen --with-ignored"
   if command -v nvim >/dev/null 2>&1 || [ -n "${EDITOR:-}" ]; then
     pal_add edit Files "Open this folder in the editor" "nvim ."
     pal_add read-md Files "Read a Markdown file, rendered" "nvim -R FILE.md"
@@ -1928,6 +2017,25 @@ palette() {
     task:*) run_at here task "$dir" "$(printf '%q --task %q' "$self" "${choice#task:}")" ;;
     find) run_at here find "$dir" "$(printf '%q --find' "$self")" ;;
     quick) DIR="$dir"; quick_open ;;
+    ignored)
+      # Only the chosen folders are read, so the search stays fast.
+      dir="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null || printf '%s' "$dir")"
+      text="$(cd "$dir" && list_folders | sort)" || true
+      [ -n "$text" ] || { then_wait printf '  No folder in %s.\n' "$dir"; exit 0; }
+      pick="$(pick_folders <<<"$text")" || exit 1
+      [ -n "$pick" ] || exit 0
+      while IFS= read -r name; do [ -z "$name" ] || add_search_dir "$name"; done <<<"$pick"
+      choice="$(printf 'open\tOpen a file of these folders\ntext\tSearch the text in these folders\n' | choose "Search")" || exit 1
+      DIR="$dir"
+      case "$choice" in
+        open) quick_open ;;
+        text)
+          GREP_TEXT="$(ask_text 'Search for')"
+          [ -n "$GREP_TEXT" ] || exit 0
+          grep_files
+          ;;
+      esac
+      ;;
     grep)
       text="$(ask_text 'Search for')"
       [ -n "$text" ] || exit 0
@@ -1935,7 +2043,7 @@ palette() {
       ;;
     edit) run_at tab edit "$dir" "$(editor_command) ." ;;
     read-md)
-      text="$(list_files 2>/dev/null | sed 's|^\./||' | grep -iE '\.(md|markdown)$' | sort)" || true
+      text="$(list_files 2>/dev/null | sed 's|^\./\([^-]\)|\1|' | grep -iE '\.(md|markdown)$' | sort)" || true
       [ -n "$text" ] || { then_wait printf '  No Markdown file in %s.\n' "$dir"; exit 0; }
       pick="$(awk '{ print $0 "\t" $0 }' <<<"$text" | choose "Markdown file")" || exit 1
       [ -n "$pick" ] || exit 0

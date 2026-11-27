@@ -111,6 +111,7 @@ These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and
 | Open lazygit over the pane | `Cmd+Shift+G` | `Ctrl+Shift+G` |
 | Open the command palette (`hopen --palette`): every action, in groups | `Cmd+Shift+P` | `Ctrl+Shift+P` |
 | Quick open a file of the project in the editor of the tab (`hopen --quick-open`) | `Cmd+P` | `Ctrl+B`, then `F` |
+| Search the files that `.gitignore` names, in the folders that you choose: the palette action "Files: Choose folders" | `Cmd+Shift+P` | `Ctrl+Shift+P` |
 
 ## Configuration
 

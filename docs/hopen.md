@@ -103,6 +103,7 @@ hopen .
 | `hopen --task test` | Run the task `test` of the project of the current folder. With no name, choose a task from a menu. See [Tasks](#tasks). |
 | `hopen --find` | Choose a file of the current folder with fzf, and open it in the editor. The shell command `ff` does the same. |
 | `hopen --grep TEXT` | Search the files of the current folder for TEXT, choose a result, and open the file at that line. The shell command `fif TEXT` does the same. |
+| `--with-ignored FOLDER` | With `--find`, `--quick-open`, or `--grep`: search only FOLDER, with the files that `.gitignore` names. Repeat it for more folders. See [Search the ignored files](files.md#search-the-ignored-files). |
 | `hopen --ports` | Show each TCP port that your programs listen on, with the program and its project, like the Ports view of VS Code. |
 | `hopen --palette` | Choose an action from a menu, like the command palette of VS Code. In Herdr, `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Linux) opens it. See [The command palette](#the-command-palette). |
 | `hopen --version` | Show the installed release. |
@@ -207,7 +208,7 @@ The palette shows only the actions that fit the place. For example, the Git acti
 | Recently used | The last 5 actions that you ran. |
 | Projects | Open a list. Open this folder in Herdr. Open this folder as its own workspace. Open this session in a new window. Open every list. Show every list. Write a `herdspace.toml` from a VS Code list. |
 | Tasks | Run a task of the project of the current folder. |
-| Files | Quick open, in Herdr. Find a file (`ff`), outside Herdr. Search in the files (`fif`): in Herdr, the result opens like quick open, at its line. Open this folder in the editor. Read a Markdown file, rendered. |
+| Files | Quick open, in Herdr. Find a file (`ff`), outside Herdr. Search in the files (`fif`): in Herdr, the result opens like quick open, at its line. Open this folder in the editor. Read a Markdown file, rendered. Choose folders, and search them with the ignored files. |
 | Git | lazygit over the pane, or in a new tab. A new worktree for an agent, on a new branch. Open, show, or remove a worktree. |
 | Agents | Go to an agent: the blocked and done agents come first. Explain the state of an agent. Start an agent program in a new pane. Show the Herdr integrations, add one for an agent, or remove one. |
 | Layout | Split the tab with a template. Split right or down. Zoom the pane. Show every template. |

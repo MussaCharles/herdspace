@@ -257,6 +257,26 @@ contains "$found" 'OPENED src/a.txt' 'hopen --find opens the chosen file in the 
 found="$(cd "$work/hb-find" && python3 "$ROOT/tests/pty_run.py" 6 '\r' env TERM=xterm-256color EDITOR='echo OPENED' hopen --grep 'needle()' 2>&1)"
 contains "$found" 'OPENED +2 src/a.txt' 'hopen --grep opens the file at the line of the result'
 
+# --with-ignored searches only the chosen folders, with the files that
+# .gitignore names, but never a folder of dependencies inside them.
+mkdir -p "$work/hb-ign/src" "$work/hb-ign/build/logs" "$work/hb-ign/build/node_modules/x" "$work/hb-ign/node_modules/y"
+git -C "$work/hb-ign" init -q
+printf 'build/\nnode_modules/\n' >"$work/hb-ign/.gitignore"
+echo 'needle src' >"$work/hb-ign/src/a.txt"
+echo 'needle log' >"$work/hb-ign/build/logs/run.log"
+echo 'needle dep' >"$work/hb-ign/build/node_modules/x/dep.js"
+ign_find() { (cd "$work/hb-ign" && python3 "$ROOT/tests/pty_run.py" 6 '\r' env TERM=xterm-256color FZF_DEFAULT_OPTS="--query $1" EDITOR='echo OPENED' hopen --find "${@:2}" 2>&1); }
+contains "$(ign_find run.log --with-ignored build)" 'OPENED build/logs/run.log' 'hopen --find --with-ignored opens an ignored file'
+mkdir -p "$work/hb-ign/-x" && echo 'dash' >"$work/hb-ign/-x/dash.txt"
+contains "$(ign_find dash.txt --with-ignored -x)" 'OPENED ./-x/dash.txt' 'hopen --with-ignored reads a folder name with a dash as a folder'
+case "$(ign_find run.log)" in *OPENED*) fail 'hopen --find skips the ignored files' ;; *) pass 'hopen --find skips the ignored files' ;; esac
+case "$(ign_find dep.js --with-ignored build)" in *OPENED*) fail 'hopen --with-ignored skips node_modules' ;; *) pass 'hopen --with-ignored skips node_modules' ;; esac
+found="$(cd "$work/hb-ign" && python3 "$ROOT/tests/pty_run.py" 6 '\r' env TERM=xterm-256color EDITOR='echo OPENED' hopen --grep 'needle' --with-ignored build 2>&1)"
+contains "$found" 'OPENED +1 build/logs/run.log' 'hopen --grep --with-ignored finds text in an ignored file'
+ign_pal="$(cd "$work/hb-ign" && python3 "$ROOT/tests/pty_run.py" 6 'ignored\r' env TERM=dumb HERDR_ACTIVE_PANE_ID=w1:p1 HERDR_ACTIVE_PANE_CWD="$work/hb-ign" hopen --palette 2>&1)"
+contains "$ign_pal" ') build/logs' 'the palette offers the ignored folders'
+case "$ign_pal" in *node_modules*) fail 'the palette offers no folder of dependencies' ;; *) pass 'the palette offers no folder of dependencies' ;; esac
+
 # hopen --palette shows the actions, and runs the chosen one.
 pal="$(cd "$work" && python3 "$ROOT/tests/pty_run.py" 6 'ports\r' env TERM=dumb hopen --palette 2>&1)"
 contains "$pal" 'Find a file' 'the palette offers to find a file'
