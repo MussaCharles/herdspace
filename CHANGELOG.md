@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+
+- Each release page lists the pull requests of the release below the changes, with the author of each and a link to the full comparison.
+
 ## [0.16.0] - 2026-11-28
 
 ### Changed
