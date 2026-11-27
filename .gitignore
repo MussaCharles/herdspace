@@ -1,3 +1,5 @@
 .DS_Store
 tests/.work/
 dist/
+__pycache__/
+config/nvim/lazyvim.json
