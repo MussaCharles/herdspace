@@ -55,7 +55,14 @@ old_nvim_is_herdspace() {
 # move_old_nvim moves the Neovim files of an older herdspace out of
 # ~/.config/nvim, to a backup folder. A folder with a file of the person stays.
 move_old_nvim() {
-  old_nvim_is_herdspace || return 0
+  if ! old_nvim_is_herdspace; then
+    # Your own Neovim stays, and nvim starts it. Say so once in each run, so
+    # that an update with no change in your editor does not surprise you.
+    if [ -e "$OLD_NVIM_DIR" ] && [ "${NVIM_APPNAME:-}" != "$HS_NVIM_APPNAME" ]; then
+      info "Your own $(short_home "$OLD_NVIM_DIR") stays, and nvim starts it. For the herdspace editor, run: NVIM_APPNAME=${HS_NVIM_APPNAME} nvim. See https://github.com/MussaCharles/herdspace/blob/main/docs/setup.md#your-neovim-files"
+    fi
+    return 0
+  fi
   if [ "$MODE" = "check" ]; then
     note_todo "${OLD_NVIM_DIR} holds the Neovim files of an older herdspace"
     return 0

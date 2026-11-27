@@ -6,6 +6,7 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ### Changed
 
+- The palette has "herdspace: Show or change the editor mode" on a server. When your own `~/.config/nvim` stays, the server setup says that `nvim` starts it, and how to start the herdspace editor.
 - The herdspace Neovim shows no warnings of linters and language servers, and no spell marks in Markdown and text files, because the files are for reading. `Space`, `u`, `d` shows the warnings, and `Space`, `u`, `s` the spell marks. Go to a definition and hover still work. `herdspace editor normal` keeps the defaults of LazyVim, and `herdspace editor reader` goes back.
 - The README has a section "For coding agents" with the command that installs the herdspace skill, and `docs/agent-setup.md` explains `-g`, the update, and the Herdr skill. `tools/release.sh --preflight` names each skill with no change since the last tag, when the code changed.
 - The herdspace skill for agents knows quick open, `Ctrl+Q`, the place keys and the integration actions of the palette, and the Herdr integrations of the server setup. It says that herdspace never installs an agent.
