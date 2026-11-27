@@ -55,6 +55,8 @@ jobs:
         run: tests/test-skills.sh
       - name: hopen list reader
         run: tests/test-hopen-list.sh
+      - name: Palette groups
+        run: tests/test-palette-groups.sh
       - name: Release build and install
         run: tests/test-install.sh
       - name: Release file comparison

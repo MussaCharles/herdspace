@@ -110,6 +110,30 @@ source "${HOPEN_LIB}/quickopen.sh"
 source "${HOPEN_LIB}/ports.sh"
 # shellcheck source=lib/hopen/palette.sh
 source "${HOPEN_LIB}/palette.sh"
+# shellcheck source=lib/hopen/palette/projects.sh
+source "${HOPEN_LIB}/palette/projects.sh"
+# shellcheck source=lib/hopen/palette/tasks.sh
+source "${HOPEN_LIB}/palette/tasks.sh"
+# shellcheck source=lib/hopen/palette/files.sh
+source "${HOPEN_LIB}/palette/files.sh"
+# shellcheck source=lib/hopen/palette/git.sh
+source "${HOPEN_LIB}/palette/git.sh"
+# shellcheck source=lib/hopen/palette/agents.sh
+source "${HOPEN_LIB}/palette/agents.sh"
+# shellcheck source=lib/hopen/palette/layout.sh
+source "${HOPEN_LIB}/palette/layout.sh"
+# shellcheck source=lib/hopen/palette/tabs.sh
+source "${HOPEN_LIB}/palette/tabs.sh"
+# shellcheck source=lib/hopen/palette/sessions.sh
+source "${HOPEN_LIB}/palette/sessions.sh"
+# shellcheck source=lib/hopen/palette/network.sh
+source "${HOPEN_LIB}/palette/network.sh"
+# shellcheck source=lib/hopen/palette/herdspace.sh
+source "${HOPEN_LIB}/palette/herdspace.sh"
+# shellcheck source=lib/hopen/palette/herdr.sh
+source "${HOPEN_LIB}/palette/herdr.sh"
+# shellcheck source=lib/hopen/palette/help.sh
+source "${HOPEN_LIB}/palette/help.sh"
 
 usage() {
   echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]"
