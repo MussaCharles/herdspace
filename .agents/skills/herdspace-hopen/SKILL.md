@@ -33,7 +33,11 @@ A task gives a `K` line after its `R` or `P` line. `hopen --task` finds the proj
 4. A new split on the right, with `exec env EDITOR`, so that the split closes with Neovim.
  `pane_runs PANE editor|shell` reads `herdr pane process-info`. `PAL_PLACE` (`right`, `down`, or `tab`) skips the order and asks `run_at` for a new editor in that place. The palette sets it from `Ctrl+V`, `Ctrl+S`, and `Ctrl+T` (fzf `--expect`), or from a word after the action in the numbered menu.
 
-The fourth argument of `pal_add` is the hint at the right of an action: the direct key first, then the prefix key or the command, for example `Cmd+T, Ctrl+B C`.
+The fourth argument of `pal_add` is the hint at the right of an action: the direct key first, then the prefix key or the command, for example `Cmd+T, Ctrl+B C`. `pal_add` stores four fields for each action: the ID, the group, the plain line, and the line with colors. fzf shows the line with colors, and the numbered menu the plain line.
+
+`lib/hopen/ui.sh` holds the look of every menu. `ui_fzf` runs fzf with the colors of the Herdr theme, a rounded frame, and a label. `group_color` gives each group of the palette one color, and `dim_folders` shows the folder of a file dim in quick open. With `NO_COLOR` set, `ui_color` fails, and the menus use no color. Use these functions for a new menu, so that it looks like the others.
+
+`--with-ignored FOLDER` calls `add_search_dir`, which adds the folder to `SEARCH_IN`. Then `fd_cmd` and `search_text` search only those folders, with `--no-ignore-vcs`, and `skip_args` leaves out the folders in `SKIP_DIRS`, such as `node_modules` and `.venv`.
 
 The integration actions of the palette read `herdr integration status` through `integrations`, which prints `name<TAB>state`. A line can have ` (experimental)` after the name.
 
@@ -79,6 +83,7 @@ Each of these mistakes broke `hopen` one time:
 - A Herdr popup has `HERDR_ACTIVE_PANE_ID` and no `HERDR_PANE_ID`. Use `${HERDR_PANE_ID:-${HERDR_ACTIVE_PANE_ID:-}}` for the pane to split.
 - `herdr pane split` gives the focus to the new pane only with `--focus`. `herdr pane focus` takes a direction, not a pane ID, so `focus_pane` steps from the focused pane toward the target through `herdr pane layout`.
 - Herdr has no option to start a split or a tab with a command. Text that comes before the shell starts gets lost. So `split_run` and `new_tab_run` wait for the prompt of the new pane with `pane_ready` before `herdr pane run`.
+- A folder or file name can start with a dash, for example `-x`. fd, rg, and Neovim then read it as an option. `add_search_dir` puts `./` in front of such a name, the file lists keep the `./`, and `open_in_editor` refuses a path that starts with a dash. An automated security review found this one.
 - A file name can hold any text, also `:` and `$(...)`. For the line of an `rg` result, `hopen` accepts digits only. An automated security review found this one: the line went unquoted into a command for a shell and for Neovim. Quote each value from a file name with `printf '%q'`, and check each number.
 
 ## Rules
