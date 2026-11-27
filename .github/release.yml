@@ -1,0 +1,10 @@
+# The list of pull requests in the release notes. tools/release-notes.sh asks
+# GitHub for it, and GitHub reads this file. The list leaves out the pull
+# requests of bots.
+changelog:
+  exclude:
+    authors:
+      - dependabot
+      - dependabot[bot]
+      - github-actions
+      - github-actions[bot]
