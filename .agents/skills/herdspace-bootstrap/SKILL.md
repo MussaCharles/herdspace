@@ -18,19 +18,21 @@ description: Change the herdspace setup scripts, add a tool or a configuration f
 
 | Function | File | Use |
 |----------|------|-----|
-| `run_part LABEL READY_FN APPLY_FN` | `common.sh` | One step. If `READY_FN` exits 0, the step is done, and the script skips it. |
-| `install_file SRC DEST [MODE]` | `common.sh` | Make a file match the repository version. It updates a file that the script wrote. It asks before it replaces a file that a person changed. The mode is 644 by default. |
-| `install_tree SRC_DIR DEST_DIR` | `common.sh` | `install_file` for each file of a folder, for example `config/nvim` and the templates. A file in `SEED_ONLY` goes through `seed_file`, which writes only a missing file. Neovim changes `lazy-lock.json` after the first start, so it is seeded. |
-| `ensure_block FILE NAME TEXT` | `common.sh` | Keep a marked block of lines in a file that the person owns, for example `~/.zprofile`. |
-| `git_pin URL DIR REF` | `common.sh` | Clone a repository at one pinned commit. |
+| `run_part LABEL READY_FN APPLY_FN` | `run.sh` | One step. If `READY_FN` exits 0, the step is done, and the script skips it. |
+| `install_file SRC DEST [MODE]` | `files.sh` | Make a file match the repository version. It updates a file that the script wrote. It asks before it replaces a file that a person changed. The mode is 644 by default. |
+| `install_tree SRC_DIR DEST_DIR` | `files.sh` | `install_file` for each file of a folder, for example `config/nvim` and the templates. A file in `SEED_ONLY` goes through `seed_file`, which writes only a missing file. Neovim changes `lazy-lock.json` after the first start, so it is seeded. |
+| `ensure_block FILE NAME TEXT` | `files.sh` | Keep a marked block of lines in a file that the person owns, for example `~/.zprofile`. |
+| `git_pin URL DIR REF` | `tools.sh` | Clone a repository at one pinned commit. |
 | `setup_shell ROLE` | `shell.sh` | The shell files and the prompt color. |
-| `finish_run NEXT_STEP` | `common.sh` | Print the result. With `--check`, exit 1 if a step is not done. |
+| `finish_run NEXT_STEP` | `run.sh` | Print the result. With `--check`, exit 1 if a step is not done. |
 
 The manifest at `~/.local/share/herdspace/manifest.tsv` keeps the checksum of each file that the script wrote. `install_file` uses it to know if a person changed a file. A file with no manifest entry is compared with `bootstrap/known-hashes.tsv`, the hashes of the older versions of each file from `config/` and `bin/`. If you change such a file, run `tools/known-hashes.sh` and commit the list. CI runs `tools/known-hashes.sh --check`.
 
 ## Output and questions
 
-Each line of the setup goes through the functions of `bootstrap/lib/common.sh`: `info`, `ok`, `warn`, `die`, `note_todo`, `step`, `ui_item`, `ui_indent`, and `ui_wait`. Do not print a status line with `printf` or `echo` in a step.
+`bootstrap/lib/common.sh` holds the shared values and the options, and it loads the other shared files: `ui.sh` (the output), `files.sh` (the manifest and the install of files and blocks), `ask.sh` (the questions about a changed file), `run.sh` (the parts of a run and the summary), and `tools.sh` (pinned repositories and Homebrew). A platform script sources only `common.sh`. A file there defines functions, and only `common.sh` and `ui.sh` set values when they load. A new shared file needs a `source` line with a `# shellcheck source=` line in `common.sh`.
+
+Each line of the setup goes through the functions of `bootstrap/lib/ui.sh`: `info`, `ok`, `warn`, `die`, `note_todo`, `step`, `ui_item`, `ui_indent`, and `ui_wait`. Do not print a status line with `printf` or `echo` in a step.
 
 - With no terminal, or with `NO_COLOR`, the output stays plain, with the words `[ok]`, `[todo]`, `[warn]`, and `[err]`. The tests, `install.md`, and coding agents read them. At a terminal, the same functions draw boxes, marks, and colors.
 - `ui_count WORD N` writes `1 file` and `2 files`. Use it for each count.
