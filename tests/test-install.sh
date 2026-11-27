@@ -40,7 +40,10 @@ if [ -f "${home}/.local/bin/hopen" ] && [ ! -L "${home}/.local/bin/hopen" ] && [
 contains "$(HOME="$home" "${home}/.local/bin/hopen" --version)" "hopen ${tag}" 'hopen shows the release tag'
 if [ -f "${home}/.local/lib/hopen/core.sh" ]; then pass 'the modules of hopen are next to the bin folder'; else fail 'the modules of hopen are next to the bin folder'; fi
 if [ -f "${home}/.local/lib/hopen/palette/projects.sh" ]; then pass 'the palette groups of hopen are installed'; else fail 'the palette groups of hopen are installed'; fi
+if [ -f "${home}/.local/lib/hopen/lists.py" ]; then pass 'the Python part of hopen is installed'; else fail 'the Python part of hopen is installed'; fi
 contains "$(HOME="$home" XDG_CONFIG_HOME="" "${home}/.local/bin/hopen" --templates 2>&1)" 'code' 'the installed hopen loads its modules'
+mkdir -p "${home}/demo" && printf '[[project]]\nname = "api"\npath = "."\n' >"${home}/demo/herdspace.toml"
+contains "$(HOME="$home" XDG_CONFIG_HOME="" "${home}/.local/bin/hopen" --complete lists 2>&1)" 'demo' 'the installed hopen reads a list with its Python part'
 for t in code agent grid review; do
   if [ -f "${home}/.config/hopen/templates/${t}.layout" ]; then pass "template ${t} installed"; else fail "template ${t} installed"; fi
 done

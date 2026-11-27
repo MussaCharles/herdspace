@@ -26,7 +26,8 @@ The setup installs the modules before the command, so that a new command never r
 |------|--------------|
 | `lib/hopen/core.sh` | The common helpers: messages, a check for a command, names, and JSON. |
 | `lib/hopen/ui.sh` | The look of the menus, like a Herdr popup, and the questions: a choice, a text, and a yes or no. |
-| `lib/hopen/lists.sh` | The project lists: read a VS Code workspace file or a `herdspace.toml` file, find the lists, and choose one. |
+| `lib/hopen/lists.sh` | The project lists: find the lists, show them, and choose one. `read_list` runs `lists.py` for each list. |
+| `lib/hopen/lists.py` | The reader of one list, a VS Code workspace file or a `herdspace.toml` file, in Python. It prints one line for each workspace, tab, task, and warning. |
 | `lib/hopen/trust.sh` | The approval of the commands and environment values of a list. |
 | `lib/hopen/sessions.sh` | The Herdr sessions: start one, open the projects of a list, start the programs again, and attach. |
 | `lib/hopen/templates.sh` | The layout templates: find, list, and apply one, and the guard of the pane names. |
@@ -87,6 +88,15 @@ A new group needs three things: a new file with both functions, its name in `PAL
 
 A platform script sources only `common.sh`, and then the step files that it needs. The `herdspace-bootstrap` skill lists the functions that a step uses.
 
+## The Python modules
+
+herdspace moves from bash to Python one module at a time. A Python module is a file next to the bash module that runs it, for example `lib/hopen/lists.py` next to `lists.sh`. These rules hold for each Python module:
+
+- Use only the standard library. A person installs no package, and no `pip`, `pipx`, or `uv`.
+- The bash module runs the file with `python3 -I`, so that a file in the current folder cannot change the program.
+- The code must run on Python 3.11.
+- Each Python module has unit tests in `tests/python/`, with `unittest`.
+
 ## Check and test a module
 
 shellcheck reads the modules through the main file of each command, with `external-sources=true` in `.shellcheckrc`. Run the command of CI:
@@ -95,4 +105,4 @@ shellcheck reads the modules through the main file of each command, with `extern
 shellcheck -S warning bin/hopen bin/herdr-update-check bin/herdspace bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
 ```
 
-A test can load one module with `source`, with the modules that it needs, and call its functions with no Herdr. `tests/test-hopen-list.sh` loads `lib/hopen/core.sh`, `lists.sh`, and `trust.sh` this way. The [testing guide](testing.md) lists each test.
+A test can load one module with `source`, with the modules that it needs, and call its functions with no Herdr. `tests/test-hopen-list.sh` loads `lib/hopen/core.sh`, `lists.sh`, and `trust.sh` this way. Run the unit tests of the Python modules with `python3 -m unittest discover -s tests/python`. The [testing guide](testing.md) lists each test.

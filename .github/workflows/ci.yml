@@ -57,6 +57,8 @@ jobs:
         run: tests/test-hopen-list.sh
       - name: Palette groups
         run: tests/test-palette-groups.sh
+      - name: Python unit tests
+        run: python3 -m unittest discover -s tests/python
       - name: Release build and install
         run: tests/test-install.sh
       - name: Release file comparison

@@ -23,6 +23,7 @@ The Linux tests use throwaway Docker containers. The macOS test runs on a Mac wi
 | `tests/test-verify-release.sh` | `tools/verify-release.sh` accepts release files that match the build, and finds a changed script, a changed or new file in an archive, an extra file, and a file that does not match `SHA256SUMS`. It needs no network. |
 | `tests/run-prereqs.sh` | The prerequisites step finds and installs a missing locale, stops with a fix when `sudo` is missing, works as root, and reports a server with no SSH. |
 | `tests/test-hopen-list.sh` | `hopen` reads each list setting, refuses crafted lists, and keeps session names safe. It needs no Herdr, and it runs in a second. |
+| `tests/python/` | Unit tests for the Python modules, with `unittest` from the standard library. `test_lists.py` runs `lib/hopen/lists.py` on lists in a temporary folder: the lines that it prints, the refused template names, comments in a VS Code file, and control characters. They need no Herdr and no network. |
 | `tests/test-palette-groups.sh` | Each action of the command palette, in Herdr and outside it, has exactly one group in `lib/hopen/palette/` that runs it, and `bin/hopen` loads each group. It uses a temporary home folder and a stub `herdr`, and it needs no network. |
 | `tests/bench-hopen.sh` | Measures how long `hopen` takes with 20 projects. `tests/run-linux.sh` runs it after the server setup. See [Benchmark](#benchmark). |
 | `tests/test-nvim-plugins.sh` | After a failed plugin download, the Neovim plugin step warns, and the next run tries again. It uses a stub `nvim`, and it runs in a second. |
@@ -115,6 +116,10 @@ tests/test-hopen-list.sh
 
 ```bash
 tests/test-palette-groups.sh
+```
+
+```bash
+python3 -m unittest discover -s tests/python
 ```
 
 ```bash
