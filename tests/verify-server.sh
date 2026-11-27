@@ -282,6 +282,14 @@ pal="$(cd "$work" && python3 "$ROOT/tests/pty_run.py" 6 'ports\r' env TERM=dumb 
 contains "$pal" 'Find a file' 'the palette offers to find a file'
 contains "$pal" 'Open the list' 'outside Herdr, the palette offers each list'
 case "$pal" in *PORT*ADDRESS* | *'listens on'*) pass 'the palette runs the chosen action' ;; *) fail "the palette runs the chosen action: ${pal:0:300}" ;; esac
+# In fzf, the palette looks like a Herdr popup, with each group in its own
+# color, and a choice still runs the right action. With NO_COLOR, the lines
+# have no colors of the groups.
+pal="$(cd "$work" && PTY_RAW="$work/pal.raw" python3 "$ROOT/tests/pty_run.py" 6 "'Network\r" env TERM=xterm-256color hopen --palette 2>&1)"
+case "$pal" in *PORT*ADDRESS* | *'listens on'*) pass 'in fzf, the palette runs the chosen action' ;; *) fail "in fzf, the palette runs the chosen action: ${pal:0:300}" ;; esac
+if LC_ALL=C grep -aq '38;2;255;184;108' "$work/pal.raw"; then pass 'the palette shows the Files group in its color'; else fail 'the palette shows the Files group in its color'; fi
+(cd "$work" && PTY_RAW="$work/pal-plain.raw" python3 "$ROOT/tests/pty_run.py" 4 '\x1b' env TERM=xterm-256color NO_COLOR=1 hopen --palette >/dev/null 2>&1)
+if LC_ALL=C grep -aq '38;2;255;184;108' "$work/pal-plain.raw"; then fail 'with NO_COLOR, the palette has no group colors'; else pass 'with NO_COLOR, the palette has no group colors'; fi
 pal="$(cd "$work" && python3 "$ROOT/tests/pty_run.py" 4 '\r' env TERM=dumb HERDR_ACTIVE_PANE_ID=w1:p1 hopen --palette 2>&1)"
 contains "$pal" 'with the template code' 'in a Herdr popup, the palette offers the templates'
 lacks "$pal" 'Open the list' 'in a Herdr popup, the palette does not offer to attach to a list'
