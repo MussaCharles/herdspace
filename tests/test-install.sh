@@ -36,7 +36,7 @@ contains "$out" 'Replaced the link' 'install replaces an old link'
 if [ -f "${home}/.local/bin/hopen" ] && [ ! -L "${home}/.local/bin/hopen" ] && [ -x "${home}/.local/bin/hopen" ]; then pass 'hopen is a real file'; else fail 'hopen is a real file'; fi
 contains "$(HOME="$home" "${home}/.local/bin/hopen" --version)" "hopen ${tag}" 'hopen shows the release tag'
 if [ -f "${home}/.local/lib/hopen/core.sh" ]; then pass 'the modules of hopen are next to the bin folder'; else fail 'the modules of hopen are next to the bin folder'; fi
-contains "$(HOME="$home" "${home}/.local/bin/hopen" --templates 2>&1)" 'code' 'the installed hopen loads its modules'
+contains "$(HOME="$home" XDG_CONFIG_HOME="" "${home}/.local/bin/hopen" --templates 2>&1)" 'code' 'the installed hopen loads its modules'
 for t in code agent grid review; do
   if [ -f "${home}/.config/hopen/templates/${t}.layout" ]; then pass "template ${t} installed"; else fail "template ${t} installed"; fi
 done
