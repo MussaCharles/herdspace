@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import completion, convert, core, lists, ports, templates, trust
+from . import completion, convert, core, lists, ports, templates, trust, ui
 
 
 def _read_list(args):
@@ -103,7 +103,49 @@ def _trust(args):
     return 0 if trust.list_trusted(path, actions, extra, state_dir, trust_flag == "1") else 1
 
 
+def _stdin_items():
+    # $(cat) in bash drops the new lines at the end.
+    return sys.stdin.read().rstrip("\n")
+
+
+def _choose(args):
+    try:
+        key = ui.choose(args[0] if args else "", _stdin_items())
+    except ui.NoItem as error:
+        print(f"  [err]  {error}", file=sys.stderr)
+        return 1
+    if key:
+        print(key)
+    return 0
+
+
+def _ask_text(args):
+    print(ui.ask_text(args[0] if args else ""), end="")
+    return 0
+
+
+def _pick_folders(args):
+    try:
+        folders = ui.pick_folders(_stdin_items())
+    except ui.NoItem as error:
+        for folder in error.picked:
+            print(folder, flush=True)
+        print(f"  [err]  {error}", file=sys.stderr)
+        return 1
+    for folder in folders:
+        print(folder)
+    return 0
+
+
+def _confirm(args):
+    return 0 if ui.confirm(args[0] if args else "") else 1
+
+
 INTERNAL = {
+    "choose": _choose,
+    "ask-text": _ask_text,
+    "pick-folders": _pick_folders,
+    "confirm": _confirm,
     "list-actions": _list_actions,
     "trust": _trust,
     "ports": _ports,

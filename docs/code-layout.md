@@ -25,7 +25,7 @@ The setup installs the modules before the command, so that a new command never r
 | File | What it does |
 |------|--------------|
 | `lib/hopen/core.sh` | The common helpers: messages, a check for a command, names, and JSON. |
-| `lib/hopen/ui.sh` | The look of the menus, like a Herdr popup, and the questions: a choice, a text, and a yes or no. |
+| `lib/hopen/ui.sh` and `ui.py` | The look of the menus, like a Herdr popup, and the questions: a choice, a text, and a yes or no. `ui.py` asks the questions. The colors stay in both files until the palette moves to Python. |
 | `lib/hopen/lists.sh` | The project lists: find the lists, show them, and choose one. `read_list` runs `lists.py` for each list. |
 | `lib/hopen/lists.py` | `read_list` reads one list, a VS Code workspace file or a `herdspace.toml` file. `find_lists` finds the lists of the home folder, and `no_list_message` helps with a name that has no list. |
 | `lib/hopen/trust.sh` and `trust.py` | The approval of the commands and environment values of a list. `trust.py` does the work. It reads the env file values on fd 3 and the question on fd 4, because another user can read the arguments of a process. |
