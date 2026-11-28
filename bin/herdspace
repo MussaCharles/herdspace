@@ -9,6 +9,7 @@
 #        herdspace version                 The same as --version.
 #        herdspace keys [normal|herdr]     Show or change the Ghostty keys (client).
 #        herdspace editor [reader|normal]  Show or change the Neovim defaults (server).
+#        herdspace prefix [KEY|default]    Show or change the Herdr prefix key (server).
 #        herdspace uninstall --check       List what an uninstall changes. Change nothing.
 #        herdspace uninstall [--yes]       Remove what the setup wrote. Ask once first.
 #        herdspace help                    This help.
@@ -50,6 +51,8 @@ source "${HERDSPACE_LIB}/update.sh"
 source "${HERDSPACE_LIB}/editor.sh"
 # shellcheck source=lib/herdspace/keys.sh
 source "${HERDSPACE_LIB}/keys.sh"
+# shellcheck source=lib/herdspace/prefix.sh
+source "${HERDSPACE_LIB}/prefix.sh"
 # shellcheck source=lib/herdspace/uninstall.sh
 source "${HERDSPACE_LIB}/uninstall.sh"
 
@@ -57,6 +60,7 @@ case "${1:-help}" in
   update) shift; cmd_update "$@" ;;
   keys) shift; cmd_keys "$@" ;;
   editor) shift; cmd_editor "$@" ;;
+  prefix) shift; cmd_prefix "$@" ;;
   uninstall) shift; cmd_uninstall "$@"; exit $? ;;
   version | --version | -V) cmd_version ;;
   notice) cmd_notice ;;
@@ -66,7 +70,7 @@ case "${1:-help}" in
     # As git and GNU tools do: the error, a suggestion, and where the help is.
     printf "herdspace: '%s' is not a herdspace command.\n" "$1" >&2
     case "${1#"${1%%[!-]*}"}" in
-      update | version | help | keys | editor | uninstall) printf "Did you mean 'herdspace %s'?\n" "${1#"${1%%[!-]*}"}" >&2 ;;
+      update | version | help | keys | editor | prefix | uninstall) printf "Did you mean 'herdspace %s'?\n" "${1#"${1%%[!-]*}"}" >&2 ;;
     esac
     printf "Run 'herdspace help' for the usage.\n" >&2
     exit 2
