@@ -1,8 +1,9 @@
 """The Help group of the command palette."""
+from .. import prefix
 from . import then_wait
 
-# The keys that a person uses most.
-KEYS = r'''  Herdr (Mac / Linux)
+# The keys that a person uses most. {p} is the prefix of Herdr.
+KEYS = '''  Herdr (Mac / Linux)
     New tab, close tab           Cmd+T, Cmd+W      / Ctrl+Shift+T, Ctrl+Shift+W
     Go to anything               Cmd+K             / Ctrl+Shift+K
     Command palette              Cmd+Shift+P       / Ctrl+Shift+P
@@ -10,9 +11,9 @@ KEYS = r'''  Herdr (Mac / Linux)
     Previous or next tab         Ctrl+Left, Ctrl+Right
     Previous or next workspace   Ctrl+Up, Ctrl+Down
     Next or previous pane        Alt+Up, Alt+Down
-    Split right, split down      Ctrl+B V, Ctrl+B -
-    Zoom the pane                Ctrl+B Z
-    Leave, keep everything       Ctrl+B Q
+    Split right, split down      {p} V, {p} -
+    Zoom the pane                {p} Z
+    Leave, keep everything       {p} Q
   Shell
     Find a file, search text     ff, fif TEXT
     Jump to a folder             z NAME, zi
@@ -29,6 +30,6 @@ def items(ctx):
 
 
 ACTIONS = {
-    "keys-help": lambda ctx, action: then_wait(lambda: print(KEYS)),
+    "keys-help": lambda ctx, action: then_wait(lambda: print(KEYS.format(p=prefix.now(ctx.home)))),
     "docs": lambda ctx, action: then_wait(lambda: print(DOCS)),
 }

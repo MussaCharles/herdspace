@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 
-from .. import core, panes, ui
+from .. import core, panes, prefix, ui
 from . import then_wait
 
 
@@ -24,11 +24,11 @@ def items(ctx):
     if inside.returncode != 0:
         return
     if shutil.which("lazygit"):
-        ctx.add("git", "Git", "Git status (lazygit)", "Cmd+Shift+G, Ctrl+B D")
+        ctx.add("git", "Git", "Git status (lazygit)", f"Cmd+Shift+G, {prefix.now(ctx.home)} D")
         if ctx.pane:
             ctx.add("git-tab", "Git", "Open lazygit in a new tab", "lazygit")
     if ctx.pane:
-        ctx.add("wt-new", "Git", "New worktree for an agent, on a new branch", "Ctrl+B Shift+G")
+        ctx.add("wt-new", "Git", "New worktree for an agent, on a new branch", f"{prefix.now(ctx.home)} Shift+G")
         ctx.add("wt-open", "Git", "Open a worktree", "herdr worktree open")
         ctx.add("wt-list", "Git", "Show the worktrees", "herdr worktree list")
         ctx.add("wt-remove", "Git", "Remove a worktree", "herdr worktree remove")

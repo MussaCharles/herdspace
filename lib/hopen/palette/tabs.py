@@ -1,17 +1,18 @@
 """The Workspace and tabs group of the command palette."""
-from .. import panes, ui
+from .. import panes, prefix, ui
 
 GROUP = "Workspace and tabs"
 
 
 def items(ctx):
     if ctx.pane:
-        ctx.add("new-tab", GROUP, "New tab", "Cmd+T, Ctrl+B C")
-        ctx.add("new-ws", GROUP, "New workspace in this folder", "Ctrl+B Shift+N")
-        ctx.add("rename-ws", GROUP, "Rename the workspace", "Ctrl+B Shift+W")
-        ctx.add("rename-tab", GROUP, "Rename the tab", "Ctrl+B Shift+T")
-        ctx.add("rename-pane", GROUP, "Rename the pane", "Ctrl+B Shift+P")
-        ctx.add("close-tab", GROUP, "Close the tab", "Cmd+W, Ctrl+B Shift+X")
+        key = prefix.now(ctx.home)
+        ctx.add("new-tab", GROUP, "New tab", f"Cmd+T, {key} C")
+        ctx.add("new-ws", GROUP, "New workspace in this folder", f"{key} Shift+N")
+        ctx.add("rename-ws", GROUP, "Rename the workspace", f"{key} Shift+W")
+        ctx.add("rename-tab", GROUP, "Rename the tab", f"{key} Shift+T")
+        ctx.add("rename-pane", GROUP, "Rename the pane", f"{key} Shift+P")
+        ctx.add("close-tab", GROUP, "Close the tab", f"Cmd+W, {key} Shift+X")
 
 
 def rename(ctx, action):

@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 
-from .. import core, editor, panes, quickopen, search, ui
+from .. import core, editor, panes, prefix, quickopen, search, ui
 from . import then_wait
 
 
@@ -16,7 +16,7 @@ def items(ctx):
     if not ctx.pane and fzf:
         ctx.add("find", "Files", "Find a file, and open it", "ff")
     if ctx.pane and fzf:
-        ctx.add("quick", "Files", "Quick open: a file in the editor of this tab", "Cmd+P, Ctrl+B F")
+        ctx.add("quick", "Files", "Quick open: a file in the editor of this tab", f"Cmd+P, {prefix.now(ctx.home)} F")
     if shutil.which("rg"):
         ctx.add("grep", "Files", "Search in the files, and open a result", "fif TEXT")
         ctx.add("ignored", "Files", "Choose folders, and search them with the ignored files", "hopen --with-ignored")
