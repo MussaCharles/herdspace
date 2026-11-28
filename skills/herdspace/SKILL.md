@@ -30,7 +30,7 @@ These commands are for the person, in their own terminal. They open a menu or an
 
 | Command | What it does |
 |---------|--------------|
-| `hopen --quick-open` | Like Quick Open of VS Code. In Herdr, `Cmd+P` (Mac) or `Ctrl+Space`, then `F` (Linux) opens it. The chosen file opens in the focused Neovim or shell first. Else it opens in the Neovim pane of the tab, or in a new split on the right. The focus moves to the file. In Neovim, `Ctrl+Q` closes the file. With no other file open, `Ctrl+Q` closes Neovim. |
+| `hopen --quick-open` | Like Quick Open of VS Code. In Herdr, `Cmd+P` (Mac) or `Alt+Space`, then `F` (Linux) opens it. The chosen file opens in the focused Neovim or shell first. Else it opens in the Neovim pane of the tab, or in a new split on the right. The focus moves to the file. In Neovim, `Ctrl+Q` closes the file. With no other file open, `Ctrl+Q` closes Neovim. |
 | `ff`, or `hopen --find` | Choose a file with fzf, and open it in the editor. |
 | `fif TEXT`, or `hopen --grep TEXT` | Search the files, and open a result at its line. From the palette in Herdr, the result opens like quick open. |
 | `hopen --find --with-ignored FOLDER`, or `hopen --grep TEXT --with-ignored FOLDER` | Search only FOLDER, with the files that `.gitignore` names, but not `node_modules`, `.venv`, and other folders of dependencies. The palette action "Files: Choose folders, and search them with the ignored files" does the same. |

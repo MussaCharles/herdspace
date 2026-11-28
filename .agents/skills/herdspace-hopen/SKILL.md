@@ -25,7 +25,7 @@ A task gives a `K` line after its `R` or `P` line. `hopen --task` finds the proj
 
 `hopen --palette` runs `lib/hopen/palette/` in Python, and an action that needs hopen again runs the path of `bin/hopen` (`ctx.self_path`). `__init__.py` holds the menu, the recent actions, `then_wait`, and `GROUPS`, the groups in the order of the menu. Each group has a file in `lib/hopen/palette/` with two parts: `items(ctx)` adds its actions with `ctx.add`, and `ACTIONS` maps an ID to the function that runs it. A new action needs a change in one group file only. A new group needs a file and a word in `GROUPS`. Keep each ID the same, because the recent list saves the IDs. `tests/test-palette-groups.sh` makes sure that each action has exactly one group that runs it. In a Herdr popup (`HERDR_ACTIVE_PANE_ID` set, no `HERDR_PANE_ID`), `then_wait` waits for Enter after an action that prints a result, because the popup closes when its command ends. The key is a `[[keys.command]]` popup in `config/herdr/config.toml`.
 
-`hopen --quick-open` (the Herdr key `Cmd+P`, or `Ctrl+Space`, then `F`) and a search result from a popup open a file through `panes.open_target`. It tries these places in order:
+`hopen --quick-open` (the Herdr key `Cmd+P`, or `Alt+Space`, then `F`) and a search result from a popup open a file through `panes.open_target`. It tries these places in order:
 
 1. The focused pane runs Neovim. `drop_in` sends `:drop`.
 2. The focused pane is a shell at its prompt. `herdr pane run` starts the editor there.
@@ -33,7 +33,7 @@ A task gives a `K` line after its `R` or `P` line. `hopen --task` finds the proj
 4. A new split on the right, with `exec env EDITOR`, so that the split closes with Neovim.
  `pane_runs(pane, "editor")` and `pane_runs(pane, "shell")` read `herdr pane process-info`. `place.where` (`right`, `down`, or `tab`) skips the order and asks `run_at` for a new editor in that place. The palette sets it from `Ctrl+V`, `Ctrl+S`, and `Ctrl+T` (fzf `--expect`), or from a word after the action in the numbered menu.
 
-The fourth argument of `ctx.add` is the hint at the right of an action: the direct key first, then the prefix key or the command, for example `Cmd+T, Ctrl+Space C`. A hint or a message that names the prefix gets it from `prefix.now(ctx.home)`, never as fixed text, because `herdspace prefix` can change it. `ctx.add` stores four fields for each action: the ID, the group, the plain line, and the line with colors. fzf shows the line with colors, and the numbered menu the plain line.
+The fourth argument of `ctx.add` is the hint at the right of an action: the direct key first, then the prefix key or the command, for example `Cmd+T, Alt+Space C`. A hint or a message that names the prefix gets it from `prefix.now(ctx.home)`, never as fixed text, because `herdspace prefix` can change it. `ctx.add` stores four fields for each action: the ID, the group, the plain line, and the line with colors. fzf shows the line with colors, and the numbered menu the plain line.
 
 `lib/hopen/ui.py` holds the look of every menu. `fzf_command` builds fzf with the colors of the Herdr theme, a rounded frame, and a label, and `run_fzf_from` streams a long list into it. `group_color` gives each group of the palette one color, and `dim_folders` shows the folder of a file dim in quick open. With `NO_COLOR` set, `ui_color()` is false, and the menus use no color. Use these functions for a new menu, so that it looks like the others.
 
