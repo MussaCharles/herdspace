@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import completion, convert, core, lists, ports, templates, trust, ui
+from . import completion, convert, core, lists, ports, tasks, templates, trust, ui
 
 
 def _read_list(args):
@@ -141,7 +141,22 @@ def _confirm(args):
     return 0 if ui.confirm(args[0] if args else "") else 1
 
 
+def _project_for_dir(args):
+    match = tasks.project_for_dir(os.environ.get("HOME", ""), args[0] if args else "")
+    if match is None:
+        return 1
+    print(f"{match[0]}\t{match[1]}")
+    return 0
+
+
+def _task(args):
+    name, trust_flag, state_dir = (args + ["", "0", ""])[:3]
+    return tasks.run_task(name, os.environ.get("HOME", ""), state_dir, trust_flag == "1")
+
+
 INTERNAL = {
+    "project-for-dir": _project_for_dir,
+    "task": _task,
     "choose": _choose,
     "ask-text": _ask_text,
     "pick-folders": _pick_folders,

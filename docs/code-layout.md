@@ -33,7 +33,7 @@ The setup installs the modules before the command, so that a new command never r
 | `lib/hopen/templates.sh` and `templates.py` | The layout templates: find, list, and apply one, and the guard of the pane names. `templates.py` lists and reads the templates, and runs the guard. |
 | `lib/hopen/panes.sh` | The Herdr panes: wait for one, split, open a tab, find the editor of a tab, and open a file in it. |
 | `lib/hopen/editor.sh` | Open a file in the editor, and the command that starts the herdspace Neovim. |
-| `lib/hopen/tasks.sh` | `hopen --task`, with the environment of the project. |
+| `lib/hopen/tasks.sh` and `tasks.py` | `hopen --task`, with the environment of the project. `tasks.py` does the work. |
 | `lib/hopen/search.sh` | Find and search the files of a project, also with the files that `.gitignore` names. |
 | `lib/hopen/quickopen.sh` | Quick open, like `Ctrl+P` in VS Code. |
 | `lib/hopen/ports.sh` and `ports.py` | `hopen --ports`, like the Ports view of VS Code. `ports.py` does the work. |
