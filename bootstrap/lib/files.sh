@@ -154,6 +154,28 @@ install_tree() {
   done 3< <(cd "$src_dir" && find . -type f | sed 's|^\./||')
 }
 
+# prune_tree SRC_DIR DEST_DIR removes each file of DEST_DIR that SRC_DIR no
+# longer has, when no person changed it: its checksum is in the manifest, or in
+# the list of older versions for an install from before the manifest. A
+# changed file stays. A check changes nothing.
+prune_tree() {
+  local src_dir="$1" dest_dir="$2" file sha removed=0
+  [ -d "$dest_dir" ] && [ "$MODE" != check ] || return 0
+  while IFS= read -r file <&3; do
+    [ ! -e "${src_dir}/${file}" ] || continue
+    sha="$(file_sha "${dest_dir}/${file}")"
+    if [ "$(manifest_get "${dest_dir}/${file}")" = "$sha" ] || known_old "${src_dir}/${file}" "$sha"; then
+      rm -f "${dest_dir}/${file}"
+      removed=$((removed + 1))
+    fi
+  done 3< <(cd "$dest_dir" && find . -type f | sed 's|^\./||')
+  find "$dest_dir" -depth -mindepth 1 -type d -empty -exec rmdir {} + 2>/dev/null || true
+  if [ "$removed" -gt 0 ]; then
+    info "Removed ${removed} files of an older herdspace from $(short_home "$dest_dir")."
+    CHANGED=$((CHANGED + 1))
+  fi
+}
+
 # seed_file copies SRC to DEST only if DEST is missing.
 seed_file() {
   [ -e "$2" ] && return 0
