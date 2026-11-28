@@ -54,6 +54,16 @@ Run each check. Do not install a missing tool without the agreement of the perso
 
 Run a test that takes more than two minutes in the background, with its output in a log file in `tests/.work`. Watch it with a quiet script. The script prints a line in two cases: the test ends, or the log stops growing for five minutes. Start such a script with `bash` by name, because your own shell can be zsh. If a test stops moving, find the cause. For example, a question can wait for an answer. Do not wait forever.
 
+## The Python unit tests on Linux
+
+A unit test can take another code path on Linux than on macOS. For example, `ports.py` reads `/proc` on Linux and runs `lsof` on macOS. On a Mac, run the unit tests in a Linux container too, before you push:
+
+```bash
+docker run --rm -v "$PWD:/src:ro" -w /src python:3.12-slim python3 -B -m unittest discover -s tests/python
+```
+
+A test can also check a process by its command line, as the client test does for the palette. Such a check breaks when a command starts another program in its place, for example `bin/hopen`, which runs Python. Match a part of the command line that each form has.
+
 ## A slow machine
 
 A CI runner, and an arm64 runner most of all, is slower than your machine. A race that never shows on your machine can fail there. A change can touch the palette, quick open, or another step that waits for Herdr or Neovim. Before you push it, run the Linux test once with less than one CPU. Make a copy of `tests/run-linux.sh` that adds `--cpus 0.7` to `docker run`, and run the copy. Do not commit the copy.
