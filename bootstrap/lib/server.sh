@@ -10,7 +10,7 @@ HERDR_CONFIG_BEFORE=""
 setup_server_files() {
   local lazygit_dir="$1"
   HERDR_CONFIG_BEFORE="$(file_sha "${HOME}/.config/herdr/config.toml" 2>/dev/null || true)"
-  install_file "${REPO_ROOT}/config/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
+  install_herdr_config
   install_file "${REPO_ROOT}/config/lazygit/config.yml" "${lazygit_dir}/config.yml"
   move_old_nvim
   # Neovim owns lazy-lock.json after the first start. :Lazy update changes it.
@@ -22,6 +22,26 @@ setup_server_files() {
   install_file "${REPO_ROOT}/bin/hopen" "${HOME}/.local/bin/hopen" 755
   install_file "${REPO_ROOT}/bin/herdr-update-check" "${HOME}/.local/bin/herdr-update-check" 755
   install_tree "${REPO_ROOT}/config/templates" "${HOME}/.config/hopen/templates"
+}
+
+# shellcheck source=lib/herdspace/prefix.sh
+source "${REPO_ROOT}/lib/herdspace/prefix.sh"
+
+# install_herdr_config installs the Herdr configuration. A prefix that the
+# person chose with "herdspace prefix" stays: the setup writes it into a copy
+# of config/herdr/config.toml, and installs the copy.
+install_herdr_config() {
+  local src="${REPO_ROOT}/config/herdr/config.toml" key copy
+  key="$(prefix_saved || true)"
+  if [ -z "$key" ] || [ "$key" = "$(prefix_of "$src")" ]; then
+    install_file "$src" "${HOME}/.config/herdr/config.toml"
+    return
+  fi
+  copy="$(mktemp)"
+  prefix_write "$src" "$key" "$copy"
+  KNOWN_SRC="$src" install_file "$copy" "${HOME}/.config/herdr/config.toml"
+  rm -f "$copy"
+  info "The Herdr prefix stays $(prefix_label "$key"). To change it, run: herdspace prefix KEY"
 }
 
 # The herdspace editor is Neovim with NVIM_APPNAME=herdspace-nvim: its files are
