@@ -58,7 +58,7 @@ The code can change after the last tag while a skill stays the same. Then `tools
 |------|-----|
 | `bootstrap.sh` | The setup, with the tag written in it. From `curl`, it downloads the archive of its own tag. |
 | `herdspace-<tag>.tar.gz` | Each file that git tracks, and each new file that git does not ignore, except `tests/`, `docs/media/`, and `dist/`. A build with no `--publish` can also hold files that are not committed yet. Only `--publish` needs a clean folder. |
-| `install.sh` and `hopen-<tag>.tar.gz` | The install of only `hopen` and its templates. |
+| `install.sh` and `hopen-<tag>.tar.gz` | The install of only `hopen`, its Python package `lib/hopen/`, and its templates. `install.sh` also removes the modules of an older `hopen` that the release no longer has. |
 | `SHA256SUMS` | The checksums that `bootstrap.sh` and `install.sh` compare. |
 
 The `hopen` in both archives has the tag in `HOPEN_VERSION`. In an early pre-release, the full archive held `HOPEN_VERSION="dev"`, and `bootstrap.sh --check` reported the `hopen` from `install.sh` as changed. If you change `tools/release.sh`, run `tests/test-install.sh`. It builds a release and installs from it.
