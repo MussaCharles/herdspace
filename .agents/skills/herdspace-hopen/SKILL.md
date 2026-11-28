@@ -80,7 +80,7 @@ Each of these mistakes broke `hopen` one time:
 - The bash completion must run on bash 3.2, the bash of macOS. Do not use `mapfile` or `compopt`.
 - On macOS, `/var` is a link to `/private/var`, and `lsof` shows the real path. Compare folders with their real paths.
 - Small Linux systems have no `ss` and no `lsof`. `--ports` reads `/proc/net/tcp` and `/proc/net/tcp6` on Linux.
-- A command line is visible to each user in `ps`. Send an environment value to a child program on stdin, not as an argument.
+- A command line is visible to each user in `ps`. Send an environment value to a child program on stdin or on another file descriptor, not as an argument. `list_trusted` sends the env file values on fd 3 and the question on fd 4 to `trust.py`, because stdin must stay free for the answer.
 - A checksum that is not 64 hexadecimal characters means "not approved". An empty checksum must never match.
 - A Herdr popup has `HERDR_ACTIVE_PANE_ID` and no `HERDR_PANE_ID`. Use `${HERDR_PANE_ID:-${HERDR_ACTIVE_PANE_ID:-}}` for the pane to split.
 - `herdr pane split` gives the focus to the new pane only with `--focus`. `herdr pane focus` takes a direction, not a pane ID, so `focus_pane` steps from the focused pane toward the target through `herdr pane layout`.
