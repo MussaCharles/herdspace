@@ -194,7 +194,10 @@ cat >"$tmp/bin/herdr" <<'STUB'
 #!/usr/bin/env bash
 echo "herdr $*" >>"$HOME/herdr.log"
 case "$*" in
-  "config check") if grep -q 'bogus' "$HERDR_CONFIG_PATH"; then printf 'config: issues found\ninvalid keybinding: keys.prefix\n'; exit 1; fi; echo 'config: ok' ;;
+  "config check")
+    if grep -q 'herdspace-no-theme' "$HERDR_CONFIG_PATH"; then printf 'config: issues found\nunknown theme name; valid themes: catppuccin, dracula, nord\n'; exit 1; fi
+    if grep -q 'bogus' "$HERDR_CONFIG_PATH"; then printf 'config: issues found\ninvalid keybinding: keys.prefix\n'; exit 1; fi
+    echo 'config: ok' ;;
   "session list --json") echo '{"sessions":[{"name":"work","running":true},{"name":"old","running":false}]}' ;;
   *) exit 0 ;;
 esac
@@ -210,7 +213,7 @@ contains "$(hs prefix)" 'The prefix: Ctrl+Space' 'prefix shows ctrl+space by def
 contains "$(hs prefix ctrl+space)" 'Nothing to change' 'prefix with the same key changes nothing'
 out="$(hs prefix Ctrl+A)"
 contains "$out" 'The prefix: Ctrl+A. An update keeps it.' 'prefix ctrl+a changes the key'
-contains "$out" 'Session work uses the new prefix now.' 'prefix reloads the running session'
+contains "$out" 'Session work uses it now.' 'prefix reloads the running session'
 lacks "$out" 'Session old' 'prefix leaves a stopped session'
 grep -q 'herdr --session work server reload-config' "$HOME/herdr.log" && pass 'prefix runs reload-config' || fail 'prefix runs reload-config'
 grep -qx 'prefix = "ctrl+a"' "$conf" && pass 'prefix writes the configuration' || fail 'prefix writes the configuration'
@@ -238,6 +241,54 @@ rm -f "$conf"
 contains "$(hs prefix ctrl+a)" 'no Herdr configuration yet' 'prefix with no configuration says so'
 [ "$(cat "$HOME/.config/herdspace/prefix" 2>/dev/null)" = ctrl+a ] && pass 'prefix with no configuration saves the choice' || fail 'prefix with no configuration saves the choice'
 rm -f "$tmp/bin/herdr" "$HOME/.config/herdspace/prefix"
+
+# theme and color: the same saved choices, in the [theme] and [theme.custom]
+# tables. The stub herdr names three themes.
+cat >"$tmp/bin/herdr" <<'STUB'
+#!/usr/bin/env bash
+echo "herdr $*" >>"$HOME/herdr.log"
+case "$*" in
+  "config check")
+    if grep -q 'herdspace-no-theme' "$HERDR_CONFIG_PATH"; then printf 'config: issues found\nunknown theme name; valid themes: catppuccin, dracula, nord\n'; exit 1; fi
+    echo 'config: ok' ;;
+  "session list --json") echo '{"sessions":[{"name":"work","running":true}]}' ;;
+  *) exit 0 ;;
+esac
+STUB
+chmod 755 "$tmp/bin/herdr"
+cp "$ROOT/config/herdr/config.toml" "$conf"
+printf '%s\t%s\n' "$conf" "$(sha "$conf")" >"$HOME/.local/share/herdspace/manifest.tsv"
+grep -qx 'name = "dracula"' "$conf" && pass 'the repository theme is dracula, as THEME_DEFAULT' || fail 'the repository theme is dracula, as THEME_DEFAULT'
+out="$(hs theme)"
+contains "$out" 'The theme of Herdr: dracula.' 'theme shows the theme'
+contains "$out" 'The themes: catppuccin dracula nord' 'theme lists the themes of the installed Herdr'
+contains "$(hs theme Nord)" 'The theme: nord. An update keeps it.' 'theme nord changes the theme'
+grep -qx 'name = "nord"' "$conf" && pass 'theme writes the [theme] table' || fail 'theme writes the [theme] table'
+[ "$(cat "$HOME/.config/herdspace/theme" 2>/dev/null)" = nord ] && pass 'theme saves the choice' || fail 'theme saves the choice'
+out="$(hs theme fancy 2>&1)"; rc=$?
+contains "$out" "'fancy' is not a theme of Herdr" 'theme with a wrong name says so'
+[ "$rc" -eq 2 ] && pass 'theme with a wrong name exits 2' || fail "theme with a wrong name exits 2: ${rc}"
+hs theme random >/dev/null
+new_theme="$(cat "$HOME/.config/herdspace/theme" 2>/dev/null || echo dracula)"
+case "$new_theme" in catppuccin | dracula) pass 'theme random picks another theme' ;; *) fail "theme random picks another theme: ${new_theme}" ;; esac
+hs theme default >/dev/null
+[ ! -e "$HOME/.config/herdspace/theme" ] && grep -qx 'name = "dracula"' "$conf" && pass 'theme default goes back to dracula' || fail 'theme default goes back to dracula'
+contains "$(hs color)" 'the color of the theme' 'color shows the color of the theme by default'
+contains "$(hs color pink)" 'The accent color: pink (#ec4899). An update keeps it.' 'color pink changes the accent'
+[ "$(awk '/^\[theme.custom\]/{t=1;next} /^\[/{t=0} t && /^accent/' "$conf")" = 'accent = "#ec4899"' ] && pass 'color writes the [theme.custom] table' || fail 'color writes the [theme.custom] table'
+[ "$(grep -c '^accent' "$conf")" -eq 1 ] && pass 'color keeps one accent line' || fail 'color keeps one accent line'
+contains "$(hs color '#AABBCC')" 'The accent color: #aabbcc.' 'color takes a #rrggbb value'
+out="$(hs color fancy 2>&1)"; rc=$?
+contains "$out" "'fancy' is not a color" 'color with a wrong name says so'
+[ "$rc" -eq 2 ] && pass 'color with a wrong name exits 2' || fail "color with a wrong name exits 2: ${rc}"
+hs color random >/dev/null
+case "$(cat "$HOME/.config/herdspace/accent")" in '#'??????) pass 'color random picks a color of the list' ;; *) fail 'color random picks a color of the list' ;; esac
+hs color default >/dev/null
+[ ! -e "$HOME/.config/herdspace/accent" ] && ! grep -q '^accent' "$conf" && pass 'color default removes the accent' || fail 'color default removes the accent'
+sha_now="$(sha "$conf")"
+grep -qF "${conf}	${sha_now}" "$HOME/.local/share/herdspace/manifest.tsv" && pass 'theme and color keep the manifest up to date' || fail 'theme and color keep the manifest up to date'
+cmp -s "$ROOT/config/herdr/config.toml" "$conf" && pass 'the defaults give back the file of the repository' || fail 'the defaults give back the file of the repository'
+rm -f "$tmp/bin/herdr"
 
 echo "RESULT failures=${failures}"
 exit $((failures > 0))
