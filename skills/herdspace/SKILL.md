@@ -91,6 +91,10 @@ To update only `hopen`:
 curl -fsSL https://github.com/MussaCharles/herdspace/releases/latest/download/install.sh | bash
 ```
 
+## Change the prefix key, the theme, or the accent color
+
+On a server, `herdspace prefix KEY` changes the prefix key of Herdr, for example `herdspace prefix ctrl+a`. `herdspace theme NAME` changes the Herdr theme, and `herdspace color NAME` changes the accent color, the color of the headers. Each takes `random` and `default` too, and shows the current value with no argument. The palette has the same three actions in the herdspace group. Do not edit these values in `~/.config/herdr/config.toml` by hand: the commands save the choice, so that an update keeps it and asks no question.
+
 ## Rules
 
 - Do not stop the Herdr server, and do not close a workspace, a tab, or a pane of the person.

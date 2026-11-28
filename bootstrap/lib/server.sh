@@ -24,24 +24,26 @@ setup_server_files() {
   install_tree "${REPO_ROOT}/config/templates" "${HOME}/.config/hopen/templates"
 }
 
+# shellcheck source=lib/herdspace/herdrconf.sh
+source "${REPO_ROOT}/lib/herdspace/herdrconf.sh"
 # shellcheck source=lib/herdspace/prefix.sh
 source "${REPO_ROOT}/lib/herdspace/prefix.sh"
 
-# install_herdr_config installs the Herdr configuration. A prefix that the
-# person chose with "herdspace prefix" stays: the setup writes it into a copy
-# of config/herdr/config.toml, and installs the copy.
+# install_herdr_config installs the Herdr configuration. The choices of the
+# person stay: the prefix ("herdspace prefix"), the theme, and the accent
+# color. The setup writes them into a copy of config/herdr/config.toml, and
+# installs the copy.
 install_herdr_config() {
-  local src="${REPO_ROOT}/config/herdr/config.toml" key copy
-  key="$(prefix_saved || true)"
-  if [ -z "$key" ] || [ "$key" = "$(prefix_of "$src")" ]; then
+  local src="${REPO_ROOT}/config/herdr/config.toml" copy
+  copy="$(mktemp)"
+  if ! hc_render "$src" "$copy"; then
+    rm -f "$copy"
     install_file "$src" "${HOME}/.config/herdr/config.toml"
     return
   fi
-  copy="$(mktemp)"
-  prefix_write "$src" "$key" "$copy"
   KNOWN_SRC="$src" install_file "$copy" "${HOME}/.config/herdr/config.toml"
   rm -f "$copy"
-  info "The Herdr prefix stays $(prefix_label "$key"). To change it, run: herdspace prefix KEY"
+  info "Your Herdr choices stay: $(hc_saved_list). See: herdspace prefix, herdspace theme, herdspace color"
 }
 
 # The herdspace editor is Neovim with NVIM_APPNAME=herdspace-nvim: its files are

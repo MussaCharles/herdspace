@@ -108,11 +108,13 @@ class NoItem(Exception):
         self.picked = list(picked)
 
 
-def choose(prompt, items, read=_tty_line):
+def choose(prompt, items, read=_tty_line, ansi=False):
     """Show a menu of ITEMS, the text of "key<TAB>text" lines, and return the
-    chosen key, or "" if the person cancels. An unknown answer raises NoItem."""
+    chosen key, or "" if the person cancels. An unknown answer raises NoItem.
+    With ANSI, fzf shows the colors of the text."""
     if has_fzf():
-        out = run_fzf(prompt, items, "--delimiter", "\t", "--with-nth", "2..", "--prompt", f"{prompt} > ",
+        extra = ["--ansi"] if ansi else []
+        out = run_fzf(prompt, items, *extra, "--delimiter", "\t", "--with-nth", "2..", "--prompt", f"{prompt} > ",
                       "--header", "Esc cancels.", "--height", "40%", "--reverse", "--no-multi")
         return "\n".join(line.split("\t")[0] for line in out.split("\n") if line)
     lines = items.split("\n")

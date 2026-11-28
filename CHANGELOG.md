@@ -7,6 +7,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 ### Added
 
 - `herdspace prefix [KEY|default]` shows or changes the prefix key of Herdr. Herdr checks the key first, and each running session reloads its configuration, so the new key works at once. The choice is in `~/.config/herdspace/prefix`, and an update keeps it.
+- `herdspace theme [NAME|random|default]` and `herdspace color [NAME|#rrggbb|random|default]` change the theme of Herdr and its accent color, the color of the headers and the highlights. `random` chooses one for you. An update keeps the choices. See [Theme and colors](docs/look.md).
+- The command palette has "herdspace: Change the Herdr theme" and "herdspace: Change the Herdr accent color", with a color sample for each entry and "Random" first.
 - The command palette has "herdspace: Change the Herdr prefix key". The right side of the row shows the current prefix. The list offers `Ctrl+Space`, `Ctrl+A`, `Ctrl+S`, `Ctrl+B`, and a key that you type.
 
 ### Changed

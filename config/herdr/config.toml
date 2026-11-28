@@ -2,6 +2,8 @@
 # After a change, run: herdr server reload-config
 onboarding = false
 
+# To change the theme or the accent color, run: herdspace theme, or:
+# herdspace color. The setup keeps those choices and writes them here.
 [theme]
 name = "dracula"
 auto_switch = false

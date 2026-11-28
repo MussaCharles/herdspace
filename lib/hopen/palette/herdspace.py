@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 
-from .. import core, panes, prefix, ui
+from .. import core, look, panes, prefix, ui
 from . import then_wait
 
 
@@ -29,6 +29,8 @@ def items(ctx):
     if kind in ("server", "both"):
         ctx.add("hs-editor", "herdspace", "Show or change the editor mode: reader or normal", "herdspace editor")
         ctx.add("hs-prefix", "herdspace", "Change the Herdr prefix key", f"now {prefix.now(ctx.home)}")
+        ctx.add("hs-theme", "herdspace", "Change the Herdr theme", f"now {look.theme(ctx.home)}")
+        ctx.add("hs-color", "herdspace", "Change the Herdr accent color", f"now {look.color_name(look.accent(ctx.home))}")
 
 
 def run_here(*args):
@@ -100,10 +102,38 @@ def change_prefix(ctx, action):
     return then_wait("herdspace", "prefix", pick)
 
 
+def change_theme(ctx, action):
+    now = look.theme(ctx.home)
+    print(f"  The theme of Herdr: {now}. Choose a new one. Esc keeps it.", flush=True)
+    pick = choose_look("Theme", look.theme_rows(now, look.menu_colors()))
+    if not pick or pick == now:
+        raise SystemExit(0)
+    return then_wait("herdspace", "theme", pick)
+
+
+def change_color(ctx, action):
+    now = look.accent(ctx.home)
+    print(f"  The accent color of Herdr: {look.color_name(now)}. Choose a new one. Esc keeps it.", flush=True)
+    pick = choose_look("Color", look.color_rows(now, look.menu_colors()))
+    if not pick or (pick == "default" and not now) or dict(look.COLORS).get(pick) == now:
+        raise SystemExit(0)
+    return then_wait("herdspace", "color", pick)
+
+
+def choose_look(prompt, rows):
+    try:
+        return ui.choose(prompt, rows, ansi=True)
+    except ui.NoItem as error:
+        print(f"  [err]  {error}", file=sys.stderr)
+        raise SystemExit(1)
+
+
 ACTIONS = {
     "hs-version": lambda ctx, action: then_wait("herdspace", "--version"),
     "hs-update": update,
     "hs-keys": keys,
     "hs-editor": editor_mode,
     "hs-prefix": change_prefix,
+    "hs-theme": change_theme,
+    "hs-color": change_color,
 }
