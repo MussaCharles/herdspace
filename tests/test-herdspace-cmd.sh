@@ -187,5 +187,57 @@ out="$(hs editor fancy 2>&1)"; rc=$?
 contains "$out" "'fancy' is not an editor mode" 'editor with a wrong word says so'
 [ "$rc" -eq 2 ] && pass 'editor with a wrong word exits 2' || fail "editor with a wrong word exits 2: ${rc}"
 
+# prefix: show the key, check a new one with herdr, write it in the Herdr
+# configuration and the manifest, save the choice, and reload each session.
+# The stub herdr knows one running session, and refuses the key bogus+zz.
+cat >"$tmp/bin/herdr" <<'STUB'
+#!/usr/bin/env bash
+echo "herdr $*" >>"$HOME/herdr.log"
+case "$*" in
+  "config check") if grep -q 'bogus' "$HERDR_CONFIG_PATH"; then printf 'config: issues found\ninvalid keybinding: keys.prefix\n'; exit 1; fi; echo 'config: ok' ;;
+  "session list --json") echo '{"sessions":[{"name":"work","running":true},{"name":"old","running":false}]}' ;;
+  *) exit 0 ;;
+esac
+STUB
+chmod 755 "$tmp/bin/herdr"
+conf="$HOME/.config/herdr/config.toml"
+mkdir -p "$(dirname "$conf")"
+cp "$ROOT/config/herdr/config.toml" "$conf"
+sha() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d ' ' -f 1; else shasum -a 256 "$1" | cut -d ' ' -f 1; fi; }
+printf '%s\t%s\n' "$conf" "$(sha "$conf")" >"$HOME/.local/share/herdspace/manifest.tsv"
+contains "$(hs --help)" 'herdspace prefix [KEY|default]' 'help lists prefix'
+contains "$(hs prefix)" 'The prefix: Ctrl+Space' 'prefix shows ctrl+space by default'
+contains "$(hs prefix ctrl+space)" 'Nothing to change' 'prefix with the same key changes nothing'
+out="$(hs prefix Ctrl+A)"
+contains "$out" 'The prefix: Ctrl+A. An update keeps it.' 'prefix ctrl+a changes the key'
+contains "$out" 'Session work uses the new prefix now.' 'prefix reloads the running session'
+lacks "$out" 'Session old' 'prefix leaves a stopped session'
+grep -q 'herdr --session work server reload-config' "$HOME/herdr.log" && pass 'prefix runs reload-config' || fail 'prefix runs reload-config'
+grep -qx 'prefix = "ctrl+a"' "$conf" && pass 'prefix writes the configuration' || fail 'prefix writes the configuration'
+[ "$(grep -c '^prefix' "$conf")" -eq 1 ] && pass 'prefix keeps one prefix line' || fail 'prefix keeps one prefix line'
+[ "$(cat "$HOME/.config/herdspace/prefix" 2>/dev/null)" = ctrl+a ] && pass 'prefix saves the choice' || fail 'prefix saves the choice'
+sha="$(sha "$conf")"
+grep -qF "${conf}	${sha}" "$HOME/.local/share/herdspace/manifest.tsv" && pass 'prefix records the new file in the manifest' || fail 'prefix records the new file in the manifest'
+out="$(hs prefix bogus+zz 2>&1)"; rc=$?
+contains "$out" "Herdr does not accept 'bogus+zz'" 'prefix with a key that Herdr refuses says so'
+[ "$rc" -eq 2 ] && pass 'prefix with a refused key exits 2' || fail "prefix with a refused key exits 2: ${rc}"
+grep -qx 'prefix = "ctrl+a"' "$conf" && pass 'a refused key changes nothing' || fail 'a refused key changes nothing'
+out="$(hs prefix 'ctrl+"' 2>&1)"; rc=$?
+[ "$rc" -eq 2 ] && pass 'prefix with a quote exits 2' || fail "prefix with a quote exits 2: ${rc}"
+# A person changed the file: the prefix changes, and the manifest stays, so
+# that the next update asks about the file.
+echo '# my line' >>"$conf"
+before="$(cat "$HOME/.local/share/herdspace/manifest.tsv")"
+hs prefix ctrl+s >/dev/null
+grep -qx 'prefix = "ctrl+s"' "$conf" && grep -qx '# my line' "$conf" && pass 'prefix keeps the lines of a person' || fail 'prefix keeps the lines of a person'
+[ "$(cat "$HOME/.local/share/herdspace/manifest.tsv")" = "$before" ] && pass 'prefix leaves the manifest of a changed file' || fail 'prefix leaves the manifest of a changed file'
+contains "$(hs prefix default)" 'The prefix: Ctrl+Space' 'prefix default goes back to ctrl+space'
+[ ! -e "$HOME/.config/herdspace/prefix" ] && pass 'prefix default removes the saved choice' || fail 'prefix default removes the saved choice'
+# With no Herdr configuration, as on a client, the choice is only saved.
+rm -f "$conf"
+contains "$(hs prefix ctrl+a)" 'no Herdr configuration yet' 'prefix with no configuration says so'
+[ "$(cat "$HOME/.config/herdspace/prefix" 2>/dev/null)" = ctrl+a ] && pass 'prefix with no configuration saves the choice' || fail 'prefix with no configuration saves the choice'
+rm -f "$tmp/bin/herdr" "$HOME/.config/herdspace/prefix"
+
 echo "RESULT failures=${failures}"
 exit $((failures > 0))
