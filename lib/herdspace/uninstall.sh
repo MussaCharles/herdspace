@@ -240,14 +240,14 @@ un_state() {
   local conf="${HOME}/.config/herdspace" self="${HOME}/.local/bin/herdspace" file
   if [ -d "$conf" ]; then
     if [ "$UN_CHECK" -eq 0 ]; then
-      rm -f "$conf/keys" "$conf/look" "$conf/editor"
+      rm -f "$conf/keys" "$conf/look" "$conf/editor" "$conf/prefix"
       if rmdir "$conf" 2>/dev/null; then
         un_say remove "$(un_home "$conf")/"
       else
         printf '  %-9s %s\n' keep "$(un_home "$conf")/ (it holds a backup or a file of yours)"
       fi
     else
-      un_say remove "$(un_home "$conf")/ (your choice of keys, look, and editor, and the folder if it is empty)"
+      un_say remove "$(un_home "$conf")/ (your choice of keys, look, editor, and prefix, and the folder if it is empty)"
     fi
   fi
   if [ -d "$CACHE" ]; then

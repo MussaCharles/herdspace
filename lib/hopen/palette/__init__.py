@@ -16,7 +16,7 @@ import os
 import subprocess
 import sys
 
-from .. import core, panes, ui
+from .. import core, panes, prefix, ui
 
 GROUPS = ["projects", "tasks", "files", "git", "agents", "layout", "tabs", "sessions", "network",
           "herdspace", "herdr", "help"]
@@ -141,8 +141,9 @@ def menu(ctx, recent_path, read=None):
     if ui.has_fzf():
         header = "Type to filter. Enter runs. Esc closes. At the right: the key or the command of each action."
         if ctx.pane:
-            header += ("\nThis palette: Cmd+Shift+P, or Ctrl+B, then A. On Linux, Cmd keys are Ctrl+Shift"
-                       " (Cmd+P is Ctrl+B, then F).")
+            key = prefix.now(ctx.home)
+            header += (f"\nThis palette: Cmd+Shift+P, or {key}, then A. On Linux, Cmd keys are Ctrl+Shift"
+                       f" (Cmd+P is {key}, then F).")
             header += "\nA program opens: Ctrl+V on the right, Ctrl+S below, Ctrl+T in a new tab."
         field = "4" if ui.ui_color() else "3"
         text = "\n".join("\t".join(row) for row in rows)

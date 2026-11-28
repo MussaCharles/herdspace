@@ -30,11 +30,14 @@ manifest_set() {
 }
 
 # known_old SRC SHA succeeds if SHA is the hash of an older herdspace version
-# of SRC. tools/known-hashes.sh writes the list from the git history.
+# of SRC. tools/known-hashes.sh writes the list from the git history. For a
+# file that the setup writes from a changed copy, KNOWN_SRC names the file of
+# the repository.
 known_old() {
   local list="${REPO_ROOT:-}/bootstrap/known-hashes.tsv" rel
   [ -n "${REPO_ROOT:-}" ] && [ -f "$list" ] || return 1
-  rel="${1#"${REPO_ROOT}"/}"
+  rel="${KNOWN_SRC:-$1}"
+  rel="${rel#"${REPO_ROOT}"/}"
   grep -Fxq -- "${rel}"$'\t'"${2}" "$list"
 }
 

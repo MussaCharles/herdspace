@@ -13,7 +13,7 @@ By default, the client setup changes some keys of Ghostty and macOS. With the ch
 | `Cmd+K` | `Ctrl+Shift+K` | Ghostty, on a Mac: clear the screen | Herdr: go to any workspace, tab, or agent |
 | `Cmd+E` | `Ctrl+Shift+E` | Ghostty: search for the selected text on a Mac, or split down on Linux | Neovim: go to the file tree. On a Mac, Ghostty still searches when you select text in Ghostty. |
 | `Cmd+Shift+G` | `Ctrl+Shift+G` | Ghostty, on a Mac: go to the previous search result | Herdr: open lazygit over the pane. On a Mac, Ghostty still uses it while its search is open. |
-| `Cmd+P` | | Ghostty: nothing | Herdr: quick open, a file in the editor of the tab. On Linux, use `Ctrl+B`, then `F`, because `Ctrl+P` stays with the shell and Neovim. |
+| `Cmd+P` | | Ghostty: nothing | Herdr: quick open, a file in the editor of the tab. On Linux, use `Ctrl+Space`, then `F`, because `Ctrl+P` stays with the shell and Neovim. |
 | `Cmd+Shift+P` | `Ctrl+Shift+P` | Ghostty: the command palette of Ghostty | Herdr: the command palette of `hopen` |
 | | `Ctrl+Shift+F` | Ghostty: search | Neovim: search the project |
 | `Option` | | macOS: type special characters, for example `å` | Sends `Alt`, for the `Alt` keys of Herdr and Neovim |
@@ -59,18 +59,32 @@ After a change of `background-opacity` or `macos-titlebar-style`, quit Ghostty a
 
 ## Every Herdr action has a prefix key too
 
-The prefix key of Herdr is `Ctrl+B`. Press it, release it, and then press the key of the action. These keys work with no change to the terminal:
+The prefix key of Herdr is `Ctrl+Space`. Press it, release it, and then press the key of the action. These keys work with no change to the terminal:
 
 | Action | Prefix key |
 |--------|-----------|
-| New tab | `Ctrl+B`, then `C` |
-| Close the tab | `Ctrl+B`, then `Shift+X` |
-| Go to any workspace, tab, or agent | `Ctrl+B`, then `G` |
-| Previous or next tab | `Ctrl+B`, then `P` or `N` |
-| Next or previous pane | `Ctrl+B`, then `Tab` or `Shift+Tab` |
-| lazygit | `Ctrl+B`, then `D` |
-| The command palette of `hopen` | `Ctrl+B`, then `A` |
-| Quick open a file | `Ctrl+B`, then `F` |
+| New tab | `Ctrl+Space`, then `C` |
+| Close the tab | `Ctrl+Space`, then `Shift+X` |
+| Go to any workspace, tab, or agent | `Ctrl+Space`, then `G` |
+| Previous or next tab | `Ctrl+Space`, then `P` or `N` |
+| Next or previous pane | `Ctrl+Space`, then `Tab` or `Shift+Tab` |
+| lazygit | `Ctrl+Space`, then `D` |
+| The command palette of `hopen` | `Ctrl+Space`, then `A` |
+| Quick open a file | `Ctrl+Space`, then `F` |
+
+## The prefix key
+
+herdspace sets the prefix to `Ctrl+Space`, because one hand presses both keys. Herdr and tmux use `Ctrl+B` by default.
+
+On a Mac, macOS also uses `Ctrl+Space` for the shortcut "Select the previous input source". If you have more than one input source, macOS takes the key before Herdr gets it. To give the key to Herdr, open System Settings, Keyboard, Keyboard Shortcuts, Input Sources, and turn off that shortcut. On Linux, an input method such as Fcitx or IBus can also use `Ctrl+Space`. Turn off that key in its settings.
+
+To change the prefix, open the command palette and choose "herdspace: Change the Herdr prefix key". The right side of the row shows the current prefix. The list offers `Ctrl+Space`, `Ctrl+A`, `Ctrl+S`, and `Ctrl+B`, and "Another key" for a key that you type. You can also run the command:
+
+```bash
+herdspace prefix ctrl+a
+```
+
+`herdspace prefix` with no key shows the current prefix. `herdspace prefix default` goes back to `Ctrl+Space`. Herdr checks the key first, and each running session uses the new key at once. The choice is in `~/.config/herdspace/prefix`, and an update of herdspace keeps it. The palette and its hints show the current prefix. These docs show `Ctrl+Space`.
 
 The [cheat sheet](cheat-sheet.md) has every key for daily use. The [keyboard docs of Herdr](https://herdr.dev/tui/docs/keyboard/) list every key of Herdr, and explain the prefix key.
 

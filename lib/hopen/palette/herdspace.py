@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 
-from .. import core, panes, ui
+from .. import core, panes, prefix, ui
 from . import then_wait
 
 
@@ -28,6 +28,7 @@ def items(ctx):
         ctx.add("hs-keys", "herdspace", "Show or change the Ghostty keys", "herdspace keys")
     if kind in ("server", "both"):
         ctx.add("hs-editor", "herdspace", "Show or change the editor mode: reader or normal", "herdspace editor")
+        ctx.add("hs-prefix", "herdspace", "Change the Herdr prefix key", f"now {prefix.now(ctx.home)}")
 
 
 def run_here(*args):
@@ -70,9 +71,39 @@ def editor_mode(ctx, action):
     return then_wait("herdspace", "editor", pick)
 
 
+# The keys that the prefix menu offers, with the reason for each.
+PREFIXES = [
+    ("ctrl+space", "one hand presses both keys. The herdspace default."),
+    ("ctrl+a", "next to Caps Lock. The shell then needs Ctrl+A twice to go to the line start."),
+    ("ctrl+s", "next to Ctrl+A. Some programs use it to save."),
+    ("ctrl+b", "the default of Herdr and tmux."),
+]
+
+
+def prefix_rows(now):
+    rows = []
+    for key, why in PREFIXES:
+        mark = "  (now)" if key == now else ""
+        rows.append(f"{key}\t%-12s %s{mark}" % (prefix.label(key), why))
+    rows.append("other\tAnother key       Type a key, for example ctrl+q or cmd+shift+space.")
+    return "\n".join(rows)
+
+
+def change_prefix(ctx, action):
+    now = prefix.current(ctx.home)
+    print(f"  The prefix of Herdr: {prefix.label(now)}. Choose a new one. Esc keeps it.", flush=True)
+    pick = choose("Prefix", prefix_rows(now))
+    if pick == "other":
+        pick = ui.ask_text("The key, as Herdr writes it (ctrl+q)").strip()
+    if not pick or pick == now:
+        raise SystemExit(0)
+    return then_wait("herdspace", "prefix", pick)
+
+
 ACTIONS = {
     "hs-version": lambda ctx, action: then_wait("herdspace", "--version"),
     "hs-update": update,
     "hs-keys": keys,
     "hs-editor": editor_mode,
+    "hs-prefix": change_prefix,
 }

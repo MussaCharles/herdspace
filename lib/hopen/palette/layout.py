@@ -1,7 +1,7 @@
 """The Layout group of the command palette."""
 import os
 
-from .. import panes, templates
+from .. import panes, prefix, templates
 from . import then_wait
 
 
@@ -16,9 +16,10 @@ def items(ctx):
             name = line.split(" ")[0]
             if name != "plain":
                 ctx.add(f"apply:{name}", "Layout", f"Split the current tab with the template {name}", f"hopen --apply {name}")
-        ctx.add("split-right", "Layout", "Split right", "Ctrl+B V")
-        ctx.add("split-down", "Layout", "Split down", "Ctrl+B -")
-        ctx.add("zoom", "Layout", "Zoom the pane, or return", "Ctrl+B Z")
+        key = prefix.now(ctx.home)
+        ctx.add("split-right", "Layout", "Split right", f"{key} V")
+        ctx.add("split-down", "Layout", "Split down", f"{key} -")
+        ctx.add("zoom", "Layout", "Zoom the pane, or return", f"{key} Z")
     ctx.add("templates", "Layout", "Show every template", "hopen --templates")
 
 

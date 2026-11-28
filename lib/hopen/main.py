@@ -11,7 +11,7 @@ import os
 import re
 import sys
 
-from . import completion, convert, core, lists, palette, ports, quickopen, search, sessions, tasks, templates, ui
+from . import completion, convert, core, lists, palette, ports, prefix, quickopen, search, sessions, tasks, templates, ui
 
 USAGE = """Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]
        hopen            (in a terminal: choose a list from a menu)
@@ -31,7 +31,10 @@ USAGE = """Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] 
        hopen --palette
        hopen --version"""
 
-IN_HERDR = "You are in a Herdr pane. Press ctrl+b, then q, and run this command again."
+def in_herdr(home):
+    return f"You are in a Herdr pane. Press {prefix.now(home)}, then Q, and run this command again."
+
+
 BAD_NAME = "A session name can use only letters, numbers, dots, dashes, and underscores."
 
 
@@ -247,7 +250,7 @@ def main(version, self_path, argv):
         return 0
     if not run.session and sys.stdin.isatty() and sys.stdout.isatty():
         if os.environ.get("HERDR_ENV") == "1" and o.attach:
-            raise core.Fail(IN_HERDR)
+            raise core.Fail(in_herdr(home))
         run.session = pick_list(home)
     if not run.session:
         usage_error()
@@ -267,7 +270,7 @@ def main(version, self_path, argv):
     if not core.valid_name(run.session):
         raise core.Fail(BAD_NAME)
     if os.environ.get("HERDR_ENV") == "1" and o.attach:
-        raise core.Fail(IN_HERDR)
+        raise core.Fail(in_herdr(home))
     if not run.list_file and not run.folder:
         found, warnings = lists.find_lists(home)
         for line in warnings:

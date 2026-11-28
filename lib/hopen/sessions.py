@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 
-from . import core, lists, templates, trust
+from . import core, lists, prefix, templates, trust
 
 RS, US = "\x1e", "\x1f"
 
@@ -317,7 +317,7 @@ class Run:
 
     def attach(self):
         if os.environ.get("HERDR_ENV") == "1":
-            raise core.Fail("You are in a Herdr pane. Press ctrl+b, then q, and run this command again.")
+            raise core.Fail(f"You are in a Herdr pane. Press {prefix.now(self.home)}, then Q, and run this command again.")
         sys.stdout.flush()
         core.exec_program(["herdr", "session", "attach", self.session])
 

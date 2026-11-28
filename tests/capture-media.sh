@@ -137,13 +137,13 @@ record_start move-panes
 WAIT=2.5 press alt+Down 'Alt+Down: next pane'
 WAIT=2.5 press alt+Down 'Alt+Down: next pane'
 WAIT=2.5 press alt+Up 'Alt+Up: previous pane'
-WAIT=0.6 press ctrl+b 'ctrl+b, z: zoom'
+WAIT=0.6 press ctrl+space 'ctrl+space, z: zoom'
 WAIT=3 key z
-WAIT=0.6 press ctrl+b 'ctrl+b, z: zoom back'
+WAIT=0.6 press ctrl+space 'ctrl+space, z: zoom back'
 WAIT=3 key z
-WAIT=0.6 press ctrl+b 'ctrl+b, l: pane on the right'
+WAIT=0.6 press ctrl+space 'ctrl+space, l: pane on the right'
 WAIT=2.5 key l
-WAIT=0.6 press ctrl+b 'ctrl+b, j: pane below'
+WAIT=0.6 press ctrl+space 'ctrl+space, j: pane below'
 WAIT=2.5 key j
 record_stop move-panes
 
@@ -151,13 +151,13 @@ record_stop move-panes
 focus_ws my-projects
 clear_idle
 record_start split-panes
-WAIT=0.6 press ctrl+b 'ctrl+b, v: split right'
+WAIT=0.6 press ctrl+space 'ctrl+space, v: split right'
 WAIT=3 key v
-WAIT=0.6 press ctrl+b 'ctrl+b, -: split down'
+WAIT=0.6 press ctrl+space 'ctrl+space, -: split down'
 WAIT=3 key minus
-WAIT=0.6 press ctrl+b 'ctrl+b, x: close the pane'
+WAIT=0.6 press ctrl+space 'ctrl+space, x: close the pane'
 WAIT=3 key x
-WAIT=0.6 press ctrl+b 'ctrl+b, x: close the pane'
+WAIT=0.6 press ctrl+space 'ctrl+space, x: close the pane'
 WAIT=3 key x
 record_stop split-panes
 

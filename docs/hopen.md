@@ -171,15 +171,15 @@ A task is a command from the list, so it needs the same approval as `on_open`. S
 
 ## The command palette
 
-The palette is the place to start an action. In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. `Ctrl+B`, then `A` also works. Outside Herdr, run `hopen --palette`.
+The palette is the place to start an action. In Herdr, press `Cmd+Shift+P` on a Mac or `Ctrl+Shift+P` on Linux. `Ctrl+Space`, then `A` also works. Outside Herdr, run `hopen --palette`.
 
-Each action has a group and a name, as in VS Code, and the key or command for it at the right, with the direct key first, for example `Cmd+T, Ctrl+B C`. On Linux, a `Cmd` key is `Ctrl+Shift`, except for quick open, which is `Ctrl+B`, then `F`. Type to filter the list, and press Enter to run an action. Esc closes the palette. With no fzf, the palette shows a numbered menu with a heading for each group.
+Each action has a group and a name, as in VS Code, and the key or command for it at the right, with the direct key first, for example `Cmd+T, Ctrl+Space C`. On Linux, a `Cmd` key is `Ctrl+Shift`, except for quick open, which is `Ctrl+Space`, then `F`. Type to filter the list, and press Enter to run an action. Esc closes the palette. With no fzf, the palette shows a numbered menu with a heading for each group.
 
 The palette, quick open, and the search look like the popups of Herdr: the colors of the Herdr theme, and a rounded frame with a label. Each group of the palette has its own color, for example green for Projects and orange for Files. Quick open shows the folder of a file dim and the file name bright. To turn off the colors, set `NO_COLOR=1`. The colors are in one place at the top of the popup part of `bin/hopen`.
 
 ### Quick open
 
-Press `Cmd+P` in Herdr, as in VS Code. On Linux, press `Ctrl+B`, then `F`, because `Ctrl+P` stays with the shell and Neovim. A popup lists the files of the git project of the focused pane, or of its folder, with a preview. Type to filter, and press Enter:
+Press `Cmd+P` in Herdr, as in VS Code. On Linux, press `Ctrl+Space`, then `F`, because `Ctrl+P` stays with the shell and Neovim. A popup lists the files of the git project of the focused pane, or of its folder, with a preview. Type to filter, and press Enter:
 
 1. If the focused pane runs Neovim, the file opens there.
 2. If the focused pane is a shell at its prompt, Neovim opens the file in that pane. When you close Neovim, the shell comes back.

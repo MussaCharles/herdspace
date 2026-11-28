@@ -73,5 +73,21 @@ before="$(find "$HOME" -name '*.bak-*' -not -path '*/.cache/*' | wc -l)"
 after="$(find "$HOME" -name '*.bak-*' -not -path '*/.cache/*' | wc -l)"
 [ "$before" -eq "$after" ] && pass "a second update changes no file" || fail "a second update changes no file: ${before} ${after} backups"
 
+# The prefix: an older install gets ctrl+space with no question. A prefix that
+# the person chose stays through the next update, also when a newer release
+# changes the file. The repository copy in the container plays the new release.
+conf="${HOME}/.config/herdr/config.toml"
+grep -qx 'prefix = "ctrl+space"' "$conf" && pass "the update sets the prefix ctrl+space" || fail "the update sets the prefix ctrl+space: $(grep '^prefix' "$conf")"
+"${HOME}/.local/bin/herdspace" prefix ctrl+a >/tmp/upgrade-prefix.log 2>&1 || { cat /tmp/upgrade-prefix.log; fail "herdspace prefix ctrl+a runs"; }
+cp config/herdr/config.toml /tmp/config.toml.repo
+printf '# A new line of a newer release.\n' >>config/herdr/config.toml
+out="$(differs "$@")"
+[ "$out" = "$EDIT" ] && pass "with a saved prefix, an update asks about no new file" || fail "with a saved prefix, an update asks about no new file: ${out}"
+./bootstrap.sh server "$@" </dev/null >/tmp/upgrade-prefix-update.log 2>&1 || fail "the update with a saved prefix runs"
+grep -qx 'prefix = "ctrl+a"' "$conf" && pass "the update keeps the saved prefix" || fail "the update keeps the saved prefix: $(grep '^prefix' "$conf")"
+grep -q 'A new line of a newer release' "$conf" && pass "the update with a saved prefix installs the new file" || fail "the update with a saved prefix installs the new file"
+grep -q 'The Herdr prefix stays Ctrl+A' /tmp/upgrade-prefix-update.log && pass "the update says that the prefix stays" || fail "the update says that the prefix stays"
+cp /tmp/config.toml.repo config/herdr/config.toml
+
 echo "RESULT upgrade-${TAG} failures=${failures}"
 exit $((failures > 0))
