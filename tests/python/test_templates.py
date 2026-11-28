@@ -57,7 +57,7 @@ class TemplatesTest(unittest.TestCase):
         self.addCleanup(os.environ.update, old)
         os.environ["PATH"] = f"{self.dir}:{os.environ['PATH']}"
         os.environ["CALLS"] = str(calls)
-        templates.guard("p1\teditor\n\x1ep1\tapi\n", "0.8")
+        templates.guard("p1\teditor\n\x1ep1\tapi\n", "2")
         made = calls.read_text().split("\n")
         self.assertIn("pane rename p1 editor", made)
         self.assertIn("tab rename t1 api", made)
