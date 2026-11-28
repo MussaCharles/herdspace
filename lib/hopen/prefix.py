@@ -14,22 +14,27 @@ def config_path(home):
     return os.environ.get("HERDR_CONFIG_PATH") or os.path.join(home, ".config", "herdr", "config.toml")
 
 
-def current(home):
-    """The prefix of the Herdr configuration, as Herdr writes it: ctrl+space."""
+def value(home, table, key):
+    """The string value of KEY in TABLE of the Herdr configuration, or ""."""
     try:
         with open(config_path(home), encoding="utf-8", errors="replace") as handle:
             lines = handle.read().split("\n")
     except OSError:
-        return HERDR_DEFAULT
-    keys = False
+        return ""
+    inside = False
     for line in lines:
         if line.startswith("["):
-            keys = line.strip() == "[keys]"
+            inside = line.strip() == f"[{table}]"
             continue
-        match = keys and re.match(r'^prefix\s*=\s*"([^"]*)"', line)
+        match = inside and re.match(rf'^{re.escape(key)}\s*=\s*"([^"]*)"', line)
         if match:
             return match.group(1)
-    return HERDR_DEFAULT
+    return ""
+
+
+def current(home):
+    """The prefix of the Herdr configuration, as Herdr writes it: ctrl+space."""
+    return value(home, "keys", "prefix") or HERDR_DEFAULT
 
 
 def label(key):
