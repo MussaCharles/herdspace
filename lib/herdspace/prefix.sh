@@ -5,7 +5,7 @@
 
 # PREFIX_DEFAULT is the prefix of config/herdr/config.toml. Herdr itself uses
 # ctrl+b when the configuration has no prefix.
-PREFIX_DEFAULT="ctrl+space"
+PREFIX_DEFAULT="alt+space"
 
 # prefix_of FILE prints the prefix of a Herdr configuration, or ctrl+b when
 # the [keys] table has no prefix.
@@ -15,7 +15,7 @@ prefix_of() {
   printf '%s\n' "${key:-ctrl+b}"
 }
 
-# prefix_label KEY prints KEY as the docs write it: ctrl+space is Ctrl+Space.
+# prefix_label KEY prints KEY as the docs write it: alt+space is Alt+Space.
 prefix_label() {
   printf '%s\n' "$1" | awk -F '+' '{
     out = ""
@@ -43,7 +43,7 @@ cmd_prefix() {
   fi
   want="$(printf '%s' "$want" | tr '[:upper:]' '[:lower:]')"
   [ "$want" != default ] || want="$PREFIX_DEFAULT"
-  hc_text_ok "$want" || { printf "herdspace: '%s' is not a key. Use a key such as ctrl+space or ctrl+a.\n" "$1" >&2; exit 2; }
+  hc_text_ok "$want" || { printf "herdspace: '%s' is not a key. Use a key such as alt+space or ctrl+s.\n" "$1" >&2; exit 2; }
   if [ "$want" = "$now" ]; then
     printf '  The prefix is %s already. Nothing to change.\n' "$label"
     return 0

@@ -45,13 +45,14 @@ rows = [
 [ui.sound]
 enabled = false
 
-# The prefix is ctrl+space: one hand presses both keys, and the shell and
-# Neovim do not use it. To change it, run: herdspace prefix KEY. The setup keeps
-# that choice in ~/.config/herdspace/prefix and writes it on the line below.
+# The prefix is alt+space, Option+Space on a Mac: one hand presses both keys,
+# and the shell, Neovim, and the agents do not use it. Ghostty sends Option as
+# Alt (macos-option-as-alt). To change it, run: herdspace prefix KEY. The setup
+# keeps that choice in ~/.config/herdspace/prefix and writes it below.
 # The client bootstrap scripts release the other keys in Ghostty. A Mac uses
 # the Cmd keys. Linux uses the ctrl+shift keys.
 [keys]
-prefix = "ctrl+space"
+prefix = "alt+space"
 new_tab = ["prefix+c", "cmd+t", "ctrl+shift+t"]
 close_tab = ["prefix+shift+x", "cmd+w", "ctrl+shift+w"]
 goto = ["prefix+g", "cmd+k", "ctrl+shift+k"]
