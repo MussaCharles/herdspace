@@ -4,6 +4,10 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- `hopen --palette` and the other commands no longer stop with a Python traceback on a machine with no `git`, `fd`, `rg`, `fzf`, or `herdr`. A missing program is a failed command again, as in 0.16.0.
+
 ## [0.17.0] - 2026-11-28
 
 ### Changed

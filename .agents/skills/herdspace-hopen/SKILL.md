@@ -75,6 +75,7 @@ Each of these mistakes broke `hopen` one time:
 - With an empty `TERM`, or `TERM=dumb`, fzf draws nothing. `ui.has_fzf()` is false then, and the menus use the numbered menu.
 - `bin/hopen` runs the package with `python3 -I -B`. `-I` keeps out the environment and the current folder, and `-B` writes no `__pycache__` folder next to the installed files, which the uninstall could not remove. `install.sh` copies the `.py` files of `lib/hopen/`, and removes the files that a release no longer ships.
 - When you change how a part behaves, compare the old and the new `hopen` on the same input before the merge. The move to Python did this for each module, for example the old `find_lists` and the new one on a home folder with hard cases. Run each compare with `env -i` and a temporary `HOME`, so that it never talks to your own Herdr server.
+- Start an outside program with `core.run`, `core.popen`, or `core.exec_program`, never with `subprocess` or `os.execvp` alone. Python raises an error for a missing program, where bash only got a failed command, and `hopen` 0.17.0 stopped with a traceback on a machine with no `git`. `tests/python/test_missing_programs.py` runs `bin/hopen` with a PATH that lacks the outside programs.
 - The Python parts must run on Python 3.11. Python 3.11 refuses a backslash inside the braces of an f-string. Use `.format`.
 - The bash completion must run on bash 3.2, the bash of macOS. Do not use `mapfile` or `compopt`.
 - On macOS, `/var` is a link to `/private/var`, and `lsof` shows the real path. Compare folders with their real paths.
