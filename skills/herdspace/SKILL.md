@@ -10,7 +10,7 @@ metadata:
 
 herdspace has two parts. `hopen` opens the projects of a list in one Herdr session. `bootstrap.sh` sets up a machine. A list is a `herdspace.toml` file in a folder, or a VS Code workspace file. Each list becomes one Herdr session, with the name of the folder or the file.
 
-If `hopen --version` fails, herdspace is not installed. Follow the agent install steps at `https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md`.
+If `hopen --version` fails, herdspace is not installed. `hopen` needs Python 3.11 or later, which the server setup installs. Follow the agent install steps at `https://raw.githubusercontent.com/MussaCharles/herdspace/main/install.md`.
 
 ## Open projects
 
