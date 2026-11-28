@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import completion, convert, core, lists, ports, templates
+from . import completion, convert, core, lists, ports, templates, trust
 
 
 def _read_list(args):
@@ -78,7 +78,34 @@ def _ports(args):
     return 0
 
 
+def _read_fd(fd):
+    # A here-string of bash ends with one new line more.
+    try:
+        with open(fd, "rb", closefd=False) as handle:
+            data = handle.read()
+    except OSError:
+        return b""
+    return data[:-1] if data.endswith(b"\n") else data
+
+
+def _list_actions(args):
+    for line in trust.list_actions([line for line in sys.stdin.read().split("\n") if line]):
+        print(line)
+    return 0
+
+
+def _trust(args):
+    # The values of the env files come on fd 3, and the lines of the question
+    # on fd 4, because another user can read the arguments of a process.
+    path, trust_flag, state_dir = (args + ["", "0", ""])[:3]
+    extra = _read_fd(3)
+    actions = _read_fd(4).decode("utf-8", "surrogateescape")
+    return 0 if trust.list_trusted(path, actions, extra, state_dir, trust_flag == "1") else 1
+
+
 INTERNAL = {
+    "list-actions": _list_actions,
+    "trust": _trust,
     "ports": _ports,
     "templates": _templates,
     "template-lines": _template_lines,
