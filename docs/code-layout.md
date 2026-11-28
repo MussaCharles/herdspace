@@ -31,11 +31,11 @@ The setup installs the modules before the command, so that a new command never r
 | `lib/hopen/trust.sh` and `trust.py` | The approval of the commands and environment values of a list. `trust.py` does the work. It reads the env file values on fd 3 and the question on fd 4, because another user can read the arguments of a process. |
 | `lib/hopen/sessions.sh` | The Herdr sessions: start one, open the projects of a list, start the programs again, and attach. |
 | `lib/hopen/templates.sh` and `templates.py` | The layout templates: find, list, and apply one, and the guard of the pane names. `templates.py` lists and reads the templates, and runs the guard. |
-| `lib/hopen/panes.sh` | The Herdr panes: wait for one, split, open a tab, find the editor of a tab, and open a file in it. |
-| `lib/hopen/editor.sh` | Open a file in the editor, and the command that starts the herdspace Neovim. |
+| `lib/hopen/panes.sh` and `panes.py` | The Herdr panes: wait for one, split, open a tab, find the editor of a tab, and open a file in it. `panes.py` does the work. |
+| `lib/hopen/editor.sh` and `editor.py` | Open a file in the editor, and the command that starts the herdspace Neovim. `editor.py` does the work. |
 | `lib/hopen/tasks.sh` and `tasks.py` | `hopen --task`, with the environment of the project. `tasks.py` does the work. |
-| `lib/hopen/search.sh` and `search.py` | Find and search the files of a project, also with the files that `.gitignore` names. `search.py` builds the commands of `fd` and `rg`. |
-| `lib/hopen/quickopen.sh` | Quick open, like `Ctrl+P` in VS Code. |
+| `lib/hopen/search.sh` and `search.py` | The file lists and the text search of a project, also with the files that `.gitignore` names. `search.py` builds the commands of `fd` and `rg`. |
+| `lib/hopen/quickopen.sh` and `quickopen.py` | Quick open, like `Ctrl+P` in VS Code, and the menus of `hopen --find` and `--grep`. `quickopen.py` does the work. |
 | `lib/hopen/ports.sh` and `ports.py` | `hopen --ports`, like the Ports view of VS Code. `ports.py` does the work. |
 | `lib/hopen/convert.sh` and `convert.py` | `hopen --convert`: write a `herdspace.toml` file from a VS Code workspace file. `convert.py` does the work. |
 | `lib/hopen/completion.sh` and `completion.py` | The shell completion, for zsh and bash. `completion.py` holds the scripts. |

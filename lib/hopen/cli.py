@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import completion, convert, core, lists, ports, search, tasks, templates, trust, ui
+from . import completion, convert, core, editor, lists, panes, ports, quickopen, search, tasks, templates, trust, ui
 
 
 def _read_list(args):
@@ -168,7 +168,62 @@ def _search_text(args):
     return search.exec_command(search.text_command(args[0] if args else "", args[1:]))
 
 
+def _home():
+    return os.environ.get("HOME", "")
+
+
+def _quick(args):
+    return quickopen.quick_open(args[0] if args else "", [search.search_dir(d) for d in args[1:]], _home())
+
+
+def _find(args):
+    return quickopen.find_file(args[0] if args else "", [search.search_dir(d) for d in args[1:]])
+
+
+def _grep(args):
+    folder, text = (args + ["", ""])[:2]
+    return quickopen.grep_files(folder, text, [search.search_dir(d) for d in args[2:]], _home())
+
+
+def _place(args):
+    # The first four arguments of a pane command: PANE WORKSPACE TAB WHERE.
+    return panes.Place(*(args + ["", "", "", ""])[:4]), args[4:]
+
+
+def _run_at(args):
+    place, rest = _place(args)
+    default, label, folder, command = (rest + ["", "", "", ""])[:4]
+    panes.run_at(place, default, label, folder, command)
+    return 0
+
+
+def _split_run(args):
+    place, rest = _place(args)
+    direction, folder, command = (rest + ["", "", ""])[:3]
+    panes.split_run(place, direction, folder, command)
+    return 0
+
+
+def _new_tab_run(args):
+    place, rest = _place(args)
+    label, folder, command = (rest + ["", "", ""])[:3]
+    panes.new_tab_run(place, label, folder, command)
+    return 0
+
+
+def _editor_command(args):
+    print(editor.editor_command(_home()), end="")
+    return 0
+
+
 INTERNAL = {
+    "quick": _quick,
+    "find": _find,
+    "grep": _grep,
+    "run-at": _run_at,
+    "split-run": _split_run,
+    "new-tab-run": _new_tab_run,
+    "editor-command": _editor_command,
     "list-files": _list_files,
     "list-folders": _list_folders,
     "search-text": _search_text,
