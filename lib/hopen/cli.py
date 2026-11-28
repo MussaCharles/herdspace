@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import lists
+from . import convert, core, lists
 
 
 def _read_list(args):
@@ -36,7 +36,16 @@ def _no_list(args):
     return 1
 
 
+def _convert(args):
+    session, forced = (args + ["", ""])[:2]
+    home = os.environ.get("HOME", "")
+    target, source = convert.convert_list(session, home, forced)
+    print(f"  [info] Wrote {core.short_path(target, home)}. hopen now uses it in place of {core.short_path(source, home)}.")
+    return 0
+
+
 INTERNAL = {
+    "convert": _convert,
     "no-list": _no_list,
     "read-list": _read_list,
     "find-lists": _find_lists,
