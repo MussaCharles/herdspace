@@ -119,7 +119,10 @@ has "$(hopen --convert conv 2>&1; cat ~/conv/herdspace.toml 2>/dev/null)" '[[pro
 if [ "$ONLY_HOPEN" -eq 1 ] && [ ! -e "$HOME/.config/herdr/config.toml" ]; then
   mkdir -p "$HOME/.config/herdr" && printf 'onboarding = false\n' >"$HOME/.config/herdr/config.toml"
 fi
-a="$($PTY 8 '\x1b q' hopen work 2>&1; echo "status=$?")"
+# The detach key is the prefix, then q. The full setup sets the prefix
+# alt+space (ESC and a space). With only hopen, Herdr keeps its own ctrl+b.
+if grep -qx 'prefix = "alt+space"' "$HOME/.config/herdr/config.toml" 2>/dev/null; then detach='\x1b q'; else detach='\x02q'; fi
+a="$($PTY 8 "$detach" hopen work 2>&1; echo "status=$?")"
 has "$a" 'status=0' 'hopen work attaches, and the detach key exits'
 
 echo "RESULT pass=$ok fail=$bad"
