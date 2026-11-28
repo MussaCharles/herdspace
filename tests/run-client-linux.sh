@@ -40,9 +40,9 @@ moved="$(focused)"
 if [ -n "$moved" ] && [ "$start" != "$moved" ]; then pass 'Ctrl+Down changes the workspace'; else fail "Ctrl+Down changes the workspace: ${start}"; fi
 [ "$moved" = website ] || { echo "focused workspace is ${moved}"; }
 
-key ctrl+space; key v
+key alt+space; key v
 type_text 'clear; cd src && ls'
-key ctrl+space; key h
+key alt+space; key h
 type_text 'clear; git status --short'
 sleep 1
 shot panes
