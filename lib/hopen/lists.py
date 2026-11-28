@@ -11,7 +11,6 @@ any Python 3. A herdspace.toml file needs Python 3.11 or later, for tomllib.
 """
 import glob
 import json
-import locale
 import os
 import re
 import sys
@@ -291,17 +290,8 @@ def read_list(path, what, forced=""):
     return lines
 
 
-def _collate(text):
-    # bash and sort order names with the collation of the locale.
-    try:
-        locale.setlocale(locale.LC_COLLATE, "")
-        return locale.strxfrm(text)
-    except locale.Error:
-        return text
-
-
 def _sorted_glob(pattern):
-    return sorted(glob.glob(pattern), key=_collate)
+    return sorted(glob.glob(pattern), key=core.collate)
 
 
 def _session_of(path):
@@ -379,7 +369,7 @@ def no_list_message(name, sessions):
     closest one for a typo, and how to make the list."""
     import difflib
 
-    names = sorted(set(sessions), key=_collate)
+    names = sorted(set(sessions), key=core.collate)
     out = [f"  [err]  No list of projects named {name}."]
     if names:
         out.append("         Your lists: " + ", ".join(names))

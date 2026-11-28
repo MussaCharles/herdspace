@@ -1,4 +1,5 @@
 """The common helpers of hopen: messages, names, and paths."""
+import locale
 import os
 import re
 import sys
@@ -9,6 +10,15 @@ NAME = re.compile(r"[A-Za-z0-9._-]+")
 def valid_name(name):
     """A session name uses letters, numbers, dots, dashes, and underscores."""
     return bool(NAME.fullmatch(name or ""))
+
+
+def collate(text):
+    """The sort key of bash globs and sort: the collation of the locale."""
+    try:
+        locale.setlocale(locale.LC_COLLATE, "")
+        return locale.strxfrm(text)
+    except locale.Error:
+        return text
 
 
 def short_path(path, home=None):
