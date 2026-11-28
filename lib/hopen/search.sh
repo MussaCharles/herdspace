@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Find and search the files of a project, also with the files that .gitignore names.
+# The folders of --with-ignored. lib/hopen/search.py finds and searches the files.
 # bin/hopen loads this file. It defines functions and variables, and runs nothing.
 
 # SEARCH_IN holds the folders of --with-ignored. When it has folders, the file
@@ -12,18 +12,3 @@ add_search_dir() {
   case "$d" in -*) d="./$d" ;; esac
   SEARCH_IN+=("$d")
 }
-
-# lib/hopen/search.py builds the commands of these three functions.
-# list_files prints the files of the current folder. With SEARCH_IN, it prints
-# only the files of those folders, with the files that .gitignore names, but
-# not the folders of SKIP_DIRS.
-list_files() { hopen_py internal list-files ${SEARCH_IN[@]+"${SEARCH_IN[@]}"}; }
-
-# list_folders prints the folders of the current folder, with the folders that
-# .gitignore names, but not the folders of SKIP_DIRS.
-list_folders() { hopen_py internal list-folders; }
-
-# search_text prints the lines of the files that hold GREP_TEXT, as
-# "file:line:text". With SEARCH_IN, it searches only those folders, with the
-# files that .gitignore names, but not the folders of SKIP_DIRS.
-search_text() { hopen_py internal search-text "$GREP_TEXT" ${SEARCH_IN[@]+"${SEARCH_IN[@]}"}; }
