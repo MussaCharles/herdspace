@@ -216,7 +216,22 @@ def _editor_command(args):
     return 0
 
 
+def _palette(args):
+    from . import palette
+    self_path, print_only = (args + ["", "0"])[:2]
+    return palette.palette(self_path, _home(), print_only == "1")
+
+
+def _palette_owner(args):
+    from . import palette
+    for action in args:
+        print(action + "\t" + " ".join(palette.owner(action)))
+    return 0
+
+
 INTERNAL = {
+    "palette": _palette,
+    "palette-owner": _palette_owner,
     "quick": _quick,
     "find": _find,
     "grep": _grep,

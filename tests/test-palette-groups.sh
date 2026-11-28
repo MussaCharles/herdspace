@@ -48,18 +48,15 @@ print_actions() {
     TERM=dumb HERDR_PANE_ID="$pane" HERDR_SESSION=default "$hopen" --palette --print)
 }
 
-# patterns GROUP prints the patterns of the case of pal_run_GROUP, one on each line.
-patterns() {
-  awk -v f="pal_run_$1() {" '$0 == f { on = 1; next } on && /^}/ { exit }
-    on && /^    [^ ].*\)/ { sub(/^    /, ""); sub(/\).*/, ""); print }' "${ROOT}/lib/hopen/palette/$1.sh" |
-    tr '|' '\n' | sed 's/^ *//; s/ *$//' | grep -vx '\*'
-}
-
-groups="$(sed -n 's/^PAL_GROUPS="\(.*\)"$/\1/p' "${ROOT}/lib/hopen/palette.sh")"
-[ -n "$groups" ] && pass "palette.sh names the groups" || fail "palette.sh names the groups"
+groups="$(python3 -I -c 'import ast, sys
+tree = ast.parse(open(sys.argv[1]).read())
+for node in tree.body:
+    if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "") == "GROUPS":
+        print(" ".join(ast.literal_eval(node.value)))' "${ROOT}/lib/hopen/palette/__init__.py")"
+[ -n "$groups" ] && pass "the palette names the groups" || fail "the palette names the groups"
 for g in $groups; do
-  [ -f "${ROOT}/lib/hopen/palette/${g}.sh" ] && grep -q "source \"\${HOPEN_LIB}/palette/${g}.sh\"" "${ROOT}/bin/hopen" &&
-    pass "the group ${g} has a file that bin/hopen loads" || fail "the group ${g} has a file that bin/hopen loads"
+  [ -f "${ROOT}/lib/hopen/palette/${g}.py" ] && grep -q '^ACTIONS = {' "${ROOT}/lib/hopen/palette/${g}.py" &&
+    pass "the group ${g} has a file with its table of actions" || fail "the group ${g} has a file with its table of actions"
 done
 
 for pane in "" p1; do
@@ -67,18 +64,8 @@ for pane in "" p1; do
   [ -z "$pane" ] || where="in Herdr"
   ids="$(print_actions "${ROOT}/bin/hopen" "$pane" | cut -f1)"
   [ "$(grep -c . <<<"$ids")" -ge 15 ] && pass "the palette lists actions ${where}" || fail "the palette lists actions ${where}: ${ids}"
-  bad=""
-  while IFS= read -r id; do
-    [ -n "$id" ] || continue
-    owners=0
-    for g in $groups; do
-      while IFS= read -r pat; do
-        # shellcheck disable=SC2254
-        case "$id" in $pat) owners=$((owners + 1)); break ;; esac
-      done < <(patterns "$g")
-    done
-    [ "$owners" -eq 1 ] || bad="${bad} ${id}(${owners})"
-  done <<<"$ids"
+  # owners prints "id<TAB>group..." for each id: the groups whose table has it.
+  bad="$(python3 -I -B "${ROOT}/lib/hopen/__main__.py" internal palette-owner $ids | awk -F '\t' 'split($2, g, " ") != 1 { printf " %s(%d)", $1, split($2, g, " ") }')"
   [ -z "$bad" ] && pass "each action ${where} has exactly one group that runs it" || fail "each action ${where} has exactly one group that runs it:${bad}"
   if [ -n "${1:-}" ]; then
     if diff <(print_actions "$1" "$pane") <(print_actions "${ROOT}/bin/hopen" "$pane") >"${tmp}/diff"; then

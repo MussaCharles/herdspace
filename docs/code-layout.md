@@ -6,7 +6,7 @@ This page is for people who change herdspace. It says what each file of the code
 
 | Command | Main file | Modules | Installed to |
 |---------|-----------|---------|--------------|
-| `hopen` | `bin/hopen` | `lib/hopen/*.sh` and `lib/hopen/palette/*.sh` | `~/.local/bin/hopen` and `~/.local/lib/hopen/` |
+| `hopen` | `bin/hopen` | `lib/hopen/*.sh`, `lib/hopen/*.py`, and `lib/hopen/palette/*.py` | `~/.local/bin/hopen` and `~/.local/lib/hopen/` |
 | `herdspace` | `bin/herdspace` | `lib/herdspace/*.sh` | `~/.local/bin/herdspace` and `~/.local/lib/herdspace/` |
 | The setup | `bootstrap.sh` and `bootstrap/platforms/*.sh` | `bootstrap/lib/*.sh` | Not installed. The setup runs from the release folder. |
 
@@ -39,17 +39,18 @@ The setup installs the modules before the command, so that a new command never r
 | `lib/hopen/ports.sh` and `ports.py` | `hopen --ports`, like the Ports view of VS Code. `ports.py` does the work. |
 | `lib/hopen/convert.sh` and `convert.py` | `hopen --convert`: write a `herdspace.toml` file from a VS Code workspace file. `convert.py` does the work. |
 | `lib/hopen/completion.sh` and `completion.py` | The shell completion, for zsh and bash. `completion.py` holds the scripts. |
-| `lib/hopen/palette.sh` | The menu of the command palette, the recent actions, and `PAL_GROUPS`, the groups in the order of the menu. |
-| `lib/hopen/palette/<group>.sh` | One group of actions of the palette, for example `git.sh` or `layout.sh`. |
+| `lib/hopen/palette.sh` | Starts the command palette in Python. |
+| `lib/hopen/palette/__init__.py` | The menu of the command palette, the recent actions, and `GROUPS`, the groups in the order of the menu. |
+| `lib/hopen/palette/<group>.py` | One group of actions of the palette, for example `git.py` or `layout.py`. |
 
 ### Add an action to the palette
 
 1. Open the file of its group in `lib/hopen/palette/`.
-2. In `pal_items_<group>`, add a line `pal_add ID GROUP TEXT HINT`. The ID must be new, and it must stay the same later, because the recent list saves the IDs.
-3. In the `case` of `pal_run_<group>`, add a branch for the ID.
-4. Run `tests/test-palette-groups.sh`. If an action has no group that runs it, the test fails.
+2. In `items(ctx)`, add a line `ctx.add(ID, GROUP, TEXT, HINT)`. The ID must be new, and it must stay the same later, because the recent list saves the IDs.
+3. In the table `ACTIONS`, add the ID and the function that runs it. An ID that ends with `:` matches each ID that starts with it, for example `open:` for `open:work`.
+4. Run `tests/test-palette-groups.sh` and `python3 -B -m unittest discover -s tests/python`. If an action has no group that runs it, the test fails.
 
-A new group needs three things: a new file with both functions, its name in `PAL_GROUPS`, and a `source` line in `bin/hopen`. Put a `# shellcheck source=` line above the `source` line.
+A new group needs a new file with `items` and `ACTIONS`, and its name in `GROUPS` in `__init__.py`.
 
 ## The herdspace command
 
