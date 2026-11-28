@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 
-from . import lists
+from . import core, lists
 
 
 def project_folders(home):
@@ -34,7 +34,7 @@ def show_ports(folders):
 
     def run(*args):
         try:
-            return subprocess.run(args, capture_output=True, text=True, timeout=10).stdout
+            return core.run(args, capture_output=True, text=True, timeout=10).stdout
         except (OSError, subprocess.SubprocessError):
             return ""
 
