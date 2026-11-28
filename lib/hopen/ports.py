@@ -88,10 +88,19 @@ def show_ports(folders):
             if not entry.isdigit():
                 continue
             try:
-                links = [os.readlink(f"/proc/{entry}/fd/{fd}") for fd in os.listdir(f"/proc/{entry}/fd")]
+                fds = os.listdir(f"/proc/{entry}/fd")
                 name = open(f"/proc/{entry}/comm").read().strip()
             except OSError:
                 continue
+            # A descriptor can close between the list and its readlink, for
+            # example the one that listdir itself used. It skips only that
+            # descriptor, not the whole process.
+            links = []
+            for fd in fds:
+                try:
+                    links.append(os.readlink(f"/proc/{entry}/fd/{fd}"))
+                except OSError:
+                    pass
             for link in links:
                 inode = link[8:-1] if link.startswith("socket:[") else None
                 if inode in listening:
