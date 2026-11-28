@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import convert, core, lists
+from . import completion, convert, core, lists
 
 
 def _read_list(args):
@@ -44,7 +44,13 @@ def _convert(args):
     return 0
 
 
+def _completion(args):
+    sys.stdout.write(completion.completion_script(args[0] if args else ""))
+    return 0
+
+
 INTERNAL = {
+    "completion": _completion,
     "convert": _convert,
     "no-list": _no_list,
     "read-list": _read_list,
