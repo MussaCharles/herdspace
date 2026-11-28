@@ -39,33 +39,13 @@ set -euo pipefail
 
 # The release script writes the release tag here.
 HOPEN_VERSION="dev"
-SESSION=""
-LIST_FILE=""
-ATTACH=1
-ACTION="one"
-TEMPLATE_FLAG=""
-APPLY_NAME=""
-SHELL_NAME=""
-COMPLETE_WHAT=""
-TEMPLATE_DIR="${HOPEN_TEMPLATES:-${XDG_CONFIG_HOME:-$HOME/.config}/hopen/templates}"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hopen"
-STARTED=0
-# GUARD_PAIRS holds one "pane id<TAB>name" line for each pane that a template named.
-GUARD_PAIRS=""
-# GUARD_TABS holds one "root pane id<TAB>name" line for each tab that a list named.
-GUARD_TABS=""
-# ENV_ARGS holds one "--env KEY=VALUE" pair for each environment value of the
-# project that hopen opens now. Each new workspace, tab, and pane gets them.
-ENV_ARGS=()
-TRUST_FLAG=0
-TASK_NAME=""
-GREP_TEXT=""
-# FOLDER is set for "hopen <folder>" when the folder has no list of its own.
-FOLDER=""
 
-# hopen_lib prints the folder of the modules of hopen: lib/hopen, next to the
-# bin folder of this file, also when hopen is a symbolic link. The setup
+# hopen is Python, in lib/hopen next to the bin folder of this file. This file
+# finds that folder, picks Python 3.11 or later, and starts it. The setup
 # installs the modules to ~/.local/lib/hopen, next to ~/.local/bin/hopen.
+
+# hopen_lib prints the folder of the modules of hopen, also when hopen is a
+# symbolic link.
 hopen_lib() {
   local self="${BASH_SOURCE[0]}" dir
   while [ -L "$self" ]; do
@@ -76,188 +56,24 @@ hopen_lib() {
   dir="$(cd "$(dirname "$self")" && pwd -P)"
   printf '%s/../lib/hopen' "$dir"
 }
-HOPEN_LIB="$(hopen_lib)"
-[ -f "${HOPEN_LIB}/core.sh" ] || { printf '  [err]  hopen cannot find its modules in %s. Run: herdspace update\n' "$HOPEN_LIB" >&2; exit 1; }
 
-# shellcheck source-path=SCRIPTDIR/..
-# shellcheck source=lib/hopen/core.sh
-source "${HOPEN_LIB}/core.sh"
-# shellcheck source=lib/hopen/ui.sh
-source "${HOPEN_LIB}/ui.sh"
-# shellcheck source=lib/hopen/completion.sh
-source "${HOPEN_LIB}/completion.sh"
-# shellcheck source=lib/hopen/templates.sh
-source "${HOPEN_LIB}/templates.sh"
-# shellcheck source=lib/hopen/lists.sh
-source "${HOPEN_LIB}/lists.sh"
-# shellcheck source=lib/hopen/trust.sh
-source "${HOPEN_LIB}/trust.sh"
-# shellcheck source=lib/hopen/tasks.sh
-source "${HOPEN_LIB}/tasks.sh"
-# shellcheck source=lib/hopen/sessions.sh
-source "${HOPEN_LIB}/sessions.sh"
-# shellcheck source=lib/hopen/convert.sh
-source "${HOPEN_LIB}/convert.sh"
-# shellcheck source=lib/hopen/search.sh
-source "${HOPEN_LIB}/search.sh"
-# shellcheck source=lib/hopen/quickopen.sh
-source "${HOPEN_LIB}/quickopen.sh"
-# shellcheck source=lib/hopen/ports.sh
-source "${HOPEN_LIB}/ports.sh"
-# shellcheck source=lib/hopen/palette.sh
-source "${HOPEN_LIB}/palette.sh"
-
-usage() {
-  echo "Usage: hopen <session> [--template NAME] [--file PATH] [--no-attach] [--trust]"
-  echo "       hopen            (in a terminal: choose a list from a menu)"
-  echo "       hopen <folder>   (for example: hopen .)"
-  echo "       hopen --all [session] [--template NAME]"
-  echo "       hopen --list"
-  echo "       hopen --templates"
-  echo "       hopen --apply NAME"
-  echo "       hopen --convert NAME"
-  echo "       hopen --completion zsh|bash"
-  echo "       hopen --task [NAME]"
-  echo "       hopen --find"
-  echo "       hopen --quick-open"
-  echo "       hopen --grep TEXT"
-  echo "       hopen --find | --quick-open | --grep TEXT --with-ignored FOLDER..."
-  echo "       hopen --ports"
-  echo "       hopen --palette"
-  echo "       hopen --version"
+# hopen_python prints Python 3.11 or later, which has tomllib for
+# herdspace.toml. Some systems have an older python3 and a newer python3.N
+# beside it, for example Ubuntu 22.04. With no Python 3.11, it prints python3,
+# which still reads a VS Code workspace file.
+hopen_python() {
+  local py
+  for py in python3 python3.14 python3.13 python3.12 python3.11; do
+    command -v "$py" >/dev/null 2>&1 || continue
+    "$py" -I -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null && { printf '%s' "$py"; return 0; }
+  done
+  printf 'python3'
 }
 
-while [ "$#" -gt 0 ]; do
-  case "$1" in
-    --file | --template | --apply | --convert | --completion | --complete)
-      [ "$#" -ge 2 ] || { usage >&2; exit 2; }
-      case "$1" in
-        --file) LIST_FILE="$2" ;;
-        --template) TEMPLATE_FLAG="$2" ;;
-        --apply) ACTION="apply"; APPLY_NAME="$2" ;;
-        --convert) ACTION="convert"; SESSION="$2" ;;
-        --completion) ACTION="completion"; SHELL_NAME="$2" ;;
-        --complete) ACTION="complete"; COMPLETE_WHAT="$2" ;;
-      esac
-      shift 2
-      ;;
-    --task)
-      ACTION="task"
-      shift
-      if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
-        TASK_NAME="$1"
-        shift
-      fi
-      ;;
-    --find) ACTION="find"; shift ;;
-    --quick-open) ACTION="quick"; shift ;;
-    --ports) ACTION="ports"; shift ;;
-    --palette) ACTION="palette"; shift ;;
-    --print) PALETTE_PRINT=1; shift ;;
-    --grep)
-      [ "$#" -ge 2 ] || { usage >&2; exit 2; }
-      ACTION="grep"; GREP_TEXT="$2"; shift 2
-      ;;
-    --with-ignored)
-      [ "$#" -ge 2 ] || { usage >&2; exit 2; }
-      add_search_dir "$2"; shift 2
-      ;;
-    --no-attach) ATTACH=0; shift ;;
-    --trust) TRUST_FLAG=1; shift ;;
-    --all) ACTION="all"; shift ;;
-    --list) ACTION="list"; shift ;;
-    --templates) ACTION="templates"; shift ;;
-    --version) echo "hopen ${HOPEN_VERSION}"; exit 0 ;;
-    -h | --help) usage; exit 0 ;;
-    -*) usage >&2; exit 2 ;;
-    *)
-      [ -z "$SESSION" ] || { usage >&2; exit 2; }
-      SESSION="$1"
-      shift
-      ;;
-  esac
-done
-
-case "$ACTION" in
-  completion) completion_script "$SHELL_NAME"; exit 0 ;;
-  task) run_task; exit 0 ;;
-  ports) show_ports; exit 0 ;;
-  palette) palette; exit 0 ;;
-  find) DIR="${HERDR_ACTIVE_PANE_CWD:-$PWD}"; find_file ;;
-  quick) DIR="${HERDR_ACTIVE_PANE_CWD:-$PWD}"; quick_open ;;
-  grep) DIR="${HERDR_ACTIVE_PANE_CWD:-$PWD}"; grep_files ;;
-  complete)
-    # The completion scripts call this. It prints one name on each line.
-    case "$COMPLETE_WHAT" in
-      lists) find_lists 2>/dev/null | cut -f1 ;;
-      templates) show_templates | tail -n +2 | cut -d ' ' -f1 ;;
-      tasks)
-        match="$(project_for_dir "$PWD")" || exit 0
-        read_list "${match%%$'\t'*}" items 2>/dev/null | awk -F '\036' -v l="${match#*$'\t'}" '$1 == "K" && $2 == l { print $3 }'
-        ;;
-    esac
-    exit 0
-    ;;
-  list) show_lists; exit 0 ;;
-  convert) convert_list; exit 0 ;;
-  templates) show_templates; exit 0 ;;
-  apply) apply_here; exit 0 ;;
-esac
-
-if [ -n "$TEMPLATE_FLAG" ] && ! template_exists "$TEMPLATE_FLAG"; then
-  die "No template named ${TEMPLATE_FLAG}. Run hopen --templates."
-fi
-
-if [ "$ACTION" = all ]; then
-  [ -z "$SESSION" ] || valid_name "$SESSION" || die "A session name can use only letters, numbers, dots, dashes, and underscores."
-  open_all
-  exit 0
-fi
-
-if [ -z "$SESSION" ] && [ -t 0 ] && [ -t 1 ]; then
-  if [ "${HERDR_ENV:-}" = "1" ] && [ "$ATTACH" -eq 1 ]; then
-    die "You are in a Herdr pane. Press ctrl+b, then q, and run this command again."
-  fi
-  pick_list
-fi
-
-[ -n "$SESSION" ] || { usage >&2; exit 2; }
-
-# "hopen <file>" opens a list file by its path, for example a VS Code workspace
-# file whose name is not the name of its folder.
-if [ -f "$SESSION" ]; then
-  case "$SESSION" in
-    *.code-workspace | *herdspace.toml)
-      [ -z "$LIST_FILE" ] || die "Give the list file once: as the argument or with --file."
-      [[ "$SESSION" != *[[:cntrl:]]* ]] || die "The file name has a control character."
-      use_list_file "$(cd "$(dirname "$SESSION")" && pwd -P)/$(basename "$SESSION")"
-      ;;
-  esac
-fi
-
-case "$SESSION" in
-  . | .. | */*)
-    [ -z "$LIST_FILE" ] || die "Use --file with a session name, not with a folder."
-    open_folder
-    ;;
-esac
-
-valid_name "$SESSION" || die "A session name can use only letters, numbers, dots, dashes, and underscores."
-
-if [ "${HERDR_ENV:-}" = "1" ] && [ "$ATTACH" -eq 1 ]; then
-  die "You are in a Herdr pane. Press ctrl+b, then q, and run this command again."
-fi
-
-if [ -z "$LIST_FILE" ] && [ -z "$FOLDER" ]; then
-  LIST_FILE="$(find_list_for "$SESSION")"
-fi
-
-if [ -z "$FOLDER" ] && { [ -z "$LIST_FILE" ] || [ ! -f "$LIST_FILE" ]; }; then
-  no_list_error "$SESSION"
-fi
-
-prepare_session
-
-if [ "$ATTACH" -eq 1 ]; then
-  attach_session
-fi
+HOPEN_LIB="$(hopen_lib)"
+[ -f "${HOPEN_LIB}/__main__.py" ] || { printf '  [err]  hopen cannot find its modules in %s. Run: herdspace update\n' "$HOPEN_LIB" >&2; exit 1; }
+HOPEN_PY="$(hopen_python)"
+command -v "$HOPEN_PY" >/dev/null 2>&1 || { printf '  [err]  hopen needs Python 3.11 or later. The server setup installs it.\n' >&2; exit 1; }
+# -I keeps out the environment and the current folder, and -B writes no
+# __pycache__ folder next to the installed files.
+exec "$HOPEN_PY" -I -B "${HOPEN_LIB}/__main__.py" hopen "$HOPEN_VERSION" "$0" "$@"

@@ -59,6 +59,9 @@ if [ "$old_nvim" -eq 1 ]; then
   ls -d "${HOME}"/.config/nvim.bak-* >/dev/null 2>&1 && pass "the old ~/.config/nvim is in a backup folder" || fail "the old ~/.config/nvim is in a backup folder"
 fi
 cmp -s config/nvim/init.lua "${HOME}/.config/herdspace-nvim/init.lua" && pass "the Neovim files are in ~/.config/herdspace-nvim" || fail "the Neovim files are in ~/.config/herdspace-nvim"
+# hopen is Python now. The update removes the bash modules of an older hopen.
+[ -z "$(find "${HOME}/.local/lib/hopen" -name '*.sh' 2>/dev/null)" ] && pass "the update removes the bash modules of an older hopen" || fail "the update removes the bash modules of an older hopen: $(find "${HOME}/.local/lib/hopen" -name '*.sh' | head -3)"
+"${HOME}/.local/bin/hopen" --templates 2>&1 | grep -q '^plain' && pass "the updated hopen runs" || fail "the updated hopen runs"
 if [ "$old_nvim" -eq 1 ]; then
   grep -q 'herdspace-nvim' /tmp/upgrade-new.log && pass "the update says where the Neovim files are" || fail "the update says where the Neovim files are"
 fi

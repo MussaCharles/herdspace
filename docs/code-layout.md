@@ -6,11 +6,11 @@ This page is for people who change herdspace. It says what each file of the code
 
 | Command | Main file | Modules | Installed to |
 |---------|-----------|---------|--------------|
-| `hopen` | `bin/hopen` | `lib/hopen/*.sh`, `lib/hopen/*.py`, and `lib/hopen/palette/*.py` | `~/.local/bin/hopen` and `~/.local/lib/hopen/` |
+| `hopen` | `bin/hopen` | The Python package `lib/hopen/`, with `lib/hopen/palette/` | `~/.local/bin/hopen` and `~/.local/lib/hopen/` |
 | `herdspace` | `bin/herdspace` | `lib/herdspace/*.sh` | `~/.local/bin/herdspace` and `~/.local/lib/herdspace/` |
 | The setup | `bootstrap.sh` and `bootstrap/platforms/*.sh` | `bootstrap/lib/*.sh` | Not installed. The setup runs from the release folder. |
 
-The main file of a command holds the help, the options, and the main steps or the dispatch. A module defines functions and variables. At its load, it runs nothing. So the order of the modules does not matter, and a test can load one module alone.
+The main file of `herdspace` holds the help, the options, and the dispatch. `bin/hopen` is a short bash file that starts the Python package. A module defines functions and variables. At its load, it runs nothing. So a test can load one module alone.
 
 ## How a command finds its modules
 
@@ -22,24 +22,27 @@ The setup installs the modules before the command, so that a new command never r
 
 ## hopen
 
+`hopen` is Python, with only the standard library. `bin/hopen` finds `lib/hopen/`, picks Python 3.11 or later, and runs `python3 -I -B lib/hopen/__main__.py hopen TAG PATH ARGS`: the release tag, the path of `bin/hopen`, and the arguments of the person. `-I` keeps out the environment and the current folder, and `-B` writes no `__pycache__` folder next to the installed files.
+
 | File | What it does |
 |------|--------------|
-| `lib/hopen/core.sh` | The common helpers: messages, a check for a command, names, and JSON. |
-| `lib/hopen/ui.sh` and `ui.py` | The look of the menus, like a Herdr popup, and the questions: a choice, a text, and a yes or no. `ui.py` asks the questions. The colors stay in both files until the palette moves to Python. |
-| `lib/hopen/lists.sh` | The project lists: find the lists, show them, and choose one. `read_list` runs `lists.py` for each list. |
+| `lib/hopen/__main__.py` | The entry point. It loads the package from its own folder by its path, so that no other package named hopen can take its place. |
+| `lib/hopen/cli.py` | It starts `main.py`. Its `internal` commands serve the tests and the background guard. |
+| `lib/hopen/main.py` | The options and the main steps of `hopen`, and `hopen <folder>`. |
+| `lib/hopen/core.py` | The common helpers: names, paths, messages, and the sort order of the locale. |
 | `lib/hopen/lists.py` | `read_list` reads one list, a VS Code workspace file or a `herdspace.toml` file. `find_lists` finds the lists of the home folder, and `no_list_message` helps with a name that has no list. |
-| `lib/hopen/trust.sh` and `trust.py` | The approval of the commands and environment values of a list. `trust.py` does the work. It reads the env file values on fd 3 and the question on fd 4, because another user can read the arguments of a process. |
-| `lib/hopen/sessions.sh` | The Herdr sessions: start one, open the projects of a list, start the programs again, and attach. |
-| `lib/hopen/templates.sh` and `templates.py` | The layout templates: find, list, and apply one, and the guard of the pane names. `templates.py` lists and reads the templates, and runs the guard. |
-| `lib/hopen/panes.sh` and `panes.py` | The Herdr panes: wait for one, split, open a tab, find the editor of a tab, and open a file in it. `panes.py` does the work. |
-| `lib/hopen/editor.sh` and `editor.py` | Open a file in the editor, and the command that starts the herdspace Neovim. `editor.py` does the work. |
-| `lib/hopen/tasks.sh` and `tasks.py` | `hopen --task`, with the environment of the project. `tasks.py` does the work. |
-| `lib/hopen/search.sh` and `search.py` | The file lists and the text search of a project, also with the files that `.gitignore` names. `search.py` builds the commands of `fd` and `rg`. |
-| `lib/hopen/quickopen.sh` and `quickopen.py` | Quick open, like `Ctrl+P` in VS Code, and the menus of `hopen --find` and `--grep`. `quickopen.py` does the work. |
-| `lib/hopen/ports.sh` and `ports.py` | `hopen --ports`, like the Ports view of VS Code. `ports.py` does the work. |
-| `lib/hopen/convert.sh` and `convert.py` | `hopen --convert`: write a `herdspace.toml` file from a VS Code workspace file. `convert.py` does the work. |
-| `lib/hopen/completion.sh` and `completion.py` | The shell completion, for zsh and bash. `completion.py` holds the scripts. |
-| `lib/hopen/palette.sh` | Starts the command palette in Python. |
+| `lib/hopen/trust.py` | The approval of the commands and environment values of a list. |
+| `lib/hopen/sessions.py` | The Herdr sessions: start one, open the projects of a list, start the programs again, apply a template, and attach. |
+| `lib/hopen/templates.py` | The layout templates: find, list, and read one, and the guard of the pane names. |
+| `lib/hopen/panes.py` | The Herdr panes: wait for one, split, open a tab, find the editor of a tab, and open a file in it. |
+| `lib/hopen/editor.py` | Open a file in the editor, and the command that starts the herdspace Neovim. |
+| `lib/hopen/ui.py` | The look of the menus, like a Herdr popup, and the questions: a choice, a text, a yes or no, and a pick of folders. |
+| `lib/hopen/tasks.py` | `hopen --task`, with the environment of the project. |
+| `lib/hopen/search.py` | The commands of `fd`, `find`, and `rg` for the file lists and the text search. |
+| `lib/hopen/quickopen.py` | Quick open, like `Ctrl+P` in VS Code, and the menus of `hopen --find` and `--grep`. |
+| `lib/hopen/ports.py` | `hopen --ports`, like the Ports view of VS Code. |
+| `lib/hopen/convert.py` | `hopen --convert`: write a `herdspace.toml` file from a VS Code workspace file. |
+| `lib/hopen/completion.py` | The shell completion scripts, for zsh and bash. |
 | `lib/hopen/palette/__init__.py` | The menu of the command palette, the recent actions, and `GROUPS`, the groups in the order of the menu. |
 | `lib/hopen/palette/<group>.py` | One group of actions of the palette, for example `git.py` or `layout.py`. |
 
@@ -89,21 +92,13 @@ A new group needs a new file with `items` and `ACTIONS`, and its name in `GROUPS
 
 A platform script sources only `common.sh`, and then the step files that it needs. The `herdspace-bootstrap` skill lists the functions that a step uses.
 
-## The Python modules
-
-`hopen` moves from bash to Python one module at a time. `lib/hopen/` is also a Python package:
-
-- `__main__.py` is the entry point. It loads the package from its own folder by its path, so no other package can take its place.
-- `cli.py` holds the commands. An `internal` command serves a bash module while the move goes on: `read_list` in `lists.sh` runs `hopen_py internal read-list`.
-- `core.py` holds the shared helpers: names, paths, and messages.
-- A module such as `lists.py` sits next to the bash module that it replaces, `lists.sh`.
-
-`hopen_py` in `core.sh` runs the package with `python3 -I -B`. If the machine has Python 3.11 or later, `hopen_python` picks it. `-I` keeps out the environment and the current folder, and `-B` writes no `__pycache__` folder next to the installed files. These rules hold for each Python module:
+## The rules of the Python code
 
 - Use only the standard library. A person installs no package, and no `pip`, `pipx`, or `uv`.
-- The bash module runs the file with `python3 -I`, so that a file in the current folder cannot change the program.
 - The code must run on Python 3.11.
-- Each Python module has unit tests in `tests/python/`, with `unittest`.
+- Each module has unit tests in `tests/python/`, with `unittest`.
+- A new module needs a row in the table of this page.
+- If nobody changed a file of `~/.local/lib/hopen/` that a release no longer ships, an update of the setup removes it. `prune_tree` in `bootstrap/lib/files.sh` does it.
 
 ## Check and test a module
 
@@ -113,4 +108,4 @@ shellcheck reads the modules through the main file of each command, with `extern
 shellcheck -S warning bin/hopen bin/herdr-update-check bin/herdspace bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
 ```
 
-A test can load one module with `source`, with the modules that it needs, and call its functions with no Herdr. `tests/test-hopen-list.sh` loads `lib/hopen/core.sh`, `lists.sh`, and `trust.sh` this way. Run the unit tests of the Python modules with `python3 -B -m unittest discover -s tests/python`. The [testing guide](testing.md) lists each test.
+A unit test imports a module of the package, and calls its functions with no Herdr. A stub `herdr` in the PATH answers like Herdr and records each call. Run the unit tests with `python3 -B -m unittest discover -s tests/python`. `tests/test-hopen-list.sh` runs `bin/hopen` and the `internal` commands of the package. The [testing guide](testing.md) lists each test.

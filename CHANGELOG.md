@@ -7,7 +7,9 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 ### Changed
 
 - Each release page lists the pull requests of the release below the changes, with the author of each and a link to the full comparison.
-- The reader of the project lists of `hopen` is now a Python file, `lib/hopen/lists.py`, and no longer a script inside `lists.sh`. The setup and `install.sh` install it to `~/.local/lib/hopen/`. It reads each list as before. It is the first step of the move of `hopen` and the `herdspace` command to Python, which uses only the standard library.
+- `hopen` is now Python, with only the standard library, in place of bash. It needs Python 3.11 or later, as before, and the setup installs it. Each option, message, state file, and exit code stays the same. `bin/hopen` is a short bash file that starts it, and `~/.local/lib/hopen/` holds the Python package. An update removes the bash modules of the older `hopen`, if nobody changed them. The `herdspace` command and the setup stay in bash, because they must run on a client that has no Python.
+- After `hopen --find`, `--quick-open`, or `--grep` opens a new split, `hopen` ends with exit status 0. Before, it went on past its last step, and could print an error in the popup.
+- `hopen --palette --print` prints no empty line at the end.
 
 ## [0.16.0] - 2026-11-28
 

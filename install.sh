@@ -102,7 +102,7 @@ want="$(awk -v f="$ARCHIVE" '$2 == f || $2 == "*" f {print $1}' "${work}/SHA256S
 tar -xzf "${work}/${ARCHIVE}" -C "$work"
 src="${work}/hopen-${VERSION}"
 [ -f "${src}/hopen" ] || die "The archive has no hopen file."
-[ -f "${src}/lib/hopen/core.sh" ] || die "The archive has no modules of hopen."
+[ -f "${src}/lib/hopen/__main__.py" ] || die "The archive has no modules of hopen."
 
 # The modules go next to the bin folder, where hopen looks for them, and
 # before hopen, so that a new hopen never runs without them.
@@ -116,6 +116,16 @@ while IFS= read -r file; do
   changed=$((changed + 1))
 done < <(cd "${src}/lib/hopen" && find . -type f \( -name '*.sh' -o -name '*.py' \) | sed 's|^\./||' | sort)
 [ "$changed" -eq 0 ] || info "Installed ${changed} modules of hopen in ${LIB_DIR}."
+# The modules of an older hopen that this release no longer has, for example
+# the bash modules that the Python package replaced.
+removed=0
+while IFS= read -r file; do
+  [ ! -e "${src}/lib/hopen/${file}" ] || continue
+  rm -f "${LIB_DIR}/${file}"
+  removed=$((removed + 1))
+done < <(cd "$LIB_DIR" && find . -type f \( -name '*.sh' -o -name '*.py' \) | sed 's|^\./||')
+find "$LIB_DIR" -depth -mindepth 1 -type d -empty -exec rmdir {} + 2>/dev/null || true
+[ "$removed" -eq 0 ] || info "Removed ${removed} old modules of hopen from ${LIB_DIR}."
 
 mkdir -p "$BIN_DIR"
 target="${BIN_DIR}/hopen"

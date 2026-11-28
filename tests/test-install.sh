@@ -25,8 +25,14 @@ contains "$(grep -c '@VERSION@\|@REPO@' "${dist}/install.sh")" '0' 'install.sh h
 full_hopen="$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/bin/hopen")"
 contains "$full_hopen" "HOPEN_VERSION=\"${tag}\"" 'the full archive has hopen with the tag'
 if [ "$full_hopen" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/hopen")" ]; then pass 'both archives have the same hopen'; else fail 'both archives have the same hopen'; fi
-if [ "$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/lib/hopen/palette.sh")" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/lib/hopen/palette.sh")" ]; then pass 'both archives have the modules of hopen'; else fail 'both archives have the modules of hopen'; fi
-if [ "$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/lib/hopen/palette/projects.py")" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/lib/hopen/palette/projects.py")" ]; then pass 'both archives have the palette groups of hopen'; else fail 'both archives have the palette groups of hopen'; fi
+for module in main.py palette/projects.py; do
+  full="$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/lib/hopen/${module}" 2>/dev/null)"
+  if [ -n "$full" ] && [ "$full" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/lib/hopen/${module}" 2>/dev/null)" ]; then
+    pass "both archives have lib/hopen/${module}"
+  else
+    fail "both archives have lib/hopen/${module}"
+  fi
+done
 
 home="${tmp}/home"
 mkdir -p "${home}/.local/bin" "${tmp}/old"
@@ -38,7 +44,7 @@ out="$(run_install)"
 contains "$out" 'Replaced the link' 'install replaces an old link'
 if [ -f "${home}/.local/bin/hopen" ] && [ ! -L "${home}/.local/bin/hopen" ] && [ -x "${home}/.local/bin/hopen" ]; then pass 'hopen is a real file'; else fail 'hopen is a real file'; fi
 contains "$(HOME="$home" "${home}/.local/bin/hopen" --version)" "hopen ${tag}" 'hopen shows the release tag'
-if [ -f "${home}/.local/lib/hopen/core.sh" ]; then pass 'the modules of hopen are next to the bin folder'; else fail 'the modules of hopen are next to the bin folder'; fi
+if [ -f "${home}/.local/lib/hopen/core.py" ]; then pass 'the modules of hopen are next to the bin folder'; else fail 'the modules of hopen are next to the bin folder'; fi
 if [ -f "${home}/.local/lib/hopen/palette/projects.py" ]; then pass 'the palette groups of hopen are installed'; else fail 'the palette groups of hopen are installed'; fi
 if [ -f "${home}/.local/lib/hopen/lists.py" ] && [ -f "${home}/.local/lib/hopen/__main__.py" ]; then pass 'the Python part of hopen is installed'; else fail 'the Python part of hopen is installed'; fi
 contains "$(HOME="$home" XDG_CONFIG_HOME="" "${home}/.local/bin/hopen" --templates 2>&1)" 'code' 'the installed hopen loads its modules'
@@ -54,6 +60,11 @@ out="$(run_install)"
 contains "$out" 'is up to date' 'a second run changes nothing'
 lacks "$out" 'modules of hopen' 'a second run copies no module'
 if find "$home" -name '*.new' | grep -q .; then fail 'a second run writes no .new file'; else pass 'a second run writes no .new file'; fi
+# A module of an older hopen, for example a bash module that Python replaced.
+printf 'old\n' >"${home}/.local/lib/hopen/old.sh"
+out="$(run_install)"
+contains "$out" 'Removed 1 old modules' 'an install removes a module that the release no longer has'
+if [ ! -e "${home}/.local/lib/hopen/old.sh" ] && [ -f "${home}/.local/lib/hopen/main.py" ]; then pass 'only the old module goes'; else fail 'only the old module goes'; fi
 
 printf '\n# my change\n' >>"${home}/.config/hopen/templates/code.layout"
 out="$(run_install)"

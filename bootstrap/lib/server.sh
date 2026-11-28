@@ -17,6 +17,8 @@ setup_server_files() {
   SEED_ONLY="lazy-lock.json" install_tree "${REPO_ROOT}/config/nvim" "$NVIM_DIR"
   # The modules of hopen go first, so that a new hopen never runs without them.
   install_tree "${REPO_ROOT}/lib/hopen" "${HOME}/.local/lib/hopen"
+  # The bash modules of an older hopen, which the Python package replaced.
+  prune_tree "${REPO_ROOT}/lib/hopen" "${HOME}/.local/lib/hopen"
   install_file "${REPO_ROOT}/bin/hopen" "${HOME}/.local/bin/hopen" 755
   install_file "${REPO_ROOT}/bin/herdr-update-check" "${HOME}/.local/bin/herdr-update-check" 755
   install_tree "${REPO_ROOT}/config/templates" "${HOME}/.config/hopen/templates"

@@ -263,6 +263,11 @@ INTERNAL = {
 
 
 def main(argv):
+    # bin/hopen runs "hopen TAG PATH ARGS...": the release tag, its own path,
+    # and the arguments of the person.
+    if len(argv) >= 3 and argv[0] == "hopen":
+        from . import main as hopen
+        return hopen.main(argv[1], argv[2], argv[3:])
     if len(argv) >= 2 and argv[0] == "internal" and argv[1] in INTERNAL:
         return INTERNAL[argv[1]](argv[2:])
     print("Usage: python3 -I -B lib/hopen/__main__.py internal COMMAND ARGS", file=sys.stderr)
