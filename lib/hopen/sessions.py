@@ -37,7 +37,7 @@ class Run:
 
     def herdr(self, *args, session=True):
         try:
-            result = subprocess.run(["herdr", *args], capture_output=True, text=True,
+            result = core.run(["herdr", *args], capture_output=True, text=True,
                                     env=self.env() if session else None)
         except OSError:
             return 127, ""
@@ -45,7 +45,7 @@ class Run:
 
     def herdr_quiet(self, *args, session=True):
         try:
-            subprocess.run(["herdr", *args], stdout=subprocess.DEVNULL, env=self.env() if session else None)
+            core.run(["herdr", *args], stdout=subprocess.DEVNULL, env=self.env() if session else None)
         except OSError:
             pass
 
@@ -62,8 +62,8 @@ class Run:
 
     def start_session(self):
         # nohup and disown in bash: the server runs on after hopen ends.
-        subprocess.Popen(["herdr", "server"], env=self.env(), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL, start_new_session=True)
+        core.popen(["herdr", "server"], env=self.env(), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                   stderr=subprocess.DEVNULL, start_new_session=True)
         self.started = True
         for _ in range(40):
             if self.session_answers():
@@ -319,7 +319,7 @@ class Run:
         if os.environ.get("HERDR_ENV") == "1":
             raise core.Fail("You are in a Herdr pane. Press ctrl+b, then q, and run this command again.")
         sys.stdout.flush()
-        os.execvp("herdr", ["herdr", "session", "attach", self.session])
+        core.exec_program(["herdr", "session", "attach", self.session])
 
 
 def no_lists_error():
