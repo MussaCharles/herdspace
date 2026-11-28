@@ -45,7 +45,7 @@ def preview_file():
 def quick_open(folder, search_in, home):
     need("fzf", "hopen --quick-open")
     need_terminal("hopen --quick-open")
-    top = subprocess.run(["git", "-C", folder, "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    top = core.run(["git", "-C", folder, "rev-parse", "--show-toplevel"], capture_output=True, text=True)
     root = top.stdout.rstrip("\n") if top.returncode == 0 else folder
     place = panes.Place.active()
     header = "Type to filter. Enter opens the file. Esc closes. In Neovim, Ctrl+Q closes the file."
