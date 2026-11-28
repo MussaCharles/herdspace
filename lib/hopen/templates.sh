@@ -12,19 +12,10 @@ template_exists() {
   [ -f "$(template_file "$1")" ]
 }
 
-template_lines() { grep -vE '^[[:space:]]*(#|$)' "$(template_file "$1")"; }
+# lib/hopen/templates.py reads the template files and lists them.
+template_lines() { hopen_py internal template-lines "$TEMPLATE_DIR" "$1"; }
 
-show_templates() {
-  local file name text
-  printf '%-12s %s\n' TEMPLATE DESCRIPTION
-  printf '%-12s %s\n' plain "One pane with a shell. This is the default."
-  for file in "$TEMPLATE_DIR"/*.layout; do
-    [ -f "$file" ] || continue
-    name="$(basename "$file" .layout)"
-    text="$(sed -n "1s/^# *${name}: *//p" "$file")"
-    printf '%-12s %s\n' "$name" "${text:-}"
-  done
-}
+show_templates() { hopen_py internal templates "$TEMPLATE_DIR"; }
 
 # apply_template NAME ROOT_PANE splits from ROOT_PANE and starts each program.
 apply_template() {
@@ -61,40 +52,9 @@ $(printf '%s\t%s' "$pane" "$id")"
 guard_names() {
   local seconds="${HOPEN_GUARD_SECONDS:-30}"
   [ -n "$GUARD_PAIRS$GUARD_TABS" ] && [ "$seconds" != 0 ] || return 0
-  printf '%s\036%s' "$GUARD_PAIRS" "$GUARD_TABS" | nohup python3 -I -c '
-import json, subprocess, sys, time
-panes_text, _, tabs_text = sys.stdin.read().partition("\x1e")
-pairs = [line.split("\t", 1) for line in panes_text.split("\n") if "\t" in line]
-# A tab is found by its first pane, because a tab create answer has that pane.
-tabs = [line.split("\t", 1) for line in tabs_text.split("\n") if "\t" in line]
-end = time.time() + float(sys.argv[1])
-
-def herdr(*args):
-    out = subprocess.run(["herdr", *args], capture_output=True, text=True, timeout=5).stdout
-    return json.loads(out)["result"]
-
-while (pairs or tabs) and time.time() < end:
-    time.sleep(0.5)
-    try:
-        panes = herdr("pane", "list")["panes"]
-        labels = {p["pane_id"]: p.get("label") or "" for p in panes}
-        tab_of = {p["pane_id"]: (p["workspace_id"], p["tab_id"]) for p in panes}
-        tab_labels = {}
-        for workspace in {tab_of[pane][0] for pane, _ in tabs if pane in tab_of}:
-            for tab in herdr("tab", "list", "--workspace", workspace)["tabs"]:
-                tab_labels[tab["tab_id"]] = tab.get("label") or ""
-    except Exception:
-        continue
-    pairs = [(pane, name) for pane, name in pairs if pane in labels]
-    for pane, name in pairs:
-        if labels[pane] != name:
-            subprocess.run(["herdr", "pane", "rename", pane, name], capture_output=True, timeout=5)
-    tabs = [(pane, name) for pane, name in tabs if pane in tab_of and tab_of[pane][1] in tab_labels]
-    for pane, name in tabs:
-        tab = tab_of[pane][1]
-        if tab_labels[tab] != name:
-            subprocess.run(["herdr", "tab", "rename", tab, name], capture_output=True, timeout=5)
-' "$seconds" >/dev/null 2>&1 &
+  # The guard is a Python loop in lib/hopen/templates.py. nohup needs a
+  # program, so it starts the Python of hopen_py by its path.
+  printf '%s\036%s' "$GUARD_PAIRS" "$GUARD_TABS" | nohup "$(hopen_python)" -I -B "${HOPEN_LIB}/__main__.py" internal guard "$seconds" >/dev/null 2>&1 &
   disown
   GUARD_PAIRS=""
   GUARD_TABS=""
