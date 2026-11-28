@@ -11,6 +11,8 @@ import shutil
 import subprocess
 import sys
 
+from . import core
+
 # The colors of the Herdr theme of the setup: Dracula, with the herdspace
 # colors of [theme.custom] in config/herdr/config.toml. ui.sh has the same
 # values while the move to Python goes on.
@@ -76,7 +78,7 @@ def fzf_command(label, *args):
 
 def run_fzf(label, items, *args):
     """Run fzf on the text ITEMS, and return what it prints. Esc returns ""."""
-    result = subprocess.run(fzf_command(label, *args), input=items + "\n", stdout=subprocess.PIPE, text=True)
+    result = core.run(fzf_command(label, *args), input=items + "\n", stdout=subprocess.PIPE, text=True)
     return result.stdout
 
 
@@ -171,8 +173,10 @@ def run_fzf_from(label, command, cwd, transform, *args):
     long list at once. Return what fzf prints."""
     import threading
 
-    source = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stdin=subprocess.DEVNULL,
-                              text=True, errors="surrogateescape")
+    source = core.popen(command, cwd=cwd, stdout=subprocess.PIPE, stdin=subprocess.DEVNULL,
+                        text=True, errors="surrogateescape")
+    if source is None:
+        return run_fzf(label, "", *args)
     menu = subprocess.Popen(fzf_command(label, *args), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             text=True, errors="surrogateescape")
 
