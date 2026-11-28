@@ -26,7 +26,7 @@ full_hopen="$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/bin/
 contains "$full_hopen" "HOPEN_VERSION=\"${tag}\"" 'the full archive has hopen with the tag'
 if [ "$full_hopen" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/hopen")" ]; then pass 'both archives have the same hopen'; else fail 'both archives have the same hopen'; fi
 if [ "$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/lib/hopen/palette.sh")" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/lib/hopen/palette.sh")" ]; then pass 'both archives have the modules of hopen'; else fail 'both archives have the modules of hopen'; fi
-if [ "$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/lib/hopen/palette/projects.sh")" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/lib/hopen/palette/projects.sh")" ]; then pass 'both archives have the palette groups of hopen'; else fail 'both archives have the palette groups of hopen'; fi
+if [ "$(tar -xzOf "${dist}/herdspace-${tag}.tar.gz" "herdspace-${tag}/lib/hopen/palette/projects.py")" = "$(tar -xzOf "${dist}/hopen-${tag}.tar.gz" "hopen-${tag}/lib/hopen/palette/projects.py")" ]; then pass 'both archives have the palette groups of hopen'; else fail 'both archives have the palette groups of hopen'; fi
 
 home="${tmp}/home"
 mkdir -p "${home}/.local/bin" "${tmp}/old"
@@ -39,7 +39,7 @@ contains "$out" 'Replaced the link' 'install replaces an old link'
 if [ -f "${home}/.local/bin/hopen" ] && [ ! -L "${home}/.local/bin/hopen" ] && [ -x "${home}/.local/bin/hopen" ]; then pass 'hopen is a real file'; else fail 'hopen is a real file'; fi
 contains "$(HOME="$home" "${home}/.local/bin/hopen" --version)" "hopen ${tag}" 'hopen shows the release tag'
 if [ -f "${home}/.local/lib/hopen/core.sh" ]; then pass 'the modules of hopen are next to the bin folder'; else fail 'the modules of hopen are next to the bin folder'; fi
-if [ -f "${home}/.local/lib/hopen/palette/projects.sh" ]; then pass 'the palette groups of hopen are installed'; else fail 'the palette groups of hopen are installed'; fi
+if [ -f "${home}/.local/lib/hopen/palette/projects.py" ]; then pass 'the palette groups of hopen are installed'; else fail 'the palette groups of hopen are installed'; fi
 if [ -f "${home}/.local/lib/hopen/lists.py" ] && [ -f "${home}/.local/lib/hopen/__main__.py" ]; then pass 'the Python part of hopen is installed'; else fail 'the Python part of hopen is installed'; fi
 contains "$(HOME="$home" XDG_CONFIG_HOME="" "${home}/.local/bin/hopen" --templates 2>&1)" 'code' 'the installed hopen loads its modules'
 mkdir -p "${home}/demo" && printf '[[project]]\nname = "api"\npath = "."\n' >"${home}/demo/herdspace.toml"
