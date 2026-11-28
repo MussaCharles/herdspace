@@ -18,8 +18,9 @@ class CompletionTest(unittest.TestCase):
     def test_bash_works_with_bash_3_2(self):
         text = completion.completion_script("bash")
         self.assertIn("complete -o filenames -F _hopen hopen", text)
-        self.assertNotIn("mapfile", text)
-        self.assertNotIn("compopt", text)
+        code = "\n".join(line for line in text.split("\n") if not line.lstrip().startswith("#"))
+        self.assertNotIn("mapfile", code)
+        self.assertNotIn("compopt", code)
 
     def test_another_shell_stops(self):
         with redirect_stderr(io.StringIO()) as err, self.assertRaises(SystemExit) as stop:
