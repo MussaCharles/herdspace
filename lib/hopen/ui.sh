@@ -6,32 +6,12 @@
 # each item, and prints the key that the person chose. It uses fzf if it is
 # installed, else a numbered menu that takes a number or a key. It prints
 # nothing if the person cancels, and it exits 1 for an unknown answer.
-choose() {
-  local prompt="$1" items answer="" name text i=0
-  items="$(cat)"
-  # fzf draws nothing with no TERM, or with TERM=dumb.
-  if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
-    ui_fzf "$prompt" --delimiter '\t' --with-nth 2.. --prompt "${prompt} > " --header 'Esc cancels.' --height 40% --reverse --no-multi <<<"$items" | cut -f1 || true
-    return 0
-  fi
-  while IFS=$'\t' read -r name text; do
-    i=$((i + 1))
-    printf '  %2d) %s\n' "$i" "$text" >&2
-  done <<<"$items"
-  printf '  %s? Type a number or a name: ' "$prompt" >&2
-  # The items came on stdin, so the answer comes from the terminal.
-  IFS= read -r answer </dev/tty || answer=""
-  case "$answer" in
-    "") return 0 ;;
-    *[!0-9]*) name="$(awk -F '\t' -v n="$answer" '$1 == n {print $1; exit}' <<<"$items")" ;;
-    *) name="$(awk -F '\t' -v n="$answer" 'NR == n {print $1; exit}' <<<"$items")" ;;
-  esac
-  [ -n "$name" ] || { printf '  [err]  No item %s.\n' "$answer" >&2; return 1; }
-  printf '%s\n' "$name"
-}
+# lib/hopen/ui.py has the questions.
+choose() { hopen_py internal choose "$1"; }
 
 # The colors of the Herdr theme of the setup: Dracula, with the herdspace
-# colors of [theme.custom] in config/herdr/config.toml. Change them here only.
+# colors of [theme.custom] in config/herdr/config.toml. lib/hopen/ui.py has the
+# same values. Change both while the palette is in bash.
 UI_BG="#282a36"
 UI_ROW="#45475a"
 UI_FG="#f8f8f2"
@@ -102,35 +82,11 @@ then_wait() {
 }
 
 # ask_text PROMPT reads one line from the terminal.
-ask_text() {
-  local text=""
-  printf '  %s: ' "$1" >&2
-  IFS= read -r text </dev/tty || text=""
-  printf '%s' "$text"
-}
+ask_text() { hopen_py internal ask-text "$1"; }
 
 # pick_folders lets the person mark one or more folders of stdin, and prints
 # them, one on each line. With no fzf, it asks for the numbers of the folders.
-pick_folders() {
-  local items answer n
-  items="$(cat)"
-  if command -v fzf >/dev/null 2>&1 && [ -n "${TERM:-}" ] && [ "${TERM}" != dumb ]; then
-    ui_fzf "Folders with the ignored files" --multi --prompt 'Folders > ' --header 'Tab marks a folder. Enter searches the marked folders, with the ignored files. Esc cancels.' --height 60% --reverse <<<"$items" || true
-    return 0
-  fi
-  awk '{ printf "  %2d) %s\n", NR, $0 }' <<<"$items" >&2
-  printf '  Folders? Type the numbers, with a space between them: ' >&2
-  IFS= read -r answer </dev/tty || answer=""
-  for n in $answer; do
-    case "$n" in *[!0-9]*) printf '  [err]  No folder %s.\n' "$n" >&2; return 1 ;; esac
-    awk -v n="$n" 'NR == n' <<<"$items"
-  done
-}
+pick_folders() { hopen_py internal pick-folders; }
 
 # confirm TEXT asks a yes or no question. The default is no.
-confirm() {
-  local answer=""
-  printf '  %s [y/N] ' "$1" >&2
-  IFS= read -r answer </dev/tty || answer=""
-  case "$answer" in y | Y | yes) return 0 ;; *) return 1 ;; esac
-}
+confirm() { hopen_py internal confirm "$1"; }
