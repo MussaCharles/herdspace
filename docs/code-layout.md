@@ -38,7 +38,7 @@ The setup installs the modules before the command, so that a new command never r
 | `lib/hopen/quickopen.sh` | Quick open, like `Ctrl+P` in VS Code. |
 | `lib/hopen/ports.sh` | `hopen --ports`, like the Ports view of VS Code. |
 | `lib/hopen/convert.sh` and `convert.py` | `hopen --convert`: write a `herdspace.toml` file from a VS Code workspace file. `convert.py` does the work. |
-| `lib/hopen/completion.sh` | The shell completion, for zsh and bash. |
+| `lib/hopen/completion.sh` and `completion.py` | The shell completion, for zsh and bash. `completion.py` holds the scripts. |
 | `lib/hopen/palette.sh` | The menu of the command palette, the recent actions, and `PAL_GROUPS`, the groups in the order of the menu. |
 | `lib/hopen/palette/<group>.sh` | One group of actions of the palette, for example `git.sh` or `layout.sh`. |
 
