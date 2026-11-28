@@ -62,7 +62,7 @@ def guard(text, seconds):
     end = time.time() + float(seconds)
 
     def herdr(*args):
-        out = subprocess.run(["herdr", *args], capture_output=True, text=True, timeout=5).stdout
+        out = core.run(["herdr", *args], capture_output=True, text=True, timeout=5).stdout
         return json.loads(out)["result"]
 
     while (pairs or tabs) and time.time() < end:
@@ -80,9 +80,9 @@ def guard(text, seconds):
         pairs = [(pane, name) for pane, name in pairs if pane in labels]
         for pane, name in pairs:
             if labels[pane] != name:
-                subprocess.run(["herdr", "pane", "rename", pane, name], capture_output=True, timeout=5)
+                core.run(["herdr", "pane", "rename", pane, name], capture_output=True, timeout=5)
         tabs = [(pane, name) for pane, name in tabs if pane in tab_of and tab_of[pane][1] in tab_labels]
         for pane, name in tabs:
             tab = tab_of[pane][1]
             if tab_labels[tab] != name:
-                subprocess.run(["herdr", "tab", "rename", tab, name], capture_output=True, timeout=5)
+                core.run(["herdr", "tab", "rename", tab, name], capture_output=True, timeout=5)
