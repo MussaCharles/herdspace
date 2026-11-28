@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import completion, convert, core, lists
+from . import completion, convert, core, lists, templates
 
 
 def _read_list(args):
@@ -49,7 +49,33 @@ def _completion(args):
     return 0
 
 
+def _templates(args):
+    for line in templates.show_templates(args[0] if args else ""):
+        print(line)
+    return 0
+
+
+def _template_lines(args):
+    folder, name = (args + ["", ""])[:2]
+    try:
+        lines = templates.template_lines(folder, name)
+    except OSError as error:
+        print(f"grep: {templates.template_file(folder, name)}: {error.strerror}", file=sys.stderr)
+        return 2
+    for line in lines:
+        print(line)
+    return 0
+
+
+def _guard(args):
+    templates.guard(sys.stdin.read(), args[0] if args else "30")
+    return 0
+
+
 INTERNAL = {
+    "templates": _templates,
+    "template-lines": _template_lines,
+    "guard": _guard,
     "completion": _completion,
     "convert": _convert,
     "no-list": _no_list,
