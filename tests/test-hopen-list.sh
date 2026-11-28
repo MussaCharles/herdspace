@@ -20,12 +20,13 @@ RS=$'\x1e'
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 # The functions come from the modules of hopen.
-# shellcheck source=lib/hopen/core.sh
-source "$ROOT/lib/hopen/core.sh"
-# shellcheck source=lib/hopen/lists.sh
-source "$ROOT/lib/hopen/lists.sh"
-# shellcheck source=lib/hopen/trust.sh
-source "$ROOT/lib/hopen/trust.sh"
+# The functions of the old bash modules, through the Python package of hopen.
+hopen_internal() { python3 -I -B "$ROOT/lib/hopen/__main__.py" internal "$@"; }
+read_list() { hopen_internal read-list "$1" "$2" "${TEMPLATE_FLAG:-}"; }
+find_lists() { hopen_internal find-lists; }
+list_actions() { hopen_internal list-actions <<<"$1"; }
+# The env file values go on fd 3 and the question on fd 4, as hopen sends them.
+list_trusted() { hopen_internal trust "$1" "$TRUST_FLAG" "$STATE_DIR" 3<<<"${3:-}" 4<<<"$2"; }
 mkdir -p "$tmp/code/a" "$tmp/code/b"
 
 # Settings.
