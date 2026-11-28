@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-11-28
+
 ### Fixed
 
 - `hopen --palette` and the other commands no longer stop with a Python traceback on a machine with no `git`, `fd`, `rg`, `fzf`, or `herdr`. A missing program is a failed command again, as in 0.16.0.
@@ -345,7 +347,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.17.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.17.1...HEAD
+[0.17.1]: https://github.com/MussaCharles/herdspace/compare/0.17.0...0.17.1
 [0.17.0]: https://github.com/MussaCharles/herdspace/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/MussaCharles/herdspace/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/MussaCharles/herdspace/compare/0.14.0...0.15.0
