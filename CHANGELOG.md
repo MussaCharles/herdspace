@@ -4,6 +4,8 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-28
+
 ### Changed
 
 - Each release page lists the pull requests of the release below the changes, with the author of each and a link to the full comparison.
@@ -339,7 +341,8 @@ The first release of herdspace.
 - `install.md` has steps that a coding agent follows to do the setup.
 - Guides for setup, SSH, templates, WSL, updating, and testing.
 
-[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.16.0...HEAD
+[Unreleased]: https://github.com/MussaCharles/herdspace/compare/0.17.0...HEAD
+[0.17.0]: https://github.com/MussaCharles/herdspace/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/MussaCharles/herdspace/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/MussaCharles/herdspace/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/MussaCharles/herdspace/compare/0.13.0...0.14.0
