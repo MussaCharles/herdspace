@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 
-from .. import panes, ui
+from .. import core, panes, ui
 from . import then_wait
 
 
@@ -20,7 +20,7 @@ def worktrees(folder):
 
 
 def items(ctx):
-    inside = subprocess.run(["git", "-C", ctx.dir, "rev-parse", "--is-inside-work-tree"], capture_output=True)
+    inside = core.run(["git", "-C", ctx.dir, "rev-parse", "--is-inside-work-tree"], capture_output=True)
     if inside.returncode != 0:
         return
     if shutil.which("lazygit"):

@@ -62,7 +62,7 @@ def then_wait(action, *args):
             pass
     else:
         try:
-            subprocess.run([action, *args])
+            core.run([action, *args])
         except OSError as error:
             print(f"hopen: {action}: {error.strerror}", file=sys.stderr)
     sys.stdout.flush()

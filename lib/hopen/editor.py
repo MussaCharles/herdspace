@@ -2,6 +2,8 @@
 import os
 import sys
 
+from . import core
+
 
 def open_in_editor(path, line=""):
     """Open PATH in $VISUAL or $EDITOR, or else Neovim, in the place of this
@@ -18,7 +20,7 @@ def open_in_editor(path, line=""):
     else:
         args = [*words, path]
     sys.stdout.flush()
-    os.execvp(args[0], args)
+    core.exec_program(args)
 
 
 def editor_command(home):

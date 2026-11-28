@@ -60,12 +60,12 @@ def keep_pane_name(pane, name, wait=1):
     for _ in range(2):
         time.sleep(wait)
         try:
-            out = subprocess.run(["herdr", "pane", "list"], capture_output=True, text=True).stdout
+            out = core.run(["herdr", "pane", "list"], capture_output=True, text=True).stdout
             label = next((p.get("label") or "" for p in json.loads(out)["result"]["panes"] if p["pane_id"] == pane), "")
         except Exception:
             return
         if label != name:
-            if subprocess.run(["herdr", "pane", "rename", pane, name], capture_output=True).returncode != 0:
+            if core.run(["herdr", "pane", "rename", pane, name], capture_output=True).returncode != 0:
                 return
 
 
@@ -114,12 +114,12 @@ def run_task(name, home, state_dir, trust_flag):
         args = ["herdr", "pane", "split", pane, "--direction", "down", "--ratio", "0.65", "--focus"]
         for item in env:
             args += ["--env", item]
-        result = subprocess.run(args, capture_output=True, text=True)
+        result = core.run(args, capture_output=True, text=True)
         if result.returncode != 0:
             raise core.Fail("Could not split the pane.")
         new = json.loads(result.stdout)["result"]["pane"]["pane_id"]
-        subprocess.run(["herdr", "pane", "rename", new, name], stdout=subprocess.DEVNULL)
-        subprocess.run(["herdr", "pane", "run", new, f"cd {shlex.quote(folder)} && {command}"], stdout=subprocess.DEVNULL)
+        core.run(["herdr", "pane", "rename", new, name], stdout=subprocess.DEVNULL)
+        core.run(["herdr", "pane", "run", new, f"cd {shlex.quote(folder)} && {command}"], stdout=subprocess.DEVNULL)
         print(f"  [info] Task {name} runs in a new pane: {command}", flush=True)
         keep_pane_name(new, name)
         return 0
@@ -129,4 +129,4 @@ def run_task(name, home, state_dir, trust_flag):
         os.environ[key] = value
     os.chdir(folder)
     shell = os.environ.get("SHELL") or "/bin/sh"
-    os.execvp(shell, [shell, "-c", command])
+    core.exec_program([shell, "-c", command])

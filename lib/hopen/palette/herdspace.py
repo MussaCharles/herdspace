@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 
-from .. import panes, ui
+from .. import core, panes, ui
 from . import then_wait
 
 
@@ -32,7 +32,7 @@ def items(ctx):
 
 def run_here(*args):
     sys.stdout.flush()
-    os.execvp(args[0], list(args))
+    core.exec_program(list(args))
 
 
 def update(ctx, action):
@@ -51,7 +51,7 @@ def choose(prompt, rows):
 
 
 def keys(ctx, action):
-    subprocess.run(["herdspace", "keys"])
+    core.run(["herdspace", "keys"])
     pick = choose("Keys", "normal\tnormal: Cmd+T, Cmd+W, and Cmd+K stay with Ghostty\n"
                           "herdr\therdr: Cmd+T, Cmd+W, and Cmd+K go to Herdr")
     if not pick:
@@ -63,7 +63,7 @@ def keys(ctx, action):
 
 
 def editor_mode(ctx, action):
-    subprocess.run(["herdspace", "editor"])
+    core.run(["herdspace", "editor"])
     pick = choose("Editor", "reader\treader: no warnings and no spell marks\nnormal\tnormal: the defaults of LazyVim")
     if not pick:
         raise SystemExit(0)

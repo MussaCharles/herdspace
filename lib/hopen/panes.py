@@ -39,7 +39,7 @@ def in_popup():
 def herdr(*args):
     """Run a Herdr command, and return its output, or "" when it fails."""
     try:
-        return subprocess.run(["herdr", *args], capture_output=True, text=True).stdout
+        return core.run(["herdr", *args], capture_output=True, text=True).stdout
     except OSError:
         return ""
 
@@ -47,7 +47,7 @@ def herdr(*args):
 def herdr_run(*args):
     """Run a Herdr command with no output, and return its exit status."""
     try:
-        return subprocess.run(["herdr", *args], stdout=subprocess.DEVNULL).returncode
+        return core.run(["herdr", *args], stdout=subprocess.DEVNULL).returncode
     except OSError:
         return 127
 
@@ -74,7 +74,7 @@ def pane_ready(pane):
 
 
 def run_in(pane, command):
-    subprocess.run(["herdr", "pane", "run", pane, command], stdout=subprocess.DEVNULL)
+    core.run(["herdr", "pane", "run", pane, command], stdout=subprocess.DEVNULL)
 
 
 def new_tab_run(place, label, folder, command):
@@ -125,7 +125,7 @@ def focus_pane(pane):
         step = focus_step(layout, pane)
         if step is None:
             return True
-        result = subprocess.run(["herdr", "pane", "focus", "--pane", step[1], "--direction", step[0]],
+        result = core.run(["herdr", "pane", "focus", "--pane", step[1], "--direction", step[0]],
                                 capture_output=True)
         if result.returncode != 0:
             return False
@@ -169,10 +169,10 @@ def drop_in(pane, path, line=""):
     line = digits(line)
     go = f" | call cursor({line}, 1)" if line else ""
     quoted = path.replace("'", "''")
-    subprocess.run(["herdr", "pane", "send-keys", pane, "esc"], stdout=subprocess.DEVNULL)
-    subprocess.run(["herdr", "pane", "send-text", pane, f":execute 'drop' fnameescape('{quoted}'){go}"],
+    core.run(["herdr", "pane", "send-keys", pane, "esc"], stdout=subprocess.DEVNULL)
+    core.run(["herdr", "pane", "send-text", pane, f":execute 'drop' fnameescape('{quoted}'){go}"],
                    stdout=subprocess.DEVNULL)
-    subprocess.run(["herdr", "pane", "send-keys", pane, "enter"], stdout=subprocess.DEVNULL)
+    core.run(["herdr", "pane", "send-keys", pane, "enter"], stdout=subprocess.DEVNULL)
     focus_pane(pane)
 
 
@@ -211,7 +211,7 @@ def run_at(place, default, label, folder, command=""):
         if command:
             new_tab_run(place, label, folder, command)
         else:
-            subprocess.run(["herdr", "tab", "create", "--workspace", place.workspace, "--cwd", folder,
+            core.run(["herdr", "tab", "create", "--workspace", place.workspace, "--cwd", folder,
                             "--label", label, "--focus"], stdout=subprocess.DEVNULL)
     else:
         try:
@@ -221,6 +221,6 @@ def run_at(place, default, label, folder, command=""):
         sys.stdout.flush()
         if command:
             # bash read the command with eval, so bash reads it here too.
-            os.execvp("bash", ["bash", "-c", f"exec {command}"])
+            core.exec_program(["bash", "-c", f"exec {command}"])
         shell = os.environ.get("SHELL") or "sh"
-        os.execvp(shell, [shell])
+        core.exec_program([shell])

@@ -2,7 +2,7 @@
 import os
 import sys
 
-from .. import lists, ui
+from .. import core, lists, ui
 from . import then_wait
 
 
@@ -41,12 +41,12 @@ def window(ctx, action):
 
 def folder(ctx, action):
     sys.stdout.flush()
-    os.execv(ctx.self_path, [ctx.self_path, "."])
+    core.exec_program([ctx.self_path, "."])
 
 
 def open_list(ctx, action):
     sys.stdout.flush()
-    os.execv(ctx.self_path, [ctx.self_path, action[len("open:"):]])
+    core.exec_program([ctx.self_path, action[len("open:"):]])
 
 
 def convert(ctx, action):

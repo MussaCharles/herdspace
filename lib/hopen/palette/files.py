@@ -39,7 +39,7 @@ def quick(ctx, action):
 
 def ignored(ctx, action):
     # Only the chosen folders are read, so the search stays fast.
-    top = subprocess.run(["git", "-C", ctx.dir, "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    top = core.run(["git", "-C", ctx.dir, "rev-parse", "--show-toplevel"], capture_output=True, text=True)
     folder = top.stdout.rstrip("\n") if top.returncode == 0 else ctx.dir
     old = os.getcwd()
     os.chdir(folder)
@@ -85,7 +85,7 @@ def edit(ctx, action):
 
 
 def read_md(ctx, action):
-    out = subprocess.run(search.files_command([]), cwd=ctx.dir, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+    out = core.run(search.files_command([]), cwd=ctx.dir, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                          text=True, errors="surrogateescape").stdout
     names = sorted((quickopen.file_line(line) for line in out.split("\n") if line), key=core.collate)
     names = [name for name in names if re.search(r"\.(md|markdown)$", name, re.I)]

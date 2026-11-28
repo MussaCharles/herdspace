@@ -11,6 +11,8 @@ import shutil
 import subprocess
 import sys
 
+from . import core
+
 # Folders of dependencies and caches. The search with the ignored files never reads them.
 SKIP_DIRS = [".git", "node_modules", ".venv", "venv", "__pycache__", ".mypy_cache", ".pytest_cache",
              ".ruff_cache", ".tox", ".next", ".gradle", "Pods", "DerivedData", "target"]
@@ -52,10 +54,10 @@ def list_folders():
     names, but not the folders of SKIP_DIRS."""
     fd = fd_command()
     if fd:
-        out = subprocess.run([fd, "--type", "d", "--hidden", "--no-ignore-vcs", *skip_args()],
+        out = core.run([fd, "--type", "d", "--hidden", "--no-ignore-vcs", *skip_args()],
                              stdout=subprocess.PIPE, text=True, errors="surrogateescape").stdout
         return [line[:-1] if line.endswith("/") else line for line in out.split("\n") if line]
-    out = subprocess.run(["find", ".", "-mindepth", "1", "-type", "d", "!", "-path", "*/.git*"],
+    out = core.run(["find", ".", "-mindepth", "1", "-type", "d", "!", "-path", "*/.git*"],
                          stdout=subprocess.PIPE, text=True, errors="surrogateescape").stdout
     return [line[2:] if line.startswith("./") else line for line in out.split("\n") if line]
 
@@ -73,7 +75,7 @@ def exec_command(command):
     """Run COMMAND in the place of this process, as bash ran it."""
     sys.stdout.flush()
     try:
-        os.execvp(command[0], command)
+        core.exec_program(command)
     except OSError as error:
         print(f"hopen: {command[0]}: {error.strerror}", file=sys.stderr)
         return 127
