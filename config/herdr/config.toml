@@ -43,9 +43,13 @@ rows = [
 [ui.sound]
 enabled = false
 
-# The prefix stays ctrl+b. The client bootstrap scripts release these keys in
-# Ghostty. A Mac uses the Cmd keys. Linux uses the ctrl+shift keys.
+# The prefix is ctrl+space: one hand presses both keys, and the shell and
+# Neovim do not use it. To change it, run: herdspace prefix KEY. The setup keeps
+# that choice in ~/.config/herdspace/prefix and writes it on the line below.
+# The client bootstrap scripts release the other keys in Ghostty. A Mac uses
+# the Cmd keys. Linux uses the ctrl+shift keys.
 [keys]
+prefix = "ctrl+space"
 new_tab = ["prefix+c", "cmd+t", "ctrl+shift+t"]
 close_tab = ["prefix+shift+x", "cmd+w", "ctrl+shift+w"]
 goto = ["prefix+g", "cmd+k", "ctrl+shift+k"]
@@ -67,7 +71,7 @@ height = "70%"
 
 # Quick open, like Cmd+P in VS Code: choose a file of the project, and it opens
 # in the Neovim pane of the tab, or in a new split on the right, with the focus
-# on it. Linux keeps Ctrl+P for the shell and Neovim, so use Ctrl+B, then F.
+# on it. Linux keeps Ctrl+P for the shell and Neovim, so use the prefix, then F.
 [[keys.command]]
 key = ["cmd+p", "prefix+f"]
 type = "popup"
