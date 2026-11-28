@@ -44,6 +44,14 @@ def herdr(*args):
         return ""
 
 
+def herdr_run(*args):
+    """Run a Herdr command with no output, and return its exit status."""
+    try:
+        return subprocess.run(["herdr", *args], stdout=subprocess.DEVNULL).returncode
+    except OSError:
+        return 127
+
+
 def herdr_json(field, *args):
     """Run a Herdr command, and return one field of its result, for example
     root_pane.pane_id of "tab create"."""
