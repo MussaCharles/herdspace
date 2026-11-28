@@ -1,31 +1,27 @@
 """Unit tests for lib/hopen/lists.py, the reader of the project lists.
 
-Each test writes a list in a temporary folder, runs lists.py with python3 -I
-as read_list in lib/hopen/lists.sh does, and checks the lines that it prints.
-They need only the standard library, and no Herdr. Run them with:
+Each test writes a list in a temporary folder, reads it with read_list or
+find_lists, and checks the result. Some tests run the package as bin/hopen
+does. They need only the standard library, and no Herdr. Run them with:
 
-    python3 -m unittest discover -s tests/python
+    python3 -B -m unittest discover -s tests/python
 """
 import os
 import pathlib
-import subprocess
-import sys
 import tempfile
 import unittest
 
-READER = pathlib.Path(__file__).resolve().parents[2] / "lib" / "hopen" / "lists.py"
+from helpers import run
+
+from hopen import lists
+
 RS = "\x1e"
 US = "\x1f"
 
 
 def read(path, what="items", template=""):
-    """Run the reader, and return its lines split into fields."""
-    out = subprocess.run(
-        [sys.executable, "-I", str(READER), str(path), what, template],
-        capture_output=True, text=True, check=True,
-    ).stdout
-    # Split at new lines only: splitlines() also splits at the byte 0x1e.
-    return [line.split(RS) for line in out.split("\n") if line]
+    """Read a list, and return its lines split into fields."""
+    return [line.split(RS) for line in lists.read_list(str(path), what, template)]
 
 
 class ListReaderTest(unittest.TestCase):
@@ -109,6 +105,85 @@ class ListReaderTest(unittest.TestCase):
         parent = read(path)[0]
         self.assertEqual(parent[0], "R")
         self.assertEqual(parent[4:], ["-", "-"])
+
+    def test_a_broken_file_raises_list_error(self):
+        path = self.write("herdspace.toml", "not = [toml")
+        with self.assertRaises(lists.ListError):
+            read(path)
+
+    def test_the_package_prints_the_lines_as_bash_reads_them(self):
+        result = run("internal", "read-list", str(self.toml()), "items", "")
+        self.assertEqual(result.returncode, 0)
+        # Split at new lines only: splitlines() also splits at the byte 0x1e.
+        first = result.stdout.split("\n")[0].split(RS)
+        self.assertEqual(first[:2], ["R", "work"])
+
+    def test_the_package_reports_a_broken_list(self):
+        path = self.write("herdspace.toml", "not = [toml")
+        result = run("internal", "read-list", str(path), "items", "")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("herdspace.toml", result.stderr)
+
+
+class FindListsTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.home = pathlib.Path(self.tmp.name).resolve()
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def toml(self, folder, text='[[project]]\nname = "a"\npath = "."\n'):
+        (self.home / folder).mkdir(exist_ok=True)
+        path = self.home / folder / "herdspace.toml"
+        path.write_text(text)
+        return str(path)
+
+    def vscode(self, folder, session=None):
+        (self.home / folder).mkdir(exist_ok=True)
+        path = self.home / folder / f"{folder}.code-workspace"
+        settings = f', "settings": {{"hopen.session": "{session}"}}' if session else ""
+        path.write_text('{"folders": [{"path": "."}]' + settings + "}")
+        return str(path)
+
+    def test_each_list_has_its_session(self):
+        a = self.toml("alpha")
+        b = self.vscode("beta")
+        found, warnings = lists.find_lists(str(self.home))
+        self.assertEqual(found, [("alpha", a), ("beta", b)])
+        self.assertEqual(warnings, [])
+
+    def test_a_claimed_name_never_takes_over_an_own_name(self):
+        own = self.toml("alpha")
+        claim = self.toml("other", 'session = "alpha"\n[[project]]\nname = "c"\npath = "."\n')
+        found, warnings = lists.find_lists(str(self.home))
+        self.assertEqual(found, [("alpha", own)])
+        self.assertEqual(warnings, [f"  [warn] {claim} claims the session alpha, which {own} has. hopen skips it."])
+
+    def test_two_claims_of_one_name_skip_both(self):
+        one = self.vscode("one", "shared")
+        two = self.vscode("two", "shared")
+        found, warnings = lists.find_lists(str(self.home))
+        self.assertEqual(found, [])
+        self.assertEqual(warnings[0], "  [warn] Two lists claim the session shared. hopen skips both. Give one another name:")
+        self.assertEqual(sorted(warnings[1:]), sorted([f"         {one}", f"         {two}"]))
+
+    def test_herdspace_toml_wins_over_a_vscode_file_of_the_same_name(self):
+        toml = self.toml("x")
+        (self.home / "x.code-workspace").write_text('{"folders": [{"path": "."}]}')
+        found, warnings = lists.find_lists(str(self.home))
+        self.assertEqual(found, [("x", toml)])
+        self.assertEqual(warnings, [f"  [warn] Session x has two lists. hopen uses {toml}."])
+
+    def test_a_broken_list_is_skipped_with_a_warning(self):
+        bad = self.toml("bad", "not = [toml")
+        found, warnings = lists.find_lists(str(self.home))
+        self.assertEqual(found, [])
+        self.assertTrue(warnings[0].startswith(f"  [warn] Skipped {bad}. "))
+
+    def test_a_session_that_is_not_a_valid_name_is_skipped(self):
+        self.vscode("odd", "bad name")
+        self.assertEqual(lists.find_lists(str(self.home)), ([], []))
 
 
 if __name__ == "__main__":

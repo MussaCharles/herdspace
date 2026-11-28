@@ -27,7 +27,7 @@ The setup installs the modules before the command, so that a new command never r
 | `lib/hopen/core.sh` | The common helpers: messages, a check for a command, names, and JSON. |
 | `lib/hopen/ui.sh` | The look of the menus, like a Herdr popup, and the questions: a choice, a text, and a yes or no. |
 | `lib/hopen/lists.sh` | The project lists: find the lists, show them, and choose one. `read_list` runs `lists.py` for each list. |
-| `lib/hopen/lists.py` | The reader of one list, a VS Code workspace file or a `herdspace.toml` file, in Python. It prints one line for each workspace, tab, task, and warning. |
+| `lib/hopen/lists.py` | `read_list` reads one list, a VS Code workspace file or a `herdspace.toml` file. `find_lists` finds the lists of the home folder, and `no_list_message` helps with a name that has no list. |
 | `lib/hopen/trust.sh` | The approval of the commands and environment values of a list. |
 | `lib/hopen/sessions.sh` | The Herdr sessions: start one, open the projects of a list, start the programs again, and attach. |
 | `lib/hopen/templates.sh` | The layout templates: find, list, and apply one, and the guard of the pane names. |
@@ -90,7 +90,14 @@ A platform script sources only `common.sh`, and then the step files that it need
 
 ## The Python modules
 
-herdspace moves from bash to Python one module at a time. A Python module is a file next to the bash module that runs it, for example `lib/hopen/lists.py` next to `lists.sh`. These rules hold for each Python module:
+`hopen` moves from bash to Python one module at a time. `lib/hopen/` is also a Python package:
+
+- `__main__.py` is the entry point. It loads the package from its own folder by its path, so no other package can take its place.
+- `cli.py` holds the commands. An `internal` command serves a bash module while the move goes on: `read_list` in `lists.sh` runs `hopen_py internal read-list`.
+- `core.py` holds the shared helpers: names, paths, and messages.
+- A module such as `lists.py` sits next to the bash module that it replaces, `lists.sh`.
+
+`hopen_py` in `core.sh` runs the package with `python3 -I -B`. If the machine has Python 3.11 or later, `hopen_python` picks it. `-I` keeps out the environment and the current folder, and `-B` writes no `__pycache__` folder next to the installed files. These rules hold for each Python module:
 
 - Use only the standard library. A person installs no package, and no `pip`, `pipx`, or `uv`.
 - The bash module runs the file with `python3 -I`, so that a file in the current folder cannot change the program.
@@ -105,4 +112,4 @@ shellcheck reads the modules through the main file of each command, with `extern
 shellcheck -S warning bin/hopen bin/herdr-update-check bin/herdspace bootstrap.sh bootstrap/lib/*.sh bootstrap/platforms/*.sh tests/*.sh tools/*.sh install.sh
 ```
 
-A test can load one module with `source`, with the modules that it needs, and call its functions with no Herdr. `tests/test-hopen-list.sh` loads `lib/hopen/core.sh`, `lists.sh`, and `trust.sh` this way. Run the unit tests of the Python modules with `python3 -m unittest discover -s tests/python`. The [testing guide](testing.md) lists each test.
+A test can load one module with `source`, with the modules that it needs, and call its functions with no Herdr. `tests/test-hopen-list.sh` loads `lib/hopen/core.sh`, `lists.sh`, and `trust.sh` this way. Run the unit tests of the Python modules with `python3 -B -m unittest discover -s tests/python`. The [testing guide](testing.md) lists each test.

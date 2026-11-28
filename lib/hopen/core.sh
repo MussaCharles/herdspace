@@ -15,6 +15,32 @@ valid_name() {
   esac
 }
 
+# HOPEN_LIB is the folder of the modules. bin/hopen sets it. A test that
+# loads a module alone gets the folder of this file.
+HOPEN_LIB="${HOPEN_LIB:-${BASH_SOURCE[0]%/*}}"
+HOPEN_PYTHON=""
+
+# hopen_python prints the Python that runs the hopen package: Python 3.11 or
+# later, which has tomllib for herdspace.toml. Some systems have an older
+# python3 and a newer python3.N beside it, for example Ubuntu 22.04. With no
+# Python 3.11, it prints python3, which still reads a VS Code workspace file.
+hopen_python() {
+  local py
+  if [ -z "$HOPEN_PYTHON" ]; then
+    HOPEN_PYTHON=python3
+    for py in python3 python3.14 python3.13 python3.12 python3.11; do
+      command -v "$py" >/dev/null 2>&1 || continue
+      "$py" -I -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null && { HOPEN_PYTHON="$py"; break; }
+    done
+  fi
+  printf '%s' "$HOPEN_PYTHON"
+}
+
+# hopen_py ARGS... runs the Python package of hopen, lib/hopen/__main__.py.
+# -I keeps out the environment and the current folder, and -B writes no
+# __pycache__ folder.
+hopen_py() { "$(hopen_python)" -I -B "${HOPEN_LIB}/__main__.py" "$@"; }
+
 json_get() { python3 -I -c "import json,sys; d=json.load(sys.stdin); print(eval(sys.argv[1], {'d': d}))" "$1"; }
 
 need() { command -v "$1" >/dev/null 2>&1 || die "$2 needs $1. The server setup installs it."; }

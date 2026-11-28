@@ -33,7 +33,7 @@ Run each check. Do not install a missing tool without the agreement of the perso
 
 | You changed | Run |
 |-------------|-----|
-| `bin/hopen`, `lib/hopen/`, or a template | `tests/test-hopen-list.sh`, `tests/test-palette-groups.sh`, and `python3 -m unittest discover -s tests/python`, then `tests/run-linux.sh` and `tests/run-macos.sh server` |
+| `bin/hopen`, `lib/hopen/`, or a template | `tests/test-hopen-list.sh`, `tests/test-palette-groups.sh`, and `python3 -B -m unittest discover -s tests/python`, then `tests/run-linux.sh` and `tests/run-macos.sh server` |
 | A setup script or a configuration file | `tests/test-install.sh`, `tests/run-macos.sh`, `tests/run-linux.sh` |
 | `bin/herdspace` or `lib/herdspace/` | `tests/test-herdspace-cmd.sh` and `tests/test-uninstall.sh`, then `tests/run-linux.sh` and `tests/run-rollback.sh`, which runs `herdspace update --version` |
 | A file in `bootstrap/lib/` | `tests/test-ui.sh` and the other fast tests, then every `tests/run-*.sh` script |
