@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import completion, convert, core, lists, templates
+from . import completion, convert, core, lists, ports, templates
 
 
 def _read_list(args):
@@ -72,7 +72,14 @@ def _guard(args):
     return 0
 
 
+def _ports(args):
+    for line in ports.show_ports(ports.project_folders(os.environ.get("HOME", ""))):
+        print(line)
+    return 0
+
+
 INTERNAL = {
+    "ports": _ports,
     "templates": _templates,
     "template-lines": _template_lines,
     "guard": _guard,
