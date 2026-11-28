@@ -4,6 +4,16 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- `herdspace prefix [KEY|default]` shows or changes the prefix key of Herdr. Herdr checks the key first, and each running session reloads its configuration, so the new key works at once. The choice is in `~/.config/herdspace/prefix`, and an update keeps it.
+- The command palette has "herdspace: Change the Herdr prefix key". The right side of the row shows the current prefix. The list offers `Ctrl+Space`, `Ctrl+A`, `Ctrl+S`, `Ctrl+B`, and a key that you type.
+
+### Changed
+
+- The prefix key of Herdr is now `Ctrl+Space` in place of `Ctrl+B`, because one hand presses both keys. An update changes it with no question. To keep `Ctrl+B`, run `herdspace prefix ctrl+b`. On a Mac with more than one input source, turn off the macOS shortcut "Select the previous input source", because it also uses `Ctrl+Space`.
+- The palette, its hints, and the messages of `hopen` show the current prefix in place of a fixed `Ctrl+B`.
+
 ## [0.17.1] - 2026-11-28
 
 ### Fixed
