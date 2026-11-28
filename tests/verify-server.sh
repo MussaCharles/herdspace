@@ -137,7 +137,10 @@ vim.defer_fn(function()
   vim.cmd("qa!")
 end, 3000)
 LUA
-read_out="$(cd "$work" && RESULT="$work/read.json" python3 "$ROOT/tests/pty_run.py" "$NVIM_LIMIT" '' nvim read.md "+luafile $work/read.lua" >/dev/null 2>&1; cat "$work/read.json" 2>/dev/null)"
+read_out="$(cd "$work" && RESULT="$work/read.json" python3 "$ROOT/tests/pty_run.py" "$NVIM_LIMIT" '' nvim read.md "+luafile $work/read.lua" >"$work/read.screen" 2>&1; cat "$work/read.json" 2>/dev/null)"
+# With no result, show the last screen of Neovim, so that a CI log says what
+# stopped it, for example a question.
+[ -n "$read_out" ] || { echo "Neovim screen of the Markdown check:"; grep -v '^[[:space:]]*$' "$work/read.screen" | tail -n 15; }
 contains "$read_out" '"ft":"markdown"' 'a Markdown file opens as Markdown'
 contains "$read_out" '"diag":false' 'the editor shows no warnings'
 contains "$read_out" '"spell":false' 'a Markdown file has no spell marks'
