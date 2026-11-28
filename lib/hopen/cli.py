@@ -6,7 +6,7 @@ goes on. Each one prints what the bash function that it replaces printed.
 import os
 import sys
 
-from . import completion, convert, core, lists, ports, tasks, templates, trust, ui
+from . import completion, convert, core, lists, ports, search, tasks, templates, trust, ui
 
 
 def _read_list(args):
@@ -154,7 +154,24 @@ def _task(args):
     return tasks.run_task(name, os.environ.get("HOME", ""), state_dir, trust_flag == "1")
 
 
+def _list_files(args):
+    return search.exec_command(search.files_command(args))
+
+
+def _list_folders(args):
+    for folder in search.list_folders():
+        print(folder)
+    return 0
+
+
+def _search_text(args):
+    return search.exec_command(search.text_command(args[0] if args else "", args[1:]))
+
+
 INTERNAL = {
+    "list-files": _list_files,
+    "list-folders": _list_folders,
+    "search-text": _search_text,
     "project-for-dir": _project_for_dir,
     "task": _task,
     "choose": _choose,
