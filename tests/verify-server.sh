@@ -115,7 +115,11 @@ vim.defer_fn(function()
   vim.cmd("qa!")
 end, 3000)
 LUA
-tree_out="$(cd "$work" && RESULT="$work/tree.json" python3 "$ROOT/tests/pty_run.py" 12 '' nvim . "+luafile $work/tree.lua" >/dev/null 2>&1; cat "$work/tree.json" 2>/dev/null)"
+# NVIM_LIMIT is the most seconds that a Neovim check can take. pty_run.py ends
+# when Neovim quits, so a fast machine does not wait for it. A slow runner
+# took more than 12 seconds to start Neovim and write the result.
+NVIM_LIMIT=40
+tree_out="$(cd "$work" && RESULT="$work/tree.json" python3 "$ROOT/tests/pty_run.py" "$NVIM_LIMIT" '' nvim . "+luafile $work/tree.lua" >/dev/null 2>&1; cat "$work/tree.json" 2>/dev/null)"
 contains "$tree_out" '"tree":true' 'nvim . opens the file tree'
 contains "$tree_out" '"folder":false' 'nvim . keeps no folder buffer in the editor'
 contains "$tree_out" '"focused":true' 'nvim . puts the cursor in the file tree'
@@ -133,7 +137,7 @@ vim.defer_fn(function()
   vim.cmd("qa!")
 end, 3000)
 LUA
-read_out="$(cd "$work" && RESULT="$work/read.json" python3 "$ROOT/tests/pty_run.py" 12 '' nvim read.md "+luafile $work/read.lua" >/dev/null 2>&1; cat "$work/read.json" 2>/dev/null)"
+read_out="$(cd "$work" && RESULT="$work/read.json" python3 "$ROOT/tests/pty_run.py" "$NVIM_LIMIT" '' nvim read.md "+luafile $work/read.lua" >/dev/null 2>&1; cat "$work/read.json" 2>/dev/null)"
 contains "$read_out" '"ft":"markdown"' 'a Markdown file opens as Markdown'
 contains "$read_out" '"diag":false' 'the editor shows no warnings'
 contains "$read_out" '"spell":false' 'a Markdown file has no spell marks'
@@ -152,7 +156,7 @@ vim.defer_fn(function()
 end, 3000)
 LUA
 rm -f "$work/normal.json"
-(cd "$work" && RESULT="$work/normal.json" python3 "$ROOT/tests/pty_run.py" 12 '' nvim normal.lua "+luafile $work/normal-check.lua" >"$work/normal.screen" 2>&1)
+(cd "$work" && RESULT="$work/normal.json" python3 "$ROOT/tests/pty_run.py" "$NVIM_LIMIT" '' nvim normal.lua "+luafile $work/normal-check.lua" >"$work/normal.screen" 2>&1)
 normal_out="$(cat "$work/normal.json" 2>/dev/null)"
 contains "$normal_out" '"diag":true' 'herdspace editor normal shows the warnings'
 contains "$normal_out" '"no_spell_rule":false' 'herdspace editor normal adds no rule against the spell marks'
@@ -173,7 +177,7 @@ vim.defer_fn(function()
 end, 3000)
 LUA
 rm -f "$work/copy.json" "$work/copy.raw"
-(cd "$work" && RESULT="$work/copy.json" PTY_RAW="$work/copy.raw" python3 "$ROOT/tests/pty_run.py" 12 '' env SSH_CONNECTION='10.0.0.1 1 10.0.0.2 22' nvim copy.txt "+luafile $work/copy.lua" >/dev/null 2>&1)
+(cd "$work" && RESULT="$work/copy.json" PTY_RAW="$work/copy.raw" python3 "$ROOT/tests/pty_run.py" "$NVIM_LIMIT" '' env SSH_CONNECTION='10.0.0.1 1 10.0.0.2 22' nvim copy.txt "+luafile $work/copy.lua" >/dev/null 2>&1)
 copy_out="$(cat "$work/copy.json" 2>/dev/null)"
 contains "$copy_out" '"provider":"herdspace OSC 52"' 'over SSH the editor copies with OSC 52'
 contains "$copy_out" '"lines":2' 'over SSH p pastes the line that yy copied'
@@ -184,7 +188,7 @@ else
 fi
 # With no SSH and no Herdr, the editor keeps the clipboard of LazyVim.
 rm -f "$work/copy.json"
-(cd "$work" && RESULT="$work/copy.json" python3 "$ROOT/tests/pty_run.py" 12 '' env -u SSH_CONNECTION -u TERM_PROGRAM nvim copy.txt "+luafile $work/copy.lua" >/dev/null 2>&1)
+(cd "$work" && RESULT="$work/copy.json" python3 "$ROOT/tests/pty_run.py" "$NVIM_LIMIT" '' env -u SSH_CONNECTION -u TERM_PROGRAM nvim copy.txt "+luafile $work/copy.lua" >/dev/null 2>&1)
 contains "$(cat "$work/copy.json" 2>/dev/null)" '"provider":""' 'with no SSH the editor keeps the system clipboard'
 
 # Herdr itself. This server is throwaway, so a stop is safe.
@@ -366,7 +370,8 @@ quit_editor() {
   local i
   for i in $(seq 0 159); do
     case "$(fg_of "$1")" in *nvim*) ;; *) return 0 ;; esac
-    [ $((i % 8)) -ne 0 ] || herdr pane send-keys "$1" ctrl+q >/dev/null 2>&1
+    # Escape first ends a mode or a message that can keep Ctrl+Q from Neovim.
+    [ $((i % 8)) -ne 0 ] || { herdr pane send-keys "$1" esc >/dev/null 2>&1; herdr pane send-keys "$1" ctrl+q >/dev/null 2>&1; }
     sleep 0.25
   done
 }
