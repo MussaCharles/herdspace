@@ -75,7 +75,7 @@ seed "$H" '
   mkdir -p "${STATE_DIR}/done" "${HOME}/.cache/herdspace"
   echo 0.9.0 >"${STATE_DIR}/version"; echo role=both >"${STATE_DIR}/last-setup"
   touch "${STATE_DIR}/done/mission-control"
-  echo herdspace >"${HOME}/.config/herdspace/keys"; echo herdspace >"${HOME}/.config/herdspace/look"; echo ctrl+a >"${HOME}/.config/herdspace/prefix"
+  echo herdspace >"${HOME}/.config/herdspace/keys"; echo herdspace >"${HOME}/.config/herdspace/look"; echo ctrl+a >"${HOME}/.config/herdspace/prefix"; echo nord >"${HOME}/.config/herdspace/theme"; echo "#ec4899" >"${HOME}/.config/herdspace/accent"
   echo latest >"${HOME}/.cache/herdspace/latest"
 '
 # What belongs to the person, and must stay.
@@ -129,6 +129,8 @@ gone "$H/.local/share/herdspace" 'the state folder is gone'
 gone "$H/.cache/herdspace" 'the cache folder is gone'
 gone "$H/.config/herdspace/keys" 'the keys choice is gone'
 gone "$H/.config/herdspace/prefix" 'the prefix choice is gone'
+gone "$H/.config/herdspace/theme" 'the theme choice is gone'
+gone "$H/.config/herdspace/accent" 'the color choice is gone'
 gone "$H/.config/systemd/user/herdr.service" 'the login service file is gone'
 here "$H/.config/lazygit/config.yml" 'a changed file stays'
 contains "$(cat "$H/.config/lazygit/config.yml")" '# my change' 'the changed file keeps its change'
