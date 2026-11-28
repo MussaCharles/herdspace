@@ -163,3 +163,35 @@ def confirm(text, read=_tty_line):
     """Ask a yes or no question. The default is no."""
     print(f"  {text} [y/N] ", end="", file=sys.stderr, flush=True)
     return read() in ("y", "Y", "yes")
+
+
+def run_fzf_from(label, command, cwd, transform, *args):
+    """Run fzf on the output of COMMAND in the folder CWD, one line at a time,
+    each line changed by TRANSFORM, so that fzf shows the first lines of a
+    long list at once. Return what fzf prints."""
+    import threading
+
+    source = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stdin=subprocess.DEVNULL,
+                              text=True, errors="surrogateescape")
+    menu = subprocess.Popen(fzf_command(label, *args), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            text=True, errors="surrogateescape")
+
+    def feed():
+        try:
+            for line in source.stdout:
+                menu.stdin.write(transform(line.rstrip("\n")) + "\n")
+        except (BrokenPipeError, OSError):
+            pass
+        finally:
+            try:
+                menu.stdin.close()
+            except OSError:
+                pass
+
+    thread = threading.Thread(target=feed, daemon=True)
+    thread.start()
+    out = menu.stdout.read()
+    menu.wait()
+    source.kill()
+    source.wait()
+    return out
