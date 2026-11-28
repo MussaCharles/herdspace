@@ -51,7 +51,7 @@ Each of these made a job fail one time:
 - `apt-get` failed with "File has unexpected size ... Mirror sync in progress?". The Ubuntu mirror was in a sync. Run the failed jobs again.
 - A check failed only on the arm64 runners, which are slower. A wait in the test was too short, or two steps raced. The `herdspace-test` skill says how to test with a slow container.
 - A macOS runner has Homebrew and many tools already. It is not a clean Mac, and it has no screen. The real key test runs only in the Linux client test.
-- On the macOS runner, the editor checks of `tests/verify-server.sh` once found no result: Neovim did not write its JSON file within the 12 seconds of `tests/pty_run.py`. The checks start only `nvim`, and a run again passed. If it happens again, give the checks more time, and do not merge on a second failure with no cause.
+- On the macOS runner, the editor checks of `tests/verify-server.sh` once found no result: Neovim did not write its JSON file within the 12 seconds of `tests/pty_run.py`. The checks start only `nvim`, and a run again passed. It happened again on the Debian 12 jobs of a pull request, on amd64 and arm64, with the quick open checks after it on arm64. Pull request #317 for issue #316 gave them a limit of 40 seconds. If they fail again, run the failed jobs again once, and do not merge on a second failure with no cause.
 
 ## Change a repository setting
 
