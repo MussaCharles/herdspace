@@ -9,11 +9,11 @@ All notable changes to herdspace are in this file. The format follows [Keep a Ch
 - `herdspace prefix [KEY|default]` shows or changes the prefix key of Herdr. Herdr checks the key first, and each running session reloads its configuration, so the new key works at once. The choice is in `~/.config/herdspace/prefix`, and an update keeps it.
 - `herdspace theme [NAME|random|default]` and `herdspace color [NAME|#rrggbb|random|default]` change the theme of Herdr and its accent color, the color of the headers and the highlights. `random` chooses one for you. An update keeps the choices. See [Theme and colors](docs/look.md).
 - The command palette has "herdspace: Change the Herdr theme" and "herdspace: Change the Herdr accent color", with a color sample for each entry and "Random" first.
-- The command palette has "herdspace: Change the Herdr prefix key". The right side of the row shows the current prefix. The list offers `Ctrl+Space`, `Ctrl+A`, `Ctrl+S`, `Ctrl+B`, and a key that you type.
+- The command palette has "herdspace: Change the Herdr prefix key". The right side of the row shows the current prefix. The list offers `Alt+Space`, `Ctrl+A`, `Ctrl+S`, `Ctrl+B`, and a key that you type.
 
 ### Changed
 
-- The prefix key of Herdr is now `Ctrl+Space` in place of `Ctrl+B`, because one hand presses both keys. An update changes it with no question. To keep `Ctrl+B`, run `herdspace prefix ctrl+b`. On a Mac with more than one input source, turn off the macOS shortcut "Select the previous input source", because it also uses `Ctrl+Space`.
+- The prefix key of Herdr is now `Alt+Space` (`Option+Space` on a Mac) in place of `Ctrl+B`. One hand presses both keys, and the shell, Neovim, lazygit, and the agents do not use it. Herdr cannot pass the prefix on to a pane, so a prefix takes its key from every program inside Herdr. An update changes it with no question. To keep `Ctrl+B`, run `herdspace prefix ctrl+b`. On Linux, GNOME and KDE use `Alt+Space` for the window menu: turn off that shortcut.
 - The palette, its hints, and the messages of `hopen` show the current prefix in place of a fixed `Ctrl+B`.
 
 ## [0.17.1] - 2026-11-28
