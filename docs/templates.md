@@ -166,10 +166,10 @@ Run `hopen --all my-projects` to open the projects of every list. Then press `Ct
 
 | Action | Mac | Linux or Windows |
 |--------|-----|------------------|
-| Next pane | `Alt+Up`, or `ctrl+space`, `tab` | The same |
-| Previous pane | `Alt+Down`, or `ctrl+space`, `shift+tab` | The same |
-| Pane to the left, below, above, or right | `ctrl+space`, then `h`, `j`, `k`, or `l` | The same |
-| Zoom the pane, or return | `ctrl+space`, `z` | The same |
+| Next pane | `Alt+Up`, or `alt+space`, `tab` | The same |
+| Previous pane | `Alt+Down`, or `alt+space`, `shift+tab` | The same |
+| Pane to the left, below, above, or right | `alt+space`, then `h`, `j`, `k`, or `l` | The same |
+| Zoom the pane, or return | `alt+space`, `z` | The same |
 | Focus a pane with the mouse | Click it | The same |
 
 A pane that changes size can show an extra copy of the first prompt line. The extra line does no harm. Run `clear` to remove it.
@@ -180,11 +180,11 @@ A pane that changes size can show an extra copy of the first prompt line. The ex
 
 | Action | Keys |
 |--------|------|
-| Split right | `ctrl+space`, `v` |
-| Split down | `ctrl+space`, `-` |
-| Close the pane | `ctrl+space`, `x` |
-| Resize | Drag a border with the mouse, or press `ctrl+space`, `r` |
-| Rename the pane | `ctrl+space`, `shift+p` |
+| Split right | `alt+space`, `v` |
+| Split down | `alt+space`, `-` |
+| Close the pane | `alt+space`, `x` |
+| Resize | Drag a border with the mouse, or press `alt+space`, `r` |
+| Rename the pane | `alt+space`, `shift+p` |
 
 ## Go to any project or pane
 

@@ -30,7 +30,7 @@ A git worktree is a second checkout of a repository, on its own branch. Give eac
 
 | Task | Command or key |
 |------|----------------|
-| New worktree from the selected workspace | `Ctrl+Space`, then `Shift+G` |
+| New worktree from the selected workspace | `Alt+Space`, then `Shift+G` |
 | New worktree on a branch | `herdr worktree create --branch fix-login` |
 | List the worktrees | `herdr worktree list` |
 | Open an existing worktree | `herdr worktree open` |

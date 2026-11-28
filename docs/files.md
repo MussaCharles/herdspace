@@ -8,7 +8,7 @@ Scope: quick open, find and search in the files, Neovim, and Markdown and images
 
 | Action | Mac | Linux |
 |--------|-----|-------|
-| Quick open a file of the project in the editor of the tab | `Cmd+P` | `ctrl+space`, `f` |
+| Quick open a file of the project in the editor of the tab | `Cmd+P` | `alt+space`, `f` |
 | Find a file in the shell, and open it | `ff` | `ff` |
 | Search in the files, and open a result | `fif TEXT` | `fif TEXT` |
 

@@ -10,24 +10,24 @@ Use one workspace for each project.
 
 | Action | Keys |
 |--------|------|
-| New workspace | `ctrl+space`, `shift+n` |
-| Rename workspace | `ctrl+space`, `shift+w` |
-| Close workspace (Herdr asks first) | `ctrl+space`, `shift+d` |
-| Open the workspace list | `ctrl+space`, `w` |
-| Go to any workspace, tab, or agent | `ctrl+space`, `g` |
-| Show or hide the sidebar | `ctrl+space`, `b` |
+| New workspace | `alt+space`, `shift+n` |
+| Rename workspace | `alt+space`, `shift+w` |
+| Close workspace (Herdr asks first) | `alt+space`, `shift+d` |
+| Open the workspace list | `alt+space`, `w` |
+| Go to any workspace, tab, or agent | `alt+space`, `g` |
+| Show or hide the sidebar | `alt+space`, `b` |
 
-In the `ctrl+space`, `g` list, type `/` to search and press `Enter` to go. Press `b`, `w`, `i`, or `d` to show only blocked, working, idle, or done agents. Press `a` to show all. Press `Esc` to leave.
+In the `alt+space`, `g` list, type `/` to search and press `Enter` to go. Press `b`, `w`, `i`, or `d` to show only blocked, working, idle, or done agents. Press `a` to show all. Press `Esc` to leave.
 
 ## Tabs
 
 | Action | Keys |
 |--------|------|
-| New tab | `ctrl+space`, `c` |
-| Next or previous tab | `ctrl+space`, `n` or `p` |
-| Go to tab 1 to 9 | `ctrl+space`, `1` to `9` |
-| Rename tab | `ctrl+space`, `shift+t` |
-| Close tab | `ctrl+space`, `shift+x` |
+| New tab | `alt+space`, `c` |
+| Next or previous tab | `alt+space`, `n` or `p` |
+| Go to tab 1 to 9 | `alt+space`, `1` to `9` |
+| Rename tab | `alt+space`, `shift+t` |
+| Close tab | `alt+space`, `shift+x` |
 
 The Auto Title plugin names each tab. A name that you set by hand stays.
 
@@ -35,8 +35,8 @@ The Auto Title plugin names each tab. A name that you set by hand stays.
 
 | Action | Keys |
 |--------|------|
-| Go to the pane on the left, below, above, or right | `ctrl+space`, `h`, `j`, `k`, `l` |
-| Next or previous pane | `Alt+Up`, `Alt+Down`, or `ctrl+space`, `tab` or `shift+tab` |
+| Go to the pane on the left, below, above, or right | `alt+space`, `h`, `j`, `k`, `l` |
+| Next or previous pane | `Alt+Up`, `Alt+Down`, or `alt+space`, `tab` or `shift+tab` |
 | Go to a pane | Click it |
 
 To move a pane itself to another place in the tab, see [Swap panes](layout.md#swap-panes).
