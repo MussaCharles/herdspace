@@ -41,7 +41,8 @@ The setup installs the modules before the command, so that a new command never r
 | `lib/hopen/search.py` | The commands of `fd`, `find`, and `rg` for the file lists and the text search. |
 | `lib/hopen/quickopen.py` | Quick open, like `Ctrl+P` in VS Code, and the menus of `hopen --find` and `--grep`. |
 | `lib/hopen/ports.py` | `hopen --ports`, like the Ports view of VS Code. |
-| `lib/hopen/prefix.py` | The prefix key of Herdr, read from the Herdr configuration, for the palette and the messages. |
+| `lib/hopen/prefix.py` | The prefix key of Herdr, and `value()`, which reads a value of the Herdr configuration. |
+| `lib/hopen/look.py` | The themes and the accent colors of Herdr, with a sample of each, for the palette. |
 | `lib/hopen/convert.py` | `hopen --convert`: write a `herdspace.toml` file from a VS Code workspace file. |
 | `lib/hopen/completion.py` | The shell completion scripts, for zsh and bash. |
 | `lib/hopen/palette/__init__.py` | The menu of the command palette, the recent actions, and `GROUPS`, the groups in the order of the menu. |
@@ -65,7 +66,9 @@ A new group needs a new file with `items` and `ACTIONS`, and its name in `GROUPS
 | `lib/herdspace/update.sh` | `herdspace update`, which runs the setup of a release again with the saved options. |
 | `lib/herdspace/editor.sh` | `herdspace editor`, the defaults of the herdspace Neovim. |
 | `lib/herdspace/keys.sh` | `herdspace keys`, the Ghostty keys of a client. |
-| `lib/herdspace/prefix.sh` | `herdspace prefix`, the prefix key of Herdr. The setup also loads it, to keep a saved prefix in an update. |
+| `lib/herdspace/herdrconf.sh` | The saved choices in the Herdr configuration: read, write, check, reload. The setup also loads it, to keep the choices in an update. |
+| `lib/herdspace/prefix.sh` | `herdspace prefix`, the prefix key of Herdr. |
+| `lib/herdspace/theme.sh` | `herdspace theme` and `herdspace color`, the theme and the accent color of Herdr. |
 | `lib/herdspace/uninstall.sh` | `herdspace uninstall`, which removes what the setup wrote. |
 
 ### Add a herdspace command

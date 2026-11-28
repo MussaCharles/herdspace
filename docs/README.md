@@ -27,6 +27,7 @@ Scope: each guide of herdspace, in groups. Start with the [README](../README.md)
 - [hopen guide](hopen.md): write a list, its settings, the commands, and how to install, update, or remove `hopen`.
 - [Templates and panes](templates.md): each template, how to add your own, and videos of the pane keys.
 - [Keyboard shortcuts](keyboard-shortcuts.md): the keys that the setup changes, and how to keep the keys of your terminal.
+- [Theme and colors](look.md): change the Herdr theme and its accent color, from the palette or with `herdspace theme` and `herdspace color`.
 - [Cheat sheet](cheat-sheet.md): the daily commands, the words, the direct keys, and the problems, with a [table of the task pages](cheat-sheet.md#by-task) and links to the official Herdr docs.
 - [From VS Code](vscode.md): the herdspace command or key for each VS Code action.
 - [From tmux](tmux.md): the Herdr command or key for each tmux action, and how to run agents side by side.
