@@ -16,8 +16,9 @@ valid_name() {
 }
 
 # HOPEN_LIB is the folder of the modules. bin/hopen sets it. A test that
-# loads a module alone gets the folder of this file.
-HOPEN_LIB="${HOPEN_LIB:-${BASH_SOURCE[0]%/*}}"
+# loads a module alone gets the full path of the folder of this file, so that
+# a cd later does not break it.
+HOPEN_LIB="${HOPEN_LIB:-$(cd "${BASH_SOURCE[0]%/*}" && pwd)}"
 HOPEN_PYTHON=""
 
 # hopen_python prints the Python that runs the hopen package: Python 3.11 or
