@@ -23,7 +23,7 @@ Scope: the commands and keys for daily use of Herdr, with the tools around it. T
 | Open the projects of a list, and attach | `hopen my-projects` |
 | Start or attach to a named session | `herdr --session my-projects` |
 | Show the sessions | `herdr session list` |
-| Leave the session, and keep every program running | `ctrl+b`, then `q` |
+| Leave the session, and keep every program running | `ctrl+space`, then `q` |
 | Stop a named session, and end every program in it | `herdr session stop my-projects` |
 | Stop the default session | `herdr server stop` |
 | Delete a stopped session | `herdr session delete my-projects` |
@@ -82,7 +82,7 @@ flowchart TD
 
 ## How to read the keys
 
-The prefix key is `ctrl+b`. A row such as `ctrl+b`, `c` means: press `ctrl+b`, release it, then press `c`. To see every active key, press `ctrl+b`, then `?`.
+The prefix key is `ctrl+space`. A row such as `ctrl+space`, `c` means: press `ctrl+space`, release it, then press `c`. To see every active key, press `ctrl+space`, then `?`. To change the prefix, see [The prefix key](keyboard-shortcuts.md#the-prefix-key).
 
 ## Daily flow
 
@@ -90,7 +90,7 @@ The prefix key is `ctrl+b`. A row such as `ctrl+b`, `c` means: press `ctrl+b`, r
 2. Run `hopen my-projects`. All the projects appear in the sidebar.
 3. Click a project in the sidebar, or press `Ctrl+Up` and `Ctrl+Down`.
 4. Start an agent in the pane, for example `claude`.
-5. Press `ctrl+b`, then `q` to leave. The agent keeps running.
+5. Press `ctrl+space`, then `q` to leave. The agent keeps running.
 
 ## Command palette
 
@@ -110,7 +110,7 @@ These keys work only inside Herdr. In a plain Ghostty window, the `Cmd` keys and
 | Next or previous pane in the tab | `Alt+Up`, `Alt+Down` | The same |
 | Open lazygit over the pane | `Cmd+Shift+G` | `Ctrl+Shift+G` |
 | Open the command palette (`hopen --palette`): every action, in groups | `Cmd+Shift+P` | `Ctrl+Shift+P` |
-| Quick open a file of the project in the editor of the tab (`hopen --quick-open`) | `Cmd+P` | `Ctrl+B`, then `F` |
+| Quick open a file of the project in the editor of the tab (`hopen --quick-open`) | `Cmd+P` | `Ctrl+Space`, then `F` |
 | Search the files that `.gitignore` names, in the folders that you choose: the palette action "Files: Choose folders" | `Cmd+Shift+P` | `Ctrl+Shift+P` |
 
 ## Configuration

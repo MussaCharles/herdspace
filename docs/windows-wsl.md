@@ -49,7 +49,7 @@ Do these steps in Windows Terminal:
 2. Open Settings, then Actions. Remove `Ctrl+Shift+T` and `Ctrl+Shift+W`, so that those keys reach Herdr.
 3. Use `Ctrl+Shift+V` to paste.
 
-The prefix keys always work, for example `ctrl+b`, then `c` for a new tab. The [cheat sheet](cheat-sheet.md) lists them.
+The prefix keys always work, for example `ctrl+space`, then `c` for a new tab. The [cheat sheet](cheat-sheet.md) lists them.
 
 ## WSL as a server
 

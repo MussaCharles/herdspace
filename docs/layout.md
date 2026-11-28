@@ -12,14 +12,14 @@ An ordinary pane closes with no question, and its program stops.
 
 | Action | Keys |
 |--------|------|
-| Split right | `ctrl+b`, `v` |
-| Split down | `ctrl+b`, `-` |
-| Go to the pane on the left, below, above, or right | `ctrl+b`, `h`, `j`, `k`, `l` |
-| Swap the pane with the pane on the left, below, above, or right | `ctrl+b`, `shift+h`, `shift+j`, `shift+k`, `shift+l` |
-| Zoom the pane, or return | `ctrl+b`, `z` |
-| Resize mode | `ctrl+b`, `r` |
-| Rename pane | `ctrl+b`, `shift+p` |
-| Close pane | `ctrl+b`, `x` |
+| Split right | `ctrl+space`, `v` |
+| Split down | `ctrl+space`, `-` |
+| Go to the pane on the left, below, above, or right | `ctrl+space`, `h`, `j`, `k`, `l` |
+| Swap the pane with the pane on the left, below, above, or right | `ctrl+space`, `shift+h`, `shift+j`, `shift+k`, `shift+l` |
+| Zoom the pane, or return | `ctrl+space`, `z` |
+| Resize mode | `ctrl+space`, `r` |
+| Rename pane | `ctrl+space`, `shift+p` |
+| Close pane | `ctrl+space`, `x` |
 
 ## Swap panes
 
@@ -27,14 +27,14 @@ A swap moves the focused pane, with its program, to the place of its neighbor. T
 
 | Action | Keys |
 |--------|------|
-| Swap with the pane on the left | `ctrl+b`, `shift+h` |
-| Swap with the pane below | `ctrl+b`, `shift+j` |
-| Swap with the pane above | `ctrl+b`, `shift+k` |
-| Swap with the pane on the right | `ctrl+b`, `shift+l` |
+| Swap with the pane on the left | `ctrl+space`, `shift+h` |
+| Swap with the pane below | `ctrl+space`, `shift+j` |
+| Swap with the pane above | `ctrl+space`, `shift+k` |
+| Swap with the pane on the right | `ctrl+space`, `shift+l` |
 
 ## Resize and zoom
 
-Drag the border between two panes with the mouse, or press `ctrl+b`, `r` for the resize mode of Herdr. `ctrl+b`, `z` zooms the focused pane to the whole tab, and the same keys return.
+Drag the border between two panes with the mouse, or press `ctrl+space`, `r` for the resize mode of Herdr. `ctrl+space`, `z` zooms the focused pane to the whole tab, and the same keys return.
 
 ## Split with a program
 
@@ -45,13 +45,13 @@ The command palette opens a program beside the current pane. Press `Ctrl+V` (rig
 | Action | Keys |
 |--------|------|
 | Copy a mouse selection | Select, then `Ctrl+C` |
-| Open copy mode | `ctrl+b`, `[` |
+| Open copy mode | `ctrl+space`, `[` |
 | Move in copy mode | `h`, `j`, `k`, `l`, or `PageUp`, `PageDown` |
 | Search in copy mode | `/`, then `n` or `N` |
 | Start a selection in copy mode | `v` or `Space` |
 | Copy in copy mode | `y` or `Enter` |
 | Leave copy mode | `q` or `Esc` |
-| Open the scrollback in `$EDITOR` | `ctrl+b`, `e` |
+| Open the scrollback in `$EDITOR` | `ctrl+space`, `e` |
 
 ## References
 
