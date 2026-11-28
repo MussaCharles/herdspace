@@ -209,8 +209,8 @@ cp "$ROOT/config/herdr/config.toml" "$conf"
 sha() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d ' ' -f 1; else shasum -a 256 "$1" | cut -d ' ' -f 1; fi; }
 printf '%s\t%s\n' "$conf" "$(sha "$conf")" >"$HOME/.local/share/herdspace/manifest.tsv"
 contains "$(hs --help)" 'herdspace prefix [KEY|default]' 'help lists prefix'
-contains "$(hs prefix)" 'The prefix: Ctrl+Space' 'prefix shows ctrl+space by default'
-contains "$(hs prefix ctrl+space)" 'Nothing to change' 'prefix with the same key changes nothing'
+contains "$(hs prefix)" 'The prefix: Alt+Space' 'prefix shows alt+space by default'
+contains "$(hs prefix alt+space)" 'Nothing to change' 'prefix with the same key changes nothing'
 out="$(hs prefix Ctrl+A)"
 contains "$out" 'The prefix: Ctrl+A. An update keeps it.' 'prefix ctrl+a changes the key'
 contains "$out" 'Session work uses it now.' 'prefix reloads the running session'
@@ -234,7 +234,7 @@ before="$(cat "$HOME/.local/share/herdspace/manifest.tsv")"
 hs prefix ctrl+s >/dev/null
 grep -qx 'prefix = "ctrl+s"' "$conf" && grep -qx '# my line' "$conf" && pass 'prefix keeps the lines of a person' || fail 'prefix keeps the lines of a person'
 [ "$(cat "$HOME/.local/share/herdspace/manifest.tsv")" = "$before" ] && pass 'prefix leaves the manifest of a changed file' || fail 'prefix leaves the manifest of a changed file'
-contains "$(hs prefix default)" 'The prefix: Ctrl+Space' 'prefix default goes back to ctrl+space'
+contains "$(hs prefix default)" 'The prefix: Alt+Space' 'prefix default goes back to alt+space'
 [ ! -e "$HOME/.config/herdspace/prefix" ] && pass 'prefix default removes the saved choice' || fail 'prefix default removes the saved choice'
 # With no Herdr configuration, as on a client, the choice is only saved.
 rm -f "$conf"

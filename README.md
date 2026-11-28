@@ -89,7 +89,7 @@ The default is `plain`, one pane with a shell. The [templates guide](docs/templa
 | Action | Mac | Linux |
 |--------|-----|-------|
 | Every action, in groups: the command palette | `Cmd+Shift+P` | `Ctrl+Shift+P` |
-| Quick open a file of the project | `Cmd+P` | `Ctrl+Space`, then `F` |
+| Quick open a file of the project | `Cmd+P` | `Alt+Space`, then `F` |
 | Go to any workspace, tab, or agent | `Cmd+K` | `Ctrl+Shift+K` |
 | New tab, close tab | `Cmd+T`, `Cmd+W` | `Ctrl+Shift+T`, `Ctrl+Shift+W` |
 | Next or previous pane | `Alt+Up`, `Alt+Down` | The same |

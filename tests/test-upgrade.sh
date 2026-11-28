@@ -73,11 +73,11 @@ before="$(find "$HOME" -name '*.bak-*' -not -path '*/.cache/*' | wc -l)"
 after="$(find "$HOME" -name '*.bak-*' -not -path '*/.cache/*' | wc -l)"
 [ "$before" -eq "$after" ] && pass "a second update changes no file" || fail "a second update changes no file: ${before} ${after} backups"
 
-# The prefix: an older install gets ctrl+space with no question. A prefix, a
+# The prefix: an older install gets alt+space with no question. A prefix, a
 # theme, and a color that the person chose stay through the next update, also
 # when a newer release changes the file. The repository copy in the container plays the new release.
 conf="${HOME}/.config/herdr/config.toml"
-grep -qx 'prefix = "ctrl+space"' "$conf" && pass "the update sets the prefix ctrl+space" || fail "the update sets the prefix ctrl+space: $(grep '^prefix' "$conf")"
+grep -qx 'prefix = "alt+space"' "$conf" && pass "the update sets the prefix alt+space" || fail "the update sets the prefix alt+space: $(grep '^prefix' "$conf")"
 "${HOME}/.local/bin/herdspace" prefix ctrl+a >/tmp/upgrade-prefix.log 2>&1 || { cat /tmp/upgrade-prefix.log; fail "herdspace prefix ctrl+a runs"; }
 "${HOME}/.local/bin/herdspace" theme nord >>/tmp/upgrade-prefix.log 2>&1 || { cat /tmp/upgrade-prefix.log; fail "herdspace theme nord runs"; }
 "${HOME}/.local/bin/herdspace" color pink >>/tmp/upgrade-prefix.log 2>&1 || { cat /tmp/upgrade-prefix.log; fail "herdspace color pink runs"; }

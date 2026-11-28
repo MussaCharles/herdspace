@@ -46,10 +46,10 @@ Windows Terminal does not need the terminal description, because it uses `xterm-
 Do these steps in Windows Terminal:
 
 1. Install a Nerd Font on Windows, and select it in the Ubuntu profile. Without it, the prompt shows boxes in place of icons.
-2. Open Settings, then Actions. Remove `Ctrl+Shift+T` and `Ctrl+Shift+W`, so that those keys reach Herdr.
+2. Open Settings, then Actions. Remove `Ctrl+Shift+T` and `Ctrl+Shift+W`, so that those keys reach Herdr. Also remove `Alt+Space`, the system menu of the window, so that the prefix key reaches Herdr.
 3. Use `Ctrl+Shift+V` to paste.
 
-The prefix keys always work, for example `ctrl+space`, then `c` for a new tab. The [cheat sheet](cheat-sheet.md) lists them.
+The prefix keys always work, for example `alt+space`, then `c` for a new tab. The [cheat sheet](cheat-sheet.md) lists them.
 
 ## WSL as a server
 

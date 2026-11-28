@@ -223,8 +223,8 @@ contains "$tpl_out" 'splits only new projects' 'hopen says why --template splits
 contains "$tpl_out" 'hopen --apply code' 'hopen names hopen --apply for a project that exists'
 contains "$(labels)" "$one" 'hopen adds nothing on a second run'
 if [ "$(labels)" = "$one" ]; then pass 'hopen list is unchanged'; else fail 'hopen list is unchanged'; fi
-# \x00 is the byte of Ctrl+Space, the prefix. Then q leaves the session.
-attach="$(python3 "$ROOT/tests/pty_run.py" 8 '\x00q' hopen hb-test --file "$work/list/t.code-workspace" 2>&1; echo "status=$?")"
+# ESC and a space are the bytes of Alt+Space, the prefix. Then q leaves the session.
+attach="$(python3 "$ROOT/tests/pty_run.py" 8 '\x1b q' hopen hb-test --file "$work/list/t.code-workspace" 2>&1; echo "status=$?")"
 contains "$attach" 'status=0' 'hopen attaches and detach exits'
 herdr session stop hb-test >/dev/null 2>&1
 sleep 1
@@ -246,7 +246,7 @@ first="$(labels_of hb-all-one)"
 hopen --all >/dev/null 2>&1
 if [ "$(labels_of hb-all-one)" = "$first" ]; then pass 'hopen --all adds nothing on a second run'; else fail 'hopen --all adds nothing on a second run'; fi
 contains "$(hopen --list 2>&1)" 'running' 'hopen --list shows a running session'
-attach_all="$(python3 "$ROOT/tests/pty_run.py" 8 '\x00q' hopen --all hb-all-two 2>&1; echo "status=$?")"
+attach_all="$(python3 "$ROOT/tests/pty_run.py" 8 '\x1b q' hopen --all hb-all-two 2>&1; echo "status=$?")"
 contains "$attach_all" 'status=0' 'hopen --all attaches to the named session'
 contains "$(hopen --all no-such-list 2>&1)" 'No project list' 'hopen --all rejects an unknown name'
 

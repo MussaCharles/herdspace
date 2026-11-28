@@ -75,10 +75,10 @@ def editor_mode(ctx, action):
 
 # The keys that the prefix menu offers, with the reason for each.
 PREFIXES = [
-    ("ctrl+space", "one hand presses both keys. The herdspace default."),
-    ("ctrl+a", "next to Caps Lock. The shell then needs Ctrl+A twice to go to the line start."),
-    ("ctrl+s", "next to Ctrl+A. Some programs use it to save."),
-    ("ctrl+b", "the default of Herdr and tmux."),
+    ("alt+space", "Option+Space on a Mac. One hand. The herdspace default."),
+    ("ctrl+a", "as many tmux users. The shell loses Ctrl+A for the line start."),
+    ("ctrl+s", "one hand. Neovim and the shell lose Ctrl+S."),
+    ("ctrl+b", "the default of Herdr and tmux. The keys are far apart."),
 ]
 
 

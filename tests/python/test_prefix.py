@@ -26,8 +26,8 @@ class PrefixTest(unittest.TestCase):
     def test_the_repository_configuration_uses_ctrl_space(self):
         with tempfile.TemporaryDirectory() as home:
             write_config(home, (REPO / "config" / "herdr" / "config.toml").read_text())
-            self.assertEqual(prefix.current(home), "ctrl+space")
-            self.assertEqual(prefix.now(home), "Ctrl+Space")
+            self.assertEqual(prefix.current(home), "alt+space")
+            self.assertEqual(prefix.now(home), "Alt+Space")
 
     def test_no_prefix_line_or_no_file_is_the_herdr_default(self):
         with tempfile.TemporaryDirectory() as home:
@@ -51,7 +51,7 @@ class PrefixTest(unittest.TestCase):
                 self.assertEqual(prefix.current(home), "ctrl+s")
 
     def test_label(self):
-        self.assertEqual(prefix.label("ctrl+space"), "Ctrl+Space")
+        self.assertEqual(prefix.label("alt+space"), "Alt+Space")
         self.assertEqual(prefix.label("ctrl+a"), "Ctrl+A")
         self.assertEqual(prefix.label("cmd+shift+k"), "Cmd+Shift+K")
         self.assertEqual(prefix.label("super+b"), "Cmd+B")
@@ -77,14 +77,14 @@ class PalettePrefixTest(unittest.TestCase):
     def test_the_rows_mark_the_current_prefix(self):
         group = palette.group_module("herdspace")
         rows = group.prefix_rows("ctrl+a").split("\n")
-        self.assertEqual([row.split("\t")[0] for row in rows], ["ctrl+space", "ctrl+a", "ctrl+s", "ctrl+b", "other"])
+        self.assertEqual([row.split("\t")[0] for row in rows], ["alt+space", "ctrl+a", "ctrl+s", "ctrl+b", "other"])
         self.assertTrue(rows[1].endswith("(now)"))
         self.assertNotIn("(now)", rows[0])
 
     def test_a_choice_runs_herdspace_prefix(self):
         group = palette.group_module("herdspace")
         with tempfile.TemporaryDirectory() as home:
-            write_config(home, '[keys]\nprefix = "ctrl+space"\n')
+            write_config(home, '[keys]\nprefix = "alt+space"\n')
             ctx = self.context(home)
             with mock.patch.object(group, "choose", return_value="ctrl+a"), \
                     mock.patch.object(group, "then_wait", return_value=0) as wait, \
@@ -106,9 +106,9 @@ class PalettePrefixTest(unittest.TestCase):
     def test_esc_or_the_same_key_changes_nothing(self):
         group = palette.group_module("herdspace")
         with tempfile.TemporaryDirectory() as home:
-            write_config(home, '[keys]\nprefix = "ctrl+space"\n')
+            write_config(home, '[keys]\nprefix = "alt+space"\n')
             ctx = self.context(home)
-            for answer in ("", "ctrl+space"):
+            for answer in ("", "alt+space"):
                 with mock.patch.object(group, "choose", return_value=answer), \
                         mock.patch.object(group, "then_wait") as wait, \
                         contextlib.redirect_stdout(io.StringIO()):

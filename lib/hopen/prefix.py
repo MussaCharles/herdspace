@@ -33,12 +33,12 @@ def value(home, table, key):
 
 
 def current(home):
-    """The prefix of the Herdr configuration, as Herdr writes it: ctrl+space."""
+    """The prefix of the Herdr configuration, as Herdr writes it: alt+space."""
     return value(home, "keys", "prefix") or HERDR_DEFAULT
 
 
 def label(key):
-    """KEY as the docs write it: ctrl+space is Ctrl+Space, cmd+k is Cmd+K."""
+    """KEY as the docs write it: alt+space is Alt+Space, cmd+k is Cmd+K."""
     parts = []
     for part in key.split("+"):
         if part in ("cmd", "super"):

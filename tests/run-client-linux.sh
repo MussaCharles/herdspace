@@ -20,6 +20,7 @@ grep -E '^(FAIL|RESULT)' tests/.work/client-idem.log | cut -c1-170
 open_ghostty
 # shellcheck disable=SC2016 # These commands run on the server.
 tabs() { srv_user bash -c 'HERDR_SESSION=my-projects herdr tab list --workspace "$(HERDR_SESSION=my-projects herdr workspace list | python3 -c "import json,sys; print([w for w in json.load(sys.stdin)[\"result\"][\"workspaces\"] if w[\"focused\"]][0][\"workspace_id\"])")" | python3 -c "import json,sys; print(len(json.load(sys.stdin)[\"result\"][\"tabs\"]))"'; }
+panes() { srv_user bash -c 'HERDR_SESSION=my-projects herdr pane list | python3 -c "import json,sys; print(len(json.load(sys.stdin)[\"result\"][\"panes\"]))"'; }
 focused() { srv_user bash -c 'HERDR_SESSION=my-projects herdr workspace list | python3 -c "import json,sys; print([w[\"label\"] for w in json.load(sys.stdin)[\"result\"][\"workspaces\"] if w[\"focused\"]][0])"'; }
 shot sessions
 
@@ -40,12 +41,26 @@ moved="$(focused)"
 if [ -n "$moved" ] && [ "$start" != "$moved" ]; then pass 'Ctrl+Down changes the workspace'; else fail "Ctrl+Down changes the workspace: ${start}"; fi
 [ "$moved" = website ] || { echo "focused workspace is ${moved}"; }
 
-key ctrl+space; key v
+# The prefix: Alt+Space, then V, splits the pane. Alt+Space reaches Herdr
+# through Ghostty and SSH. Herdr leaves the prefix mode after a short time, so
+# the second key follows at once.
+panes_before="$(panes)"
+WAIT=0.3 key alt+space; key v
+panes_after="$(panes)"
+if [ -n "$panes_after" ] && [ "$panes_after" = "$((panes_before + 1))" ]; then pass 'Alt+Space, then V, splits the pane'; else fail "Alt+Space, then V, splits the pane: ${panes_before} ${panes_after}"; fi
 type_text 'clear; cd src && ls'
-key ctrl+space; key h
+WAIT=0.3 key alt+space; key h
 type_text 'clear; git status --short'
 sleep 1
 shot panes
+# herdspace prefix changes the key of the attached client at once.
+srv_user herdspace prefix ctrl+s >/dev/null 2>&1
+panes_before="$(panes)"
+WAIT=0.3 key ctrl+s; key v
+panes_after="$(panes)"
+if [ -n "$panes_after" ] && [ "$panes_after" = "$((panes_before + 1))" ]; then pass 'herdspace prefix changes the key of the attached client'; else fail "herdspace prefix changes the key of the attached client: ${panes_before} ${panes_after}"; fi
+WAIT=0.3 key ctrl+s; key x
+srv_user herdspace prefix default >/dev/null 2>&1
 WAIT=16 type_text 'clear; nvim .'
 key j; key j; WAIT=4 key j
 shot neovim

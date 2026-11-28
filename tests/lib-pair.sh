@@ -60,7 +60,11 @@ pair_setup() {
 open_ghostty() {
   cli_user bash -c 'Xvfb :9 -screen 0 1400x940x24 +extension GLX >/tmp/x 2>&1 &'
   sleep 2
-  cli_user bash -c 'openbox >/dev/null 2>&1 &'
+  # Openbox, like GNOME and KDE, opens its window menu with Alt+Space, the
+  # Herdr prefix of herdspace. The docs tell Linux users to turn off that key,
+  # and the test does the same.
+  # shellcheck disable=SC2016 # The command runs in the client container.
+  cli_user bash -c 'mkdir -p ~/.config/openbox && sed "/<keybind key=\"A-space\">/,/<\/keybind>/d" /etc/xdg/openbox/rc.xml >~/.config/openbox/rc.xml && openbox >/dev/null 2>&1 &'
   sleep 1
   local attempt
   # Ghostty can show no window, or close it during the wait, with no error in
